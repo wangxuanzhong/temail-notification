@@ -14,7 +14,6 @@ node() {
         sh "${mvnHome}/bin/mvn clean package -Dmaven.test.skip=true"
     }
 
-
     /*stage('Sonar') {
         withSonarQubeEnv('sonarServer') {
             sh "${mvnHome}/bin/mvn sonar:sonar"

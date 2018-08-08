@@ -8,7 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.Before;
+import com.google.gson.Gson;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,32 +18,24 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@WebAppConfiguration
 public class NotificationControllerTest {
 
   @Autowired
-  WebApplicationContext wac;
-
-  MockMvc mockMvc;
-
-  @Before
-  public void setUp() throws Exception {
-    mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-  }
+  private MockMvc mockMvc;
 
   @Test
-  public void testSaveMenu() throws Exception {
-    mockMvc.perform(post("/menus")
+  public void testSendMessage() throws Exception {
+    Map<String, String> body = new HashMap<>();
+    body.put("data", "测试消息");
+
+    mockMvc.perform(post("/notification")
         .contentType(MediaType.APPLICATION_JSON)
-        .content("{\"menuName\":\"功能管理\",\"path\":\"/userrights-functions\",\"parentMenuCode\":1}"))
+        .content((new Gson()).toJson(body)))
         .andExpect(status().isOk());
   }
 

@@ -1,8 +1,5 @@
 package com.syswin.temail.notification.main.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,19 +8,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class NotificationServiceTest {
+public class RocketMqProducerTest {
 
   @Autowired
-  private NotificationService notificationService;
-
-  @Before
-  public void setup() {
-
-  }
+  private RocketMqProducer rocketMqProducer;
 
   @Test
-  public void TestSendMessage() throws Exception {
-    notificationService.sendMessage("测试消息");
-    assertThat(1);
+  public void testSendMessage() throws Exception {
+    for (int i = 0; i < 100; i++) {
+      rocketMqProducer.sendMessage("" + i, "test_tag", "test_key");
+//      sleep(200);
+    }
   }
 }
