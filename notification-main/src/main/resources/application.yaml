@@ -1,14 +1,44 @@
+spring:
+  datasource:
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/ls?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
+    platform: mysql
+    continue-on-error: true
+    initialization-mode: always
+  redis:
+    host: 192.168.0.251
+    port: 7389
+    database: 1
+    timeout: 1000
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+
 server:
   port: 8081
   servlet:
     context-path: /
 
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations: classpath*:mapper/*Mapper.xml
+
+#loging
+logging:
+  level:
+    com.syswin.temail.notification.main.infrastructure: DEBUG
 
 temail:
-  rocketmq:
-    namesrvAddr: 172.28.43.18:9876
-    topics:
-#      service: temail-usermail
-      service: service_topic
-      consumer: service_topic
-#      consumer: consumer_tipic
+  notification:
+    rocketmq:
+      namesrvAddr: 172.28.43.18:9876
+      topics:
+        mailBox: temail-usermail
+#        mailBox: service_topic
+#        notify: service_topic
+        notify: temail-notification

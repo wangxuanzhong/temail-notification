@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.syswin.temail.notification.main.infrastructure.EventMapper">
+  <resultMap id="BaseResultMap" type="com.syswin.temail.notification.main.domains.Event">
+    <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="sequence_no" jdbcType="BIGINT" property="sequenceNo"/>
+    <result column="event_type" jdbcType="INTEGER" property="eventType"/>
+    <result column="from" jdbcType="VARCHAR" property="from"/>
+    <result column="to" jdbcType="VARCHAR" property="to"/>
+    <result column="message_id" jdbcType="BIGINT" property="messageId"/>
+    <result column="message" jdbcType="VARCHAR" property="message"/>
+    <result column="client_sent_timestamp" jdbcType="TIMESTAMP" property="clientSentTimestamp"/>
+  </resultMap>
+
+  <insert id="batchInsert" parameterType="java.util.List">
+    INSERT INTO `event`
+    (`sequence_no`, `event_type`, `from`, `to`, `message_id`, `message`)
+    VALUES
+    <foreach collection="list" index="index" item="item" separator=",">
+      (
+      #{item.sequenceNo},
+      #{item.eventType},
+      #{item.from},
+      #{item.to},
+      #{item.messageId},
+      #{item.message}
+      )
+    </foreach>
+  </insert>
+
+  <select id="selectByTo" resultMap="BaseResultMap">
+    SELECT
+    `sequence_no`, `event_type`, `from`, `to`, `message_id`, `message`
+    FROM `event`
+    WHERE `to` = #{to} AND sequence_no > #{sequenceNo}
+  </select>
+
+  <delete id="deleteByTo">
+    DELETE FROM `event`
+    WHERE `to` = #{to} AND `sequence_no` <![CDATA[<=]]> #{sequenceNo} AND `id` > 0
+  </delete>
+</mapper>

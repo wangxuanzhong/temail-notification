@@ -1,13 +1,15 @@
 package com.syswin.temail.notification.main.application;
 
+import com.syswin.temail.notification.main.exctptions.SendMqMessageException;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
-import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
 import org.apache.rocketmq.remoting.exception.RemotingException;
@@ -27,8 +29,8 @@ public class RocketMqProducer {
   private String namesrvAddr;
   private String topic;
 
-  public RocketMqProducer(@Value("${temail.rocketmq.namesrvAddr}") String namesrvAddr,
-      @Value("${temail.rocketmq.topics.consumer}") String topic) {
+  public RocketMqProducer(@Value("${temail.notification.rocketmq.namesrvAddr}") String namesrvAddr,
+      @Value("${temail.notification.rocketmq.topics.notify}") String topic) {
     this.namesrvAddr = namesrvAddr;
     this.topic = topic;
   }
@@ -47,22 +49,14 @@ public class RocketMqProducer {
    * 发送消息
    */
   public void sendMessage(String body, String tags, String keys)
-      throws UnsupportedEncodingException, RemotingException, MQClientException, InterruptedException {
+      throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
     Message mqMsg = new Message(topic, tags, keys, body.getBytes(RemotingHelper.DEFAULT_CHARSET));
+    SendResult sendResult = producer.send(mqMsg);
+    LOGGER.info("MQ: 发送消息 {}", sendResult);
 
-//    List<MessageQueue> messageQueues = producer.fetchPublishMessageQueues(topic);
-
-    producer.send(mqMsg, new SendCallback() {
-      @Override
-      public void onSuccess(SendResult sendResult) {
-        LOGGER.info("MQ: 发送消息 {}", sendResult);
-      }
-
-      @Override
-      public void onException(Throwable throwable) {
-        LOGGER.error(throwable.getMessage(), throwable);
-      }
-    });
+    if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
+      throw new SendMqMessageException(sendResult.toString());
+    }
   }
 
   @PreDestroy

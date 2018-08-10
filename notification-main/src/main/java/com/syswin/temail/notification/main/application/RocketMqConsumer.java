@@ -30,8 +30,8 @@ public class RocketMqConsumer implements MessageListenerConcurrently {
   private String topic;
 
   public RocketMqConsumer(NotificationService notificationService,
-      @Value("${temail.rocketmq.namesrvAddr}") String namesrvAddr,
-      @Value("${temail.rocketmq.topics.service}") String topic) {
+      @Value("${temail.notification.rocketmq.namesrvAddr}") String namesrvAddr,
+      @Value("${temail.notification.rocketmq.topics.mailBox}") String topic) {
     this.notificationService = notificationService;
     this.namesrvAddr = namesrvAddr;
     this.topic = topic;
@@ -50,7 +50,7 @@ public class RocketMqConsumer implements MessageListenerConcurrently {
     // 集群消费模式
     consumer.setMessageModel(MessageModel.CLUSTERING);
     // 订阅主题
-    consumer.subscribe(topic, "test_tag");
+    consumer.subscribe(topic, "");
     // 注册消息监听器
     consumer.registerMessageListener(this);
     // 启动消费端
@@ -66,8 +66,8 @@ public class RocketMqConsumer implements MessageListenerConcurrently {
       for (MessageExt msg : msgs) {
         String body = new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET);
         LOGGER.info("MQ：接收新信息: MsgId={} Topic={} Tags={} Keys={} Body={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys(), body);
-        // TODO
-        // do something
+//        System.out.println(body);
+        notificationService.handleMqMessage(body);
       }
     } catch (Exception e) {
       LOGGER.error(e.getMessage(), e);
