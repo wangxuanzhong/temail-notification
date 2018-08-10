@@ -132,9 +132,10 @@ public class Event {
 
   public enum EventType {
     RECEIVE(0, "消息已接收"),
-    READ(1, "消息已读"),
+    PULLED(1, "消息已拉取"),
     RETRACT(2, "消息已撤回"),
-    DESTROY(3, "消息已焚毁");
+    DESTROY(3, "消息已焚毁"),
+    READ(4, "消息已读");
 
     private final int value;
     private final String description;

@@ -1,23 +1,15 @@
 package com.syswin.temail.notification.main.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.google.gson.Gson;
-import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.Event.EventType;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,36 +18,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 public class NotificationControllerTest {
 
-  private final String TEST_FROM = "11111111";
-  private final String TEST_TO = "00000000";
-
-  private Gson gson = new Gson();
-  private Event event;
-
   @Autowired
   private MockMvc mockMvc;
-
-  @Before
-  public void setUp() {
-    event = new Event();
-    event.setEventType(EventType.RECEIVE.getValue());
-    event.setFrom(TEST_FROM);
-    event.setTo(TEST_TO);
-    event.setMessageId(12345678L);
-    event.setMessageSeqNo(22222L);
-    event.setMessage("aaaaaaaa");
-  }
-
-  @Test
-  public void testSendMessage() throws Exception {
-    Map<String, String> body = new HashMap<>();
-    body.put("data", gson.toJson(event));
-
-    mockMvc.perform(post("/notification")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content((new Gson()).toJson(body)))
-        .andExpect(status().isOk());
-  }
 
   @Test
   public void testGetEvents() throws Exception {

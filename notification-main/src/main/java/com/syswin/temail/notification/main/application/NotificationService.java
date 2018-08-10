@@ -7,7 +7,6 @@ import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.MailAgentParams;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,20 +37,6 @@ public class NotificationService {
   }
 
   /**
-   * 批量插入事件信息
-   */
-  public void batchInsert(List<Event> events) {
-    eventRepository.batchInsert(events);
-  }
-
-  /**
-   * 向RocketMq发送消息
-   */
-  public void sendMqMessage(String body) throws Exception {
-    rocketMqProducer.sendMessage(body, "", "");
-  }
-
-  /**
    * 处理从MQ收到的信息
    */
   @Transactional(rollbackFor = Exception.class)
@@ -60,53 +45,27 @@ public class NotificationService {
     Event event = new Event(params.getSessionMssageType(), params.getFrom(), params.getTo(), params.getMsgid(), params.getFromSeqNo(),
         params.getToMsg(), params.getHeader());
     event.setSequenceNo(redisService.getNextSeq(event.getTo()));
-    batchInsert(Arrays.asList(event));
-    sendMqMessage(gson.toJson(event));
+
+    // 入库
+    eventRepository.insert(event);
+    // 发送消息
+    rocketMqProducer.sendMessage(gson.toJson(event), event.getTo(), "");
   }
 
   /**
    * 获取新事件
    *
-   * @param userId 接收方
+   * @param to 接收方
    * @param sequenceNo 上次拉取结尾序号
    */
-  public Map<String, List<Event>> getEvents(String userId, Long sequenceNo) {
-    eventRepository.deleteByTo(userId, sequenceNo);
-    List<Event> events = eventRepository.selectByTo(userId, sequenceNo);
+  public Map<String, List<Event>> getEvents(String to, Long sequenceNo) {
+    LOGGER.info("从序列号[" + sequenceNo + "]之后开始拉取收件人[" + to + "]的事件。");
+
+    // 删除以前的事件
+    eventRepository.deleteByTo(to, sequenceNo);
 
     Map<String, List<Event>> result = new HashMap<>();
-    for (Event event : events) {
-
-      List<Event> toEvents;
-      if (!result.containsKey(event.getFrom())) {
-        toEvents = new ArrayList<>();
-        result.put(event.getFrom(), toEvents);
-      } else {
-        toEvents = result.get(event.getFrom());
-      }
-
-      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
-        case RECEIVE:
-          toEvents.add(event);
-          break;
-        case READ:
-          toEvents.forEach(toEvent -> {
-            if (toEvent.getMessageId() == event.getMessageId()) {
-              toEvents.remove(toEvent);
-            }
-          });
-          toEvents.add(event);
-          break;
-        case RETRACT:
-        case DESTROY:
-          toEvents.forEach(toEvent -> {
-            if (toEvent.getMessageId() == event.getMessageId()) {
-              toEvents.remove(toEvent);
-            }
-          });
-          break;
-      }
-    }
+    eventRepository.selectByTo(to, sequenceNo).forEach(event -> mergeEvent(result, event));
 
     // 删除value为空的数据
     result.forEach((s, toEvents) -> {
@@ -116,5 +75,37 @@ public class NotificationService {
     });
 
     return result;
+  }
+
+  private void mergeEvent(Map<String, List<Event>> result, Event event) {
+    List<Event> fromEvents = getFromEvents(result, event.getFrom());
+    switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+      case RECEIVE:
+        fromEvents.add(event);
+        break;
+      case PULLED:
+        deleteEvent(fromEvents, event.getMessageId());
+        fromEvents.add(event);
+        break;
+      case RETRACT:
+      case DESTROY:
+        deleteEvent(fromEvents, event.getMessageId());
+        break;
+    }
+  }
+
+  private List<Event> getFromEvents(Map<String, List<Event>> result, String from) {
+    if (!result.containsKey(from)) {
+      result.put(from, new ArrayList<>());
+    }
+    return result.get(from);
+  }
+
+  private void deleteEvent(List<Event> fromEvents, Long messageId) {
+    fromEvents.forEach(fromEvent -> {
+      if (fromEvent.getMessageId() == messageId) {
+        fromEvents.remove(fromEvent);
+      }
+    });
   }
 }

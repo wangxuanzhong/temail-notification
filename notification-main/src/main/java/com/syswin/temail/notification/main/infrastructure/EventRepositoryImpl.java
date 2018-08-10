@@ -17,6 +17,11 @@ public class EventRepositoryImpl implements EventRepository {
   }
 
   @Override
+  public int insert(Event event) {
+    return eventMapper.insert(event);
+  }
+
+  @Override
   public int batchInsert(List<Event> events) {
     return eventMapper.batchInsert(events);
   }

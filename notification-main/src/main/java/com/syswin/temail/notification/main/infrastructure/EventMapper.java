@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EventMapper {
 
+  int insert(Event event);
+
   int batchInsert(List<Event> events);
 
   List<Event> selectByTo(@Param("to") String to, @Param("sequenceNo") Long sequenceNo);

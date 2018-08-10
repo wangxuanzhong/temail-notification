@@ -38,7 +38,7 @@ temail:
     rocketmq:
       namesrvAddr: 172.28.43.18:9876
       topics:
-#        mailAgent: temail-usermail
-        mailAgent: service_topic
-        notify: service_topic
-#        notify: temail-notification
+        mailAgent: temail-usermail
+#        mailAgent: service_topic
+#        notify: service_topic
+        notify: temail-notification

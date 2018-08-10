@@ -30,19 +30,6 @@ public class NotificationServiceTest {
   private RedisService redisService;
 
   @Test
-  public void testSendMqMessage() throws Exception {
-    notificationService.sendMqMessage("a");
-  }
-
-  @Test
-  public void testGetEvents() {
-    long sequenceNo = 1L;
-    Map<String, List<Event>> events = notificationService.getEvents(TEST_TO, sequenceNo);
-    System.out.println(gson.toJson(events));
-    assertThat(events).isNotEmpty();
-  }
-
-  @Test
   public void testHandleMqMessage() throws Exception {
     MailAgentParams mailAgentParams = new MailAgentParams();
     mailAgentParams.setSessionMssageType(EventType.RECEIVE.getValue());
@@ -52,5 +39,13 @@ public class NotificationServiceTest {
     mailAgentParams.setFromSeqNo(2222L);
     mailAgentParams.setToMsg("aaaaaaaa");
     notificationService.handleMqMessage(gson.toJson(mailAgentParams));
+  }
+
+  @Test
+  public void testGetEvents() {
+    long sequenceNo = 1L;
+    Map<String, List<Event>> events = notificationService.getEvents(TEST_TO, sequenceNo);
+    System.out.println(gson.toJson(events));
+    assertThat(events).isNotEmpty();
   }
 }
