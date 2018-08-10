@@ -5,10 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
-import java.util.Arrays;
+import com.syswin.temail.notification.main.domains.MailAgentParams;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,6 @@ public class NotificationServiceTest {
   private final String TEST_TO = "00000000";
   private Gson gson = new Gson();
 
-  private Event event;
 
   @Autowired
   private NotificationService notificationService;
@@ -31,26 +29,9 @@ public class NotificationServiceTest {
   @Autowired
   private RedisService redisService;
 
-  @Before
-  public void setUp() {
-    event = new Event();
-    event.setEventType(EventType.RECEIVE.getValue());
-    event.setFrom(TEST_FROM);
-    event.setTo(TEST_TO);
-    event.setMessageId(12345678L);
-    event.setMessage("aaaaaaaa");
-  }
-
-  @Test
-  public void testBatchInsert() {
-    event.setSequenceNo(redisService.getNextSeq(TEST_TO));
-    notificationService.batchInsert(Arrays.asList(event));
-  }
-
   @Test
   public void testSendMqMessage() throws Exception {
-    notificationService.sendMqMessage(gson.toJson(event));
-//    notificationService.sendMqMessage("a");
+    notificationService.sendMqMessage("a");
   }
 
   @Test
@@ -63,6 +44,13 @@ public class NotificationServiceTest {
 
   @Test
   public void testHandleMqMessage() throws Exception {
-    notificationService.handleMqMessage(gson.toJson(event));
+    MailAgentParams mailAgentParams = new MailAgentParams();
+    mailAgentParams.setSessionMssageType(EventType.RECEIVE.getValue());
+    mailAgentParams.setFrom(TEST_FROM);
+    mailAgentParams.setTo(TEST_TO);
+    mailAgentParams.setMsgid(12345678L);
+    mailAgentParams.setFromSeqNo(2222L);
+    mailAgentParams.setToMsg("aaaaaaaa");
+    notificationService.handleMqMessage(gson.toJson(mailAgentParams));
   }
 }

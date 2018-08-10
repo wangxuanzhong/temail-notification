@@ -31,7 +31,7 @@ public class RocketMqConsumer implements MessageListenerConcurrently {
 
   public RocketMqConsumer(NotificationService notificationService,
       @Value("${temail.notification.rocketmq.namesrvAddr}") String namesrvAddr,
-      @Value("${temail.notification.rocketmq.topics.mailBox}") String topic) {
+      @Value("${temail.notification.rocketmq.topics.mailAgent}") String topic) {
     this.notificationService = notificationService;
     this.namesrvAddr = namesrvAddr;
     this.topic = topic;
@@ -66,7 +66,7 @@ public class RocketMqConsumer implements MessageListenerConcurrently {
       for (MessageExt msg : msgs) {
         String body = new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET);
         LOGGER.info("MQ：接收新信息: MsgId={} Topic={} Tags={} Keys={} Body={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys(), body);
-//        System.out.println(body);
+        System.out.println(body);
         notificationService.handleMqMessage(body);
       }
     } catch (Exception e) {

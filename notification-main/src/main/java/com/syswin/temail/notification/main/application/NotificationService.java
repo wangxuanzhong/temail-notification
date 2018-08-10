@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.EventRepository;
+import com.syswin.temail.notification.main.domains.MailAgentParams;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ public class NotificationService {
   private final RocketMqProducer rocketMqProducer;
   private final EventRepository eventRepository;
   private final RedisService redisService;
+  private final Gson gson;
 
   @Autowired
   public NotificationService(RocketMqProducer rocketMqProducer, EventRepository eventRepository,
@@ -32,6 +34,7 @@ public class NotificationService {
     this.rocketMqProducer = rocketMqProducer;
     this.eventRepository = eventRepository;
     this.redisService = redisService;
+    gson = new Gson();
   }
 
   /**
@@ -53,10 +56,12 @@ public class NotificationService {
    */
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body) throws Exception {
-    Event event = (new Gson()).fromJson(body, Event.class);
+    MailAgentParams params = gson.fromJson(body, MailAgentParams.class);
+    Event event = new Event(params.getSessionMssageType(), params.getFrom(), params.getTo(), params.getMsgid(), params.getFromSeqNo(),
+        params.getToMsg(), params.getHeader());
     event.setSequenceNo(redisService.getNextSeq(event.getTo()));
     batchInsert(Arrays.asList(event));
-    sendMqMessage(body);
+    sendMqMessage(gson.toJson(event));
   }
 
   /**
@@ -103,6 +108,7 @@ public class NotificationService {
       }
     }
 
+    // 删除value为空的数据
     result.forEach((s, toEvents) -> {
       if (toEvents.isEmpty()) {
         result.remove(s);

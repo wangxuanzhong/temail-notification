@@ -42,6 +42,7 @@ public class NotificationControllerTest {
     event.setFrom(TEST_FROM);
     event.setTo(TEST_TO);
     event.setMessageId(12345678L);
+    event.setMessageSeqNo(22222L);
     event.setMessage("aaaaaaaa");
   }
 

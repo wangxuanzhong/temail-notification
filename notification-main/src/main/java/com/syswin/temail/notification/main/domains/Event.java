@@ -12,13 +12,26 @@ public class Event {
   private Integer eventType;
   private String from;
   private String to;
+
   private Long messageId;
+  private Long messageSeqNo;
   private String message;
+
   private Timestamp clientSentTimestamp;
 
   private String header;
 
   public Event() {
+  }
+
+  public Event(Integer eventType, String from, String to, Long messageId, Long messageSeqNo, String message, String header) {
+    this.eventType = eventType;
+    this.from = from;
+    this.to = to;
+    this.messageId = messageId;
+    this.messageSeqNo = messageSeqNo;
+    this.message = message;
+    this.header = header;
   }
 
   public Long getId() {
@@ -69,6 +82,14 @@ public class Event {
     this.messageId = messageId;
   }
 
+  public Long getMessageSeqNo() {
+    return messageSeqNo;
+  }
+
+  public void setMessageSeqNo(Long messageSeqNo) {
+    this.messageSeqNo = messageSeqNo;
+  }
+
   public String getMessage() {
     return message;
   }
@@ -102,6 +123,7 @@ public class Event {
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", messageId=" + messageId +
+        ", messageSeqNo='" + messageSeqNo + '\'' +
         ", message='" + message + '\'' +
         ", clientSentTimestamp=" + clientSentTimestamp +
         ", header='" + header + '\'' +
