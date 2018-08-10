@@ -23,11 +23,11 @@ public class NotificationControllerTest {
 
   @Test
   public void testGetEvents() throws Exception {
-    String userId = "601183";
+    String to = "601183";
     String sequenceNo = "1";
     mockMvc.perform(get("/notification/events")
         .header("CDTP-header", "aaaaa")
-        .param("userId", userId)
+        .param("to", to)
         .param("sequenceNo", sequenceNo))
         .andExpect(status().isOk()).andDo(print())
         .andExpect(jsonPath("$.data").isNotEmpty());

@@ -18,13 +18,13 @@
     (`sequence_no`, `event_type`, `from`, `to`, `message_id`, `message_seq_no`, `message`)
     VALUES
     (
-    #{item.sequenceNo},
-    #{item.eventType},
-    #{item.from},
-    #{item.to},
-    #{item.messageId},
-    #{item.messageSeqNo},
-    #{item.message}
+    #{sequenceNo},
+    #{eventType},
+    #{from},
+    #{to},
+    #{messageId},
+    #{messageSeqNo},
+    #{message}
     )
   </insert>
 
