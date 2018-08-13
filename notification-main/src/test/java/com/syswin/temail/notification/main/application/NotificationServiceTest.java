@@ -35,7 +35,7 @@ public class NotificationServiceTest {
     mailAgentParams.setSessionMssageType(EventType.RECEIVE.getValue());
     mailAgentParams.setFrom(TEST_FROM);
     mailAgentParams.setTo(TEST_TO);
-    mailAgentParams.setMsgid(12345678L);
+    mailAgentParams.setMsgid("syswin-d675d0de-2d9d-4bbc-a82f-1acf8d2bc97b-1533888096291");
     mailAgentParams.setFromSeqNo(2222L);
     mailAgentParams.setToMsg("aaaaaaaa");
     notificationService.handleMqMessage(gson.toJson(mailAgentParams));

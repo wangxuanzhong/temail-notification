@@ -46,6 +46,11 @@ public class NotificationService {
         params.getToMsg(), params.getHeader());
     event.setSequenceNo(redisService.getNextSeq(event.getTo()));
 
+    // 需要通知发件人的消息，将from和to对调
+    if (event.getEventType().equals(EventType.DESTROY)) {
+      event.exchangeSides();
+    }
+
     // 入库
     eventRepository.insert(event);
     // 发送消息
@@ -101,11 +106,7 @@ public class NotificationService {
     return result.get(from);
   }
 
-  private void deleteEvent(List<Event> fromEvents, Long messageId) {
-    fromEvents.forEach(fromEvent -> {
-      if (fromEvent.getMessageId() == messageId) {
-        fromEvents.remove(fromEvent);
-      }
-    });
+  private void deleteEvent(List<Event> fromEvents, String messageId) {
+    fromEvents.removeIf(event -> event.getMessageId().equals(messageId));
   }
 }

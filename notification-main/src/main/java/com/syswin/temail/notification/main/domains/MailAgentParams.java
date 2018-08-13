@@ -8,7 +8,7 @@ public class MailAgentParams {
   private String from;
   private String to;
 
-  private Long msgid;
+  private String msgid;
   private Long fromSeqNo;
   private String toMsg;
 
@@ -40,11 +40,11 @@ public class MailAgentParams {
     this.to = to;
   }
 
-  public Long getMsgid() {
+  public String getMsgid() {
     return msgid;
   }
 
-  public void setMsgid(Long msgid) {
+  public void setMsgid(String msgid) {
     this.msgid = msgid;
   }
 

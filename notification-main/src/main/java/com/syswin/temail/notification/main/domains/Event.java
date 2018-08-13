@@ -13,7 +13,7 @@ public class Event {
   private String from;
   private String to;
 
-  private Long messageId;
+  private String messageId;
   private Long messageSeqNo;
   private String message;
 
@@ -24,7 +24,7 @@ public class Event {
   public Event() {
   }
 
-  public Event(Integer eventType, String from, String to, Long messageId, Long messageSeqNo, String message, String header) {
+  public Event(Integer eventType, String from, String to, String messageId, Long messageSeqNo, String message, String header) {
     this.eventType = eventType;
     this.from = from;
     this.to = to;
@@ -32,6 +32,15 @@ public class Event {
     this.messageSeqNo = messageSeqNo;
     this.message = message;
     this.header = header;
+  }
+
+  /**
+   * 交换收发件方
+   */
+  public void exchangeSides() {
+    String tmp = this.from;
+    this.from = this.to;
+    this.to = tmp;
   }
 
   public Long getId() {
@@ -74,11 +83,11 @@ public class Event {
     this.to = to;
   }
 
-  public Long getMessageId() {
+  public String getMessageId() {
     return messageId;
   }
 
-  public void setMessageId(Long messageId) {
+  public void setMessageId(String messageId) {
     this.messageId = messageId;
   }
 

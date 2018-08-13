@@ -66,7 +66,7 @@ public class RocketMqConsumer implements MessageListenerConcurrently {
       for (MessageExt msg : msgs) {
         String body = new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET);
         LOGGER.info("MQ：接收新信息: MsgId={} Topic={} Tags={} Keys={} Body={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys(), body);
-        System.out.println(body);
+//        System.out.println(body);
         notificationService.handleMqMessage(body);
       }
     } catch (Exception e) {

@@ -7,7 +7,7 @@
     <result column="event_type" jdbcType="INTEGER" property="eventType"/>
     <result column="from" jdbcType="VARCHAR" property="from"/>
     <result column="to" jdbcType="VARCHAR" property="to"/>
-    <result column="message_id" jdbcType="BIGINT" property="messageId"/>
+    <result column="message_id" jdbcType="VARCHAR" property="messageId"/>
     <result column="message_seq_no" jdbcType="BIGINT" property="messageSeqNo"/>
     <result column="message" jdbcType="VARCHAR" property="message"/>
     <result column="client_sent_timestamp" jdbcType="TIMESTAMP" property="clientSentTimestamp"/>
