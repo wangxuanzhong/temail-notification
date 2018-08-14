@@ -2,45 +2,27 @@ package com.syswin.temail.notification.main.domains;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.sql.Timestamp;
 
 @JsonInclude(Include.NON_NULL)
-public class Event {
+public class Event extends Message {
 
   private Long id;
-  private Long sequenceNo;
   private Integer eventType;
-  private String from;
-  private String to;
-
-  private String messageId;
-  private Long messageSeqNo;
-  private String message;
-
-  private Timestamp clientSentTimestamp;
 
   private String header;
 
   public Event() {
   }
 
-  public Event(Integer eventType, String from, String to, String messageId, Long messageSeqNo, String message, String header) {
+  public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, Integer eventType, String header) {
+    super(msgId, seqId, message, from, to, timestamp);
     this.eventType = eventType;
-    this.from = from;
-    this.to = to;
-    this.messageId = messageId;
-    this.messageSeqNo = messageSeqNo;
-    this.message = message;
     this.header = header;
   }
 
-  /**
-   * 交换收发件方
-   */
-  public void exchangeSides() {
-    String tmp = this.from;
-    this.from = this.to;
-    this.to = tmp;
+  public Event(Integer eventType, String header) {
+    this.eventType = eventType;
+    this.header = header;
   }
 
   public Long getId() {
@@ -51,14 +33,6 @@ public class Event {
     this.id = id;
   }
 
-  public Long getSequenceNo() {
-    return sequenceNo;
-  }
-
-  public void setSequenceNo(Long sequenceNo) {
-    this.sequenceNo = sequenceNo;
-  }
-
   public Integer getEventType() {
     return eventType;
   }
@@ -67,76 +41,12 @@ public class Event {
     this.eventType = eventType;
   }
 
-  public String getFrom() {
-    return from;
-  }
-
-  public void setFrom(String from) {
-    this.from = from;
-  }
-
-  public String getTo() {
-    return to;
-  }
-
-  public void setTo(String to) {
-    this.to = to;
-  }
-
-  public String getMessageId() {
-    return messageId;
-  }
-
-  public void setMessageId(String messageId) {
-    this.messageId = messageId;
-  }
-
-  public Long getMessageSeqNo() {
-    return messageSeqNo;
-  }
-
-  public void setMessageSeqNo(Long messageSeqNo) {
-    this.messageSeqNo = messageSeqNo;
-  }
-
-  public String getMessage() {
-    return message;
-  }
-
-  public void setMessage(String message) {
-    this.message = message;
-  }
-
-  public Timestamp getClientSentTimestamp() {
-    return clientSentTimestamp;
-  }
-
-  public void setClientSentTimestamp(Timestamp clientSentTimestamp) {
-    this.clientSentTimestamp = clientSentTimestamp;
-  }
-
   public String getHeader() {
     return header;
   }
 
   public void setHeader(String header) {
     this.header = header;
-  }
-
-  @Override
-  public String toString() {
-    return "Event{" +
-        "id=" + id +
-        ", sequenceNo=" + sequenceNo +
-        ", eventType=" + eventType +
-        ", from='" + from + '\'' +
-        ", to='" + to + '\'' +
-        ", messageId=" + messageId +
-        ", messageSeqNo='" + messageSeqNo + '\'' +
-        ", message='" + message + '\'' +
-        ", clientSentTimestamp=" + clientSentTimestamp +
-        ", header='" + header + '\'' +
-        '}';
   }
 
   public enum EventType {

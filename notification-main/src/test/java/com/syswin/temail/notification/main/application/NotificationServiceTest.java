@@ -5,9 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
+import com.syswin.temail.notification.main.domains.EventResponse;
 import com.syswin.temail.notification.main.domains.MailAgentParams;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +20,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class NotificationServiceTest {
 
-  private final String TEST_FROM = "11111111";
-  private final String TEST_TO = "00000000";
+  private final String TEST_FROM = "a";
+  private final String TEST_TO = "b";
   private Gson gson = new Gson();
 
 
@@ -32,20 +34,27 @@ public class NotificationServiceTest {
   @Test
   public void testHandleMqMessage() throws Exception {
     MailAgentParams mailAgentParams = new MailAgentParams();
-    mailAgentParams.setSessionMssageType(EventType.RECEIVE.getValue());
+    mailAgentParams.setSessionMssageType(EventType.RETRACT.getValue());
     mailAgentParams.setFrom(TEST_FROM);
     mailAgentParams.setTo(TEST_TO);
-    mailAgentParams.setMsgid("syswin-d675d0de-2d9d-4bbc-a82f-1acf8d2bc97b-1533888096291");
-    mailAgentParams.setFromSeqNo(2222L);
+    mailAgentParams.setMsgid("2");
+    mailAgentParams.setFromSeqNo(2L);
     mailAgentParams.setToMsg("aaaaaaaa");
+    mailAgentParams.setTimestamp(new Timestamp((new Date()).getTime()));
     notificationService.handleMqMessage(gson.toJson(mailAgentParams));
   }
 
   @Test
   public void testGetEvents() {
     long sequenceNo = 1L;
-    Map<String, List<Event>> events = notificationService.getEvents(TEST_TO, sequenceNo);
+    List<Event> events = notificationService.getEvents(TEST_TO, 1L, 3);
     System.out.println(gson.toJson(events));
     assertThat(events).isNotEmpty();
+  }
+
+  @Test
+  public void testGetUnread() {
+    List<EventResponse> result = notificationService.getUnread(TEST_TO);
+    assertThat(result).isNotEmpty();
   }
 }

@@ -2,6 +2,7 @@ package com.syswin.temail.notification.main.infrastructure;
 
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventRepository;
+import com.syswin.temail.notification.main.domains.EventResponse;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,17 +23,23 @@ public class EventRepositoryImpl implements EventRepository {
   }
 
   @Override
-  public int batchInsert(List<Event> events) {
-    return eventMapper.batchInsert(events);
+  public List<Event> selectByToBetweenSeqId(String to, Long begin, Long end) {
+    return eventMapper.selectByToBetweenSeqId(to, begin, end);
   }
 
   @Override
-  public List<Event> selectByTo(String to, Long sequenceNo) {
-    return eventMapper.selectByTo(to, sequenceNo);
+  public List<EventResponse> selectAllUnread(String to) {
+    return eventMapper.selectAllUnread(to);
   }
 
   @Override
-  public int deleteByTo(String to, Long sequenceNo) {
-    return eventMapper.deleteByTo(to, sequenceNo);
+  public int deleteByToBetweenSeqId(String to, Long begin, Long end) {
+    return eventMapper.deleteByToBetweenSeqId(to, begin, end);
   }
+
+  @Override
+  public int deleteUnreadEvent(String msgId) {
+    return eventMapper.deleteUnreadEvent(msgId);
+  }
+
 }

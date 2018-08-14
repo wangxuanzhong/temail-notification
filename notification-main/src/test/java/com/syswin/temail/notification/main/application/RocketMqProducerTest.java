@@ -15,7 +15,7 @@ public class RocketMqProducerTest {
 
   @Test
   public void testSendMessage() throws Exception {
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
       rocketMqProducer.sendMessage("" + i, "test_tag", "test_key");
 //      sleep(200);
     }

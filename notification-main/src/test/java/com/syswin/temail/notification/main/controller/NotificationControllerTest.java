@@ -22,15 +22,30 @@ public class NotificationControllerTest {
   private MockMvc mockMvc;
 
   @Test
-  public void testGetEvents() throws Exception {
-    String to = "601183";
-    String sequenceNo = "1";
+  public void testNotificationEvents() throws Exception {
+    String from = "b";
     mockMvc.perform(get("/notification/events")
         .header("CDTP-header", "aaaaa")
-        .param("to", to)
-        .param("sequenceNo", sequenceNo))
+        .param("from", from)
+        .param("seqId", "1")
+        .param("pageSize", "3"))
         .andExpect(status().isOk()).andDo(print())
-        .andExpect(jsonPath("$.data").isNotEmpty());
+        .andExpect(jsonPath("$.data").isNotEmpty())
+        .andExpect(jsonPath("$.data").isArray());
+//        .andExpect(jsonPath("$.data.children[0].menuCode").value(100L))
+//        .andExpect(jsonPath("$.data.children[0].children[0].menuCode").value(100100L))
+//        .andExpect(jsonPath("$.data.children[0].children[0].functions[0].functionName").value("新增菜单"));
+  }
+
+  @Test
+  public void testNotificationUnread() throws Exception {
+    String from = "b";
+    mockMvc.perform(get("/notification/unread")
+        .header("CDTP-header", "aaaaa")
+        .param("from", from))
+        .andExpect(status().isOk()).andDo(print())
+        .andExpect(jsonPath("$.data").isNotEmpty())
+        .andExpect(jsonPath("$.data").isArray());
 //        .andExpect(jsonPath("$.data.children[0].menuCode").value(100L))
 //        .andExpect(jsonPath("$.data.children[0].children[0].menuCode").value(100100L))
 //        .andExpect(jsonPath("$.data.children[0].children[0].functions[0].functionName").value("新增菜单"));

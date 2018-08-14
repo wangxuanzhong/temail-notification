@@ -3,10 +3,10 @@ package com.syswin.temail.notification.main.interfaces.controller;
 import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.main.application.NotificationService;
 import com.syswin.temail.notification.main.domains.Event;
+import com.syswin.temail.notification.main.domains.EventResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,11 +35,20 @@ public class NotificationController {
 
   @ApiOperation(value = "拉取事件", consumes = "application/json")
   @GetMapping("/events")
-  public ResponseEntity<Response<Map<String, List<Event>>>> getEvents(String to, Long sequenceNo,
+  public ResponseEntity<Response<List<Event>>> getEvents(String from, Long seqId, Integer pageSize,
       @RequestHeader(name = CDTP_HEADER) String header) throws Exception {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    Map<String, List<Event>> result = notificationService.getEvents(to, sequenceNo);
+    List<Event> result = notificationService.getEvents(from, seqId, pageSize);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "获取未读数", consumes = "application/json")
+  @GetMapping("/unread")
+  public ResponseEntity<Response<List<EventResponse>>> getUnread(String from, @RequestHeader(name = CDTP_HEADER) String header) throws Exception {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+    List<EventResponse> result = notificationService.getUnread(from);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 }
