@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,8 +36,8 @@ public class NotificationController {
 
   @ApiOperation(value = "拉取事件", consumes = "application/json")
   @GetMapping("/events")
-  public ResponseEntity<Response<List<Event>>> getEvents(String from, Long seqId, Integer pageSize,
-      @RequestHeader(name = CDTP_HEADER) String header) throws Exception {
+  public ResponseEntity<Response<List<Event>>> getEvents(@RequestParam(required = true) String from, @RequestParam(required = true) Long seqId,
+      @RequestParam(defaultValue = "20") Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) throws Exception {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     List<Event> result = notificationService.getEvents(from, seqId, pageSize);
@@ -45,7 +46,8 @@ public class NotificationController {
 
   @ApiOperation(value = "获取未读数", consumes = "application/json")
   @GetMapping("/unread")
-  public ResponseEntity<Response<List<EventResponse>>> getUnread(String from, @RequestHeader(name = CDTP_HEADER) String header) throws Exception {
+  public ResponseEntity<Response<List<EventResponse>>> getUnread(@RequestParam(required = true) String from,
+      @RequestHeader(name = CDTP_HEADER) String header) throws Exception {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     List<EventResponse> result = notificationService.getUnread(from);

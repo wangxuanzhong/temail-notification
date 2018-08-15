@@ -9,20 +9,12 @@ public class Event extends Message {
   private Long id;
   private Integer eventType;
 
-  private String header;
-
   public Event() {
   }
 
-  public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, Integer eventType, String header) {
+  public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, Integer eventType) {
     super(msgId, seqId, message, from, to, timestamp);
     this.eventType = eventType;
-    this.header = header;
-  }
-
-  public Event(Integer eventType, String header) {
-    this.eventType = eventType;
-    this.header = header;
   }
 
   public Long getId() {
@@ -39,14 +31,6 @@ public class Event extends Message {
 
   public void setEventType(Integer eventType) {
     this.eventType = eventType;
-  }
-
-  public String getHeader() {
-    return header;
-  }
-
-  public void setHeader(String header) {
-    this.header = header;
   }
 
   public enum EventType {

@@ -26,7 +26,7 @@
 
   <select id="selectByToBetweenSeqId" resultMap="EventMap">
     SELECT
-    `event_type`, `msg_id`, `seq_id`, `message`, `from`, `to`, `timestamp`
+    `event_type`, `msg_id`, `from`, `to`
     FROM `event`
     WHERE `to` = #{to} AND `seq_id` BETWEEN #{begin} AND #{end} AND `event_type` != 0
     ORDER BY `seq_id`
@@ -42,7 +42,7 @@
 
   <delete id="deleteByToBetweenSeqId">
     DELETE FROM `event`
-    WHERE `to` = #{to} AND `seq_id` BETWEEN #{begin} AND #{end} AND id > 0
+    WHERE `to` = #{to} AND `seq_id` BETWEEN #{begin} AND #{end} AND `event_type` != 0 AND id > 0
   </delete>
 
   <delete id="deleteUnreadEvent" parameterType="java.lang.String">
