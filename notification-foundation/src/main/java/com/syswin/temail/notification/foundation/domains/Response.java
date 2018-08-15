@@ -10,7 +10,6 @@ public class Response<T> {
   private Integer code;
   private String message;
   private T data;
-  private Paging paging;
 
   public Response() {
   }
@@ -30,13 +29,6 @@ public class Response<T> {
     this.data = data;
   }
 
-  public Response(HttpStatus status, String message, T data, Paging paging) {
-    this.code = status.value();
-    this.message = message;
-    this.data = data;
-    this.paging = paging;
-  }
-
   public Integer getCode() {
     return code;
   }
@@ -48,9 +40,4 @@ public class Response<T> {
   public T getData() {
     return data;
   }
-
-  public Paging getPaging() {
-    return paging;
-  }
-
 }

@@ -1,7 +1,5 @@
 package com.syswin.temail.notification.main.domains;
 
-import java.sql.Timestamp;
-
 public class MailAgentParams {
 
   // eventType
@@ -13,7 +11,7 @@ public class MailAgentParams {
   private String msgid;
   private Long fromSeqNo;
   private String toMsg;
-  private Timestamp timestamp;
+  private Long timestamp;
 
   private Integer messageSize;
 
@@ -67,11 +65,11 @@ public class MailAgentParams {
     this.fromSeqNo = fromSeqNo;
   }
 
-  public Timestamp getTimestamp() {
+  public Long getTimestamp() {
     return timestamp;
   }
 
-  public void setTimestamp(Timestamp timestamp) {
+  public void setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
   }
 

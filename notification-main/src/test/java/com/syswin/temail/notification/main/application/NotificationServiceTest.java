@@ -7,7 +7,6 @@ import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.EventResponse;
 import com.syswin.temail.notification.main.domains.MailAgentParams;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import org.junit.Test;
@@ -35,13 +34,13 @@ public class NotificationServiceTest {
   public void testHandleMqMessage() throws Exception {
     MailAgentParams mailAgentParams = new MailAgentParams();
     mailAgentParams.setHeader("header");
-    mailAgentParams.setSessionMssageType(EventType.RECEIVE.getValue());
+    mailAgentParams.setSessionMssageType(EventType.RETRACT.getValue());
     mailAgentParams.setFrom(TEST_FROM);
     mailAgentParams.setTo(TEST_TO);
-    mailAgentParams.setMsgid("1");
-    mailAgentParams.setFromSeqNo(1L);
-    mailAgentParams.setToMsg("aaaaaaaa");
-    mailAgentParams.setTimestamp(new Timestamp((new Date()).getTime()));
+    mailAgentParams.setMsgid("2");
+//    mailAgentParams.setFromSeqNo(1L);
+//    mailAgentParams.setToMsg("aaaaaaaa");
+    mailAgentParams.setTimestamp((new Date()).getTime());
     notificationService.handleMqMessage(gson.toJson(mailAgentParams));
   }
 

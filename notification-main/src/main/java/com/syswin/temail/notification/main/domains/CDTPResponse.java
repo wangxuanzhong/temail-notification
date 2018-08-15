@@ -6,15 +6,25 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class CDTPResponse {
 
+  private String toTemail;
   private String header;
   private Event data;
 
   public CDTPResponse() {
   }
 
-  public CDTPResponse(String header, Event data) {
+  public CDTPResponse(String toTemail, String header, Event data) {
+    this.toTemail = toTemail;
     this.header = header;
     this.data = data;
+  }
+
+  public String getToTemail() {
+    return toTemail;
+  }
+
+  public void setToTemail(String toTemail) {
+    this.toTemail = toTemail;
   }
 
   public String getHeader() {
@@ -36,7 +46,8 @@ public class CDTPResponse {
   @Override
   public String toString() {
     return "CDTPResponse{" +
-        "header='" + header + '\'' +
+        "toTemail='" + toTemail + '\'' +
+        ", header='" + header + '\'' +
         ", data=" + data +
         '}';
   }

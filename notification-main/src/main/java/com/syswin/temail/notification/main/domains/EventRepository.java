@@ -13,4 +13,8 @@ public interface EventRepository {
   int deleteByToBetweenSeqId(String to, Long begin, Long end);
 
   int deleteUnreadEvent(String msgId);
+
+  Event selectByMsgId(String msgId);
+
+  int updateByMsgId(Event event);
 }

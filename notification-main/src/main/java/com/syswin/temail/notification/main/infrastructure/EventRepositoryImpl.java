@@ -42,4 +42,14 @@ public class EventRepositoryImpl implements EventRepository {
     return eventMapper.deleteUnreadEvent(msgId);
   }
 
+  @Override
+  public Event selectByMsgId(String msgId) {
+    return eventMapper.selectByMsgId(msgId);
+  }
+
+  @Override
+  public int updateByMsgId(Event event) {
+    return eventMapper.updateByMsgId(event);
+  }
+
 }

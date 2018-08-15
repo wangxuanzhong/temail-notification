@@ -18,4 +18,8 @@ public interface EventMapper {
   int deleteByToBetweenSeqId(@Param("to") String to, @Param("begin") Long begin, @Param("end") Long end);
 
   int deleteUnreadEvent(@Param("msgId") String msgId);
+
+  Event selectByMsgId(String msgId);
+
+  int updateByMsgId(Event event);
 }

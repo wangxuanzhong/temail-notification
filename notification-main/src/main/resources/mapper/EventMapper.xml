@@ -49,4 +49,22 @@
     DELETE FROM `event`
     WHERE `msg_id` = #{msgId} AND `event_type` = 0 AND id > 0
   </delete>
+
+  <select id="selectByMsgId" parameterType="java.lang.String" resultMap="EventMap">
+    SELECT
+    `event_type`, `msg_id`, `seq_id`, `message`, `from`, `to`, `timestamp`
+    FROM `event`
+    WHERE `msg_id` = #{msgId}
+  </select>
+
+  <update id="updateByMsgId" parameterType="com.syswin.temail.notification.main.domains.Event">
+    UPDATE `event`
+    <set>
+      `event_type` = #{eventType},
+      `message` = #{message},
+      `timestamp` = #{timestamp}
+    </set>
+    WHERE `msg_id` = #{msgId}
+  </update>
+
 </mapper>

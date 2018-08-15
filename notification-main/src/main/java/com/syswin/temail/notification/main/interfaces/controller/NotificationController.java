@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/notification")
-@Api(value = "notification", tags = "notification")
+@Api(value = "notification", tags = "通知服务")
 @CrossOrigin
 public class NotificationController {
 

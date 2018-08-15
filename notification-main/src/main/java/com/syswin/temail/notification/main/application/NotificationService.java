@@ -39,14 +39,14 @@ public class NotificationService {
   public void handleMqMessage(String body) throws Exception {
     MailAgentParams params = gson.fromJson(body, MailAgentParams.class);
     Event event = new Event(params.getMsgid(), params.getFromSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
-        params.getTimestamp().getTime(), params.getSessionMssageType());
+        params.getTimestamp(), params.getSessionMssageType());
 
     // 不同事件做不同处理
     dealEvent(event);
 
     // 发送消息
-    CDTPResponse cdtpResponse = new CDTPResponse(params.getHeader(), event);
-    rocketMqProducer.sendMessage(gson.toJson(cdtpResponse), event.getFrom(), event.getTo());
+    CDTPResponse cdtpResponse = new CDTPResponse(event.getTo(), params.getHeader(), event);
+    rocketMqProducer.sendMessage(gson.toJson(cdtpResponse), "", "");
   }
 
   private void dealEvent(Event event) {
@@ -59,8 +59,11 @@ public class NotificationService {
         break;
       case RETRACT:
       case DESTROY:
-        eventRepository.deleteUnreadEvent(event.getMsgId());
-        eventRepository.insert(event);
+        if (eventRepository.selectByMsgId(event.getMsgId()) != null) {
+          eventRepository.updateByMsgId(event);
+        } else {
+          eventRepository.insert(event);
+        }
         break;
     }
   }

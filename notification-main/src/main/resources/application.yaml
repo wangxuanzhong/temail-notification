@@ -1,9 +1,9 @@
 spring:
   datasource:
-    username: root
-    password: root
+    username: syswin
+    password: syswin
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/ls?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
+    url: jdbc:mysql://172.28.5.92:3306/temail-notification?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
     platform: mysql
     continue-on-error: true
     initialization-mode: always
@@ -20,7 +20,7 @@ spring:
         min-idle: 0
 
 server:
-  port: 8081
+  port: 8900
   servlet:
     context-path: /
 
