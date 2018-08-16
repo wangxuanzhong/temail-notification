@@ -24,11 +24,11 @@
     (#{eventType}, #{msgId}, #{seqId}, #{message}, #{from}, #{to}, #{timestamp})
   </insert>
 
-  <select id="selectByToBetweenSeqId" resultMap="EventMap">
+  <select id="selectByTo" parameterType="java.lang.String" resultMap="EventMap">
     SELECT
     `event_type`, `msg_id`, `from`, `to`
     FROM `event`
-    WHERE `to` = #{to} AND `seq_id` BETWEEN #{begin} AND #{end} AND `event_type` != 0
+    WHERE `to` = #{to} AND `seq_id` AND `event_type` != 0
     ORDER BY `seq_id`
   </select>
 
@@ -40,14 +40,18 @@
     GROUP BY `from`
   </select>
 
-  <delete id="deleteByToBetweenSeqId">
+  <delete id="deleteByTo" parameterType="java.lang.String">
     DELETE FROM `event`
-    WHERE `to` = #{to} AND `seq_id` BETWEEN #{begin} AND #{end} AND `event_type` != 0 AND id > 0
+    WHERE `to` = #{to} AND `event_type` != 0 AND id > 0
   </delete>
 
-  <delete id="deleteUnreadEvent" parameterType="java.lang.String">
+  <delete id="deleteUnreadEvents" parameterType="java.util.List">
     DELETE FROM `event`
-    WHERE `msg_id` = #{msgId} AND `event_type` = 0 AND id > 0
+    WHERE `msg_id` IN (
+    <foreach collection="list" index="index" item="item" separator=",">
+      #{item}
+    </foreach>
+    )AND `event_type` = 0 AND id > 0
   </delete>
 
   <select id="selectByMsgId" parameterType="java.lang.String" resultMap="EventMap">

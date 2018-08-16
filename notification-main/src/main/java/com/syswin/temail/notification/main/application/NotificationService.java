@@ -8,6 +8,7 @@ import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.EventResponse;
 import com.syswin.temail.notification.main.domains.MailAgentParams;
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -42,21 +43,24 @@ public class NotificationService {
         params.getTimestamp(), params.getSessionMssageType());
 
     // 不同事件做不同处理
-    dealEvent(event);
-
-    // 发送消息
-    CDTPResponse cdtpResponse = new CDTPResponse(event.getTo(), params.getHeader(), event);
-    rocketMqProducer.sendMessage(gson.toJson(cdtpResponse), "", "");
+    if (dealEvent(event)) {
+      // 发送消息
+      CDTPResponse cdtpResponse = new CDTPResponse(event.getTo(), params.getHeader(), event);
+      rocketMqProducer.sendMessage(gson.toJson(cdtpResponse), "", "");
+    }
   }
 
-  private void dealEvent(Event event) {
+  /**
+   * @return 返回是否需要发送通知
+   */
+  private boolean dealEvent(Event event) {
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
         eventRepository.insert(event);
-        break;
+        return true;
       case PULLED:
-        eventRepository.deleteUnreadEvent(event.getMsgId());
-        break;
+        eventRepository.deleteUnreadEvents(Arrays.asList(event.getMsgId().split(",")));
+        return false;
       case RETRACT:
       case DESTROY:
         if (eventRepository.selectByMsgId(event.getMsgId()) != null) {
@@ -64,7 +68,9 @@ public class NotificationService {
         } else {
           eventRepository.insert(event);
         }
-        break;
+        return true;
+      default:
+        return false;
     }
   }
 
@@ -73,17 +79,15 @@ public class NotificationService {
    * 获取新事件
    *
    * @param from 发起方
-   * @param seqId 消息起始序列号
-   * @param pageSize 拉取数量
    */
   @Transactional(rollbackFor = Exception.class)
-  public List<Event> getEvents(String from, Long seqId, Integer pageSize) {
-    LOGGER.info("拉取收件人[" + from + "]序列号[" + seqId + "]之后" + pageSize + "条事件。");
+  public List<Event> getEvents(String from) {
+    LOGGER.info("拉取收件人[" + from + "]的事件。");
 
-    List<Event> events = eventRepository.selectByToBetweenSeqId(from, seqId + 1, seqId + pageSize);
+    List<Event> events = eventRepository.selectByTo(from);
 
     // 删除以前的事件
-    eventRepository.deleteByToBetweenSeqId(from, seqId + 1, seqId + pageSize);
+    eventRepository.deleteByTo(from);
 
     return events;
   }

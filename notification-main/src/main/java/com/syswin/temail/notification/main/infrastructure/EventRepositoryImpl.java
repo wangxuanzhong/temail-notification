@@ -23,8 +23,8 @@ public class EventRepositoryImpl implements EventRepository {
   }
 
   @Override
-  public List<Event> selectByToBetweenSeqId(String to, Long begin, Long end) {
-    return eventMapper.selectByToBetweenSeqId(to, begin, end);
+  public List<Event> selectByTo(String to) {
+    return eventMapper.selectByTo(to);
   }
 
   @Override
@@ -33,13 +33,13 @@ public class EventRepositoryImpl implements EventRepository {
   }
 
   @Override
-  public int deleteByToBetweenSeqId(String to, Long begin, Long end) {
-    return eventMapper.deleteByToBetweenSeqId(to, begin, end);
+  public int deleteByTo(String to) {
+    return eventMapper.deleteByTo(to);
   }
 
   @Override
-  public int deleteUnreadEvent(String msgId) {
-    return eventMapper.deleteUnreadEvent(msgId);
+  public int deleteUnreadEvents(List<String> msgIds) {
+    return eventMapper.deleteUnreadEvents(msgIds);
   }
 
   @Override

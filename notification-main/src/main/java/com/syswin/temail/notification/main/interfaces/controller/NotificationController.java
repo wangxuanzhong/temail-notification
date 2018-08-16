@@ -36,11 +36,11 @@ public class NotificationController {
 
   @ApiOperation(value = "拉取事件", consumes = "application/json")
   @GetMapping("/events")
-  public ResponseEntity<Response<List<Event>>> getEvents(@RequestParam(required = true) String from, @RequestParam(required = true) Long seqId,
-      @RequestParam(defaultValue = "20") Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) throws Exception {
+  public ResponseEntity<Response<List<Event>>> getEvents(@RequestParam(required = true) String from, @RequestHeader(name = CDTP_HEADER) String header)
+      throws Exception {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    List<Event> result = notificationService.getEvents(from, seqId, pageSize);
+    List<Event> result = notificationService.getEvents(from);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 

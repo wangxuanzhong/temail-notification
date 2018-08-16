@@ -6,13 +6,13 @@ public interface EventRepository {
 
   int insert(Event event);
 
-  List<Event> selectByToBetweenSeqId(String to, Long begin, Long end);
+  List<Event> selectByTo(String to);
 
   List<EventResponse> selectAllUnread(String to);
 
-  int deleteByToBetweenSeqId(String to, Long begin, Long end);
+  int deleteByTo(String to);
 
-  int deleteUnreadEvent(String msgId);
+  int deleteUnreadEvents(List<String> msgIds);
 
   Event selectByMsgId(String msgId);
 
