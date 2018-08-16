@@ -9,11 +9,11 @@ public class MailAgentParams {
   private String to;
 
   private String msgid;
+  // seqId
   private Long fromSeqNo;
+  // message
   private String toMsg;
   private Long timestamp;
-
-  private Integer messageSize;
 
   private String header;
 
@@ -73,14 +73,6 @@ public class MailAgentParams {
     this.timestamp = timestamp;
   }
 
-  public Integer getMessageSize() {
-    return messageSize;
-  }
-
-  public void setMessageSize(Integer messageSize) {
-    this.messageSize = messageSize;
-  }
-
   public String getHeader() {
     return header;
   }
@@ -99,7 +91,6 @@ public class MailAgentParams {
         ", fromSeqNo=" + fromSeqNo +
         ", toMsg='" + toMsg + '\'' +
         ", timestamp=" + timestamp +
-        ", messageSize=" + messageSize +
         ", header='" + header + '\'' +
         '}';
   }

@@ -2,7 +2,7 @@ package com.syswin.temail.notification.main.infrastructure;
 
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventRepository;
-import com.syswin.temail.notification.main.domains.EventResponse;
+import com.syswin.temail.notification.main.domains.UnreadResponse;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ public class EventRepositoryImpl implements EventRepository {
   }
 
   @Override
-  public List<EventResponse> selectAllUnread(String to) {
+  public List<UnreadResponse> selectAllUnread(String to) {
     return eventMapper.selectAllUnread(to);
   }
 

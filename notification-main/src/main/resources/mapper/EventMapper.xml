@@ -11,7 +11,7 @@
     <result column="to" jdbcType="VARCHAR" property="to"/>
     <result column="timestamp" jdbcType="BIGINT" property="timestamp"/>
   </resultMap>
-  <resultMap id="EventResponse" type="com.syswin.temail.notification.main.domains.EventResponse">
+  <resultMap id="UnreadMap" type="com.syswin.temail.notification.main.domains.UnreadResponse">
     <result column="from" jdbcType="VARCHAR" property="from"/>
     <result column="to" jdbcType="VARCHAR" property="to"/>
     <result column="unread" jdbcType="INTEGER" property="unread"/>
@@ -28,11 +28,11 @@
     SELECT
     `event_type`, `msg_id`, `from`, `to`
     FROM `event`
-    WHERE `to` = #{to} AND `seq_id` AND `event_type` != 0
+    WHERE `to` = #{to} AND `event_type` != 0
     ORDER BY `seq_id`
   </select>
 
-  <select id="selectAllUnread" parameterType="java.lang.String" resultMap="EventResponse">
+  <select id="selectAllUnread" parameterType="java.lang.String" resultMap="UnreadMap">
     SELECT
     `from`, `to`, sum(1) as unread
     FROM `event`

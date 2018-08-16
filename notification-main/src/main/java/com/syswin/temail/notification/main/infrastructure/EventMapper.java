@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.infrastructure;
 
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.EventResponse;
+import com.syswin.temail.notification.main.domains.UnreadResponse;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +12,7 @@ public interface EventMapper {
 
   List<Event> selectByTo(String to);
 
-  List<EventResponse> selectAllUnread(String to);
+  List<UnreadResponse> selectAllUnread(String to);
 
   int deleteByTo(String to);
 

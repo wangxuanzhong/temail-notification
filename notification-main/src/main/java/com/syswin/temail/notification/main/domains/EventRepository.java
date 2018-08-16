@@ -8,7 +8,7 @@ public interface EventRepository {
 
   List<Event> selectByTo(String to);
 
-  List<EventResponse> selectAllUnread(String to);
+  List<UnreadResponse> selectAllUnread(String to);
 
   int deleteByTo(String to);
 

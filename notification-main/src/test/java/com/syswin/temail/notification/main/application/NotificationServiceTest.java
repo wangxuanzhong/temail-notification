@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
-import com.syswin.temail.notification.main.domains.EventResponse;
 import com.syswin.temail.notification.main.domains.MailAgentParams;
+import com.syswin.temail.notification.main.domains.UnreadResponse;
 import java.util.Date;
 import java.util.List;
 import org.junit.Test;
@@ -55,7 +55,7 @@ public class NotificationServiceTest {
 
   @Test
   public void testGetUnread() {
-    List<EventResponse> result = notificationService.getUnread(TEST_TO);
+    List<UnreadResponse> result = notificationService.getUnread(TEST_TO);
     assertThat(result).isNotEmpty();
   }
 }

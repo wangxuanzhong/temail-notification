@@ -5,8 +5,8 @@ import com.syswin.temail.notification.main.domains.CDTPResponse;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.EventRepository;
-import com.syswin.temail.notification.main.domains.EventResponse;
 import com.syswin.temail.notification.main.domains.MailAgentParams;
+import com.syswin.temail.notification.main.domains.UnreadResponse;
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.List;
@@ -56,13 +56,13 @@ public class NotificationService {
   private boolean dealEvent(Event event) {
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
+      case DESTROY:
         eventRepository.insert(event);
         return true;
       case PULLED:
         eventRepository.deleteUnreadEvents(Arrays.asList(event.getMsgId().split(",")));
         return false;
       case RETRACT:
-      case DESTROY:
         if (eventRepository.selectByMsgId(event.getMsgId()) != null) {
           eventRepository.updateByMsgId(event);
         } else {
@@ -98,7 +98,7 @@ public class NotificationService {
    *
    * @param from 发起人
    */
-  public List<EventResponse> getUnread(String from) {
+  public List<UnreadResponse> getUnread(String from) {
     return eventRepository.selectAllUnread(from);
   }
 }
