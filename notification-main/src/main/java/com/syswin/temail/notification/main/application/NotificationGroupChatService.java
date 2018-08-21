@@ -82,11 +82,11 @@ public class NotificationGroupChatService {
         memberRepository.insert(event);
         break;
       case DELETE_GROUP:
-        event.setTemail(null);
-        memberRepository.deleteGroupMember(event);
         event.notifyToAll();
         insertGroupEvent(event);
         sendGroupMessage(event, header);
+        event.setTemail(null);
+        memberRepository.deleteGroupMember(event);
         break;
       case ADD_MEMBER:
         memberRepository.insert(event);

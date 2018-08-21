@@ -14,8 +14,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class NotificationGroupChatServiceTest {
 
-  private final String TEST_GROUP = "g";
-  private final String TEST_TETMAIL = "g";
+  private final String TEST_GROUP = "g2";
+  private final String TEST_TETMAIL = "a";
   private final String TEST_GROUP_MSG_ID = "g-";
 
   @Autowired
@@ -26,7 +26,7 @@ public class NotificationGroupChatServiceTest {
   public void testHandleMqMessage() throws Exception {
     MailAgentGroupChatParams mailAgentGroupChatParams = new MailAgentGroupChatParams();
     mailAgentGroupChatParams.setHeader("header");
-    mailAgentGroupChatParams.setSessionMssageType(EventType.APPLY.getValue());
+    mailAgentGroupChatParams.setSessionMssageType(EventType.DELETE_GROUP.getValue());
     mailAgentGroupChatParams.setGroupTemail(TEST_GROUP);
     mailAgentGroupChatParams.setTemail(TEST_TETMAIL);
 //    mailAgentGroupChatParams.setType(0);

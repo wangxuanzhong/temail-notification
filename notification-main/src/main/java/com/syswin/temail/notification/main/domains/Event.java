@@ -115,7 +115,7 @@ public class Event extends Message {
 
   public enum EventType {
     // 消息部分
-    RECEIVE(0, "消息已接收"),
+    RECEIVE(0, "消息发送"),
     PULLED(1, "消息已拉取"),
     RETRACT(2, "消息已撤回"),
     DESTROY(3, "消息已焚毁"),

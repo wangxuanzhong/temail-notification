@@ -24,7 +24,7 @@
   </select>
 
   <delete id="deleteGroupMember" parameterType="com.syswin.temail.notification.main.domains.Event">
-    DELETE FROM `event`
+    DELETE FROM `member`
     WHERE`group_temail` = #{groupTemail}
     <if test="temail != null and temail != '' ">AND `temail` = #{temail}</if>
     AND id > 0
