@@ -8,6 +8,12 @@ public class UnreadResponse extends Message {
 
   private Integer unread;
 
+  public UnreadResponse(String from, String to, Integer unread) {
+    this.setFrom(from);
+    this.setTo(to);
+    this.unread = unread;
+  }
+
   public Integer getUnread() {
     return unread;
   }

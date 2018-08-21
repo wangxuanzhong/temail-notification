@@ -3,72 +3,31 @@
 <mapper namespace="com.syswin.temail.notification.main.infrastructure.EventMapper">
   <resultMap id="EventMap" type="com.syswin.temail.notification.main.domains.Event">
     <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="event_seq_id" jdbcType="BIGINT" property="eventSeqId"/>
     <result column="event_type" jdbcType="INTEGER" property="eventType"/>
     <result column="msg_id" jdbcType="VARCHAR" property="msgId"/>
     <result column="seq_id" jdbcType="BIGINT" property="seqId"/>
     <result column="message" jdbcType="VARCHAR" property="message"/>
     <result column="from" jdbcType="VARCHAR" property="from"/>
     <result column="to" jdbcType="VARCHAR" property="to"/>
+    <result column="group_temail" jdbcType="VARCHAR" property="groupTemail"/>
+    <result column="temail" jdbcType="VARCHAR" property="temail"/>
     <result column="timestamp" jdbcType="BIGINT" property="timestamp"/>
-  </resultMap>
-  <resultMap id="UnreadMap" type="com.syswin.temail.notification.main.domains.UnreadResponse">
-    <result column="from" jdbcType="VARCHAR" property="from"/>
-    <result column="to" jdbcType="VARCHAR" property="to"/>
-    <result column="unread" jdbcType="INTEGER" property="unread"/>
   </resultMap>
 
   <insert id="insert" parameterType="com.syswin.temail.notification.main.domains.Event">
     INSERT INTO `event`
-    (`event_type`, `msg_id`, `seq_id`, `message`, `from`, `to`, `timestamp`)
+    (`event_seq_id`, `event_type`, `msg_id`, `seq_id`, `message`, `from`, `to`, `group_temail`, `temail`, `timestamp`)
     VALUES
-    (#{eventType}, #{msgId}, #{seqId}, #{message}, #{from}, #{to}, #{timestamp})
+    (#{eventSeqId}, #{eventType}, #{msgId}, #{seqId}, #{message}, #{from}, #{to}, #{groupTemail}, #{temail}, #{timestamp})
   </insert>
 
-  <select id="selectByTo" parameterType="java.lang.String" resultMap="EventMap">
+  <select id="selectByTo" resultMap="EventMap">
     SELECT
-    `event_type`, `msg_id`, `from`, `to`
+    `event_seq_id`, `event_type`, `msg_id`, `from`, `to`, `group_temail`, `temail`
     FROM `event`
-    WHERE `to` = #{to} AND `event_type` != 0
-    ORDER BY `seq_id`
+    WHERE `to` = #{to} AND event_seq_id > #{begin}
+    <if test="end != null">AND event_seq_id <![CDATA[<=]]> #{end}</if>
+    ORDER BY `event_seq_id`
   </select>
-
-  <select id="selectAllUnread" parameterType="java.lang.String" resultMap="UnreadMap">
-    SELECT
-    `from`, `to`, sum(1) as unread
-    FROM `event`
-    WHERE `to` = #{to} AND `event_type` = 0
-    GROUP BY `from`
-  </select>
-
-  <delete id="deleteByTo" parameterType="java.lang.String">
-    DELETE FROM `event`
-    WHERE `to` = #{to} AND `event_type` != 0 AND id > 0
-  </delete>
-
-  <delete id="deleteUnreadEvents" parameterType="java.util.List">
-    DELETE FROM `event`
-    WHERE `msg_id` IN (
-    <foreach collection="list" index="index" item="item" separator=",">
-      #{item}
-    </foreach>
-    )AND `event_type` = 0 AND id > 0
-  </delete>
-
-  <select id="selectByMsgId" parameterType="java.lang.String" resultMap="EventMap">
-    SELECT
-    `event_type`, `msg_id`, `seq_id`, `message`, `from`, `to`, `timestamp`
-    FROM `event`
-    WHERE `msg_id` = #{msgId}
-  </select>
-
-  <update id="updateByMsgId" parameterType="com.syswin.temail.notification.main.domains.Event">
-    UPDATE `event`
-    <set>
-      `event_type` = #{eventType},
-      `message` = #{message},
-      `timestamp` = #{timestamp}
-    </set>
-    WHERE `msg_id` = #{msgId}
-  </update>
-
 </mapper>

@@ -24,14 +24,14 @@ public class RocketMqProducer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final DefaultMQProducer producer = new DefaultMQProducer("RocketMQProducer");
+  private final DefaultMQProducer producer = new DefaultMQProducer("producer");
 
-  private String namesrvAddr;
+  private String host;
   private String topic;
 
-  public RocketMqProducer(@Value("${temail.notification.rocketmq.namesrvAddr}") String namesrvAddr,
+  public RocketMqProducer(@Value("${temail.notification.rocketmq.host}") String host,
       @Value("${temail.notification.rocketmq.topics.notify}") String topic) {
-    this.namesrvAddr = namesrvAddr;
+    this.host = host;
     this.topic = topic;
   }
 
@@ -41,7 +41,7 @@ public class RocketMqProducer {
   @PostConstruct
   public void start() throws MQClientException {
     LOGGER.info("MQ：启动生产者");
-    producer.setNamesrvAddr(namesrvAddr);
+    producer.setNamesrvAddr(host);
     producer.start();
   }
 

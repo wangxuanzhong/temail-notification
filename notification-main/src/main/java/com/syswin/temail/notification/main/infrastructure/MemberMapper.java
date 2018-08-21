@@ -2,13 +2,14 @@ package com.syswin.temail.notification.main.infrastructure;
 
 import com.syswin.temail.notification.main.domains.Event;
 import java.util.List;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface EventMapper {
+public interface MemberMapper {
 
   int insert(Event event);
 
-  List<Event> selectByTo(@Param("to") String to, @Param("begin") Long begin, @Param("end") Long end);
+  List<String> selectByGroupTemail(Event event);
+
+  int deleteGroupMember(Event event);
 }

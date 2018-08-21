@@ -2,12 +2,12 @@ package com.syswin.temail.notification.main.domains;
 
 public class MailAgentParams {
 
+  public static final String MSG_ID_SPLIT = ",";
+
   // eventType
   private Integer sessionMssageType;
-
   private String from;
   private String to;
-
   private String msgid;
   // seqId
   private Long fromSeqNo;

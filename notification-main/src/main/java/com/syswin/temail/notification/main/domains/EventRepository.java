@@ -6,15 +6,5 @@ public interface EventRepository {
 
   int insert(Event event);
 
-  List<Event> selectByTo(String to);
-
-  List<UnreadResponse> selectAllUnread(String to);
-
-  int deleteByTo(String to);
-
-  int deleteUnreadEvents(List<String> msgIds);
-
-  Event selectByMsgId(String msgId);
-
-  int updateByMsgId(Event event);
+  List<Event> selectByTo(String to, Long begin, Long end);
 }

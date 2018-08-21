@@ -28,11 +28,11 @@
       <groupId>com.syswin.temail</groupId>
       <artifactId>notification-foundation</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.systoon.integration</groupId>
-      <artifactId>disconf-spring-boot-starter</artifactId>
-      <version>1.0.0</version>
-    </dependency>
+    <!--<dependency>-->
+    <!--<groupId>com.systoon.integration</groupId>-->
+    <!--<artifactId>disconf-spring-boot-starter</artifactId>-->
+    <!--<version>1.0.0</version>-->
+    <!--</dependency>-->
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -97,5 +97,42 @@
         </executions>
       </plugin>
     </plugins>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <excludes>
+          <exclude>develop/**</exclude>
+          <exclude>test/**</exclude>
+          <exclude>product/**</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <directory>src/main/resources/${environment}</directory>
+      </resource>
+    </resources>
   </build>
+
+  <profiles>
+    <profile>
+      <id>dev</id>
+      <properties>
+        <environment>develop</environment>
+      </properties>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+    <profile>
+      <id>test</id>
+      <properties>
+        <environment>test</environment>
+      </properties>
+    </profile>
+    <profile>
+      <id>prod</id>
+      <properties>
+        <environment>product</environment>
+      </properties>
+    </profile>
+  </profiles>
 </project>

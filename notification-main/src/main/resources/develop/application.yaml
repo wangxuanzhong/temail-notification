@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    username: app
+    password: temail#app
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.15.108:3316/temail-notification?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
+    platform: mysql
+    continue-on-error: true
+    initialization-mode: always
+  redis:
+    host: 192.168.15.125
+    port: 7389
+    database: 1
+    timeout: 1000
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+
+server:
+  port: 8900
+  servlet:
+    context-path: /
+
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations: classpath*:mapper/*Mapper.xml
+
+#loging
+logging:
+  level:
+    com.syswin.temail.notification.main.infrastructure: DEBUG
+
+temail:
+  notification:
+    rocketmq:
+      host: 192.168.15.37:9876
+      topics:
+        mailAgent:
+          singleChat: service_topic_1
+          groupChat: service_topic_1
+        notify: service_topic

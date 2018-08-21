@@ -1,14 +1,14 @@
 spring:
   datasource:
-    username: syswin
-    password: syswin
+    username: app
+    password: temail#app
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://172.28.5.92:3306/temail-notification?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
+    url: jdbc:mysql://192.168.15.108:3316/temail-notification?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
     platform: mysql
     continue-on-error: true
     initialization-mode: always
   redis:
-    host: 192.168.0.251
+    host: 192.168.15.125
     port: 7389
     database: 1
     timeout: 1000
@@ -36,9 +36,9 @@ logging:
 temail:
   notification:
     rocketmq:
-      namesrvAddr: 172.28.43.18:9876
+      host: 192.168.15.37:9876
       topics:
-        mailAgent: temail-usermail
-#        mailAgent: service_topic
-#        notify: service_topic
+        mailAgent:
+          singleChat: temail-usermail
+          groupChat: temail-groupmail
         notify: temail-notification

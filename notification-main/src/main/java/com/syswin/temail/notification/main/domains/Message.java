@@ -25,15 +25,6 @@ public class Message {
     this.timestamp = timestamp;
   }
 
-  /**
-   * 交换收发件方
-   */
-  public void exchangeSides() {
-    String tmp = this.from;
-    this.from = this.to;
-    this.to = tmp;
-  }
-
   public String getMsgId() {
     return msgId;
   }
