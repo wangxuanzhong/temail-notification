@@ -50,7 +50,8 @@ public class NotificationGroupChatService {
    * 处理从MQ收到的信息
    */
   @Transactional(rollbackFor = Exception.class)
-  public void handleMqMessage(String body) throws Exception {
+  public void handleMqMessage(String body)
+      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentGroupChatParams params = gson.fromJson(body, MailAgentGroupChatParams.class);
     Event event = new Event(params.getMsgid(), params.getFromSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
         params.getTimestamp(), params.getGroupTemail(), params.getTemail(), params.getType(), params.getSessionMssageType());

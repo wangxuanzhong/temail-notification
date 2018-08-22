@@ -7,6 +7,7 @@ import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.MailAgentParams;
 import com.syswin.temail.notification.main.domains.UnreadResponse;
+import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,6 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.rocketmq.client.exception.MQBrokerException;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +45,8 @@ public class NotificationService {
   /**
    * 处理从MQ收到的信息
    */
-  public void handleMqMessage(String body) throws Exception {
+  public void handleMqMessage(String body)
+      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentParams params = gson.fromJson(body, MailAgentParams.class);
     Event event = new Event(params.getMsgid(), params.getFromSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
         params.getTimestamp(), params.getSessionMssageType());
