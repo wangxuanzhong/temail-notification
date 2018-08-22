@@ -109,7 +109,11 @@ public class NotificationService {
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
 
     Map<String, Object> result = new HashMap<>();
-    result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
+    if (events.isEmpty()) {
+      result.put("lastEventSeqId", -1);
+    } else {
+      result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
+    }
     result.put("events", notifyEvents);
     LOGGER.info("拉取事件结果为：" + result);
     return result;

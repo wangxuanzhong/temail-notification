@@ -7,15 +7,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class Event extends Message {
 
+  @JsonIgnore
   private Long id;
   private Long eventSeqId;
   private Integer eventType;
-
-  // 群聊参数
-  private String groupTemail;
-  private String temail;
-  @JsonIgnore
-  private Integer role;
 
   public Event() {
   }
@@ -25,27 +20,24 @@ public class Event extends Message {
     this.eventType = eventType;
   }
 
-  public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, Integer eventType, String groupTemail, String temail,
-      Integer role) {
-    super(msgId, seqId, message, from, to, timestamp);
+  public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, String groupTemail, String temail,
+      Integer role, Integer eventType) {
+    super(msgId, seqId, message, from, to, timestamp, groupTemail, temail, role);
     this.eventType = eventType;
-    this.groupTemail = groupTemail;
-    this.temail = temail;
-    this.role = role;
   }
 
   /**
    * 去除角色条件，即通知所有人
    */
   public void notifyToAll() {
-    this.role = null;
+    this.setRole(null);
   }
 
   /**
    * 角色设置为管理员，只通知管理员
    */
   public void notifyToAdmin() {
-    this.role = MemberRole.ADMIN.getValue();
+    this.setRole(MemberRole.ADMIN.getValue());
   }
 
 
@@ -55,7 +47,7 @@ public class Event extends Message {
    * @param eventType 需要匹配的通知类型
    */
   public void addEventMsgId(EventType eventType) {
-    this.setMsgId(this.groupTemail + "_" + this.temail + "_" + eventType.getValue());
+    this.setMsgId(this.getGroupTemail() + "_" + this.getTemail() + "_" + eventType.getValue());
   }
 
   /**
@@ -87,30 +79,6 @@ public class Event extends Message {
 
   public void setEventType(Integer eventType) {
     this.eventType = eventType;
-  }
-
-  public String getGroupTemail() {
-    return groupTemail;
-  }
-
-  public void setGroupTemail(String groupTemail) {
-    this.groupTemail = groupTemail;
-  }
-
-  public String getTemail() {
-    return temail;
-  }
-
-  public void setTemail(String temail) {
-    this.temail = temail;
-  }
-
-  public Integer getRole() {
-    return role;
-  }
-
-  public void setRole(Integer role) {
-    this.role = role;
   }
 
   public enum EventType {

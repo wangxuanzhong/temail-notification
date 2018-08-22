@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class NotificationGroupChatServiceTest {
 
-  private final String TEST_GROUP = "g2";
+  private final String TEST_GROUP = "g";
   private final String TEST_TETMAIL = "a";
   private final String TEST_GROUP_MSG_ID = "g-";
 
@@ -26,14 +26,14 @@ public class NotificationGroupChatServiceTest {
   public void testHandleMqMessage() throws Exception {
     MailAgentGroupChatParams mailAgentGroupChatParams = new MailAgentGroupChatParams();
     mailAgentGroupChatParams.setHeader("header");
-    mailAgentGroupChatParams.setSessionMssageType(EventType.DELETE_GROUP.getValue());
+    mailAgentGroupChatParams.setSessionMssageType(EventType.RECEIVE.getValue());
     mailAgentGroupChatParams.setGroupTemail(TEST_GROUP);
     mailAgentGroupChatParams.setTemail(TEST_TETMAIL);
 //    mailAgentGroupChatParams.setType(0);
 //    mailAgentGroupChatParams.setMsgid(TEST_GROUP_MSG_ID + "1," + TEST_GROUP_MSG_ID + "2");
-//    mailAgentGroupChatParams.setMsgid(TEST_GROUP_MSG_ID + "1");
-//    mailAgentGroupChatParams.setFromSeqNo(2L);
-//    mailAgentGroupChatParams.setToMsg("aaaaaaaa");
+    mailAgentGroupChatParams.setMsgid(TEST_GROUP_MSG_ID + "1");
+    mailAgentGroupChatParams.setFromSeqNo(2L);
+    mailAgentGroupChatParams.setToMsg("aaaaaaaa");
     mailAgentGroupChatParams.setTimestamp((new Date()).getTime());
 
     System.out.println(gson.toJson(mailAgentGroupChatParams));
