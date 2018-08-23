@@ -30,4 +30,11 @@
     <if test="end != null">AND event_seq_id <![CDATA[<=]]> #{end}</if>
     ORDER BY `event_seq_id`
   </select>
+
+  <select id="selectPulledEvent" resultMap="EventMap">
+    SELECT
+    `event_seq_id`, `event_type`, `msg_id`, `from`, `to`, `group_temail`, `temail`
+    FROM `event`
+    WHERE `from` = #{from} AND `to` = #{to} AND `event_type` = #{eventType} AND `msg_id` = #{msgId}
+  </select>
 </mapper>

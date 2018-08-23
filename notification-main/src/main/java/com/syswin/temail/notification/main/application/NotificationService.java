@@ -53,11 +53,26 @@ public class NotificationService {
 
     LOGGER.info("单聊收到的事件类型为：" + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
 
-    for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
-      event.setEventSeqId(redisService.getNextSeq(event.getTo()));
-      event.setMsgId(msgId);
-      eventRepository.insert(event);
-      rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), event)), "", "");
+    switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+      case RECEIVE:
+      case RETRACT:
+      case DESTROY:
+        event.setEventSeqId(redisService.getNextSeq(event.getTo()));
+        eventRepository.insert(event);
+        rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), event)), "", "");
+        break;
+      case PULLED:
+        for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
+          event.setMsgId(msgId);
+          if (eventRepository.selectPulledEvent(event) == null) {
+            event.setEventSeqId(redisService.getNextSeq(event.getTo()));
+            eventRepository.insert(event);
+            rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), event)), "", "");
+          } else {
+            LOGGER.info("消息{}已拉取，不重复处理", msgId);
+          }
+        }
+        break;
     }
   }
 

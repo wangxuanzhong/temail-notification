@@ -7,4 +7,6 @@ public interface EventRepository {
   int insert(Event event);
 
   List<Event> selectByTo(String to, Long begin, Long end);
+
+  Event selectPulledEvent(Event event);
 }

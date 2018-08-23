@@ -33,12 +33,12 @@ public class NotificationServiceTest {
   public void testHandleMqMessage() throws Exception {
     MailAgentParams mailAgentParams = new MailAgentParams();
     mailAgentParams.setHeader("header");
-    mailAgentParams.setSessionMssageType(EventType.RETRACT.getValue());
+    mailAgentParams.setSessionMssageType(EventType.PULLED.getValue());
     mailAgentParams.setFrom(TEST_FROM);
     mailAgentParams.setTo(TEST_TO);
-//    mailAgentParams.setMsgid("1,2");
-    mailAgentParams.setMsgid("3");
-//    mailAgentParams.setFromSeqNo(3L);
+    mailAgentParams.setMsgid("1,2");
+//    mailAgentParams.setMsgid("2");
+//    mailAgentParams.setFromSeqNo(2L);
 //    mailAgentParams.setToMsg("aaaaaaaa");
     mailAgentParams.setTimestamp((new Date()).getTime());
     notificationService.handleMqMessage(gson.toJson(mailAgentParams));

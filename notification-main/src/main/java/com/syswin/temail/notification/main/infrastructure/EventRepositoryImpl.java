@@ -25,4 +25,9 @@ public class EventRepositoryImpl implements EventRepository {
   public List<Event> selectByTo(String to, Long begin, Long end) {
     return eventMapper.selectByTo(to, begin, end);
   }
+
+  @Override
+  public Event selectPulledEvent(Event event) {
+    return eventMapper.selectPulledEvent(event);
+  }
 }

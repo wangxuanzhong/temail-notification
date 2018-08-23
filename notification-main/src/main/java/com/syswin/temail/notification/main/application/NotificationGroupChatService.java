@@ -70,10 +70,14 @@ public class NotificationGroupChatService {
         for (String msgId : event.getMsgId().split(MailAgentGroupChatParams.MSG_ID_SPLIT)) {
           event.setFrom(event.getGroupTemail());
           event.setTo(event.getTemail());
-          event.setEventSeqId(redisService.getNextSeq(event.getTo()));
           event.setMsgId(msgId);
-          eventRepository.insert(event);
-          sendSingleMessage(event, header);
+          if (eventRepository.selectPulledEvent(event) == null) {
+            event.setEventSeqId(redisService.getNextSeq(event.getTo()));
+            eventRepository.insert(event);
+            sendSingleMessage(event, header);
+          } else {
+            LOGGER.info("消息{}已拉取，不重复处理", msgId);
+          }
         }
         break;
       case ADD_GROUP:
