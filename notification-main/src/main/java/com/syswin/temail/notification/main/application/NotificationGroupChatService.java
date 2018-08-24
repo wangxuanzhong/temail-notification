@@ -173,7 +173,7 @@ public class NotificationGroupChatService {
    */
   private void sendSingleMessage(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("向[{}]发送通知。", event.getTo());
+    LOGGER.info("向[{}]发送通知，通知类型为：{}", event.getTo(), Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
     rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), header, event)), GROUP_RMQ_TAG, GROUP_RMQ_KEYS);
   }
 
@@ -184,7 +184,7 @@ public class NotificationGroupChatService {
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
     List<String> tos = memberRepository.selectByGroupTemail(event);
     tos.remove(event.getTemail());
-    LOGGER.info("向{}发送通知。", tos);
+    LOGGER.info("向{}发送通知，通知类型为：{}", tos, Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
     for (String to : tos) {
       rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(to, header, event)), GROUP_RMQ_TAG, GROUP_RMQ_KEYS);
     }

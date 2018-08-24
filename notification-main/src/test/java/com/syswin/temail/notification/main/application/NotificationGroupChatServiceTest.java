@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class NotificationGroupChatServiceTest {
 
   private final String TEST_GROUP = "g";
-  private final String TEST_TETMAIL = "b";
+  private final String TEST_TETMAIL = "1";
   private final String TEST_GROUP_MSG_ID = "g-";
 
   @Autowired
@@ -31,13 +31,10 @@ public class NotificationGroupChatServiceTest {
     mailAgentGroupChatParams.setTemail(TEST_TETMAIL);
 //    mailAgentGroupChatParams.setType(0);
     mailAgentGroupChatParams.setMsgid(TEST_GROUP_MSG_ID + "1," + TEST_GROUP_MSG_ID + "2");
-//    mailAgentGroupChatParams.setMsgid(TEST_GROUP_MSG_ID + "2");
-//    mailAgentGroupChatParams.setFromSeqNo(2L);
+//    mailAgentGroupChatParams.setMsgid(TEST_GROUP_MSG_ID + "1");
+//    mailAgentGroupChatParams.setFromSeqNo(1L);
 //    mailAgentGroupChatParams.setToMsg("aaaaaaaa");
     mailAgentGroupChatParams.setTimestamp((new Date()).getTime());
-
-    System.out.println(gson.toJson(mailAgentGroupChatParams));
-
     notificationGroupChatService.handleMqMessage(gson.toJson(mailAgentGroupChatParams));
   }
 

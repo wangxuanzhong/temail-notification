@@ -81,6 +81,14 @@ public class Event extends Message {
     this.eventType = eventType;
   }
 
+  @Override
+  public String toString() {
+    return "Event{" +
+        "eventSeqId=" + eventSeqId +
+        ", eventType=" + eventType +
+        '}';
+  }
+
   public enum EventType {
     // 消息部分
     RECEIVE(0, "消息发送"),

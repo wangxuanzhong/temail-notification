@@ -21,4 +21,13 @@ public class UnreadResponse extends Message {
   public void setUnread(Integer unread) {
     this.unread = unread;
   }
+
+  @Override
+  public String toString() {
+    return "UnreadResponse{" +
+        "unread=" + unread +
+        ", from=" + this.getFrom() +
+        ", to=" + this.getTo() +
+        '}';
+  }
 }
