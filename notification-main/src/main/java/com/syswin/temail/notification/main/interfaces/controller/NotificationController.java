@@ -37,8 +37,7 @@ public class NotificationController {
   @ApiOperation(value = "拉取事件", consumes = "application/json")
   @GetMapping("/events")
   public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from", required = true) String to,
-      @RequestParam(required = true) Long eventSeqId, Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header)
-      throws Exception {
+      @RequestParam(required = true) Long eventSeqId, Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     Map<String, Object> result = notificationService.getEvents(to, eventSeqId, pageSize);
@@ -48,7 +47,7 @@ public class NotificationController {
   @ApiOperation(value = "获取未读数", consumes = "application/json")
   @GetMapping("/unread")
   public ResponseEntity<Response<List<UnreadResponse>>> getUnread(@RequestParam(name = "from", required = true) String to,
-      @RequestParam(required = true) Long eventSeqId, @RequestHeader(name = CDTP_HEADER) String header) throws Exception {
+      @RequestParam(required = true) Long eventSeqId, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     List<UnreadResponse> result = notificationService.getUnread(to, eventSeqId);
