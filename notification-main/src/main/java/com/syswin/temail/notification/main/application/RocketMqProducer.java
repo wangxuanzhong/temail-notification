@@ -60,6 +60,14 @@ public class RocketMqProducer {
     }
   }
 
+  /**
+   * 发送消息，不使用tags和keys
+   */
+  public void sendMessage(String body)
+      throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
+    sendMessage(body, "", "");
+  }
+
   @PreDestroy
   public void stop() {
     if (producer != null) {
