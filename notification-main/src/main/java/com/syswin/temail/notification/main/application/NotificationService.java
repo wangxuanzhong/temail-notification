@@ -144,6 +144,7 @@ public class NotificationService {
    * 获取消息未读数
    *
    * @param to 发起人
+   * @param eventSeqId 上次拉取结尾序号
    */
   public List<UnreadResponse> getUnread(String to, Long eventSeqId) {
     LOGGER.info("从序列号[" + eventSeqId + "]之后获取接收方[" + to + "]的未读消息数量。");

@@ -1,4 +1,4 @@
-package com.syswin.temail.notification.main.exctptions;
+package com.syswin.temail.notification.main.exceptions;
 
 import com.syswin.temail.notification.foundation.exceptions.BaseException;
 

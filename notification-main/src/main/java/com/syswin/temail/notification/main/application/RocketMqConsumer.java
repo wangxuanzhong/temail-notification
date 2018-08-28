@@ -1,5 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
+import com.syswin.temail.notification.main.exceptions.SendMqMessageException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -78,7 +79,7 @@ public class RocketMqConsumer {
             LOGGER.info("MQ：接收信息: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
             handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), type);
           }
-        } catch (InterruptedException | RemotingException | MQClientException | MQBrokerException | UnsupportedEncodingException e) {
+        } catch (InterruptedException | RemotingException | MQClientException | MQBrokerException | UnsupportedEncodingException | SendMqMessageException e) {
           LOGGER.error(e.getMessage(), e);
         } catch (Exception e) {
           // 非MQ相关异常，消息不返回成功

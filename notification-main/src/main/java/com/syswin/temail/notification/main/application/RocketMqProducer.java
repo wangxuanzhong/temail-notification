@@ -1,6 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
-import com.syswin.temail.notification.main.exctptions.SendMqMessageException;
+import com.syswin.temail.notification.main.exceptions.SendMqMessageException;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import javax.annotation.PostConstruct;
