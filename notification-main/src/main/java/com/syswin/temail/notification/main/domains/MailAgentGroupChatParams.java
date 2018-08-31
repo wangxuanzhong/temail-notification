@@ -2,9 +2,19 @@ package com.syswin.temail.notification.main.domains;
 
 public class MailAgentGroupChatParams extends MailAgentParams {
 
+  // seqId
+  private Long fromSeqNo;
   private String groupTemail;
   private String temail;
   private Integer type;
+
+  public Long getFromSeqNo() {
+    return fromSeqNo;
+  }
+
+  public void setFromSeqNo(Long fromSeqNo) {
+    this.fromSeqNo = fromSeqNo;
+  }
 
   public String getGroupTemail() {
     return groupTemail;

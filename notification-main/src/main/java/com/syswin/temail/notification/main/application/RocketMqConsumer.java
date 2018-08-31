@@ -2,11 +2,11 @@ package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.main.exceptions.SendMqMessageException;
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
-import org.apache.rocketmq.client.consumer.MQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
@@ -25,10 +25,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class RocketMqConsumer {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MQPushConsumer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final DefaultMQPushConsumer singleChatConsumer = new DefaultMQPushConsumer("singleChatConsumer");
-  private final DefaultMQPushConsumer groupChatConsumer = new DefaultMQPushConsumer("groupChatConsumer");
+  private final DefaultMQPushConsumer singleChatConsumer = new DefaultMQPushConsumer("notificationSingleChatConsumer");
+  private final DefaultMQPushConsumer groupChatConsumer = new DefaultMQPushConsumer("notificationGroupChatConsumer");
 
   private final int TYPE_0_SINGLE_CHAT = 0;
   private final int TYPE_1_GROUP_CHAT = 1;

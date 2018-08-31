@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
-import com.syswin.temail.notification.main.domains.MailAgentParams;
+import com.syswin.temail.notification.main.domains.MailAgentSingleChatParams;
 import com.syswin.temail.notification.main.domains.UnreadResponse;
 import java.util.Date;
 import java.util.List;
@@ -26,22 +26,19 @@ public class NotificationServiceTest {
   @Autowired
   private NotificationService notificationService;
 
-  @Autowired
-  private RedisService redisService;
-
   @Test
   public void testHandleMqMessage() throws Exception {
-    MailAgentParams mailAgentParams = new MailAgentParams();
-    mailAgentParams.setHeader("header");
-    mailAgentParams.setSessionMssageType(EventType.PULLED.getValue());
-    mailAgentParams.setFrom(TEST_FROM);
-    mailAgentParams.setTo(TEST_TO);
-    mailAgentParams.setMsgid("1,2");
-//    mailAgentParams.setMsgid("2");
-//    mailAgentParams.setFromSeqNo(2L);
-//    mailAgentParams.setToMsg("aaaaaaaa");
-    mailAgentParams.setTimestamp((new Date()).getTime());
-    notificationService.handleMqMessage(gson.toJson(mailAgentParams));
+    MailAgentSingleChatParams params = new MailAgentSingleChatParams();
+    params.setHeader("header");
+    params.setSessionMssageType(EventType.RECEIVE.getValue());
+    params.setFrom(TEST_FROM);
+    params.setTo(TEST_TO);
+//    params.setMsgid("1,2");
+    params.setMsgid("2");
+    params.setSeqNo(2L);
+    params.setToMsg("aaaaaaaa");
+    params.setTimestamp((new Date()).getTime());
+    notificationService.handleMqMessage(gson.toJson(params));
   }
 
   @Test

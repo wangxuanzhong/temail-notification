@@ -101,9 +101,10 @@
       <resource>
         <directory>src/main/resources</directory>
         <excludes>
-          <exclude>develop/**</exclude>
           <exclude>test/**</exclude>
           <exclude>product/**</exclude>
+          <exclude>*.yaml</exclude>
+          <exclude>*.properties</exclude>
         </excludes>
       </resource>
       <resource>
@@ -116,7 +117,7 @@
     <profile>
       <id>dev</id>
       <properties>
-        <environment>develop</environment>
+        <environment></environment>
       </properties>
       <activation>
         <activeByDefault>true</activeByDefault>

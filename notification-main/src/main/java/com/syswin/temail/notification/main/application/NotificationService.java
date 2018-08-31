@@ -6,6 +6,7 @@ import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.MailAgentParams;
+import com.syswin.temail.notification.main.domains.MailAgentSingleChatParams;
 import com.syswin.temail.notification.main.domains.UnreadResponse;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
@@ -47,8 +48,8 @@ public class NotificationService {
    */
   public void handleMqMessage(String body)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    MailAgentParams params = gson.fromJson(body, MailAgentParams.class);
-    Event event = new Event(params.getMsgid(), params.getFromSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
+    MailAgentSingleChatParams params = gson.fromJson(body, MailAgentSingleChatParams.class);
+    Event event = new Event(params.getMsgid(), params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
         params.getTimestamp(), params.getSessionMssageType());
 
     LOGGER.info("单聊收到的事件类型为：" + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());

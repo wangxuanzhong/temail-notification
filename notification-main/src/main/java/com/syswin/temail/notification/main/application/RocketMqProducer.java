@@ -24,7 +24,7 @@ public class RocketMqProducer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final DefaultMQProducer producer = new DefaultMQProducer("producer");
+  private final DefaultMQProducer producer = new DefaultMQProducer("notificationProducer");
 
   private String host;
   private String topic;

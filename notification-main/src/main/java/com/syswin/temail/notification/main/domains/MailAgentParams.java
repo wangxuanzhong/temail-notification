@@ -9,8 +9,6 @@ public class MailAgentParams {
   private String from;
   private String to;
   private String msgid;
-  // seqId
-  private Long fromSeqNo;
   // message
   private String toMsg;
   private Long timestamp;
@@ -57,14 +55,6 @@ public class MailAgentParams {
     this.toMsg = toMsg;
   }
 
-  public Long getFromSeqNo() {
-    return fromSeqNo;
-  }
-
-  public void setFromSeqNo(Long fromSeqNo) {
-    this.fromSeqNo = fromSeqNo;
-  }
-
   public Long getTimestamp() {
     return timestamp;
   }
@@ -88,7 +78,6 @@ public class MailAgentParams {
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", msgid='" + msgid + '\'' +
-        ", fromSeqNo=" + fromSeqNo +
         ", toMsg='" + toMsg + '\'' +
         ", timestamp=" + timestamp +
         ", header='" + header + '\'' +

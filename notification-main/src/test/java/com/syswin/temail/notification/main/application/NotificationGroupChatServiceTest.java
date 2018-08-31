@@ -24,18 +24,18 @@ public class NotificationGroupChatServiceTest {
 
   @Test
   public void testHandleMqMessage() throws Exception {
-    MailAgentGroupChatParams mailAgentGroupChatParams = new MailAgentGroupChatParams();
-    mailAgentGroupChatParams.setHeader("header");
-    mailAgentGroupChatParams.setSessionMssageType(EventType.RECEIVE.getValue());
-    mailAgentGroupChatParams.setGroupTemail(TEST_GROUP);
-    mailAgentGroupChatParams.setTemail(TEST_TETMAIL);
-//    mailAgentGroupChatParams.setType(0);
-//    mailAgentGroupChatParams.setMsgid(TEST_GROUP_MSG_ID + "1," + TEST_GROUP_MSG_ID + "2");
-    mailAgentGroupChatParams.setMsgid(TEST_GROUP_MSG_ID + "1");
-    mailAgentGroupChatParams.setFromSeqNo(1L);
-    mailAgentGroupChatParams.setToMsg("aaaaaaaa");
-    mailAgentGroupChatParams.setTimestamp((new Date()).getTime());
-    notificationGroupChatService.handleMqMessage(gson.toJson(mailAgentGroupChatParams));
+    MailAgentGroupChatParams params = new MailAgentGroupChatParams();
+    params.setHeader("header");
+    params.setSessionMssageType(EventType.RECEIVE.getValue());
+    params.setGroupTemail(TEST_GROUP);
+    params.setTemail(TEST_TETMAIL);
+//    params.setType(0);
+//    params.setMsgid(TEST_GROUP_MSG_ID + "1," + TEST_GROUP_MSG_ID + "2");
+    params.setMsgid(TEST_GROUP_MSG_ID + "1");
+    params.setFromSeqNo(1L);
+    params.setToMsg("aaaaaaaa");
+    params.setTimestamp((new Date()).getTime());
+    notificationGroupChatService.handleMqMessage(gson.toJson(params));
   }
 
 
