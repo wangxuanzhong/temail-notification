@@ -79,7 +79,7 @@ public class NotificationService {
 
 
   /**
-   * 获取新事件
+   * 拉取事件
    *
    * @param to 发起人
    * @param eventSeqId 上次拉取结尾序号
@@ -111,6 +111,7 @@ public class NotificationService {
         case INVITATION:
         case INVITATION_ADOPT:
         case INVITATION_REFUSE:
+        case UPDATE_GROUP_CARD:
           notifyEvents.add(event);
           break;
         case PULLED:
@@ -171,6 +172,7 @@ public class NotificationService {
         case INVITATION:
         case INVITATION_ADOPT:
         case INVITATION_REFUSE:
+        case UPDATE_GROUP_CARD:
           msgIds.add("notify event msgId");
           break;
         case PULLED:

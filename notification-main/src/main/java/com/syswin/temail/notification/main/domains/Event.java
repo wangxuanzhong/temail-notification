@@ -10,6 +10,7 @@ public class Event extends Message {
   @JsonIgnore
   private Long id;
   private Long eventSeqId;
+  private String remark;
   private Integer eventType;
 
   public Event() {
@@ -21,8 +22,8 @@ public class Event extends Message {
   }
 
   public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, String groupTemail, String temail,
-      Integer role, Integer eventType) {
-    super(msgId, seqId, message, from, to, timestamp, groupTemail, temail, role);
+      String name, Integer role, Integer eventType) {
+    super(msgId, seqId, message, from, to, timestamp, groupTemail, temail, name, role);
     this.eventType = eventType;
   }
 
@@ -73,6 +74,14 @@ public class Event extends Message {
     this.eventSeqId = eventSeqId;
   }
 
+  public String getRemark() {
+    return remark;
+  }
+
+  public void setRemark(String remark) {
+    this.remark = remark;
+  }
+
   public Integer getEventType() {
     return eventType;
   }
@@ -84,7 +93,9 @@ public class Event extends Message {
   @Override
   public String toString() {
     return "Event{" +
-        "eventSeqId=" + eventSeqId +
+        "id=" + id +
+        ", eventSeqId=" + eventSeqId +
+        ", remark='" + remark + '\'' +
         ", eventType=" + eventType +
         '}';
   }
@@ -108,7 +119,8 @@ public class Event extends Message {
     DELETE_MEMBER(11, "群成员被移除"),
     DELETE_GROUP(12, "群已解散"),
     ADD_GROUP(13, "新建群"),
-    LEAVE_GROUP(15, "已退出群聊");
+    LEAVE_GROUP(15, "已退出群聊"),
+    UPDATE_GROUP_CARD(16, "群名片更新");
 
     private final int value;
     private final String description;

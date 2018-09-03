@@ -48,7 +48,7 @@ public class RocketMqProducer {
   /**
    * 发送消息
    */
-  public void sendMessage(String body, String tags, String keys)
+  public void sendMessage(String body, String topic, String tags, String keys)
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
     Message mqMsg = new Message(topic, tags, keys, body.getBytes(RemotingHelper.DEFAULT_CHARSET));
     LOGGER.info("MQ: 发送消息 {}", body);
@@ -61,11 +61,11 @@ public class RocketMqProducer {
   }
 
   /**
-   * 发送消息，不使用tags和keys
+   * 发送消息，使用默认的topic，不使用tags和keys
    */
   public void sendMessage(String body)
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
-    sendMessage(body, "", "");
+    sendMessage(body, topic, "", "");
   }
 
   @PreDestroy

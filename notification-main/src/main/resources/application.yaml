@@ -40,5 +40,5 @@ temail:
       topics:
         mailAgent:
           singleChat: service_topic_1
-          groupChat: service_topic_1
+          groupChat: service_topic_2
         notify: service_topic

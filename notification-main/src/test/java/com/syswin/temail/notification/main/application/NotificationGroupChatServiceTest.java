@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.MailAgentGroupChatParams;
 import java.util.Date;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,26 +18,38 @@ public class NotificationGroupChatServiceTest {
   private final String TEST_GROUP = "g";
   private final String TEST_TETMAIL = "a";
   private final String TEST_GROUP_MSG_ID = "g-";
-
+  MailAgentGroupChatParams params = new MailAgentGroupChatParams();
   @Autowired
-  NotificationGroupChatService notificationGroupChatService;
+  private NotificationGroupChatService notificationGroupChatService;
+  @Autowired
+  private RocketMqProducer rocketMqProducer;
   private Gson gson = new Gson();
 
-  @Test
-  public void testHandleMqMessage() throws Exception {
-    MailAgentGroupChatParams params = new MailAgentGroupChatParams();
+  @Before
+  public void setUp() {
     params.setHeader("header");
-    params.setSessionMssageType(EventType.RECEIVE.getValue());
     params.setGroupTemail(TEST_GROUP);
     params.setTemail(TEST_TETMAIL);
+    params.setTimestamp((new Date()).getTime());
+  }
+
+  @Test
+  public void testEventTypeReceive() throws Exception {
+    params.setSessionMssageType(EventType.RECEIVE.getValue());
 //    params.setType(0);
 //    params.setMsgid(TEST_GROUP_MSG_ID + "1," + TEST_GROUP_MSG_ID + "2");
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
     params.setFromSeqNo(1L);
     params.setToMsg("aaaaaaaa");
-    params.setTimestamp((new Date()).getTime());
     notificationGroupChatService.handleMqMessage(gson.toJson(params));
   }
 
-
+  @Test
+  public void testEventTypeUpdateGroupCard() throws Exception {
+    params.setSessionMssageType(EventType.UPDATE_GROUP_CARD.getValue());
+    params.setGroupName("测试组");
+    params.setNickName("测试当事人");
+    rocketMqProducer.sendMessage(gson.toJson(params), "service_topic_2", "", "");
+    Thread.sleep(20 * 1000);
+  }
 }

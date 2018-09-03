@@ -18,6 +18,7 @@ public class Message {
   // 群聊参数
   private String groupTemail;
   private String temail;
+  private String name;
   @JsonIgnore
   private Integer role;
 
@@ -34,7 +35,7 @@ public class Message {
   }
 
   public Message(String msgId, Long seqId, String message, String from, String to, Long timestamp, String groupTemail, String temail,
-      Integer role) {
+      String name, Integer role) {
     this.msgId = msgId;
     this.seqId = seqId;
     this.message = message;
@@ -43,6 +44,7 @@ public class Message {
     this.timestamp = timestamp;
     this.groupTemail = groupTemail;
     this.temail = temail;
+    this.name = name;
     this.role = role;
   }
 
@@ -110,6 +112,14 @@ public class Message {
     this.temail = temail;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
   public Integer getRole() {
     return role;
   }
@@ -129,6 +139,7 @@ public class Message {
         ", timestamp=" + timestamp +
         ", groupTemail='" + groupTemail + '\'' +
         ", temail='" + temail + '\'' +
+        ", name='" + name + '\'' +
         ", role=" + role +
         '}';
   }

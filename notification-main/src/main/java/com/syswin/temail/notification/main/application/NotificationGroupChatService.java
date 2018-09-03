@@ -48,8 +48,8 @@ public class NotificationGroupChatService {
   public void handleMqMessage(String body)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentGroupChatParams params = gson.fromJson(body, MailAgentGroupChatParams.class);
-    Event event = new Event(params.getMsgid(), params.getFromSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
-        params.getTimestamp(), params.getGroupTemail(), params.getTemail(), params.getType(), params.getSessionMssageType());
+    Event event = new Event(params.getMsgid(), params.getFromSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp(),
+        params.getGroupTemail(), params.getTemail(), params.getNickName(), params.getType(), params.getSessionMssageType());
 
     // 前端需要的头信息
     String header = params.getHeader();
@@ -147,6 +147,12 @@ public class NotificationGroupChatService {
         insertGroupEvent(event);
         sendGroupMessage(event, header);
         break;
+      case UPDATE_GROUP_CARD:
+        event.notifyToAll();
+        event.setRemark(params.getGroupName());
+        insertGroupEvent(event);
+        sendGroupMessage(event, header);
+        break;
     }
   }
 
@@ -156,9 +162,9 @@ public class NotificationGroupChatService {
   private void insertGroupEvent(Event event) {
     List<String> tos = memberRepository.selectByGroupTemail(event);
     tos.remove(event.getTemail());
+    event.setFrom(event.getGroupTemail());
     tos.forEach(to -> {
       event.setEventSeqId(redisService.getNextSeq(to));
-      event.setFrom(event.getGroupTemail());
       event.setTo(to);
       eventRepository.insert(event);
     });
