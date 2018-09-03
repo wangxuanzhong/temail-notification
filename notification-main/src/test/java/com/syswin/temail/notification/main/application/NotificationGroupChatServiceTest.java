@@ -49,7 +49,7 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMssageType(EventType.UPDATE_GROUP_CARD.getValue());
     params.setGroupName("测试组");
     params.setNickName("测试当事人");
-    rocketMqProducer.sendMessage(gson.toJson(params), "service_topic_2", "", "");
+    rocketMqProducer.sendMessage(gson.toJson(params), "temail-groupmail", "", "");
     Thread.sleep(20 * 1000);
   }
 }

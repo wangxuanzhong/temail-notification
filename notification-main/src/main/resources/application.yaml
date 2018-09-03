@@ -39,6 +39,6 @@ temail:
       host: 192.168.15.37:9876
       topics:
         mailAgent:
-          singleChat: service_topic_1
-          groupChat: service_topic_2
-        notify: service_topic
+          singleChat: temail-usermail
+          groupChat: temail-groupmail
+        notify: temail-notification
