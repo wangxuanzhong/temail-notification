@@ -2,7 +2,7 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
-import com.syswin.temail.notification.main.domains.MailAgentGroupChatParams;
+import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;

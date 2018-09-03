@@ -1,13 +1,13 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.main.domains.CDTPResponse;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.Event.MemberRole;
 import com.syswin.temail.notification.main.domains.EventRepository;
-import com.syswin.temail.notification.main.domains.MailAgentGroupChatParams;
 import com.syswin.temail.notification.main.domains.MemberRepository;
+import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
+import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;

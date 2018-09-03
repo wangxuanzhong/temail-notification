@@ -2,7 +2,7 @@ package com.syswin.temail.notification.main.interfaces.controller;
 
 import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.main.application.NotificationService;
-import com.syswin.temail.notification.main.domains.UnreadResponse;
+import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;

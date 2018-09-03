@@ -1,7 +1,8 @@
-package com.syswin.temail.notification.main.domains;
+package com.syswin.temail.notification.main.domains.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.syswin.temail.notification.main.domains.Message;
 
 @JsonInclude(Include.NON_NULL)
 public class UnreadResponse extends Message {

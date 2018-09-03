@@ -1,4 +1,4 @@
-package com.syswin.temail.notification.main.domains;
+package com.syswin.temail.notification.main.domains.params;
 
 public class MailAgentGroupChatParams extends MailAgentParams {
 

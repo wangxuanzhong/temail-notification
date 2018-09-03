@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
-import com.syswin.temail.notification.main.domains.MailAgentSingleChatParams;
-import com.syswin.temail.notification.main.domains.UnreadResponse;
+import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
+import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
