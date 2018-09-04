@@ -56,8 +56,9 @@ public class NotificationService {
 
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
-      case RETRACT:
       case DESTROY:
+      case RETRACT:
+      case DESTROYED:
         event.setEventSeqId(redisService.getNextSeq(event.getTo()));
         eventRepository.insert(event);
         rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), gson.toJson(event))));
@@ -97,6 +98,7 @@ public class NotificationService {
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case RECEIVE:
         case DESTROY:
+        case DESTROYED:
         case APPLY:
           eventMap.put(event.getMsgId(), event);
           break;
@@ -157,6 +159,7 @@ public class NotificationService {
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case RECEIVE:
         case DESTROY:
+        case DESTROYED:
         case ADD_GROUP:
         case APPLY:
           msgIds.add(event.getMsgId());

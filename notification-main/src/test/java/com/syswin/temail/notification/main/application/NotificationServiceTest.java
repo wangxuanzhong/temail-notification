@@ -9,6 +9,7 @@ import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,24 +22,20 @@ public class NotificationServiceTest {
 
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
+  private final String TOPIC = "temail-usermail";
+  MailAgentSingleChatParams params = new MailAgentSingleChatParams();
   private Gson gson = new Gson();
-
+  @Autowired
+  private RocketMqProducer rocketMqProducer;
   @Autowired
   private NotificationService notificationService;
 
-  @Test
-  public void testHandleMqMessage() throws Exception {
-    MailAgentSingleChatParams params = new MailAgentSingleChatParams();
+  @Before
+  public void setUp() {
     params.setHeader("header");
-    params.setSessionMssageType(EventType.RECEIVE.getValue());
     params.setFrom(TEST_FROM);
     params.setTo(TEST_TO);
-//    params.setMsgid("1,2");
-    params.setMsgid("2");
-    params.setSeqNo(2L);
-    params.setToMsg("aaaaaaaa");
     params.setTimestamp((new Date()).getTime());
-    notificationService.handleMqMessage(gson.toJson(params));
   }
 
   @Test
@@ -53,5 +50,25 @@ public class NotificationServiceTest {
   public void testGetUnread() {
     List<UnreadResponse> result = notificationService.getUnread(TEST_TO, 0L);
     assertThat(result).isNotEmpty();
+  }
+
+  @Test
+  public void testEventTypeReceive() throws Exception {
+    params.setSessionMssageType(EventType.RECEIVE.getValue());
+    params.setMsgid("1");
+    params.setSeqNo(1L);
+    params.setToMsg("aaaaaaaa");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(20 * 1000);
+  }
+
+  @Test
+  public void testEventTypeDestroy() throws Exception {
+    params.setSessionMssageType(EventType.DESTROY.getValue());
+    params.setMsgid("1");
+    params.setSeqNo(1L);
+    params.setToMsg("aaaaaaaa");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(20 * 1000);
   }
 }

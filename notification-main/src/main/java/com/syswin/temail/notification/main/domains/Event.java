@@ -106,8 +106,9 @@ public class Event extends Message {
     RECEIVE(0, "消息发送"),
     PULLED(1, "消息已拉取"),
     RETRACT(2, "消息已撤回"),
-    DESTROY(3, "消息已焚毁"),
+    DESTROYED(3, "消息已焚毁"),
     DELETE(4, "消息已删除"),
+    DESTROY(17, "阅后即焚消息发送"),
 
     // 群管理部分
     APPLY(5, "入群申请"),
