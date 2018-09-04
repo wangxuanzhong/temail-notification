@@ -2,19 +2,18 @@ package com.syswin.temail.notification.main.domains.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.syswin.temail.notification.main.domains.Event;
 
 @JsonInclude(Include.NON_NULL)
 public class CDTPResponse {
 
   private String receiver;
   private String header;
-  private Event data;
+  private String data;
 
   public CDTPResponse() {
   }
 
-  public CDTPResponse(String receiver, String header, Event data) {
+  public CDTPResponse(String receiver, String header, String data) {
     this.receiver = receiver;
     this.header = header;
     this.data = data;
@@ -36,11 +35,11 @@ public class CDTPResponse {
     this.header = header;
   }
 
-  public Event getData() {
+  public String getData() {
     return data;
   }
 
-  public void setData(Event data) {
+  public void setData(String data) {
     this.data = data;
   }
 

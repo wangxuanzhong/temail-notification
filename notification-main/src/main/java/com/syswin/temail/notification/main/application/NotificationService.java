@@ -60,7 +60,7 @@ public class NotificationService {
       case DESTROY:
         event.setEventSeqId(redisService.getNextSeq(event.getTo()));
         eventRepository.insert(event);
-        rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), event)));
+        rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), gson.toJson(event))));
         break;
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
@@ -68,7 +68,7 @@ public class NotificationService {
           if (eventRepository.selectPulledEvent(event) == null) {
             event.setEventSeqId(redisService.getNextSeq(event.getTo()));
             eventRepository.insert(event);
-            rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), event)));
+            rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), gson.toJson(event))));
           } else {
             LOGGER.info("消息{}已拉取，不重复处理", msgId);
           }
@@ -89,11 +89,7 @@ public class NotificationService {
     LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取接收方[" + to + "]的事件。拉取数量为：" + pageSize);
 
     // 如果pageSize为空则不限制查询条数
-    Long end = null;
-    if (pageSize != null) {
-      end = eventSeqId + pageSize;
-    }
-    List<Event> events = eventRepository.selectByTo(to, eventSeqId, end);
+    List<Event> events = eventRepository.selectByTo(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
     Map<String, Event> eventMap = new HashMap<>();
     List<Event> notifyEvents = new ArrayList<>();

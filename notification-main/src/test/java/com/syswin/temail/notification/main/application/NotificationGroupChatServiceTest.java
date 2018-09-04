@@ -3,7 +3,9 @@ package com.syswin.temail.notification.main.application;
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
+import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import java.util.Date;
+import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,5 +53,21 @@ public class NotificationGroupChatServiceTest {
     params.setNickName("测试当事人");
     rocketMqProducer.sendMessage(gson.toJson(params), "temail-groupmail", "", "");
     Thread.sleep(20 * 1000);
+  }
+
+
+  @Test
+  public void test() throws Exception {
+    params.setSessionMssageType(EventType.UPDATE_GROUP_CARD.getValue());
+    params.setGroupName("测试组");
+    params.setNickName("测试当事人");
+    String p = gson.toJson(params);
+    System.out.println(p);
+
+    String c = gson.toJson(new CDTPResponse("", p, null));
+    System.out.println(c);
+
+    System.out.println(gson.fromJson(c, HashMap.class));
+    System.out.println(gson.fromJson(p, HashMap.class));
   }
 }

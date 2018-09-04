@@ -97,7 +97,8 @@ public class Event extends Message {
         ", eventSeqId=" + eventSeqId +
         ", remark='" + remark + '\'' +
         ", eventType=" + eventType +
-        '}';
+        '}' + " " +
+        super.toString();
   }
 
   public enum EventType {
