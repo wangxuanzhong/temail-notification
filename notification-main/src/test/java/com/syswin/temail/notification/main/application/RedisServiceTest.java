@@ -23,4 +23,14 @@ public class RedisServiceTest {
       assertThat(redisService.getNextSeq(key)).isEqualTo(i);
     }
   }
+
+  //  @Test
+  public void testDeleteKey() {
+    redisService.deleteKey("jack@t.email");
+    redisService.deleteKey("sean@t.email");
+    redisService.deleteKey("Jack@t.email");
+    redisService.deleteKey("Sean@t.email");
+    redisService.deleteKey("bob@temail.com");
+    redisService.deleteKey("alice@temail.com");
+  }
 }

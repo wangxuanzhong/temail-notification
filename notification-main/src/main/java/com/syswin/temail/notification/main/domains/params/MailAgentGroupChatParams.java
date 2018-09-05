@@ -7,7 +7,7 @@ public class MailAgentGroupChatParams extends MailAgentParams {
   private String groupTemail;
   private String groupName;
   private String temail;
-  private String nickName;
+  private String name;
   private Integer type;
 
   public Long getFromSeqNo() {
@@ -42,12 +42,12 @@ public class MailAgentGroupChatParams extends MailAgentParams {
     this.temail = temail;
   }
 
-  public String getNickName() {
-    return nickName;
+  public String getName() {
+    return name;
   }
 
-  public void setNickName(String nickName) {
-    this.nickName = nickName;
+  public void setName(String name) {
+    this.name = name;
   }
 
   public Integer getType() {

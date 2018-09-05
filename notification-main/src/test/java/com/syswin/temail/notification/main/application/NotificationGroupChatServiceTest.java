@@ -50,7 +50,7 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeUpdateGroupCard() throws Exception {
     params.setSessionMssageType(EventType.UPDATE_GROUP_CARD.getValue());
     params.setGroupName("测试组");
-    params.setNickName("测试当事人");
+    params.setName("测试当事人");
     rocketMqProducer.sendMessage(gson.toJson(params), "temail-groupmail", "", "");
     Thread.sleep(20 * 1000);
   }
@@ -60,7 +60,7 @@ public class NotificationGroupChatServiceTest {
   public void test() throws Exception {
     params.setSessionMssageType(EventType.UPDATE_GROUP_CARD.getValue());
     params.setGroupName("测试组");
-    params.setNickName("测试当事人");
+    params.setName("测试当事人");
     String p = gson.toJson(params);
     System.out.println(p);
 
