@@ -1,12 +1,26 @@
 CREATE TABLE `event` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `sequence_no` bigint(20) NOT NULL COMMENT '事件序列号',
-  `event_type` tinyint(1) NOT NULL COMMENT '消息类型',
+  `event_seq_id` bigint(20) NOT NULL COMMENT '事件序列号',
+  `event_type` tinyint(2) NOT NULL COMMENT '事件类型',
+  `msg_id` varchar(255) DEFAULT NULL COMMENT '消息ID',
+  `seq_id` bigint(20) DEFAULT NULL COMMENT '消息序列号',
+  `message` mediumtext COMMENT '消息内容',
   `from` varchar(320) NOT NULL COMMENT '发件人',
   `to` varchar(320) NOT NULL COMMENT '收件人',
-  `message_id` bigint(20) NOT NULL COMMENT '消息id',
-  `message_seq_no` bigint(20) NOT NULL COMMENT '消息序列号',
-  `message` varchar(500) DEFAULT NULL COMMENT '消息内容',
-  `client_sent_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '客户端消息发送时间',
+  `group_temail` varchar(320) DEFAULT NULL COMMENT '群聊邮箱',
+  `temail` varchar(320) DEFAULT NULL COMMENT '当事人邮箱',
+  `name` varchar(500) DEFAULT NULL COMMENT '当事人名称',
+  `remark` varchar(500) DEFAULT NULL COMMENT '事件描述',
+  `timestamp` bigint(20) DEFAULT NULL COMMENT '客户端消息发送时间',
+  `create_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `member` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `group_temail` varchar(320) NOT NULL COMMENT '群邮件',
+  `temail` varchar(320) NOT NULL COMMENT '用户邮件',
+  `role` tinyint(1) NOT NULL DEFAULT '0' COMMENT '群角色',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

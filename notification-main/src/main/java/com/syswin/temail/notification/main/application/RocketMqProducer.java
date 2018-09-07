@@ -3,6 +3,7 @@ package com.syswin.temail.notification.main.application;
 import com.syswin.temail.notification.main.exceptions.SendMqMessageException;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
+import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.apache.rocketmq.client.exception.MQBrokerException;
@@ -42,6 +43,7 @@ public class RocketMqProducer {
   public void start() throws MQClientException {
     LOGGER.info("MQ：启动生产者");
     producer.setNamesrvAddr(host);
+    producer.setInstanceName(UUID.randomUUID().toString());
     producer.start();
   }
 

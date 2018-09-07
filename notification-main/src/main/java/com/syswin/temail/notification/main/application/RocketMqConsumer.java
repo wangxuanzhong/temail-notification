@@ -4,6 +4,7 @@ import com.syswin.temail.notification.main.exceptions.SendMqMessageException;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
@@ -89,6 +90,7 @@ public class RocketMqConsumer {
         return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
       }
     });
+    consumer.setInstanceName(UUID.randomUUID().toString());
     // 启动消费端
     consumer.start();
   }

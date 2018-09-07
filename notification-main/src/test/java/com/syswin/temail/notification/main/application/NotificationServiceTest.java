@@ -59,7 +59,13 @@ public class NotificationServiceTest {
     params.setSeqNo(1L);
     params.setToMsg("aaaaaaaa");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(20 * 1000);
+  }
+
+  @Test
+  public void testEventTypePulled() throws Exception {
+    params.setSessionMssageType(EventType.PULLED.getValue());
+    params.setMsgid("1");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
 
   @Test
@@ -69,6 +75,5 @@ public class NotificationServiceTest {
     params.setSeqNo(1L);
     params.setToMsg("aaaaaaaa");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(20 * 1000);
   }
 }
