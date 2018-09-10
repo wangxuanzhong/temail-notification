@@ -177,7 +177,9 @@ public class NotificationGroupChatService {
   private void sendSingleMessage(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("向[{}]发送通知，通知类型为：{}", event.getTo(), Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
-    rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), header, gson.toJson(event))));
+    if (event.getTo() != null && !event.getTo().equals("")) {
+      rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), header, gson.toJson(event))));
+    }
   }
 
   /**

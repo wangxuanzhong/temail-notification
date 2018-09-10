@@ -69,11 +69,23 @@ public class NotificationServiceTest {
   }
 
   @Test
+  public void testEventTypeRetract() throws Exception {
+    params.setSessionMssageType(EventType.RETRACT.getValue());
+    params.setMsgid("1");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+  }
+
+  @Test
+  public void testEventTypeDestroyed() throws Exception {
+    params.setSessionMssageType(EventType.DESTROYED.getValue());
+    params.setMsgid("1");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+  }
+
+  @Test
   public void testEventTypeDestroy() throws Exception {
     params.setSessionMssageType(EventType.DESTROY.getValue());
     params.setMsgid("1");
-    params.setSeqNo(1L);
-    params.setToMsg("aaaaaaaa");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
 }

@@ -26,7 +26,7 @@
   <delete id="deleteGroupMember" parameterType="com.syswin.temail.notification.main.domains.Event">
     DELETE FROM `member`
     WHERE`group_temail` = #{groupTemail}
-    <if test="temail != null and temail != '' ">AND `temail` = #{temail}</if>
+    <if test="temail != null">AND `temail` = #{temail}</if>
     AND id > 0
   </delete>
 </mapper>

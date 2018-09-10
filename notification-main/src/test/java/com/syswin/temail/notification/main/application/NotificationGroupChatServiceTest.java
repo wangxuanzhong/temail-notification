@@ -16,8 +16,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class NotificationGroupChatServiceTest {
 
   private final String TEST_GROUP = "g";
-  private final String TEST_TETMAIL = "a";
+  private final String TEST_TETMAIL = "f";
   private final String TEST_GROUP_MSG_ID = "g-";
+  private final String TOPIC = "temail-groupmail";
   MailAgentGroupChatParams params = new MailAgentGroupChatParams();
   @Autowired
   private NotificationGroupChatService notificationGroupChatService;
@@ -39,14 +40,35 @@ public class NotificationGroupChatServiceTest {
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
     params.setFromSeqNo(1L);
     params.setToMsg("aaaaaaaa");
-    rocketMqProducer.sendMessage(gson.toJson(params), "temail-groupmail", "", "");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
 
   @Test
   public void testEventTypePulled() throws Exception {
     params.setSessionMssageType(EventType.PULLED.getValue());
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
-    rocketMqProducer.sendMessage(gson.toJson(params), "temail-groupmail", "", "");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+  }
+
+  @Test
+  public void testEventTypeRetract() throws Exception {
+    params.setSessionMssageType(EventType.RETRACT.getValue());
+    params.setMsgid("1");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+  }
+
+  @Test
+  public void testEventTypeAddGroup() throws Exception {
+    params.setSessionMssageType(EventType.ADD_GROUP.getValue());
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+  }
+
+  @Test
+  public void testEventTypeDeleteMember() throws Exception {
+    params.setTemail("");
+    params.setSessionMssageType(EventType.DELETE_MEMBER.getValue());
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(20000);
   }
 
   @Test
@@ -54,6 +76,6 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMssageType(EventType.UPDATE_GROUP_CARD.getValue());
     params.setGroupName("测试组");
     params.setName("测试当事人");
-    rocketMqProducer.sendMessage(gson.toJson(params), "temail-groupmail", "", "");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
 }
