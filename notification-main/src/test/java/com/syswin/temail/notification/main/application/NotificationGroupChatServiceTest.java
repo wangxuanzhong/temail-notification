@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class NotificationGroupChatServiceTest {
 
   private final String TEST_GROUP = "g";
-  private final String TEST_TETMAIL = "f";
+  private final String TEST_TETMAIL = "a";
   private final String TEST_GROUP_MSG_ID = "g-";
   private final String TOPIC = "temail-groupmail";
   MailAgentGroupChatParams params = new MailAgentGroupChatParams();
@@ -41,6 +41,7 @@ public class NotificationGroupChatServiceTest {
     params.setFromSeqNo(1L);
     params.setToMsg("aaaaaaaa");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(10000);
   }
 
   @Test
@@ -65,10 +66,10 @@ public class NotificationGroupChatServiceTest {
 
   @Test
   public void testEventTypeDeleteMember() throws Exception {
-    params.setTemail("");
+    params.setTemail("d,e,f");
     params.setSessionMssageType(EventType.DELETE_MEMBER.getValue());
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(20000);
+    Thread.sleep(10000);
   }
 
   @Test
