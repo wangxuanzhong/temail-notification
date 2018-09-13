@@ -4,21 +4,11 @@ public class MailAgentGroupChatParams extends MailAgentParams {
 
   public static final String TEMAIL_SPLIT = ",";
 
-  // seqId
-  private Long fromSeqNo;
   private String groupTemail;
   private String groupName;
   private String temail;
   private String name;
   private Integer type;
-
-  public Long getFromSeqNo() {
-    return fromSeqNo;
-  }
-
-  public void setFromSeqNo(Long fromSeqNo) {
-    this.fromSeqNo = fromSeqNo;
-  }
 
   public String getGroupTemail() {
     return groupTemail;

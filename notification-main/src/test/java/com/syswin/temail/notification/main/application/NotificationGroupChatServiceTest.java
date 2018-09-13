@@ -38,7 +38,7 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeReceive() throws Exception {
     params.setSessionMssageType(EventType.RECEIVE.getValue());
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
-    params.setFromSeqNo(1L);
+    params.setSeqNo(1L);
     params.setToMsg("aaaaaaaa");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(10000);

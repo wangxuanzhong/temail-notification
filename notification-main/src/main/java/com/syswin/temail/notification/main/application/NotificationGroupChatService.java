@@ -48,7 +48,7 @@ public class NotificationGroupChatService {
   public void handleMqMessage(String body)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentGroupChatParams params = gson.fromJson(body, MailAgentGroupChatParams.class);
-    Event event = new Event(params.getMsgid(), params.getFromSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp(),
+    Event event = new Event(params.getMsgid(), params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp(),
         params.getGroupTemail(), params.getTemail(), params.getName(), params.getType(), params.getSessionMssageType());
 
     // 前端需要的头信息
