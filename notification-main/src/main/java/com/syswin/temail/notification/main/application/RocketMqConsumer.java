@@ -42,9 +42,9 @@ public class RocketMqConsumer {
 
   public RocketMqConsumer(NotificationService notificationService,
       NotificationGroupChatService notificationGroupChatService,
-      @Value("${temail.notification.rocketmq.host}") String host,
-      @Value("${temail.notification.rocketmq.topics.mailAgent.singleChat}") String singleChatTopic,
-      @Value("${temail.notification.rocketmq.topics.mailAgent.groupChat}") String groupChatTopic) {
+      @Value("${app.temail.notification.rocketmq.host}") String host,
+      @Value("${app.temail.notification.rocketmq.topics.mailAgent.singleChat}") String singleChatTopic,
+      @Value("${app.temail.notification.rocketmq.topics.mailAgent.groupChat}") String groupChatTopic) {
     this.notificationService = notificationService;
     this.notificationGroupChatService = notificationGroupChatService;
     this.host = host;
