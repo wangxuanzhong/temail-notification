@@ -143,6 +143,7 @@
         <excludes>
           <exclude>test/**</exclude>
           <exclude>product/**</exclude>
+          <exclude>sit/**</exclude>
           <exclude>*.yaml</exclude>
           <exclude>*.properties</exclude>
         </excludes>
@@ -173,6 +174,12 @@
       <id>prod</id>
       <properties>
         <environment>product</environment>
+      </properties>
+    </profile>
+    <profile>
+      <id>sit</id>
+      <properties>
+        <environment>sit</environment>
       </properties>
     </profile>
   </profiles>
