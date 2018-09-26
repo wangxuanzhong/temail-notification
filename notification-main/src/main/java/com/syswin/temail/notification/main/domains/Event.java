@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class Event extends Message {
 
+  public static final String GROUP_CHAT_KEY_POSTFIX = "::event_group_chat";
+
   @JsonIgnore
   private Long id;
   private Long eventSeqId;
@@ -103,6 +105,7 @@ public class Event extends Message {
 
   public enum EventType {
     // 消息部分
+    RESET(-1, "重置消息未读数"),
     RECEIVE(0, "消息发送"),
     PULLED(1, "消息已拉取"),
     RETRACT(2, "消息已撤回"),

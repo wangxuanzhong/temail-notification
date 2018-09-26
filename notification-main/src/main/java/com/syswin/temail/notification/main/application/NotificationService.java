@@ -144,19 +144,26 @@ public class NotificationService {
    * 获取消息未读数
    *
    * @param to 发起人
-   * @param eventSeqId 上次拉取结尾序号
    */
-  public List<UnreadResponse> getUnread(String to, Long eventSeqId) {
-    LOGGER.info("从序列号[" + eventSeqId + "]之后获取接收方[" + to + "]的未读消息数量。");
-    List<Event> events = eventRepository.selectByTo(to, eventSeqId, null);
+  public List<UnreadResponse> getUnread(String to) {
+    LOGGER.info("获取接收方[" + to + "]的未读消息数量。");
+    List<Event> events = eventRepository.selectByTo(to, null, null);
 
     Map<String, List<String>> unreadMap = new HashMap<>();
     events.forEach(event -> {
-      if (!unreadMap.containsKey(event.getFrom())) {
-        unreadMap.put(event.getFrom(), new ArrayList<>());
+      String key = event.getFrom();
+      if (event.getGroupTemail() != null && !event.getGroupTemail().equals("")) {
+        key += Event.GROUP_CHAT_KEY_POSTFIX;
       }
-      List<String> msgIds = unreadMap.get(event.getFrom());
+
+      if (!unreadMap.containsKey(key)) {
+        unreadMap.put(key, new ArrayList<>());
+      }
+      List<String> msgIds = unreadMap.get(key);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+        case RESET:
+          msgIds.clear();
+          break;
         case RECEIVE:
         case DESTROY:
         case DESTROYED:
@@ -189,13 +196,29 @@ public class NotificationService {
 
     // 统计各个会话的未读数量
     List<UnreadResponse> unreadResponses = new ArrayList<>();
-    unreadMap.forEach((from, msgIds) -> {
+    unreadMap.forEach((key, msgIds) -> {
       if (!msgIds.isEmpty()) {
-        unreadResponses.add(new UnreadResponse(from, to, msgIds.size()));
+        UnreadResponse unreadResponse = new UnreadResponse(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds.size());
+        if (key.endsWith(Event.GROUP_CHAT_KEY_POSTFIX)) {
+          unreadResponse.setGroupTemail(unreadResponse.getFrom());
+        }
+        unreadResponses.add(unreadResponse);
       }
     });
 
     LOGGER.info("获取未读消息结果为：" + unreadResponses);
     return unreadResponses;
+  }
+
+  /**
+   * 重置消息未读数
+   */
+  public void reset(Event event) {
+    if (event.getGroupTemail() != null && !event.getGroupTemail().equals("")) {
+      event.setFrom(event.getGroupTemail());
+    }
+    event.setEventType(EventType.RESET.getValue());
+    event.setEventSeqId(redisService.getNextSeq(event.getTo()));
+    eventRepository.insert(event);
   }
 }

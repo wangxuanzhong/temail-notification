@@ -25,14 +25,15 @@
     INSERT INTO `event`
     (`event_seq_id`, `event_type`, `msg_id`, `seq_id`, `message`, `from`, `to`, `group_temail`, `temail`, `name`, `remark`, `timestamp`)
     VALUES
-      (#{eventSeqId}, #{eventType}, #{msgId}, #{seqId}, #{message}, #{from}, #{to}, #{groupTemail}, #{temail}, #{name}, #{remark}, #{timestamp})
+    (#{eventSeqId}, #{eventType}, #{msgId}, #{seqId}, #{message}, #{from}, #{to}, #{groupTemail}, #{temail}, #{name}, #{remark}, #{timestamp})
   </insert>
 
   <select id="selectByTo" resultMap="EventMap">
     SELECT
     <include refid="baseField"/>
     FROM `event`
-    WHERE `to` = #{to} AND event_seq_id > #{begin}
+    WHERE `to` = #{to}
+    <if test="begin != null">AND event_seq_id > #{begin}</if>
     <if test="end != null">AND event_seq_id <![CDATA[<=]]> #{end}</if>
     ORDER BY `event_seq_id`
   </select>

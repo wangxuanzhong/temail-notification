@@ -1,14 +1,9 @@
 package com.syswin.temail.notification.main.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
-import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,8 +22,6 @@ public class NotificationServiceTest {
   private Gson gson = new Gson();
   @Autowired
   private RocketMqProducer rocketMqProducer;
-  @Autowired
-  private NotificationService notificationService;
 
   @Before
   public void setUp() {
@@ -36,20 +29,6 @@ public class NotificationServiceTest {
     params.setFrom(TEST_FROM);
     params.setTo(TEST_TO);
     params.setTimestamp((new Date()).getTime());
-  }
-
-  @Test
-  public void testGetEvents() {
-    long sequenceNo = 1L;
-    Map<String, Object> events = notificationService.getEvents(TEST_TO, 0L, null);
-    System.out.println(gson.toJson(events));
-    assertThat(events).isNotEmpty();
-  }
-
-  @Test
-  public void testGetUnread() {
-    List<UnreadResponse> result = notificationService.getUnread(TEST_TO, 0L);
-    assertThat(result).isNotEmpty();
   }
 
   @Test

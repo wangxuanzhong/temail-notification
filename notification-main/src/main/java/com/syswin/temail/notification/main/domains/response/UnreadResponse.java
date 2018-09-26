@@ -29,6 +29,7 @@ public class UnreadResponse extends Message {
         "unread=" + unread +
         ", from=" + this.getFrom() +
         ", to=" + this.getTo() +
+        ", groupTemail=" + this.getGroupTemail() +
         '}';
   }
 }
