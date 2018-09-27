@@ -214,6 +214,7 @@ public class NotificationService {
    * 重置消息未读数
    */
   public void reset(Event event) {
+    LOGGER.info("重置[{}]的消息未读数，from: {}, groupTemail: {}", event.getTo(), event.getFrom(), event.getGroupTemail());
     if (event.getGroupTemail() != null && !event.getGroupTemail().equals("")) {
       event.setFrom(event.getGroupTemail());
     }
