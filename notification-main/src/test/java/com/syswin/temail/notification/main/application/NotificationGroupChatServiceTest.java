@@ -3,7 +3,6 @@ package com.syswin.temail.notification.main.application;
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
-import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +30,7 @@ public class NotificationGroupChatServiceTest {
     params.setHeader("header");
     params.setGroupTemail(TEST_GROUP);
     params.setTemail(TEST_TETMAIL);
-    params.setTimestamp((new Date()).getTime());
+//    params.setTimestamp(System.currentTimeMillis());
   }
 
   @Test

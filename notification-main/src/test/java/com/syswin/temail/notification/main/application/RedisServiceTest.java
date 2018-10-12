@@ -20,7 +20,9 @@ public class RedisServiceTest {
     String key = "test_user";
     redisService.deleteKey(key);
     for (long i = 1; i <= 5; i++) {
-      assertThat(redisService.getNextSeq(key)).isEqualTo(i);
+      long seq = redisService.getNextSeq(key);
+      System.out.println(seq);
+      assertThat(seq).isEqualTo(i);
     }
   }
 

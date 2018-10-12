@@ -220,6 +220,7 @@ public class NotificationService {
     }
     event.setEventType(EventType.RESET.getValue());
     event.setEventSeqId(redisService.getNextSeq(event.getTo()));
+    event.setTimestamp(System.currentTimeMillis());
     eventRepository.insert(event);
   }
 }
