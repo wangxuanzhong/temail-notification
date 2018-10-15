@@ -71,7 +71,7 @@ public class NotificationService {
             eventRepository.insert(event);
             rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), gson.toJson(event))));
           } else {
-            LOGGER.info("消息{}已拉取，不重复处理", msgId);
+            LOGGER.info("消息{}已拉取，不重复处理，时间戳为：{}", msgId, event.getTimestamp());
           }
         }
         break;

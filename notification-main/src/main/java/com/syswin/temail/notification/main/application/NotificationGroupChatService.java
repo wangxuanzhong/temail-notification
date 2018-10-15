@@ -72,7 +72,7 @@ public class NotificationGroupChatService {
             eventRepository.insert(event);
             sendSingleMessage(event, header);
           } else {
-            LOGGER.info("消息{}已拉取，不重复处理", msgId);
+            LOGGER.info("消息{}已拉取，不重复处理，时间戳为：{}", msgId, event.getTimestamp());
           }
         }
         break;
@@ -87,7 +87,13 @@ public class NotificationGroupChatService {
         memberRepository.deleteGroupMember(event);
         break;
       case ADD_MEMBER:
-        memberRepository.insert(event);
+        // 校验群成员是否已存在，不存在时添加到数据库
+        List<String> members = memberRepository.selectByGroupTemail(event);
+        if (!members.contains(event.getTemail())) {
+          memberRepository.insert(event);
+        } else {
+          LOGGER.info("{}已经是群{}的成员，不重复添加，时间戳为：{}", event.getTemail(), event.getGroupTemail(), event.getTimestamp());
+        }
         event.notifyToAll();
         sendGroupMessage(event, header);
         break;

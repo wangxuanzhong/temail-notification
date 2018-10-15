@@ -15,7 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class NotificationGroupChatServiceTest {
 
   private final String TEST_GROUP = "g";
-  private final String TEST_TETMAIL = "a";
   private final String TEST_GROUP_MSG_ID = "g-";
   private final String TOPIC = "temail-groupmail";
   MailAgentGroupChatParams params = new MailAgentGroupChatParams();
@@ -29,7 +28,6 @@ public class NotificationGroupChatServiceTest {
   public void setUp() {
     params.setHeader("header");
     params.setGroupTemail(TEST_GROUP);
-    params.setTemail(TEST_TETMAIL);
 //    params.setTimestamp(System.currentTimeMillis());
   }
 
@@ -37,16 +35,18 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeReceive() throws Exception {
     params.setSessionMssageType(EventType.RECEIVE.getValue());
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
+    params.setTemail("a");
     params.setSeqNo(1L);
     params.setToMsg("aaaaaaaa");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(10000);
+    Thread.sleep(2000);
   }
 
   @Test
   public void testEventTypePulled() throws Exception {
     params.setSessionMssageType(EventType.PULLED.getValue());
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
+    params.setTemail("b");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
 
@@ -54,12 +54,28 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeRetract() throws Exception {
     params.setSessionMssageType(EventType.RETRACT.getValue());
     params.setMsgid("1");
+    params.setTemail("a");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+  }
+
+  @Test
+  public void testEventTypeAddMember() throws Exception {
+    params.setSessionMssageType(EventType.ADD_MEMBER.getValue());
+    params.setTemail("d");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+    params.setTemail("e");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+    params.setTemail("f");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
   }
 
   @Test
   public void testEventTypeAddGroup() throws Exception {
     params.setSessionMssageType(EventType.ADD_GROUP.getValue());
+    params.setTemail("a");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
 
