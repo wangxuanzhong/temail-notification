@@ -30,8 +30,8 @@ public class RocketMqProducer {
   private String host;
   private String topic;
 
-  public RocketMqProducer(@Value("${app.temail.notification.rocketmq.host}") String host,
-      @Value("${app.temail.notification.rocketmq.topics.notify}") String topic) {
+  public RocketMqProducer(@Value("${spring.rocketmq.host}") String host,
+      @Value("${spring.rocketmq.topics.notify}") String topic) {
     this.host = host;
     this.topic = topic;
   }
