@@ -27,7 +27,7 @@ public class EventRepositoryImpl implements EventRepository {
   }
 
   @Override
-  public Event selectPulledEvent(Event event) {
+  public List<Event> selectPulledEvent(Event event) {
     return eventMapper.selectPulledEvent(event);
   }
 }

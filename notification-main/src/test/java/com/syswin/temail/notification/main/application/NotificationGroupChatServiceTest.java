@@ -48,6 +48,7 @@ public class NotificationGroupChatServiceTest {
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
     params.setTemail("b");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
   }
 
   @Test

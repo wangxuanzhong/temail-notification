@@ -45,6 +45,7 @@ public class NotificationServiceTest {
     params.setSessionMssageType(EventType.PULLED.getValue());
     params.setMsgid("1");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
   }
 
   @Test

@@ -67,7 +67,7 @@ public class NotificationGroupChatService {
           event.setFrom(event.getGroupTemail());
           event.setTo(event.getTemail());
           event.setMsgId(msgId);
-          if (eventRepository.selectPulledEvent(event) == null) {
+          if (eventRepository.selectPulledEvent(event).size() == 0) {
             event.setEventSeqId(redisService.getNextSeq(event.getTo()));
             eventRepository.insert(event);
             sendSingleMessage(event, header);

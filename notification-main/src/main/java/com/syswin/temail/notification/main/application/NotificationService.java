@@ -66,7 +66,7 @@ public class NotificationService {
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
-          if (eventRepository.selectPulledEvent(event) == null) {
+          if (eventRepository.selectPulledEvent(event).size() == 0) {
             event.setEventSeqId(redisService.getNextSeq(event.getTo()));
             eventRepository.insert(event);
             rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), gson.toJson(event))));
