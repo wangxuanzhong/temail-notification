@@ -37,6 +37,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -67,6 +73,11 @@
       <artifactId>rocketmq-client</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-log4j2</artifactId>
+    </dependency>
+
     <!-- test dependencies -->
     <dependency>
       <groupId>org.assertj</groupId>
@@ -85,6 +96,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
@@ -144,48 +161,47 @@
     </plugins>
     <resources>
       <resource>
-        <directory>src/main/resources</directory>
-        <excludes>
-          <exclude>test/**</exclude>
-          <exclude>product/**</exclude>
-          <exclude>sit/**</exclude>
-          <exclude>*.yaml</exclude>
-          <exclude>*.properties</exclude>
-        </excludes>
+        <directory>${basedir}/src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>**/*.properties</include>
+          <include>**/*.yml</include>
+          <include>**/*.yaml</include>
+          <include>**/*.xml</include>
+        </includes>
       </resource>
       <resource>
-        <directory>src/main/resources/${environment}</directory>
+        <directory>${basedir}/src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>**/*.properties</exclude>
+          <exclude>**/*.yml</exclude>
+          <exclude>**/*.yaml</exclude>
+          <exclude>**/*.xml</exclude>
+        </excludes>
       </resource>
     </resources>
+    <testResources>
+      <testResource>
+        <directory>${basedir}/src/test/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>**/*.properties</include>
+          <include>**/*.yml</include>
+          <include>**/*.yaml</include>
+          <include>**/*.xml</include>
+        </includes>
+      </testResource>
+      <testResource>
+        <directory>${basedir}/src/test/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>**/*.properties</exclude>
+          <exclude>**/*.yml</exclude>
+          <exclude>**/*.yaml</exclude>
+          <exclude>**/*.xml</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
   </build>
-
-  <profiles>
-    <profile>
-      <id>dev</id>
-      <properties>
-        <environment></environment>
-      </properties>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-    </profile>
-    <profile>
-      <id>test</id>
-      <properties>
-        <environment>test</environment>
-      </properties>
-    </profile>
-    <profile>
-      <id>prod</id>
-      <properties>
-        <environment>product</environment>
-      </properties>
-    </profile>
-    <profile>
-      <id>sit</id>
-      <properties>
-        <environment>sit</environment>
-      </properties>
-    </profile>
-  </profiles>
 </project>
