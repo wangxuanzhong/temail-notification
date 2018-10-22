@@ -18,7 +18,7 @@
   </resultMap>
 
   <sql id="baseField">
-    `event_seq_id`, `event_type`, `msg_id`, `from`, `to`, `group_temail`, `temail`, `name`, `remark`, `timestamp`
+    `id`, `event_seq_id`, `event_type`, `msg_id`, `from`, `to`, `group_temail`, `temail`, `name`, `remark`, `timestamp`
   </sql>
 
   <insert id="insert" parameterType="com.syswin.temail.notification.main.domains.Event">
