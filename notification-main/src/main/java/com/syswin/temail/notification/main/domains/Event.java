@@ -3,6 +3,7 @@ package com.syswin.temail.notification.main.domains;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.syswin.temail.notification.foundation.application.JsonService;
 
 @JsonInclude(Include.NON_NULL)
 public class Event extends Message {
@@ -12,8 +13,18 @@ public class Event extends Message {
   @JsonIgnore
   private Long id;
   private Long eventSeqId;
-  private String remark;
   private Integer eventType;
+
+  // 当事人名称
+  private String name;
+  // 触发人名称
+  private String adminName;
+  // 群名称
+  private String groupName;
+
+  // 扩展参数
+  @JsonIgnore
+  private String extendParam;
 
   public Event() {
   }
@@ -23,10 +34,14 @@ public class Event extends Message {
     this.eventType = eventType;
   }
 
+
   public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, String groupTemail, String temail,
-      String name, Integer role, Integer eventType) {
-    super(msgId, seqId, message, from, to, timestamp, groupTemail, temail, name, role);
+      Integer role, Integer eventType, String name, String adminName, String groupName) {
+    super(msgId, seqId, message, from, to, timestamp, groupTemail, temail, role);
     this.eventType = eventType;
+    this.name = name;
+    this.adminName = adminName;
+    this.groupName = groupName;
   }
 
   /**
@@ -60,6 +75,25 @@ public class Event extends Message {
     this.setMsgId(null);
   }
 
+  /**
+   * 自动解析扩展字段
+   */
+  public void autoReadExtendParam(JsonService jsonService) {
+    if (this.extendParam != null && !this.extendParam.isEmpty()) {
+      ExtendParam extendParam = jsonService.fromJson(this.extendParam, ExtendParam.class);
+      this.name = extendParam.getName();
+      this.adminName = extendParam.getAdminName();
+      this.groupName = extendParam.getGroupName();
+    }
+  }
+
+  /**
+   * 自动配置扩展字段
+   */
+  public void autoWriteExtendParam(JsonService jsonService) {
+    this.extendParam = jsonService.toJson(new ExtendParam(this.name, this.adminName, this.getGroupName()));
+  }
+
   public Long getId() {
     return id;
   }
@@ -76,14 +110,6 @@ public class Event extends Message {
     this.eventSeqId = eventSeqId;
   }
 
-  public String getRemark() {
-    return remark;
-  }
-
-  public void setRemark(String remark) {
-    this.remark = remark;
-  }
-
   public Integer getEventType() {
     return eventType;
   }
@@ -92,13 +118,47 @@ public class Event extends Message {
     this.eventType = eventType;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getAdminName() {
+    return adminName;
+  }
+
+  public void setAdminName(String adminName) {
+    this.adminName = adminName;
+  }
+
+  public String getGroupName() {
+    return groupName;
+  }
+
+  public void setGroupName(String groupName) {
+    this.groupName = groupName;
+  }
+
+  public String getExtendParam() {
+    return extendParam;
+  }
+
+  public void setExtendParam(String extendParam) {
+    this.extendParam = extendParam;
+  }
+
   @Override
   public String toString() {
     return "Event{" +
         "id=" + id +
         ", eventSeqId=" + eventSeqId +
-        ", remark='" + remark + '\'' +
         ", eventType=" + eventType +
+        ", name='" + name + '\'' +
+        ", adminName='" + adminName + '\'' +
+        ", groupName='" + groupName + '\'' +
         '}' + " " +
         super.toString();
   }
@@ -167,6 +227,49 @@ public class Event extends Message {
 
     public int getValue() {
       return value;
+    }
+  }
+
+  /**
+   * 事件扩展参数
+   */
+  class ExtendParam {
+
+    // 当事人名称
+    private String name;
+    // 触发人名称
+    private String adminName;
+    // 群名称
+    private String groupName;
+
+    public ExtendParam(String name, String adminName, String groupName) {
+      this.name = name;
+      this.adminName = adminName;
+      this.groupName = groupName;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public String getAdminName() {
+      return adminName;
+    }
+
+    public void setAdminName(String adminName) {
+      this.adminName = adminName;
+    }
+
+    public String getGroupName() {
+      return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+      this.groupName = groupName;
     }
   }
 }

@@ -10,11 +10,11 @@ CREATE TABLE `event` (
   `group_temail` varchar(320) DEFAULT NULL COMMENT '群聊邮箱',
   `temail` varchar(320) DEFAULT NULL COMMENT '当事人邮箱',
   `name` varchar(500) DEFAULT NULL COMMENT '当事人名称',
-  `remark` varchar(500) DEFAULT NULL COMMENT '事件描述',
+  `extend_param` mediumtext COMMENT '扩展字段',
   `timestamp` bigint(20) DEFAULT NULL COMMENT '客户端消息发送时间',
   `create_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `member` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',

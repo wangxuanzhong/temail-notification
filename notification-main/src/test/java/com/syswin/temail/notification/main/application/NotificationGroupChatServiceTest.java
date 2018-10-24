@@ -2,6 +2,7 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
+import com.syswin.temail.notification.main.domains.Event.MemberRole;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +29,9 @@ public class NotificationGroupChatServiceTest {
   public void setUp() {
     params.setHeader("header");
     params.setGroupTemail(TEST_GROUP);
+    params.setGroupName("测试组名");
+    params.setName("测试当事人名");
+    params.setAdminName("测试触发人名");
 //    params.setTimestamp(System.currentTimeMillis());
   }
 
@@ -37,7 +41,7 @@ public class NotificationGroupChatServiceTest {
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
     params.setTemail("a");
     params.setSeqNo(1L);
-    params.setToMsg("aaaaaaaa");
+    params.setToMsg("这是一条群聊测试消息！");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -62,6 +66,7 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeAddMember() throws Exception {
     params.setSessionMssageType(EventType.ADD_MEMBER.getValue());
+    params.setType(MemberRole.NORMAL.getValue());
     params.setTemail("d");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);

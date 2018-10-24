@@ -1,6 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
-import com.google.gson.Gson;
+import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.EventRepository;
@@ -32,15 +32,15 @@ public class NotificationService {
   private final RocketMqProducer rocketMqProducer;
   private final RedisService redisService;
   private final EventRepository eventRepository;
-  private final Gson gson;
+  private final JsonService jsonService;
 
   @Autowired
   public NotificationService(RocketMqProducer rocketMqProducer, RedisService redisService,
-      EventRepository eventRepository) {
+      EventRepository eventRepository, JsonService jsonService) {
     this.rocketMqProducer = rocketMqProducer;
     this.redisService = redisService;
     this.eventRepository = eventRepository;
-    gson = new Gson();
+    this.jsonService = jsonService;
   }
 
   /**
@@ -48,7 +48,7 @@ public class NotificationService {
    */
   public void handleMqMessage(String body)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    MailAgentSingleChatParams params = gson.fromJson(body, MailAgentSingleChatParams.class);
+    MailAgentSingleChatParams params = jsonService.fromJson(body, MailAgentSingleChatParams.class);
     Event event = new Event(params.getMsgid(), params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
         params.getTimestamp(), params.getSessionMssageType());
 
@@ -61,7 +61,7 @@ public class NotificationService {
       case DESTROYED:
         event.setEventSeqId(redisService.getNextSeq(event.getTo()));
         eventRepository.insert(event);
-        rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), gson.toJson(event))));
+        rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), params.getHeader(), jsonService.toJson(event))));
         break;
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
@@ -69,7 +69,7 @@ public class NotificationService {
           if (eventRepository.selectPulledEvent(event).size() == 0) {
             event.setEventSeqId(redisService.getNextSeq(event.getTo()));
             eventRepository.insert(event);
-            rocketMqProducer.sendMessage(gson.toJson(new CDTPResponse(event.getTo(), params.getHeader(), gson.toJson(event))));
+            rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), params.getHeader(), jsonService.toJson(event))));
           } else {
             LOGGER.info("消息{}已拉取，不重复处理，时间戳为：{}", msgId, event.getTimestamp());
           }
@@ -95,6 +95,7 @@ public class NotificationService {
     Map<String, Event> eventMap = new HashMap<>();
     List<Event> notifyEvents = new ArrayList<>();
     events.forEach(event -> {
+      event.autoReadExtendParam(jsonService);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case RECEIVE:
         case DESTROY:
@@ -151,6 +152,7 @@ public class NotificationService {
 
     Map<String, List<String>> unreadMap = new HashMap<>();
     events.forEach(event -> {
+      // 为了区分单聊和群聊，给群聊添加后缀
       String key = event.getFrom();
       if (event.getGroupTemail() != null && !event.getGroupTemail().equals("")) {
         key += Event.GROUP_CHAT_KEY_POSTFIX;

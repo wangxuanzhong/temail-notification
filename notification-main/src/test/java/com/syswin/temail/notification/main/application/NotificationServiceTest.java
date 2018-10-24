@@ -36,7 +36,7 @@ public class NotificationServiceTest {
     params.setSessionMssageType(EventType.RECEIVE.getValue());
     params.setMsgid("1");
     params.setSeqNo(1L);
-    params.setToMsg("aaaaaaaa");
+    params.setToMsg("这是一条测试消息！");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
 

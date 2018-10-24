@@ -47,7 +47,7 @@ public class H2Test {
 
     // 群聊消息
     event = new Event("get_unread_1", 1L, "get_unread_aaaa", "get_unread_group_temail", "get_unread_to", System.currentTimeMillis(),
-        "get_unread_group_temail", null, null, null, 0);
+        "get_unread_group_temail", null, null, 0, null, null, null);
     event.setEventSeqId(2L);
     eventRepository.insert(event);
     result = notificationService.getUnread("get_unread_to");
@@ -67,7 +67,8 @@ public class H2Test {
     assertThat(result.get(0).getUnread()).isEqualTo(1);
 
     // 群聊消息
-    event = new Event("reset_1", 1L, "aaaa", "reset_group_temail", "reset_to", System.currentTimeMillis(), "reset_group_temail", null, null, null, 0);
+    event = new Event("reset_1", 1L, "aaaa", "reset_group_temail", "reset_to", System.currentTimeMillis(), "reset_group_temail", null, null, 0, null,
+        null, null);
     event.setEventSeqId(2L);
     eventRepository.insert(event);
     result = notificationService.getUnread("reset_to");

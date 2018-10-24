@@ -8,6 +8,7 @@ public class MailAgentGroupChatParams extends MailAgentParams {
   private String groupName;
   private String temail;
   private String name;
+  private String adminName;
   private Integer type;
 
   public String getGroupTemail() {
@@ -40,6 +41,14 @@ public class MailAgentGroupChatParams extends MailAgentParams {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getAdminName() {
+    return adminName;
+  }
+
+  public void setAdminName(String adminName) {
+    this.adminName = adminName;
   }
 
   public Integer getType() {
