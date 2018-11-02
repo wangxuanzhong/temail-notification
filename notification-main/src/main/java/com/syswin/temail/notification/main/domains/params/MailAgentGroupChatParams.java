@@ -2,8 +2,6 @@ package com.syswin.temail.notification.main.domains.params;
 
 public class MailAgentGroupChatParams extends MailAgentParams {
 
-  public static final String TEMAIL_SPLIT = ",";
-
   private String groupTemail;
   private String groupName;
   private String temail;

@@ -99,22 +99,29 @@ public class NotificationGroupChatService {
         sendGroupMessage(event, header);
         break;
       case DELETE_MEMBER:
-        String[] temails = event.getTemail().split(MailAgentGroupChatParams.TEMAIL_SPLIT);
+        List<String> temails = jsonService.fromJson(event.getTemail(), List.class);
+        List<String> names = jsonService.fromJson(event.getName(), List.class);
+
+        if (temails.size() != names.size()) {
+          LOGGER.error("移除群成员temail和name不对应：temails:{}, names:{}", temails, names);
+        }
 
         // 删除当事人
-        for (String temail : temails) {
-          event.setTemail(temail);
+        for (int i = 0; i < temails.size(); i++) {
+          event.setTemail(temails.get(i));
           memberRepository.deleteGroupMember(event);
         }
 
-        for (String temail : temails) {
+        for (int i = 0; i < temails.size(); i++) {
+          event.setTemail(temails.get(i));
+          event.setName(names.get(i));
           // 通知所有人
           event.notifyToAll();
           sendGroupMessage(event, header);
           // 通知当事人被移除群聊
           event.setFrom(event.getGroupTemail());
-          event.setTo(temail);
-          event.setTemail(temail);
+          event.setTo(temails.get(i));
+          event.setTemail(temails.get(i));
           event.setEventSeqId(redisService.getNextSeq(event.getTo()));
           this.insert(event);
           sendSingleMessage(event, header);
