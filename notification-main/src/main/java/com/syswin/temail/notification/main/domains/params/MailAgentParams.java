@@ -9,6 +9,7 @@ public class MailAgentParams {
   private String from;
   private String to;
   private String msgid;
+  private String parentMsgId;
   // seqId
   private Long seqNo;
   // message
@@ -47,6 +48,14 @@ public class MailAgentParams {
 
   public void setMsgid(String msgid) {
     this.msgid = msgid;
+  }
+
+  public String getParentMsgId() {
+    return parentMsgId;
+  }
+
+  public void setParentMsgId(String parentMsgId) {
+    this.parentMsgId = parentMsgId;
   }
 
   public Long getSeqNo() {
@@ -91,6 +100,8 @@ public class MailAgentParams {
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", msgid='" + msgid + '\'' +
+        ", parentMsgId='" + parentMsgId + '\'' +
+        ", seqNo=" + seqNo +
         ", toMsg='" + toMsg + '\'' +
         ", timestamp=" + timestamp +
         ", header='" + header + '\'' +

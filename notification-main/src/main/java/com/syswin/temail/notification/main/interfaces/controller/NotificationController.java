@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.interfaces.controller;
 
 import com.syswin.temail.notification.foundation.domains.Response;
-import com.syswin.temail.notification.main.application.NotificationService;
+import com.syswin.temail.notification.main.application.EventService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import io.swagger.annotations.Api;
@@ -30,34 +30,34 @@ public class NotificationController {
 
   private final String CDTP_HEADER = "CDTP-header";
 
-  private final NotificationService notificationService;
+  private final EventService eventService;
 
   @Autowired
-  public NotificationController(NotificationService notificationService) {
-    this.notificationService = notificationService;
+  public NotificationController(EventService eventService) {
+    this.eventService = eventService;
   }
 
-  @ApiOperation(value = "拉取事件", consumes = "application/json")
+  @ApiOperation(value = "拉取事件 3 0001", consumes = "application/json")
   @GetMapping("/events")
   public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from", required = true) String to,
       @RequestParam(required = true) Long eventSeqId, Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    Map<String, Object> result = notificationService.getEvents(to, eventSeqId, pageSize);
+    Map<String, Object> result = eventService.getEvents(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
-  @ApiOperation(value = "获取未读数", consumes = "application/json")
+  @ApiOperation(value = "获取未读数 3 0002", consumes = "application/json")
   @GetMapping("/unread")
   public ResponseEntity<Response<List<UnreadResponse>>> getUnread(@RequestParam(name = "from", required = true) String to,
       @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    List<UnreadResponse> result = notificationService.getUnread(to);
+    List<UnreadResponse> result = eventService.getUnread(to);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
-  @ApiOperation(value = "重置未读数", consumes = "application/json")
+  @ApiOperation(value = "重置未读数 3 0004", consumes = "application/json")
   @PutMapping("/reset")
   public ResponseEntity<Response<List<UnreadResponse>>> reset(@RequestBody Event event, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -71,7 +71,28 @@ public class NotificationController {
       return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from和groupTemail不能同时为空！"), headers, HttpStatus.BAD_REQUEST);
     }
 
-    notificationService.reset(event);
+    eventService.reset(event);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "拉取回复事件 3 0005", consumes = "application/json")
+  @GetMapping("/reply/events")
+  public ResponseEntity<Response<Map<String, Object>>> getReplyEvents(@RequestParam(name = "from", required = true) String to,
+      @RequestParam(required = true) String parentMsgId, @RequestParam(required = true) Long eventSeqId, Integer pageSize,
+      @RequestHeader(name = CDTP_HEADER) String header) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+    Map<String, Object> result = eventService.getReplyEvents(to, parentMsgId, eventSeqId, pageSize);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "获取回复未读数 3 0006", consumes = "application/json")
+  @GetMapping("/reply/unread")
+  public ResponseEntity<Response<UnreadResponse>> getReplyUnread(@RequestParam(name = "from", required = true) String to,
+      @RequestParam(required = true) String parentMsgId, @RequestHeader(name = CDTP_HEADER) String header) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+    UnreadResponse result = eventService.getReplyUnread(to, parentMsgId);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 }

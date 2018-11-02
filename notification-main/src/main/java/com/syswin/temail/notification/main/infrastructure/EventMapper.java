@@ -13,4 +13,7 @@ public interface EventMapper {
   List<Event> selectByTo(@Param("to") String to, @Param("begin") Long begin, @Param("end") Long end);
 
   List<Event> selectPulledEvent(Event event);
+
+  List<Event> selectReplyEvents(@Param("to") String to, @Param("parentMsgId") String parentMsgId, @Param("begin") Long begin, @Param("end") Long end);
+
 }

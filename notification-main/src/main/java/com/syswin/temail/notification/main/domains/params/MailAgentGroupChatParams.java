@@ -8,6 +8,7 @@ public class MailAgentGroupChatParams extends MailAgentParams {
   private String name;
   private String adminName;
   private Integer type;
+  private String at;
 
   public String getGroupTemail() {
     return groupTemail;
@@ -55,5 +56,26 @@ public class MailAgentGroupChatParams extends MailAgentParams {
 
   public void setType(Integer type) {
     this.type = type;
+  }
+
+  public String getAt() {
+    return at;
+  }
+
+  public void setAt(String at) {
+    this.at = at;
+  }
+
+  @Override
+  public String toString() {
+    return "MailAgentGroupChatParams{" +
+        "groupTemail='" + groupTemail + '\'' +
+        ", groupName='" + groupName + '\'' +
+        ", temail='" + temail + '\'' +
+        ", name='" + name + '\'' +
+        ", adminName='" + adminName + '\'' +
+        ", type=" + type +
+        ", at='" + at + '\'' +
+        '}' + super.toString();
   }
 }

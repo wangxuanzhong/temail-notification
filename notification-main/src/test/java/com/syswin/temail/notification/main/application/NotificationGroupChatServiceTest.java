@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.Event.MemberRole;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
-import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,15 +80,12 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMssageType(EventType.ADD_MEMBER.getValue());
     params.setType(MemberRole.NORMAL.getValue());
     params.setTemail("d");
-    params.setName("dd");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
     params.setTemail("e");
-    params.setName("ee");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
     params.setTemail("f");
-    params.setName("ff");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -109,9 +105,9 @@ public class NotificationGroupChatServiceTest {
    */
   @Test
   public void testEventTypeDeleteMember() throws Exception {
+    params.setName("测试当事人名");
     params.setAdminName("测试触发人名");
-    params.setTemail(gson.toJson(Arrays.asList("d", "e", "f")));
-    params.setName(gson.toJson(Arrays.asList("dd", "ee", "ff")));
+    params.setTemail("d,e,f");
     params.setSessionMssageType(EventType.DELETE_MEMBER.getValue());
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
@@ -127,5 +123,21 @@ public class NotificationGroupChatServiceTest {
     params.setName("测试当事人名");
     params.setAdminName("测试触发人名");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+  }
+
+  /**
+   * EventType REPLY 18
+   */
+  @Test
+  public void testEventTypeReply() throws Exception {
+    params.setSessionMssageType(EventType.REPLY.getValue());
+    params.setMsgid(TEST_GROUP_MSG_ID + "reply_5");
+    params.setTemail("a");
+    params.setParentMsgId("g_333");
+    params.setAt("a;b;c");
+    params.setToMsg("这是一条回复消息！");
+    params.setSeqNo(1L);
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
   }
 }
