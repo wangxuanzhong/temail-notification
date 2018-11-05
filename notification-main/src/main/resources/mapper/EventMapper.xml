@@ -70,4 +70,10 @@
     <if test="groupTemail != null and groupTemail != ''">AND group_temail = #{groupTemail}</if>
     <if test="temail != null and temail != ''">AND temail = #{temail}</if>
   </select>
+
+  <select id="deleteReplyEvents" parameterType="com.syswin.temail.notification.main.domains.Event">
+    DELETE FROM `event`
+    WHERE `event_type` = #{eventType} AND `to` = #{to} AND event_seq_id <![CDATA[<]]> #{eventSeqId}
+    <if test="groupTemail != null">AND group_temail = #{groupTemail}</if>
+  </select>
 </mapper>

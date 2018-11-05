@@ -40,4 +40,9 @@ public class EventRepositoryImpl implements EventRepository {
   public List<Event> selectByXPacketId(Event event) {
     return eventMapper.selectByXPacketId(event);
   }
+
+  @Override
+  public Integer deleteReplyEvents(Event event) {
+    return eventMapper.deleteReplyEvents(event);
+  }
 }
