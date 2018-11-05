@@ -30,9 +30,4 @@ public class EventRepositoryImpl implements EventRepository {
   public List<Event> selectPulledEvent(Event event) {
     return eventMapper.selectPulledEvent(event);
   }
-
-  @Override
-  public List<Event> selectReplyEvents(String to, String parentMsgId, Long begin, Long end) {
-    return eventMapper.selectReplyEvents(to, parentMsgId, begin, end);
-  }
 }

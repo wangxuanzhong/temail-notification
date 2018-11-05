@@ -1,7 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.foundation.application.JsonService;
-import com.syswin.temail.notification.foundation.application.SequenceService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.Event.MemberRole;
@@ -27,16 +26,17 @@ public class NotificationGroupChatService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final RocketMqProducer rocketMqProducer;
-  private final SequenceService sequenceService;
+  private final RedisService redisService;
   private final EventRepository eventRepository;
   private final MemberRepository memberRepository;
   private final JsonService jsonService;
 
   @Autowired
-  public NotificationGroupChatService(RocketMqProducer rocketMqProducer, SequenceService sequenceService, EventRepository eventRepository,
+  public NotificationGroupChatService(RocketMqProducer rocketMqProducer, RedisService redisService,
+      EventRepository eventRepository,
       MemberRepository memberRepository, JsonService jsonService) {
     this.rocketMqProducer = rocketMqProducer;
-    this.sequenceService = sequenceService;
+    this.redisService = redisService;
     this.eventRepository = eventRepository;
     this.memberRepository = memberRepository;
     this.jsonService = jsonService;
@@ -48,9 +48,9 @@ public class NotificationGroupChatService {
   public void handleMqMessage(String body)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentGroupChatParams params = jsonService.fromJson(body, MailAgentGroupChatParams.class);
-    Event event = new Event(params.getSessionMssageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(), params.getType(), params.getName(),
-        params.getAdminName(), params.getGroupName(), params.getAt());
+    Event event = new Event(params.getMsgid(), params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp(),
+        params.getGroupTemail(), params.getTemail(), params.getType(), params.getSessionMssageType(), params.getName(), params.getAdminName(),
+        params.getGroupName());
 
     // 前端需要的头信息
     String header = params.getHeader();
@@ -60,7 +60,6 @@ public class NotificationGroupChatService {
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
       case RETRACT:
-      case REPLY:
         event.notifyToAll();
         sendGroupMessage(event, header);
         break;
@@ -70,6 +69,7 @@ public class NotificationGroupChatService {
           event.setTo(event.getTemail());
           event.setMsgId(msgId);
           if (eventRepository.selectPulledEvent(event).size() == 0) {
+            event.setEventSeqId(redisService.getNextSeq(event.getTo()));
             this.insert(event);
             sendSingleMessage(event, header);
           } else {
@@ -113,8 +113,9 @@ public class NotificationGroupChatService {
           sendGroupMessage(event, header);
           // 通知当事人被移除群聊
           event.setFrom(event.getGroupTemail());
-          event.setTo(temail);
-          event.setTemail(temail);
+          event.setTo(temails.get(i));
+          event.setTemail(temails.get(i));
+          event.setEventSeqId(redisService.getNextSeq(event.getTo()));
           this.insert(event);
           sendSingleMessage(event, header);
         }
@@ -140,12 +141,14 @@ public class NotificationGroupChatService {
         event.removeEventMsgId();
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
+        event.setEventSeqId(redisService.getNextSeq(event.getTo()));
         this.insert(event);
         sendSingleMessage(event, header);
         break;
       case INVITATION:
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
+        event.setEventSeqId(redisService.getNextSeq(event.getTo()));
         this.insert(event);
         sendSingleMessage(event, header);
         break;
@@ -165,7 +168,6 @@ public class NotificationGroupChatService {
    * 插入数据库
    */
   private void insert(Event event) {
-    event.initEventSeqId(sequenceService);
     event.autoWriteExtendParam(jsonService);
     eventRepository.insert(event);
   }
@@ -191,6 +193,7 @@ public class NotificationGroupChatService {
     event.setFrom(event.getGroupTemail());
     LOGGER.info("向{}发送通知，通知类型为：{}", tos, Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
     for (String to : tos) {
+      event.setEventSeqId(redisService.getNextSeq(to));
       event.setTo(to);
       this.insert(event);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, header, jsonService.toJson(event))));

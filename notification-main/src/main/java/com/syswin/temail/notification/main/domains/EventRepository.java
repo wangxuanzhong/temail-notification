@@ -9,6 +9,4 @@ public interface EventRepository {
   List<Event> selectByTo(String to, Long begin, Long end);
 
   List<Event> selectPulledEvent(Event event);
-
-  List<Event> selectReplyEvents(String to, String parentMsgId, Long begin, Long end);
 }

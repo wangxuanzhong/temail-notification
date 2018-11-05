@@ -124,20 +124,4 @@ public class NotificationGroupChatServiceTest {
     params.setAdminName("测试触发人名");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
-
-  /**
-   * EventType REPLY 18
-   */
-  @Test
-  public void testEventTypeReply() throws Exception {
-    params.setSessionMssageType(EventType.REPLY.getValue());
-    params.setMsgid(TEST_GROUP_MSG_ID + "reply_5");
-    params.setTemail("a");
-    params.setParentMsgId("g_333");
-    params.setAt("a;b;c");
-    params.setToMsg("这是一条回复消息！");
-    params.setSeqNo(1L);
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
-  }
 }

@@ -1,12 +1,14 @@
 package com.syswin.temail.notification.main.application;
 
-import com.syswin.temail.notification.foundation.application.SequenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RedisService implements SequenceService {
+public class RedisService {
+
+  private final long STEP = 1L;
+  private final String KEY_PREFIX = "temail_notification_";
 
   private final RedisTemplate<String, ?> redisTemplate;
 
@@ -22,7 +24,6 @@ public class RedisService implements SequenceService {
   /**
    * 获取下个序号
    */
-  @Override
   public Long getNextSeq(String key) {
     return redisTemplate.opsForValue().increment(getKey(key), STEP);
   }
