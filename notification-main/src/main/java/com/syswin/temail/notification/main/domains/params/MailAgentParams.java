@@ -114,7 +114,7 @@ public class MailAgentParams {
         ", msgid='" + msgid + '\'' +
         ", parentMsgId='" + parentMsgId + '\'' +
         ", seqNo=" + seqNo +
-        ", toMsg='" + toMsg + '\'' +
+        ", toMsg length='" + toMsg.length() + '\'' +
         ", timestamp=" + timestamp +
         ", at='" + at + '\'' +
         ", header='" + header + '\'' +

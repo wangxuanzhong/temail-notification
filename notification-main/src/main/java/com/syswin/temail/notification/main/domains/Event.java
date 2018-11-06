@@ -47,14 +47,10 @@ public class Event {
   @JsonIgnore
   private String extendParam;
 
-  @JsonIgnore
-  private String xPacketId;
-
   public Event() {
   }
 
-  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp,
-      String xPacketId) {
+  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp) {
     this.eventType = eventType;
     this.msgId = msgId;
     this.parentMsgId = parentMsgId;
@@ -63,11 +59,10 @@ public class Event {
     this.from = from;
     this.to = to;
     this.timestamp = timestamp;
-    this.xPacketId = xPacketId;
   }
 
   public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp,
-      String groupTemail, String temail, Integer role, String name, String adminName, String groupName, String at, String xPacketId) {
+      String groupTemail, String temail, Integer role, String name, String adminName, String groupName, String at) {
     this.eventType = eventType;
     this.msgId = msgId;
     this.parentMsgId = parentMsgId;
@@ -83,7 +78,6 @@ public class Event {
     this.adminName = adminName;
     this.groupName = groupName;
     this.at = at;
-    this.xPacketId = xPacketId;
   }
 
   /**
@@ -302,14 +296,6 @@ public class Event {
     this.extendParam = extendParam;
   }
 
-  public String getxPacketId() {
-    return xPacketId;
-  }
-
-  public void setxPacketId(String xPacketId) {
-    this.xPacketId = xPacketId;
-  }
-
   @Override
   public String toString() {
     return "Event{" +
@@ -319,7 +305,7 @@ public class Event {
         ", msgId='" + msgId + '\'' +
         ", parentMsgId='" + parentMsgId + '\'' +
         ", seqId=" + seqId +
-        ", message length='" + (message == null ? 0 : message.length()) + '\'' +
+        ", message length='" + message.length() + '\'' +
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", timestamp=" + timestamp +
@@ -331,7 +317,6 @@ public class Event {
         ", groupName='" + groupName + '\'' +
         ", at='" + at + '\'' +
         ", extendParam='" + extendParam + '\'' +
-        ", xPacketId='" + xPacketId + '\'' +
         '}';
   }
 
