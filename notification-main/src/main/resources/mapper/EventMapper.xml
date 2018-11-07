@@ -37,7 +37,7 @@
     WHERE `to` = #{to}
     <choose>
       <when test="parentMsgId == null or parentMsgId == ''">
-        AND `event_type` != '${@com.syswin.temail.notification.main.domains.Event$EventType@REPLY.getValue()}'
+        AND `event_type` != ${@com.syswin.temail.notification.main.domains.Event$EventType@REPLY.getValue()}
       </when>
       <otherwise>
         AND parent_msg_id = #{parentMsgId}
