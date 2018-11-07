@@ -305,7 +305,7 @@ public class Event {
         ", msgId='" + msgId + '\'' +
         ", parentMsgId='" + parentMsgId + '\'' +
         ", seqId=" + seqId +
-        ", message length='" + message.length() + '\'' +
+        ", message length='" + (message == null ? 0 : message.length()) + '\'' +
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", timestamp=" + timestamp +

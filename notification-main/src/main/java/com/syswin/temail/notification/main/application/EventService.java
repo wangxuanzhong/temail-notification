@@ -39,14 +39,19 @@ public class EventService {
    * 拉取事件
    *
    * @param to 发起人
+   * @param parentMsgId 父消息id
    * @param eventSeqId 上次拉取结尾序号
    * @param pageSize 拉取数量
    */
-  public Map<String, Object> getEvents(String to, Long eventSeqId, Integer pageSize) {
-    LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取接收方[" + to + "]的事件。拉取数量为：" + pageSize);
+  public Map<String, Object> getEvents(String to, String parentMsgId, Long eventSeqId, Integer pageSize) {
+    if (parentMsgId == null || parentMsgId.isEmpty()) {
+      LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取接收方[" + to + "]的事件。拉取数量为：" + pageSize);
+    } else {
+      LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取[ " + to + "]消息[" + parentMsgId + "]的回复事件。拉取数量为：" + pageSize);
+    }
 
     // 如果pageSize为空则不限制查询条数
-    List<Event> events = eventRepository.selectByTo(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    List<Event> events = eventRepository.selectEvents(to, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
     Map<String, Event> eventMap = new HashMap<>();
     List<Event> notifyEvents = new ArrayList<>();
@@ -57,6 +62,7 @@ public class EventService {
         case DESTROY:
         case DESTROYED:
         case APPLY:
+        case REPLY:
           eventMap.put(event.getMsgId(), event);
           break;
         case DELETE_GROUP:
@@ -97,60 +103,18 @@ public class EventService {
   }
 
   /**
-   * 拉取回复事件
-   *
-   * @param to 发起人
-   * @param parentMsgId 父消息id
-   * @param eventSeqId 上次拉取结尾序号
-   * @param pageSize 拉取数量
-   */
-  public Map<String, Object> getReplyEvents(String to, String parentMsgId, Long eventSeqId, Integer pageSize) {
-    LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取[ " + to + "]消息[" + parentMsgId + "]的回复事件。拉取数量为：" + pageSize);
-
-    // 如果pageSize为空则不限制查询条数
-    List<Event> events = eventRepository.selectReplyEvents(to, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
-
-    Map<String, Event> eventMap = new HashMap<>();
-    events.forEach(event -> {
-      event.autoReadExtendParam(jsonService);
-      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
-        case REPLY:
-          eventMap.put(event.getMsgId(), event);
-          break;
-        case PULLED:
-        case RETRACT:
-          if (eventMap.containsKey(event.getMsgId())) {
-            eventMap.remove(event.getMsgId());
-          } else {
-            eventMap.put(event.getMsgId(), event);
-          }
-          break;
-      }
-    });
-
-    List<Event> notifyEvents = new ArrayList<>(eventMap.values());
-    notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
-
-    Map<String, Object> result = new HashMap<>();
-    if (events.isEmpty()) {
-      result.put("lastEventSeqId", -1);
-    } else {
-      result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
-    }
-    result.put("events", notifyEvents);
-    LOGGER.info("拉取回复事件结果为：" + result);
-    return result;
-  }
-
-
-  /**
    * 获取消息未读数
    *
    * @param to 发起人
+   * @param parentMsgId 父消息id
    */
-  public List<UnreadResponse> getUnread(String to) {
-    LOGGER.info("获取接收方[" + to + "]的未读消息数量。");
-    List<Event> events = eventRepository.selectByTo(to, null, null);
+  public List<UnreadResponse> getUnread(String to, String parentMsgId) {
+    if (parentMsgId == null || parentMsgId.isEmpty()) {
+      LOGGER.info("获取接收方[" + to + "]的未读消息数量。");
+    } else {
+      LOGGER.info("获取[{}]消息[{}]的回复消息未读数量。", to, parentMsgId);
+    }
+    List<Event> events = eventRepository.selectEvents(to, parentMsgId, null, null);
 
     Map<String, List<String>> unreadMap = new HashMap<>();
     events.forEach(event -> {
@@ -173,6 +137,7 @@ public class EventService {
         case DESTROYED:
         case ADD_GROUP:
         case APPLY:
+        case REPLY:
           msgIds.add(event.getMsgId());
           break;
         case DELETE_GROUP:
@@ -212,44 +177,6 @@ public class EventService {
 
     LOGGER.info("获取未读消息结果为：" + unreadResponses);
     return unreadResponses;
-  }
-
-
-  /**
-   * 获取回复消息未读数
-   *
-   * @param to 发起人
-   * @param parentMsgId 父消息id
-   */
-  public UnreadResponse getReplyUnread(String to, String parentMsgId) {
-    LOGGER.info("获取[{}]消息[{}]的回复消息未读数量。", to, parentMsgId);
-    List<Event> events = eventRepository.selectReplyEvents(to, parentMsgId, null, null);
-
-    List<String> msgIds = new ArrayList<>();
-    events.forEach(event -> {
-      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
-        case RESET:
-          msgIds.clear();
-          break;
-        case REPLY:
-          msgIds.add(event.getMsgId());
-          break;
-        case PULLED:
-        case RETRACT:
-          if (msgIds.contains(event.getMsgId())) {
-            msgIds.remove(event.getMsgId());
-          } else {
-            msgIds.add(event.getMsgId());
-          }
-          break;
-      }
-    });
-
-    // 统计未读数量
-    UnreadResponse unreadResponse = new UnreadResponse(msgIds.size());
-
-    LOGGER.info("获取未读消息结果为：" + unreadResponse);
-    return unreadResponse;
   }
 
   /**

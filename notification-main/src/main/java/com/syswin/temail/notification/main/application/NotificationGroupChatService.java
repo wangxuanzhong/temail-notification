@@ -52,17 +52,12 @@ public class NotificationGroupChatService {
     MailAgentGroupChatParams params = jsonService.fromJson(body, MailAgentGroupChatParams.class);
     Event event = new Event(params.getSessionMssageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
         params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(), params.getType(), params.getName(),
-        params.getAdminName(), params.getGroupName(), params.getAt(), params.getxPacketId());
+        params.getAdminName(), params.getGroupName(), params.getAt());
 
     // 前端需要的头信息
     String header = params.getHeader();
 
     LOGGER.info("群聊收到的事件类型为：" + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
-
-    // 校验收到的数据是否重复
-    if (!this.checkXPacketId(event)) {
-      return;
-    }
 
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
@@ -76,11 +71,11 @@ public class NotificationGroupChatService {
           event.setFrom(event.getGroupTemail());
           event.setTo(event.getTemail());
           event.setMsgId(msgId);
-          if (eventRepository.selectEventsByMsgId(event).size() == 0) {
+          if (eventRepository.selectPulledEvents(event).size() == 0) {
             this.insert(event);
             sendSingleMessage(event, header);
           } else {
-            LOGGER.info("消息{}已拉取，不重复处理。", msgId);
+            LOGGER.info("消息{}已拉取，不重复处理，时间戳为：{}", msgId, event.getTimestamp());
           }
         }
         break;
@@ -100,21 +95,28 @@ public class NotificationGroupChatService {
         if (!members.contains(event.getTemail())) {
           memberRepository.insert(event);
         } else {
-          LOGGER.info("{}已经是群{}的成员，不重复添加。", event.getTemail(), event.getGroupTemail());
+          LOGGER.info("{}已经是群{}的成员，不重复添加，时间戳为：{}", event.getTemail(), event.getGroupTemail(), event.getTimestamp());
         }
         event.notifyToAll();
         sendGroupMessage(event, header);
         break;
       case DELETE_MEMBER:
-        String[] temails = event.getTemail().split(MailAgentGroupChatParams.TEMAIL_SPLIT);
+        List<String> temails = jsonService.fromJson(event.getTemail(), List.class);
+        List<String> names = jsonService.fromJson(event.getName(), List.class);
+
+        if (temails.size() != names.size()) {
+          LOGGER.error("移除群成员temail和name不对应：temails:{}, names:{}", temails, names);
+        }
 
         // 删除当事人
-        for (String temail : temails) {
-          event.setTemail(temail);
+        for (int i = 0; i < temails.size(); i++) {
+          event.setTemail(temails.get(i));
           memberRepository.deleteGroupMember(event);
         }
 
-        for (String temail : temails) {
+        for (int i = 0; i < temails.size(); i++) {
+          event.setTemail(temails.get(i));
+          event.setName(names.get(i));
           // 通知所有人
           event.notifyToAll();
           sendGroupMessage(event, header);
@@ -201,23 +203,6 @@ public class NotificationGroupChatService {
       event.setTo(to);
       this.insert(event);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, header, jsonService.toJson(event))));
-    }
-  }
-
-  /**
-   * 幂等校验
-   */
-  public boolean checkXPacketId(Event event) {
-    if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
-      LOGGER.warn("xPacketId为空！");
-      return true;
-    }
-
-    if (eventRepository.selectByXPacketId(event).isEmpty()) {
-      return true;
-    } else {
-      LOGGER.error("数据重复：event --> {}", event);
-      return false;
     }
   }
 }

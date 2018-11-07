@@ -47,14 +47,9 @@ public class NotificationService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentSingleChatParams params = jsonService.fromJson(body, MailAgentSingleChatParams.class);
     Event event = new Event(params.getSessionMssageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId());
+        params.getFrom(), params.getTo(), params.getTimestamp());
 
     LOGGER.info("单聊收到的事件类型为：" + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
-
-    // 校验收到的数据是否重复
-    if (!this.checkXPacketId(event)) {
-      return;
-    }
 
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
@@ -68,11 +63,11 @@ public class NotificationService {
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
-          if (eventRepository.selectEventsByMsgId(event).size() == 0) {
+          if (eventRepository.selectPulledEvents(event).size() == 0) {
             this.insert(event);
             rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), params.getHeader(), jsonService.toJson(event))));
           } else {
-            LOGGER.info("消息{}已拉取，不重复处理。", msgId);
+            LOGGER.info("消息{}已拉取，不重复处理，时间戳为：{}", msgId, event.getTimestamp());
           }
         }
         break;
@@ -86,22 +81,5 @@ public class NotificationService {
     event.initEventSeqId(sequenceService);
     event.autoWriteExtendParam(jsonService);
     eventRepository.insert(event);
-  }
-
-  /**
-   * 幂等校验
-   */
-  public boolean checkXPacketId(Event event) {
-    if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
-      LOGGER.warn("xPacketId为空！");
-      return true;
-    }
-
-    if (eventRepository.selectByXPacketId(event).isEmpty()) {
-      return true;
-    } else {
-      LOGGER.error("数据重复：event --> {}", event);
-      return false;
-    }
   }
 }

@@ -22,23 +22,13 @@ public class EventRepositoryImpl implements EventRepository {
   }
 
   @Override
-  public List<Event> selectEventsByTo(String to, String parentMsgId, Long begin, Long end) {
-    return eventMapper.selectEventsByTo(to, parentMsgId, begin, end);
+  public List<Event> selectEvents(String to, String parentMsgId, Long begin, Long end) {
+    return eventMapper.selectEvents(to, parentMsgId, begin, end);
   }
 
   @Override
-  public List<Event> selectEventsByMsgId(Event event) {
-    return eventMapper.selectEventsByMsgId(event);
-  }
-
-  @Override
-  public Integer deleteResetEvents(Event event) {
-    return eventMapper.deleteResetEvents(event);
-  }
-
-  @Override
-  public List<Event> selectByXPacketId(Event event) {
-    return eventMapper.selectByXPacketId(event);
+  public List<Event> selectPulledEvents(Event event) {
+    return eventMapper.selectPulledEvents(event);
   }
 
   @Override
