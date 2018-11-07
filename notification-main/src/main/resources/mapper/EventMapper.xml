@@ -30,7 +30,7 @@
     #{timestamp})
   </insert>
 
-  <select id="selectEvents" resultMap="EventMap">
+  <select id="selectEventsByTo" resultMap="EventMap">
     SELECT
     <include refid="baseField"/>
     FROM `event`
@@ -48,7 +48,7 @@
     ORDER BY `event_seq_id`
   </select>
 
-  <select id="selectPulledEvents" resultMap="EventMap">
+  <select id="selectEvent" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">
     SELECT
     <include refid="baseField"/>
     FROM `event`

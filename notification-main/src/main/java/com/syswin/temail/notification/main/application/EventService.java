@@ -51,7 +51,7 @@ public class EventService {
     }
 
     // 如果pageSize为空则不限制查询条数
-    List<Event> events = eventRepository.selectEvents(to, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    List<Event> events = eventRepository.selectEventsByTo(to, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
     Map<String, Event> eventMap = new HashMap<>();
     List<Event> notifyEvents = new ArrayList<>();
@@ -114,7 +114,7 @@ public class EventService {
     } else {
       LOGGER.info("获取[{}]消息[{}]的回复消息未读数量。", to, parentMsgId);
     }
-    List<Event> events = eventRepository.selectEvents(to, parentMsgId, null, null);
+    List<Event> events = eventRepository.selectEventsByTo(to, parentMsgId, null, null);
 
     Map<String, List<String>> unreadMap = new HashMap<>();
     events.forEach(event -> {

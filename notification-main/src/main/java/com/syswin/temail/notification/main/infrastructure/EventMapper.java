@@ -10,9 +10,9 @@ public interface EventMapper {
 
   int insert(Event event);
 
-  List<Event> selectEvents(@Param("to") String to, @Param("parentMsgId") String parentMsgId, @Param("begin") Long begin, @Param("end") Long end);
+  List<Event> selectEventsByTo(@Param("to") String to, @Param("parentMsgId") String parentMsgId, @Param("begin") Long begin, @Param("end") Long end);
 
-  List<Event> selectPulledEvents(Event event);
+  List<Event> selectEvent(Event event);
 
   Integer deleteReplyEvents(Event event);
 }

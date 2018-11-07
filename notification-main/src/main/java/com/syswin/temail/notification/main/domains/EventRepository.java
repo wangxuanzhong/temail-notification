@@ -6,9 +6,9 @@ public interface EventRepository {
 
   int insert(Event event);
 
-  List<Event> selectEvents(String to, String parentMsgId, Long begin, Long end);
+  List<Event> selectEventsByTo(String to, String parentMsgId, Long begin, Long end);
 
-  List<Event> selectPulledEvents(Event event);
+  List<Event> selectEvent(Event event);
 
   Integer deleteReplyEvents(Event event);
 }

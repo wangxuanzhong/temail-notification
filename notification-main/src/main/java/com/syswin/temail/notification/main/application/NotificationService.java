@@ -63,7 +63,7 @@ public class NotificationService {
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
-          if (eventRepository.selectPulledEvents(event).size() == 0) {
+          if (eventRepository.selectEvent(event).size() == 0) {
             this.insert(event);
             rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), params.getHeader(), jsonService.toJson(event))));
           } else {
