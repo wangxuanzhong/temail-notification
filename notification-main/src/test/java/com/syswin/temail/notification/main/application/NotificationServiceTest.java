@@ -18,7 +18,6 @@ public class NotificationServiceTest {
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
   private final String TOPIC = "temail-usermail";
-  private final String PREFIX = "temail-notification-";
   MailAgentSingleChatParams params = new MailAgentSingleChatParams();
   private Gson gson = new Gson();
   @Autowired
@@ -30,7 +29,7 @@ public class NotificationServiceTest {
     params.setFrom(TEST_FROM);
     params.setTo(TEST_TO);
     params.setTimestamp(System.currentTimeMillis());
-    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
+    params.setxPacketId(UUID.randomUUID().toString());
   }
 
   /**
@@ -52,7 +51,7 @@ public class NotificationServiceTest {
   @Test
   public void testEventTypePulled() throws Exception {
     params.setSessionMssageType(EventType.PULLED.getValue());
-    params.setMsgid("1,2,3");
+    params.setMsgid("1");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -74,9 +73,8 @@ public class NotificationServiceTest {
   @Test
   public void testEventTypeDestroyed() throws Exception {
     params.setSessionMssageType(EventType.DESTROYED.getValue());
-    params.setMsgid("2");
+    params.setMsgid("1");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
   }
 
   /**
@@ -85,24 +83,9 @@ public class NotificationServiceTest {
   @Test
   public void testEventTypeDestroy() throws Exception {
     params.setSessionMssageType(EventType.DESTROY.getValue());
-    params.setMsgid("2");
-    params.setSeqNo(2L);
+    params.setMsgid("1");
+    params.setSeqNo(1L);
     params.setToMsg("这是一条单聊阅后即焚测试消息！");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
-  }
-
-  /**
-   * EventType REPLY 18 回复消息
-   */
-  @Test
-  public void testEventTypeReply() throws Exception {
-    params.setSessionMssageType(EventType.REPLY.getValue());
-    params.setMsgid("reply_1");
-    params.setParentMsgId("1");
-    params.setSeqNo(1L);
-    params.setToMsg("这是一条单聊回复测试消息！");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
   }
 }
