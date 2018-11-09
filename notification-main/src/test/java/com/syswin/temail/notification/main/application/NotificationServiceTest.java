@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
 import java.util.Date;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,7 @@ public class NotificationServiceTest {
     params.setFrom(TEST_FROM);
     params.setTo(TEST_TO);
     params.setTimestamp((new Date()).getTime());
+    params.setxPacketId(UUID.randomUUID().toString());
   }
 
   @Test
@@ -36,14 +38,17 @@ public class NotificationServiceTest {
     params.setSessionMssageType(EventType.RECEIVE.getValue());
     params.setMsgid("1");
     params.setSeqNo(1L);
-    params.setToMsg("这是一条测试消息！");
+    params.setToMsg("这是一条单聊测试消息！");
+//    params.setxPacketId("aaaaaa");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
   }
 
   @Test
   public void testEventTypePulled() throws Exception {
     params.setSessionMssageType(EventType.PULLED.getValue());
     params.setMsgid("1");
+//    params.setxPacketId("aaaaaa");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }

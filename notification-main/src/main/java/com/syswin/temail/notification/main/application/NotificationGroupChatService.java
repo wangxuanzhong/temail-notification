@@ -50,12 +50,17 @@ public class NotificationGroupChatService {
     MailAgentGroupChatParams params = jsonService.fromJson(body, MailAgentGroupChatParams.class);
     Event event = new Event(params.getMsgid(), params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp(),
         params.getGroupTemail(), params.getTemail(), params.getType(), params.getSessionMssageType(), params.getName(), params.getAdminName(),
-        params.getGroupName());
+        params.getGroupName(), params.getxPacketId());
 
     // 前端需要的头信息
     String header = params.getHeader();
 
     LOGGER.info("群聊收到的事件类型为：" + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+
+    // 校验收到的数据是否重复
+    if (!this.checkXPacketId(event)) {
+      return;
+    }
 
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
@@ -68,7 +73,7 @@ public class NotificationGroupChatService {
           event.setFrom(event.getGroupTemail());
           event.setTo(event.getTemail());
           event.setMsgId(msgId);
-          if (eventRepository.selectPulledEvent(event).size() == 0) {
+          if (eventRepository.selectEvent(event).size() == 0) {
             event.setEventSeqId(redisService.getNextSeq(event.getTo()));
             this.insert(event);
             sendSingleMessage(event, header);
@@ -197,6 +202,23 @@ public class NotificationGroupChatService {
       event.setTo(to);
       this.insert(event);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, header, jsonService.toJson(event))));
+    }
+  }
+
+  /**
+   * 幂等校验
+   */
+  private boolean checkXPacketId(Event event) {
+    if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
+      LOGGER.error("xPacketId为空！");
+      return false;
+    }
+
+    if (eventRepository.selectByXPacketId(event).isEmpty()) {
+      return true;
+    } else {
+      LOGGER.error("数据重复：event --> {}", event);
+      return false;
     }
   }
 }

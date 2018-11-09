@@ -50,9 +50,14 @@ public class NotificationService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentSingleChatParams params = jsonService.fromJson(body, MailAgentSingleChatParams.class);
     Event event = new Event(params.getMsgid(), params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
-        params.getTimestamp(), params.getSessionMssageType());
+        params.getTimestamp(), params.getSessionMssageType(), params.getxPacketId());
 
     LOGGER.info("单聊收到的事件类型为：" + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+
+    // 校验收到的数据是否重复
+    if (!this.checkXPacketId(event)) {
+      return;
+    }
 
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
@@ -66,7 +71,7 @@ public class NotificationService {
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
-          if (eventRepository.selectPulledEvent(event).size() == 0) {
+          if (eventRepository.selectEvent(event).size() == 0) {
             event.setEventSeqId(redisService.getNextSeq(event.getTo()));
             eventRepository.insert(event);
             rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), params.getHeader(), jsonService.toJson(event))));
@@ -224,5 +229,22 @@ public class NotificationService {
     event.setEventSeqId(redisService.getNextSeq(event.getTo()));
     event.setTimestamp(System.currentTimeMillis());
     eventRepository.insert(event);
+  }
+
+  /**
+   * 幂等校验
+   */
+  private boolean checkXPacketId(Event event) {
+    if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
+      LOGGER.error("xPacketId为空！");
+      return false;
+    }
+
+    if (eventRepository.selectByXPacketId(event).isEmpty()) {
+      return true;
+    } else {
+      LOGGER.error("数据重复：event --> {}", event);
+      return false;
+    }
   }
 }

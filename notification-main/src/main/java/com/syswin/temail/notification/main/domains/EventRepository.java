@@ -8,5 +8,7 @@ public interface EventRepository {
 
   List<Event> selectByTo(String to, Long begin, Long end);
 
-  List<Event> selectPulledEvent(Event event);
+  List<Event> selectEvent(Event event);
+
+  List<Event> selectByXPacketId(Event event);
 }

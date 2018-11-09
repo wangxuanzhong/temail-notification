@@ -3,6 +3,7 @@
 <mapper namespace="com.syswin.temail.notification.main.infrastructure.EventMapper">
   <resultMap id="EventMap" type="com.syswin.temail.notification.main.domains.Event">
     <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="x_packet_id" jdbcType="VARCHAR" property="xPacketId"/>
     <result column="event_seq_id" jdbcType="BIGINT" property="eventSeqId"/>
     <result column="event_type" jdbcType="INTEGER" property="eventType"/>
     <result column="msg_id" jdbcType="VARCHAR" property="msgId"/>
@@ -17,14 +18,15 @@
   </resultMap>
 
   <sql id="baseField">
-    `id`, `event_seq_id`, `event_type`, `msg_id`, `from`, `to`, `group_temail`, `temail`, `extend_param`, `timestamp`
+    `id`, `x_packet_id`, `event_seq_id`, `event_type`, `msg_id`, `from`, `to`, `group_temail`, `temail`, `extend_param`, `timestamp`
   </sql>
 
   <insert id="insert" parameterType="com.syswin.temail.notification.main.domains.Event">
     INSERT INTO `event`
-    (`event_seq_id`, `event_type`, `msg_id`, `seq_id`, `message`, `from`, `to`, `group_temail`, `temail`, `extend_param`, `timestamp`)
+    (`x_packet_id`, `event_seq_id`, `event_type`, `msg_id`, `seq_id`, `message`, `from`, `to`, `group_temail`, `temail`, `extend_param`, `timestamp`)
     VALUES
-    (#{eventSeqId}, #{eventType}, #{msgId}, #{seqId}, #{message}, #{from}, #{to}, #{groupTemail}, #{temail}, #{extendParam}, #{timestamp})
+    (#{xPacketId}, #{eventSeqId}, #{eventType}, #{msgId}, #{seqId}, #{message}, #{from}, #{to}, #{groupTemail}, #{temail}, #{extendParam},
+    #{timestamp})
   </insert>
 
   <select id="selectByTo" resultMap="EventMap">
@@ -37,10 +39,19 @@
     ORDER BY `event_seq_id`
   </select>
 
-  <select id="selectPulledEvent" resultMap="EventMap">
+  <select id="selectEvent" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">
     SELECT
     <include refid="baseField"/>
     FROM `event`
     WHERE `from` = #{from} AND `to` = #{to} AND `event_type` = #{eventType} AND `msg_id` = #{msgId}
+  </select>
+
+  <select id="selectByXPacketId" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">
+    SELECT
+    <include refid="baseField"/>
+    FROM `event`
+    WHERE `x_packet_id` = #{xPacketId} AND `event_type` = #{eventType}
+    <if test="groupTemail != null and groupTemail != ''">AND group_temail = #{groupTemail}</if>
+    <if test="temail != null and temail != ''">AND temail = #{temail}</if>
   </select>
 </mapper>

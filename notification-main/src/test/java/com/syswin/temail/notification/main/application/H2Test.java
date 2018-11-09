@@ -7,6 +7,7 @@ import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,8 @@ public class H2Test {
   @Test
   public void testGetUnread() {
     // 单聊消息
-    Event event = new Event("get_unread_1", 1L, "get_unread_aaaa", "get_unread_from", "get_unread_to", System.currentTimeMillis(), 0);
+    Event event = new Event("get_unread_1", 1L, "get_unread_aaaa", "get_unread_from", "get_unread_to", System.currentTimeMillis(), 0,
+        UUID.randomUUID().toString());
     event.setEventSeqId(1L);
     eventRepository.insert(event);
     List<UnreadResponse> result = notificationService.getUnread("get_unread_to");
@@ -47,7 +49,7 @@ public class H2Test {
 
     // 群聊消息
     event = new Event("get_unread_1", 1L, "get_unread_aaaa", "get_unread_group_temail", "get_unread_to", System.currentTimeMillis(),
-        "get_unread_group_temail", null, null, 0, null, null, null);
+        "get_unread_group_temail", null, null, 0, null, null, null, UUID.randomUUID().toString());
     event.setEventSeqId(2L);
     eventRepository.insert(event);
     result = notificationService.getUnread("get_unread_to");
@@ -57,7 +59,7 @@ public class H2Test {
   @Test
   public void testReset() {
     // 单聊消息
-    Event event = new Event("reset_1", 1L, "aaaa", "reset_from", "reset_to", System.currentTimeMillis(), 0);
+    Event event = new Event("reset_1", 1L, "aaaa", "reset_from", "reset_to", System.currentTimeMillis(), 0, UUID.randomUUID().toString());
     event.setEventSeqId(1L);
     eventRepository.insert(event);
     List<UnreadResponse> result = notificationService.getUnread("reset_to");
@@ -68,7 +70,7 @@ public class H2Test {
 
     // 群聊消息
     event = new Event("reset_1", 1L, "aaaa", "reset_group_temail", "reset_to", System.currentTimeMillis(), "reset_group_temail", null, null, 0, null,
-        null, null);
+        null, null, UUID.randomUUID().toString());
     event.setEventSeqId(2L);
     eventRepository.insert(event);
     result = notificationService.getUnread("reset_to");

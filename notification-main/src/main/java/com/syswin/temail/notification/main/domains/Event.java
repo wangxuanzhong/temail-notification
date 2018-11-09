@@ -26,22 +26,27 @@ public class Event extends Message {
   @JsonIgnore
   private String extendParam;
 
+  @JsonIgnore
+  private String xPacketId;
+
   public Event() {
   }
 
-  public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, Integer eventType) {
+  public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, Integer eventType, String xPacketId) {
     super(msgId, seqId, message, from, to, timestamp);
     this.eventType = eventType;
+    this.xPacketId = xPacketId;
   }
 
 
   public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, String groupTemail, String temail,
-      Integer role, Integer eventType, String name, String adminName, String groupName) {
+      Integer role, Integer eventType, String name, String adminName, String groupName, String xPacketId) {
     super(msgId, seqId, message, from, to, timestamp, groupTemail, temail, role);
     this.eventType = eventType;
     this.name = name;
     this.adminName = adminName;
     this.groupName = groupName;
+    this.xPacketId = xPacketId;
   }
 
   /**
@@ -150,6 +155,14 @@ public class Event extends Message {
     this.extendParam = extendParam;
   }
 
+  public String getxPacketId() {
+    return xPacketId;
+  }
+
+  public void setxPacketId(String xPacketId) {
+    this.xPacketId = xPacketId;
+  }
+
   @Override
   public String toString() {
     return "Event{" +
@@ -159,6 +172,7 @@ public class Event extends Message {
         ", name='" + name + '\'' +
         ", adminName='" + adminName + '\'' +
         ", groupName='" + groupName + '\'' +
+        ", xPacketId='" + xPacketId + '\'' +
         '}' + " " +
         super.toString();
   }

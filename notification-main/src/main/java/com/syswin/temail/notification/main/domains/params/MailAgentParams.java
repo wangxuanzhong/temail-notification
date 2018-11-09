@@ -16,6 +16,7 @@ public class MailAgentParams {
   private Long timestamp;
 
   private String header;
+  private String xPacketId;
 
   public Integer getSessionMssageType() {
     return sessionMssageType;
@@ -84,6 +85,14 @@ public class MailAgentParams {
     this.header = header;
   }
 
+  public String getxPacketId() {
+    return xPacketId;
+  }
+
+  public void setxPacketId(String xPacketId) {
+    this.xPacketId = xPacketId;
+  }
+
   @Override
   public String toString() {
     return "MailAgentParams{" +
@@ -91,9 +100,11 @@ public class MailAgentParams {
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", msgid='" + msgid + '\'' +
+        ", seqNo=" + seqNo +
         ", toMsg='" + toMsg + '\'' +
         ", timestamp=" + timestamp +
         ", header='" + header + '\'' +
+        ", xPacketId='" + xPacketId + '\'' +
         '}';
   }
 }

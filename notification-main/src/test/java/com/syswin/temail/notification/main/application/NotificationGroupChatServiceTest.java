@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.Event.MemberRole;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
+import java.util.Arrays;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +35,7 @@ public class NotificationGroupChatServiceTest {
 //    params.setName("测试当事人名");
 //    params.setAdminName("测试触发人名");
 //    params.setTimestamp(System.currentTimeMillis());
+    params.setxPacketId(UUID.randomUUID().toString());
   }
 
   /**
@@ -45,6 +48,7 @@ public class NotificationGroupChatServiceTest {
     params.setTemail("a");
     params.setSeqNo(1L);
     params.setToMsg("这是一条群聊测试消息！");
+    params.setxPacketId("aaaaaa");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -57,6 +61,7 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMssageType(EventType.PULLED.getValue());
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
     params.setTemail("b");
+//    params.setxPacketId("aaaaaa");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -80,12 +85,15 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMssageType(EventType.ADD_MEMBER.getValue());
     params.setType(MemberRole.NORMAL.getValue());
     params.setTemail("d");
+    params.setName("dd");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
     params.setTemail("e");
+    params.setName("ee");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
     params.setTemail("f");
+    params.setName("ff");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -105,9 +113,9 @@ public class NotificationGroupChatServiceTest {
    */
   @Test
   public void testEventTypeDeleteMember() throws Exception {
-    params.setName("测试当事人名");
     params.setAdminName("测试触发人名");
-    params.setTemail("d,e,f");
+    params.setTemail(gson.toJson(Arrays.asList("d", "e", "f")));
+    params.setName(gson.toJson(Arrays.asList("dd", "ee", "ff")));
     params.setSessionMssageType(EventType.DELETE_MEMBER.getValue());
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
