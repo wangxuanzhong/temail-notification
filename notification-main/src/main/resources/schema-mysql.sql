@@ -1,6 +1,6 @@
 CREATE TABLE `event` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `x_packet_id` varchar(255) NOT NULL DEFAULT '' COMMENT 'x_packet_id',
+  `x_packet_id` varchar(255) DEFAULT '' COMMENT 'x_packet_id',
   `event_seq_id` bigint(20) NOT NULL COMMENT '事件序列号',
   `event_type` tinyint(2) NOT NULL COMMENT '事件类型',
   `msg_id` varchar(255) DEFAULT '' COMMENT '消息ID',
