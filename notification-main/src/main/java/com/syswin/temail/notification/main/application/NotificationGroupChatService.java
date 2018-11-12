@@ -210,8 +210,8 @@ public class NotificationGroupChatService {
    */
   private boolean checkXPacketId(Event event) {
     if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
-      LOGGER.error("xPacketId为空！");
-      return false;
+      LOGGER.warn("xPacketId为空！");
+      return true;
     }
 
     if (eventRepository.selectByXPacketId(event).isEmpty()) {
