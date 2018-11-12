@@ -74,7 +74,7 @@ public class NotificationGroupChatService {
           event.setFrom(event.getGroupTemail());
           event.setTo(event.getTemail());
           event.setMsgId(msgId);
-          if (eventRepository.selectEvent(event).size() == 0) {
+          if (eventRepository.selectEventsByMsgId(event).size() == 0) {
             this.insert(event);
             sendSingleMessage(event, header);
           } else {

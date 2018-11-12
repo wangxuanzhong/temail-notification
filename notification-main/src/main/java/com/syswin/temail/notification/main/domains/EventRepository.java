@@ -8,7 +8,7 @@ public interface EventRepository {
 
   List<Event> selectEventsByTo(String to, String parentMsgId, Long begin, Long end);
 
-  List<Event> selectEvent(Event event);
+  List<Event> selectEventsByMsgId(Event event);
 
   Integer deleteReplyEvents(Event event);
 

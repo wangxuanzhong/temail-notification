@@ -49,7 +49,7 @@
     ORDER BY `event_seq_id`
   </select>
 
-  <select id="selectEvent" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">
+  <select id="selectEventsByMsgId" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">
     SELECT
     <include refid="baseField"/>
     FROM `event`

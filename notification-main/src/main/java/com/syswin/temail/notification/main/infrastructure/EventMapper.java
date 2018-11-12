@@ -12,7 +12,7 @@ public interface EventMapper {
 
   List<Event> selectEventsByTo(@Param("to") String to, @Param("parentMsgId") String parentMsgId, @Param("begin") Long begin, @Param("end") Long end);
 
-  List<Event> selectEvent(Event event);
+  List<Event> selectEventsByMsgId(Event event);
 
   Integer deleteReplyEvents(Event event);
 
