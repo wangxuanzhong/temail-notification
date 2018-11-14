@@ -80,10 +80,7 @@ public class RocketMqConsumer {
             LOGGER.info("MQ：接收信息: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
             handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), type);
           }
-        } catch (InterruptedException | RemotingException | MQClientException | MQBrokerException | UnsupportedEncodingException | SendMqMessageException e) {
-          LOGGER.error(e.getMessage(), e);
         } catch (Exception e) {
-          // 非MQ相关异常，消息不返回成功
           LOGGER.error(e.getMessage(), e);
           return ConsumeConcurrentlyStatus.RECONSUME_LATER;
         }
