@@ -22,6 +22,7 @@ public class NotificationGroupChatServiceTest {
   private final String TEST_GROUP = "g";
   private final String TEST_GROUP_MSG_ID = "g-";
   private final String TOPIC = "temail-groupmail";
+  private final String PREFIX = "temail-notification-";
   MailAgentGroupChatParams params = new MailAgentGroupChatParams();
   @Autowired
   private NotificationGroupChatService notificationGroupChatService;
@@ -42,7 +43,7 @@ public class NotificationGroupChatServiceTest {
 //    params.setName("测试当事人名");
 //    params.setAdminName("测试触发人名");
 //    params.setTimestamp(System.currentTimeMillis());
-    params.setxPacketId(UUID.randomUUID().toString());
+    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
   }
 
   /**
@@ -279,7 +280,7 @@ public class NotificationGroupChatServiceTest {
   }
 
   private void sendMessage(MailAgentGroupChatParams param) throws Exception {
-    param.setxPacketId(UUID.randomUUID().toString());
+    param.setxPacketId(PREFIX + UUID.randomUUID().toString());
     rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
     Thread.sleep(2000);
   }

@@ -18,6 +18,7 @@ public class NotificationServiceTest {
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
   private final String TOPIC = "temail-usermail";
+  private final String PREFIX = "temail-notification-";
   MailAgentSingleChatParams params = new MailAgentSingleChatParams();
   private Gson gson = new Gson();
   @Autowired
@@ -29,7 +30,7 @@ public class NotificationServiceTest {
     params.setFrom(TEST_FROM);
     params.setTo(TEST_TO);
     params.setTimestamp(System.currentTimeMillis());
-    params.setxPacketId(UUID.randomUUID().toString());
+    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
   }
 
   /**

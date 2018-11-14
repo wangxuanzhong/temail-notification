@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class NotificationGroupChatService {
@@ -45,6 +46,7 @@ public class NotificationGroupChatService {
   /**
    * 处理从MQ收到的信息
    */
+  @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentGroupChatParams params = jsonService.fromJson(body, MailAgentGroupChatParams.class);
@@ -78,7 +80,7 @@ public class NotificationGroupChatService {
             this.insert(event);
             sendSingleMessage(event, header);
           } else {
-            LOGGER.info("消息{}已拉取，不重复处理，时间戳为：{}", msgId, event.getTimestamp());
+            LOGGER.info("消息{}已拉取，不重复处理。", msgId);
           }
         }
         break;
@@ -98,7 +100,7 @@ public class NotificationGroupChatService {
         if (!members.contains(event.getTemail())) {
           memberRepository.insert(event);
         } else {
-          LOGGER.info("{}已经是群{}的成员，不重复添加，时间戳为：{}", event.getTemail(), event.getGroupTemail(), event.getTimestamp());
+          LOGGER.info("{}已经是群{}的成员，不重复添加。", event.getTemail(), event.getGroupTemail());
         }
         event.notifyToAll();
         sendGroupMessage(event, header);
