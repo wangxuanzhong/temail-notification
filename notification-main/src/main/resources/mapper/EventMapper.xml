@@ -56,7 +56,7 @@
     WHERE `from` = #{from} AND `to` = #{to} AND `event_type` = #{eventType} AND `msg_id` = #{msgId}
   </select>
 
-  <delete id="deleteReplyEvents" parameterType="com.syswin.temail.notification.main.domains.Event">
+  <delete id="deleteResetEvents" parameterType="com.syswin.temail.notification.main.domains.Event">
     DELETE FROM `event`
     WHERE `event_type` = #{eventType} AND `to` = #{to} AND event_seq_id <![CDATA[<]]> #{eventSeqId}
     <if test="groupTemail != null and groupTemail != ''">AND group_temail = #{groupTemail}</if>

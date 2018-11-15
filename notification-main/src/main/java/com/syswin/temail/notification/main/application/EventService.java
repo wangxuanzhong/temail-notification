@@ -194,6 +194,6 @@ public class EventService {
     eventRepository.insert(event);
 
     // 删除历史重置事件
-    eventRepository.deleteReplyEvents(event);
+    eventRepository.deleteResetEvents(event);
   }
 }
