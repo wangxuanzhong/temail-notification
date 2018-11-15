@@ -10,5 +10,7 @@ public interface EventRepository {
 
   List<Event> selectEvent(Event event);
 
+  Integer deleteResetEvents(Event event);
+
   List<Event> selectByXPacketId(Event event);
 }

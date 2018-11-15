@@ -222,15 +222,19 @@ public class NotificationService {
   /**
    * 重置消息未读数
    */
+  @Transactional(rollbackFor = Exception.class)
   public void reset(Event event) {
-    LOGGER.info("重置[{}]的消息未读数，from: {}, groupTemail: {}", event.getTo(), event.getFrom(), event.getGroupTemail());
-    if (event.getGroupTemail() != null && !event.getGroupTemail().equals("")) {
+    LOGGER.info("重置[{}]的消息未读数：参数{}", event.getTo(), event);
+    if (event.getGroupTemail() != null && !event.getGroupTemail().isEmpty()) {
       event.setFrom(event.getGroupTemail());
     }
     event.setEventType(EventType.RESET.getValue());
-    event.setEventSeqId(redisService.getNextSeq(event.getTo()));
     event.setTimestamp(System.currentTimeMillis());
+    event.setEventSeqId(redisService.getNextSeq(event.getTo()));
     eventRepository.insert(event);
+
+    // 删除历史重置事件
+    eventRepository.deleteResetEvents(event);
   }
 
   /**
