@@ -4,18 +4,24 @@ public class MailAgentParams {
 
   public static final String MSG_ID_SPLIT = ",";
 
-  // eventType
+  // eventType 事件类型
   private Integer sessionMssageType;
   private String from;
   private String to;
   private String msgid;
-  // seqId
+  // 父消息ID
+  private String parentMsgId;
+  // seqId 消息序号
   private Long seqNo;
-  // message
+  // message 消息体
   private String toMsg;
+  // 时间戳
   private Long timestamp;
+  // @对象
+  private String at;
 
   private String header;
+
   private String xPacketId;
 
   public Integer getSessionMssageType() {
@@ -48,6 +54,14 @@ public class MailAgentParams {
 
   public void setMsgid(String msgid) {
     this.msgid = msgid;
+  }
+
+  public String getParentMsgId() {
+    return parentMsgId;
+  }
+
+  public void setParentMsgId(String parentMsgId) {
+    this.parentMsgId = parentMsgId;
   }
 
   public Long getSeqNo() {
@@ -85,6 +99,14 @@ public class MailAgentParams {
     this.header = header;
   }
 
+  public String getAt() {
+    return at;
+  }
+
+  public void setAt(String at) {
+    this.at = at;
+  }
+
   public String getxPacketId() {
     return xPacketId;
   }
@@ -100,9 +122,11 @@ public class MailAgentParams {
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", msgid='" + msgid + '\'' +
+        ", parentMsgId='" + parentMsgId + '\'' +
         ", seqNo=" + seqNo +
-        ", toMsg='" + toMsg + '\'' +
+        ", toMsg length='" + (toMsg == null ? 0 : toMsg.length()) + '\'' +
         ", timestamp=" + timestamp +
+        ", at='" + at + '\'' +
         ", header='" + header + '\'' +
         ", xPacketId='" + xPacketId + '\'' +
         '}';

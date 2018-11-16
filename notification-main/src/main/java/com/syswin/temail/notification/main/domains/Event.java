@@ -4,25 +4,46 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.foundation.application.SequenceService;
+import java.util.Objects;
 
 @JsonInclude(Include.NON_NULL)
-public class Event extends Message {
+public class Event {
 
   public static final String GROUP_CHAT_KEY_POSTFIX = "::event_group_chat";
 
+  // 事件参数
   @JsonIgnore
   private Long id;
   private Long eventSeqId;
   private Integer eventType;
 
+  // 单聊参数
+  private String msgId;
+  private String parentMsgId;
+  private Long seqId;
+  private String message;
+  private String from;
+  private String to;
+  private Long timestamp;
+
+  // 群聊参数
+  private String groupTemail;
+  private String temail;
+  @JsonIgnore
+  private Integer role;
+
+
+  // 以下参数均存入扩展参数字段
   // 当事人名称
   private String name;
-  // 触发人名称
+  // 管理员名称
   private String adminName;
   // 群名称
   private String groupName;
+  // @的temail
+  private String at;
 
-  // 扩展参数
   @JsonIgnore
   private String extendParam;
 
@@ -32,20 +53,36 @@ public class Event extends Message {
   public Event() {
   }
 
-  public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, Integer eventType, String xPacketId) {
-    super(msgId, seqId, message, from, to, timestamp);
+  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp,
+      String xPacketId) {
     this.eventType = eventType;
+    this.msgId = msgId;
+    this.parentMsgId = parentMsgId;
+    this.seqId = seqId;
+    this.message = message;
+    this.from = from;
+    this.to = to;
+    this.timestamp = timestamp;
     this.xPacketId = xPacketId;
   }
 
-
-  public Event(String msgId, Long seqId, String message, String from, String to, Long timestamp, String groupTemail, String temail,
-      Integer role, Integer eventType, String name, String adminName, String groupName, String xPacketId) {
-    super(msgId, seqId, message, from, to, timestamp, groupTemail, temail, role);
+  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp,
+      String groupTemail, String temail, Integer role, String name, String adminName, String groupName, String at, String xPacketId) {
     this.eventType = eventType;
+    this.msgId = msgId;
+    this.parentMsgId = parentMsgId;
+    this.seqId = seqId;
+    this.message = message;
+    this.from = from;
+    this.to = to;
+    this.timestamp = timestamp;
+    this.groupTemail = groupTemail;
+    this.temail = temail;
+    this.role = role;
     this.name = name;
     this.adminName = adminName;
     this.groupName = groupName;
+    this.at = at;
     this.xPacketId = xPacketId;
   }
 
@@ -53,14 +90,14 @@ public class Event extends Message {
    * 去除角色条件，即通知所有人
    */
   public void notifyToAll() {
-    this.setRole(null);
+    this.role = null;
   }
 
   /**
    * 角色设置为管理员，只通知管理员
    */
   public void notifyToAdmin() {
-    this.setRole(MemberRole.ADMIN.getValue());
+    this.role = MemberRole.ADMIN.getValue();
   }
 
 
@@ -70,14 +107,14 @@ public class Event extends Message {
    * @param eventType 需要匹配的通知类型
    */
   public void addEventMsgId(EventType eventType) {
-    this.setMsgId(this.getGroupTemail() + "_" + this.getTemail() + "_" + eventType.getValue());
+    this.msgId = this.groupTemail + "_" + this.temail + "_" + eventType.getValue();
   }
 
   /**
    * 清除通知类消息的msgId
    */
   public void removeEventMsgId() {
-    this.setMsgId(null);
+    this.msgId = null;
   }
 
   /**
@@ -89,6 +126,7 @@ public class Event extends Message {
       this.name = extendParam.getName();
       this.adminName = extendParam.getAdminName();
       this.groupName = extendParam.getGroupName();
+      this.at = extendParam.getAt();
     }
   }
 
@@ -96,7 +134,28 @@ public class Event extends Message {
    * 自动配置扩展字段
    */
   public void autoWriteExtendParam(JsonService jsonService) {
-    this.extendParam = jsonService.toJson(new ExtendParam(this.name, this.adminName, this.getGroupName()));
+    this.extendParam = jsonService.toJson(new ExtendParam(this.name, this.adminName, this.groupName, this.at));
+  }
+
+  /**
+   * 根据不同事件类型按照不同的key生成seqId
+   */
+  public void initEventSeqId(SequenceService sequenceService) {
+    switch (Objects.requireNonNull(EventType.getByValue(this.eventType))) {
+      case RESET:
+        if (this.parentMsgId != null) {
+          this.eventSeqId = sequenceService.getNextSeq(this.parentMsgId + "_" + this.to);
+        } else {
+          this.eventSeqId = sequenceService.getNextSeq(this.to);
+        }
+        break;
+      case REPLY:
+        this.eventSeqId = sequenceService.getNextSeq(this.parentMsgId + "_" + this.to);
+        break;
+      default:
+        this.eventSeqId = sequenceService.getNextSeq(this.to);
+        break;
+    }
   }
 
   public Long getId() {
@@ -123,6 +182,86 @@ public class Event extends Message {
     this.eventType = eventType;
   }
 
+  public String getMsgId() {
+    return msgId;
+  }
+
+  public void setMsgId(String msgId) {
+    this.msgId = msgId;
+  }
+
+  public String getParentMsgId() {
+    return parentMsgId;
+  }
+
+  public void setParentMsgId(String parentMsgId) {
+    this.parentMsgId = parentMsgId;
+  }
+
+  public Long getSeqId() {
+    return seqId;
+  }
+
+  public void setSeqId(Long seqId) {
+    this.seqId = seqId;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
+  }
+
+  public String getFrom() {
+    return from;
+  }
+
+  public void setFrom(String from) {
+    this.from = from;
+  }
+
+  public String getTo() {
+    return to;
+  }
+
+  public void setTo(String to) {
+    this.to = to;
+  }
+
+  public Long getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(Long timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  public String getGroupTemail() {
+    return groupTemail;
+  }
+
+  public void setGroupTemail(String groupTemail) {
+    this.groupTemail = groupTemail;
+  }
+
+  public String getTemail() {
+    return temail;
+  }
+
+  public void setTemail(String temail) {
+    this.temail = temail;
+  }
+
+  public Integer getRole() {
+    return role;
+  }
+
+  public void setRole(Integer role) {
+    this.role = role;
+  }
+
   public String getName() {
     return name;
   }
@@ -147,6 +286,14 @@ public class Event extends Message {
     this.groupName = groupName;
   }
 
+  public String getAt() {
+    return at;
+  }
+
+  public void setAt(String at) {
+    this.at = at;
+  }
+
   public String getExtendParam() {
     return extendParam;
   }
@@ -169,12 +316,23 @@ public class Event extends Message {
         "id=" + id +
         ", eventSeqId=" + eventSeqId +
         ", eventType=" + eventType +
+        ", msgId='" + msgId + '\'' +
+        ", parentMsgId='" + parentMsgId + '\'' +
+        ", seqId=" + seqId +
+        ", message length='" + (message == null ? 0 : message.length()) + '\'' +
+        ", from='" + from + '\'' +
+        ", to='" + to + '\'' +
+        ", timestamp=" + timestamp +
+        ", groupTemail='" + groupTemail + '\'' +
+        ", temail='" + temail + '\'' +
+        ", role=" + role +
         ", name='" + name + '\'' +
         ", adminName='" + adminName + '\'' +
         ", groupName='" + groupName + '\'' +
+        ", at='" + at + '\'' +
+        ", extendParam='" + extendParam + '\'' +
         ", xPacketId='" + xPacketId + '\'' +
-        '}' + " " +
-        super.toString();
+        '}';
   }
 
   public enum EventType {
@@ -186,6 +344,7 @@ public class Event extends Message {
     DESTROYED(3, "消息已焚毁"),
     DELETE(4, "消息已删除"),
     DESTROY(17, "阅后即焚消息发送"),
+    REPLY(18, "回复消息"),
 
     // 群管理部分
     APPLY(5, "入群申请"),
@@ -200,6 +359,7 @@ public class Event extends Message {
     ADD_GROUP(13, "新建群"),
     LEAVE_GROUP(15, "已退出群聊"),
     UPDATE_GROUP_CARD(16, "群名片更新");
+
 
     private final int value;
     private final String description;
@@ -247,6 +407,7 @@ public class Event extends Message {
   /**
    * 事件扩展参数
    */
+  @JsonInclude(Include.NON_NULL)
   class ExtendParam {
 
     // 当事人名称
@@ -255,11 +416,14 @@ public class Event extends Message {
     private String adminName;
     // 群名称
     private String groupName;
+    // @的temail
+    private String at;
 
-    public ExtendParam(String name, String adminName, String groupName) {
+    public ExtendParam(String name, String adminName, String groupName, String at) {
       this.name = name;
       this.adminName = adminName;
       this.groupName = groupName;
+      this.at = at;
     }
 
     public String getName() {
@@ -284,6 +448,14 @@ public class Event extends Message {
 
     public void setGroupName(String groupName) {
       this.groupName = groupName;
+    }
+
+    public String getAt() {
+      return at;
+    }
+
+    public void setAt(String at) {
+      this.at = at;
     }
   }
 }

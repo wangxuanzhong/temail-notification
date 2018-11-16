@@ -2,12 +2,19 @@ package com.syswin.temail.notification.main.domains.params;
 
 public class MailAgentGroupChatParams extends MailAgentParams {
 
+  // 群邮件
   private String groupTemail;
+  // 群名称
   private String groupName;
+  // 当事人
   private String temail;
+  // 当事人名称
   private String name;
+  // 管理员名称
   private String adminName;
+  // 成员类型
   private Integer type;
+
 
   public String getGroupTemail() {
     return groupTemail;
@@ -55,5 +62,17 @@ public class MailAgentGroupChatParams extends MailAgentParams {
 
   public void setType(Integer type) {
     this.type = type;
+  }
+
+  @Override
+  public String toString() {
+    return "MailAgentGroupChatParams{" +
+        "groupTemail='" + groupTemail + '\'' +
+        ", groupName='" + groupName + '\'' +
+        ", temail='" + temail + '\'' +
+        ", name='" + name + '\'' +
+        ", adminName='" + adminName + '\'' +
+        ", type=" + type +
+        '}' + super.toString();
   }
 }
