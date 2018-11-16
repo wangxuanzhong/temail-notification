@@ -19,6 +19,7 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,12 +99,17 @@ public class NotificationGroupChatService {
         // 校验群成员是否已存在，不存在时添加到数据库
         List<String> members = memberRepository.selectByGroupTemail(event);
         if (!members.contains(event.getTemail())) {
-          memberRepository.insert(event);
+          // 添加唯一索引校验，防止并发问题
+          try {
+            memberRepository.insert(event);
+          } catch (DuplicateKeyException e) {
+            LOGGER.warn("重复添加群成员异常：" + e);
+          }
+          event.notifyToAll();
+          sendGroupMessage(event, header);
         } else {
           LOGGER.info("{}已经是群{}的成员，不重复添加。", event.getTemail(), event.getGroupTemail());
         }
-        event.notifyToAll();
-        sendGroupMessage(event, header);
         break;
       case DELETE_MEMBER:
         List<String> temails = jsonService.fromJson(event.getTemail(), List.class);

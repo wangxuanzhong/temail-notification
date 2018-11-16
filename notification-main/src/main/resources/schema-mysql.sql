@@ -12,7 +12,8 @@ CREATE TABLE `event` (
   `extend_param` mediumtext COMMENT '扩展字段',
   `timestamp` bigint(20) NOT NULL COMMENT '客户端消息发送时间',
   `create_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `to` (`to`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `member` (
@@ -20,6 +21,7 @@ CREATE TABLE `member` (
   `group_temail` varchar(320) NOT NULL COMMENT '群邮件',
   `temail` varchar(320) NOT NULL COMMENT '用户邮件',
   `role` tinyint(1) NOT NULL DEFAULT '0' COMMENT '群角色',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique` (`group_temail`,`temail`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
