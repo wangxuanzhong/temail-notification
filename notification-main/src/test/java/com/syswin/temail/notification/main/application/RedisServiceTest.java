@@ -2,6 +2,7 @@ package com.syswin.temail.notification.main.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,13 @@ public class RedisServiceTest {
       System.out.println(seq);
       assertThat(seq).isEqualTo(i);
     }
+  }
+
+  @Test
+  public void testCheckUnique() {
+    String key = UUID.randomUUID().toString();
+    assertThat(redisService.checkUnique(key)).isTrue();
+    assertThat(redisService.checkUnique(key)).isFalse();
   }
 
   //  @Test

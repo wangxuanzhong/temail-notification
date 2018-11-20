@@ -10,7 +10,7 @@ CREATE TABLE `event` (
   `group_temail` varchar(320) DEFAULT '' COMMENT '群聊邮箱',
   `temail` varchar(320) DEFAULT '' COMMENT '当事人邮箱',
   `extend_param` mediumtext COMMENT '扩展字段',
-  `timestamp` bigint(20) NOT NULL COMMENT '客户端消息发送时间',
+  `timestamp` bigint(20) DEFAULT '0' COMMENT '客户端消息发送时间',
   `create_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `to` (`to`)

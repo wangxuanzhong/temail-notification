@@ -20,6 +20,7 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -79,6 +80,8 @@ public class RocketMqConsumer {
             LOGGER.info("MQ：接收信息: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
             handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), type);
           }
+        } catch (DuplicateKeyException e) {
+          LOGGER.warn("数据库唯一索引异常：" + e);
         } catch (Exception e) {
           LOGGER.error(e.getMessage(), e);
           return ConsumeConcurrentlyStatus.RECONSUME_LATER;
@@ -96,11 +99,9 @@ public class RocketMqConsumer {
       throws InterruptedException, RemotingException, UnsupportedEncodingException, MQClientException, MQBrokerException {
     switch (type) {
       case TYPE_0_SINGLE_CHAT:
-        LOGGER.info("单聊消息内容：\n" + body);
         notificationService.handleMqMessage(body);
         break;
       case TYPE_1_GROUP_CHAT:
-        LOGGER.info("群聊消息内容：\n" + body);
         notificationGroupChatService.handleMqMessage(body);
         break;
     }

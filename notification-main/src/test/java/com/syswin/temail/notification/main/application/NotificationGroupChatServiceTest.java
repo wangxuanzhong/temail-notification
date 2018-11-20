@@ -66,7 +66,7 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypePulled() throws Exception {
     params.setSessionMssageType(EventType.PULLED.getValue());
-    params.setMsgid(TEST_GROUP_MSG_ID + "1");
+    params.setMsgid(TEST_GROUP_MSG_ID + "1," + TEST_GROUP_MSG_ID + "2," + TEST_GROUP_MSG_ID + "3");
     params.setTemail("b");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
@@ -88,6 +88,7 @@ public class NotificationGroupChatServiceTest {
    */
   @Test
   public void testEventTypeAddMember() throws Exception {
+//    params.setxPacketId("aaaaaaaaa");
     params.setSessionMssageType(EventType.ADD_MEMBER.getValue());
     params.setType(MemberRole.NORMAL.getValue());
     params.setTemail("d");
@@ -156,6 +157,11 @@ public class NotificationGroupChatServiceTest {
   }
 
 
+  /**
+   * 完成群聊流程
+   *
+   * 期待结果5 66 77 8 14 9 10*15 0*5 1*3 2*5 18*5 11*10 15*5 16*2 12*2 = 58
+   */
   @Test
   public void testAll() throws Exception {
     MailAgentGroupChatParams param = null;
@@ -200,16 +206,16 @@ public class NotificationGroupChatServiceTest {
     this.sendMessage(param);
     param.setTemail("c_all");
     param.setName("c_all_name");
-    this.sendMessage(param);
+    this.sendMessage(param, true);
     param.setTemail("d_all");
     param.setName("d_all_name");
-    this.sendMessage(param);
+    this.sendMessage(param, true);
     param.setTemail("e_all");
     param.setName("e_all_name");
-    this.sendMessage(param);
+    this.sendMessage(param, true);
     param.setTemail("f_all");
     param.setName("f_all_name");
-    this.sendMessage(param);
+    this.sendMessage(param, true);
 
     // 消息发送 0
     param = init(groupTemail);
@@ -280,7 +286,13 @@ public class NotificationGroupChatServiceTest {
   }
 
   private void sendMessage(MailAgentGroupChatParams param) throws Exception {
-    param.setxPacketId(PREFIX + UUID.randomUUID().toString());
+    sendMessage(param, false);
+  }
+
+  private void sendMessage(MailAgentGroupChatParams param, boolean isSamePacket) throws Exception {
+    if (!isSamePacket) {
+      param.setxPacketId(PREFIX + UUID.randomUUID().toString());
+    }
     rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
     Thread.sleep(2000);
   }

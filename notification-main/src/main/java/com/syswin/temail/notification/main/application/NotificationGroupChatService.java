@@ -1,7 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.foundation.application.JsonService;
-import com.syswin.temail.notification.foundation.application.SequenceService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.Event.MemberRole;
@@ -29,16 +28,16 @@ public class NotificationGroupChatService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final RocketMqProducer rocketMqProducer;
-  private final SequenceService sequenceService;
+  private final RedisService redisService;
   private final EventRepository eventRepository;
   private final MemberRepository memberRepository;
   private final JsonService jsonService;
 
   @Autowired
-  public NotificationGroupChatService(RocketMqProducer rocketMqProducer, SequenceService sequenceService, EventRepository eventRepository,
+  public NotificationGroupChatService(RocketMqProducer rocketMqProducer, RedisService redisService, EventRepository eventRepository,
       MemberRepository memberRepository, JsonService jsonService) {
     this.rocketMqProducer = rocketMqProducer;
-    this.sequenceService = sequenceService;
+    this.redisService = redisService;
     this.eventRepository = eventRepository;
     this.memberRepository = memberRepository;
     this.jsonService = jsonService;
@@ -58,10 +57,11 @@ public class NotificationGroupChatService {
     // 前端需要的头信息
     String header = params.getHeader();
 
+    LOGGER.info("群聊消息内容：\n" + params);
     LOGGER.info("群聊收到的事件类型为：" + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
 
     // 校验收到的数据是否重复
-    if (!this.checkXPacketId(event)) {
+    if (!this.checkUnique(event)) {
       return;
     }
 
@@ -185,7 +185,7 @@ public class NotificationGroupChatService {
    * 插入数据库
    */
   private void insert(Event event) {
-    event.initEventSeqId(sequenceService);
+    event.initEventSeqId(redisService);
     event.autoWriteExtendParam(jsonService);
     eventRepository.insert(event);
   }
@@ -220,16 +220,16 @@ public class NotificationGroupChatService {
   /**
    * 幂等校验
    */
-  public boolean checkXPacketId(Event event) {
+  public boolean checkUnique(Event event) {
     if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
       LOGGER.warn("xPacketId为空！");
       return true;
     }
 
-    if (eventRepository.selectByXPacketId(event).isEmpty()) {
+    if (redisService.checkUnique(event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail())) {
       return true;
     } else {
-      LOGGER.error("数据重复：event --> {}", event);
+      LOGGER.warn("幂等校验失败：" + event);
       return false;
     }
   }
