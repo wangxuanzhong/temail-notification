@@ -35,9 +35,4 @@ public class EventRepositoryImpl implements EventRepository {
   public Integer deleteResetEvents(Event event) {
     return eventMapper.deleteResetEvents(event);
   }
-
-  @Override
-  public List<Event> selectByXPacketId(Event event) {
-    return eventMapper.selectByXPacketId(event);
-  }
 }

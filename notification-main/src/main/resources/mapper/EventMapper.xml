@@ -61,13 +61,4 @@
     WHERE `event_type` = #{eventType} AND `from` = #{from} AND `to` = #{to} AND event_seq_id <![CDATA[<]]> #{eventSeqId}
     <if test="groupTemail != null and groupTemail != ''">AND group_temail = #{groupTemail}</if>
   </delete>
-
-  <select id="selectByXPacketId" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">
-    SELECT
-    <include refid="baseField"/>
-    FROM `event`
-    WHERE `x_packet_id` = #{xPacketId} AND `event_type` = #{eventType}
-    <if test="groupTemail != null and groupTemail != ''">AND group_temail = #{groupTemail}</if>
-    <if test="temail != null and temail != ''">AND temail = #{temail}</if>
-  </select>
 </mapper>

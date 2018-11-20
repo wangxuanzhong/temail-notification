@@ -15,6 +15,4 @@ public interface EventMapper {
   List<Event> selectEventsByMsgId(Event event);
 
   Integer deleteResetEvents(Event event);
-
-  List<Event> selectByXPacketId(Event event);
 }
