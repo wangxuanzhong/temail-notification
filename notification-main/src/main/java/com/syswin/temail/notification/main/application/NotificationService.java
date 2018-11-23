@@ -9,6 +9,7 @@ import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatPar
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 import java.util.Objects;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -45,8 +46,11 @@ public class NotificationService {
   public void handleMqMessage(String body)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentSingleChatParams params = jsonService.fromJson(body, MailAgentSingleChatParams.class);
-    Event event = new Event(params.getSessionMssageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId());
+    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
+        params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId(), params.getDeleteAllMsg());
+
+    // 前端需要的头信息
+    String header = params.getHeader();
 
     LOGGER.info("单聊消息内容：\n" + params);
     LOGGER.info("单聊收到的事件类型为：" + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
@@ -62,19 +66,26 @@ public class NotificationService {
       case RETRACT:
       case DESTROYED:
       case REPLY:
-        this.insert(event);
-        rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), params.getHeader(), jsonService.toJson(event))));
+        sendMessage(event, header);
         break;
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
           if (eventRepository.selectEventsByMsgId(event).size() == 0) {
-            this.insert(event);
-            rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), params.getHeader(), jsonService.toJson(event))));
+            sendMessage(event, header);
           } else {
             LOGGER.info("消息{}已拉取，不重复处理。", msgId);
           }
         }
+        break;
+      case DELETE:
+        // 删除操作msgId是多条，存入msgIds字段
+        event.setMsgIds(jsonService.fromJson(event.getMsgId(), List.class));
+        event.setMsgId(null);
+        // from和to与正常业务相反
+        event.setFrom(params.getTo());
+        event.setTo(params.getFrom());
+        sendMessage(event, header);
         break;
     }
   }
@@ -86,6 +97,18 @@ public class NotificationService {
     event.initEventSeqId(redisService);
     event.autoWriteExtendParam(jsonService);
     eventRepository.insert(event);
+  }
+
+  /**
+   * 发送消息
+   */
+  private void sendMessage(Event event, String header)
+      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+    LOGGER.info("向{}发送通知，通知类型为：{}", event.getTo(), Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+    if (event.getTo() != null && !event.getTo().isEmpty()) {
+      this.insert(event);
+      rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), header, jsonService.toJson(event))));
+    }
   }
 
   /**

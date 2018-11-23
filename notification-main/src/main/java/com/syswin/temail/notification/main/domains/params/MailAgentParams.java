@@ -5,7 +5,7 @@ public class MailAgentParams {
   public static final String MSG_ID_SPLIT = ",";
 
   // eventType 事件类型
-  private Integer sessionMssageType;
+  private Integer sessionMessageType;
   private String from;
   private String to;
   private String msgid;
@@ -21,15 +21,14 @@ public class MailAgentParams {
   private String at;
 
   private String header;
-
   private String xPacketId;
 
-  public Integer getSessionMssageType() {
-    return sessionMssageType;
+  public Integer getSessionMessageType() {
+    return sessionMessageType;
   }
 
-  public void setSessionMssageType(Integer sessionMssageType) {
-    this.sessionMssageType = sessionMssageType;
+  public void setSessionMessageType(Integer sessionMessageType) {
+    this.sessionMessageType = sessionMessageType;
   }
 
   public String getFrom() {
@@ -118,7 +117,7 @@ public class MailAgentParams {
   @Override
   public String toString() {
     return "MailAgentParams{" +
-        "sessionMssageType=" + sessionMssageType +
+        "sessionMessageType=" + sessionMessageType +
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", msgid='" + msgid + '\'' +

@@ -50,7 +50,7 @@ public class NotificationGroupChatService {
   public void handleMqMessage(String body)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentGroupChatParams params = jsonService.fromJson(body, MailAgentGroupChatParams.class);
-    Event event = new Event(params.getSessionMssageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
+    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
         params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(), params.getType(), params.getName(),
         params.getAdminName(), params.getGroupName(), params.getAt(), params.getxPacketId());
 
@@ -70,7 +70,7 @@ public class NotificationGroupChatService {
       case RETRACT:
       case REPLY:
         event.notifyToAll();
-        sendGroupMessage(event, header);
+        this.sendGroupMessage(event, header);
         break;
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentGroupChatParams.MSG_ID_SPLIT)) {
@@ -78,12 +78,18 @@ public class NotificationGroupChatService {
           event.setTo(event.getTemail());
           event.setMsgId(msgId);
           if (eventRepository.selectEventsByMsgId(event).size() == 0) {
-            this.insert(event);
-            sendSingleMessage(event, header);
+            this.sendSingleMessage(event, header);
           } else {
             LOGGER.info("消息{}已拉取，不重复处理。", msgId);
           }
         }
+        break;
+      case DELETE:
+        // 删除操作msgId是多条，存入msgIds字段
+        event.setMsgIds(jsonService.fromJson(event.getMsgId(), List.class));
+        event.setMsgId(null);
+        event.notifyToAll();
+        this.sendGroupMessage(event, header);
         break;
       case ADD_GROUP:
         event.setRole(MemberRole.ADMIN.getValue());
@@ -91,7 +97,7 @@ public class NotificationGroupChatService {
         break;
       case DELETE_GROUP:
         event.notifyToAll();
-        sendGroupMessage(event, header);
+        this.sendGroupMessage(event, header);
         event.setTemail(null);
         memberRepository.deleteGroupMember(event);
         break;
@@ -106,7 +112,7 @@ public class NotificationGroupChatService {
             LOGGER.warn("重复添加群成员异常：" + e);
           }
           event.notifyToAll();
-          sendGroupMessage(event, header);
+          this.sendGroupMessage(event, header);
         } else {
           LOGGER.info("{}已经是群{}的成员，不重复添加。", event.getTemail(), event.getGroupTemail());
         }
@@ -130,53 +136,50 @@ public class NotificationGroupChatService {
           event.setName(names.get(i));
           // 通知所有人
           event.notifyToAll();
-          sendGroupMessage(event, header);
+          this.sendGroupMessage(event, header);
           // 通知当事人被移除群聊
           event.setFrom(event.getGroupTemail());
           event.setTo(temails.get(i));
           event.setTemail(temails.get(i));
-          this.insert(event);
-          sendSingleMessage(event, header);
+          this.sendSingleMessage(event, header);
         }
 
         break;
       case LEAVE_GROUP:
         memberRepository.deleteGroupMember(event);
         event.notifyToAll();
-        sendGroupMessage(event, header);
+        this.sendGroupMessage(event, header);
         break;
       case APPLY:
         event.notifyToAdmin();
         event.addEventMsgId(EventType.APPLY);
-        sendGroupMessage(event, header);
+        this.sendGroupMessage(event, header);
         break;
       case APPLY_ADOPT:
       case APPLY_REFUSE:
         // 通知所有管理员
         event.notifyToAdmin();
         event.addEventMsgId(EventType.APPLY);
-        sendGroupMessage(event, header);
+        this.sendGroupMessage(event, header);
         // 通知申请人
         event.removeEventMsgId();
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
-        this.insert(event);
-        sendSingleMessage(event, header);
+        this.sendSingleMessage(event, header);
         break;
       case INVITATION:
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
-        this.insert(event);
-        sendSingleMessage(event, header);
+        this.sendSingleMessage(event, header);
         break;
       case INVITATION_ADOPT:
       case INVITATION_REFUSE:
         event.notifyToAdmin();
-        sendGroupMessage(event, header);
+        this.sendGroupMessage(event, header);
         break;
       case UPDATE_GROUP_CARD:
         event.notifyToAll();
-        sendGroupMessage(event, header);
+        this.sendGroupMessage(event, header);
         break;
     }
   }
@@ -196,7 +199,8 @@ public class NotificationGroupChatService {
   private void sendSingleMessage(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("向{}发送通知，通知类型为：{}", event.getTo(), Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
-    if (event.getTo() != null && !event.getTo().equals("")) {
+    if (event.getTo() != null && !event.getTo().isEmpty()) {
+      this.insert(event);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), header, jsonService.toJson(event))));
     }
   }

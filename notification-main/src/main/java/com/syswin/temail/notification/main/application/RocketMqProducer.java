@@ -70,13 +70,6 @@ public class RocketMqProducer {
     sendMessage(body, topic, "", "");
   }
 
-  /**
-   * 数据一致性使用此方法保存发送内容
-   */
-  public void saveMessage(String body) {
-    // TODO
-  }
-
   @PreDestroy
   public void stop() {
     if (producer != null) {

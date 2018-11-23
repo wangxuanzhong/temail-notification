@@ -51,7 +51,7 @@ public class NotificationGroupChatServiceTest {
    */
   @Test
   public void testEventTypeReceive() throws Exception {
-    params.setSessionMssageType(EventType.RECEIVE.getValue());
+    params.setSessionMessageType(EventType.RECEIVE.getValue());
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
     params.setTemail("a");
     params.setSeqNo(1L);
@@ -65,9 +65,22 @@ public class NotificationGroupChatServiceTest {
    */
   @Test
   public void testEventTypePulled() throws Exception {
-    params.setSessionMssageType(EventType.PULLED.getValue());
+    params.setSessionMessageType(EventType.PULLED.getValue());
     params.setMsgid(TEST_GROUP_MSG_ID + "1," + TEST_GROUP_MSG_ID + "2," + TEST_GROUP_MSG_ID + "3");
     params.setTemail("b");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
+   * EventType DESTROYED 4 消息已删除
+   */
+  @Test
+  public void testEventTypeDelete() throws Exception {
+    params.setSessionMessageType(EventType.DELETE.getValue());
+    params.setTemail("a");
+    params.setAdminName("aa");
+    params.setMsgid(gson.toJson(Arrays.asList("1", "2", "3")));
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -77,7 +90,7 @@ public class NotificationGroupChatServiceTest {
    */
   @Test
   public void testEventTypeRetract() throws Exception {
-    params.setSessionMssageType(EventType.RETRACT.getValue());
+    params.setSessionMessageType(EventType.RETRACT.getValue());
     params.setMsgid("1");
     params.setTemail("a");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
@@ -89,16 +102,19 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeAddMember() throws Exception {
 //    params.setxPacketId("aaaaaaaaa");
-    params.setSessionMssageType(EventType.ADD_MEMBER.getValue());
+    params.setSessionMessageType(EventType.ADD_MEMBER.getValue());
     params.setType(MemberRole.NORMAL.getValue());
     params.setTemail("d");
     params.setName("dd");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     params.setTemail("e");
     params.setName("ee");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
     params.setTemail("f");
     params.setName("ff");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
@@ -110,7 +126,7 @@ public class NotificationGroupChatServiceTest {
    */
   @Test
   public void testEventTypeAddGroup() throws Exception {
-    params.setSessionMssageType(EventType.ADD_GROUP.getValue());
+    params.setSessionMessageType(EventType.ADD_GROUP.getValue());
     params.setTemail("a");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
@@ -123,7 +139,7 @@ public class NotificationGroupChatServiceTest {
     params.setAdminName("测试触发人名");
     params.setTemail(gson.toJson(Arrays.asList("d", "e", "f")));
     params.setName(gson.toJson(Arrays.asList("dd", "ee", "ff")));
-    params.setSessionMssageType(EventType.DELETE_MEMBER.getValue());
+    params.setSessionMessageType(EventType.DELETE_MEMBER.getValue());
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -133,7 +149,7 @@ public class NotificationGroupChatServiceTest {
    */
   @Test
   public void testEventTypeUpdateGroupCard() throws Exception {
-    params.setSessionMssageType(EventType.UPDATE_GROUP_CARD.getValue());
+    params.setSessionMessageType(EventType.UPDATE_GROUP_CARD.getValue());
     params.setGroupName("测试组名");
     params.setName("测试当事人名");
     params.setAdminName("测试触发人名");
@@ -145,7 +161,7 @@ public class NotificationGroupChatServiceTest {
    */
   @Test
   public void testEventTypeReply() throws Exception {
-    params.setSessionMssageType(EventType.REPLY.getValue());
+    params.setSessionMessageType(EventType.REPLY.getValue());
     params.setMsgid(TEST_GROUP_MSG_ID + "reply_5");
     params.setTemail("a");
     params.setParentMsgId("g_333");
@@ -169,37 +185,37 @@ public class NotificationGroupChatServiceTest {
 
     // 创建群 13
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.ADD_GROUP.getValue());
+    param.setSessionMessageType(EventType.ADD_GROUP.getValue());
     param.setTemail("a_all");
     this.sendMessage(param);
 
     // 入群申请 5
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.APPLY.getValue());
+    param.setSessionMessageType(EventType.APPLY.getValue());
     param.setTemail("b_all");
     this.sendMessage(param);
     // 入群申请已通过 6
-    param.setSessionMssageType(EventType.APPLY_ADOPT.getValue());
+    param.setSessionMessageType(EventType.APPLY_ADOPT.getValue());
     this.sendMessage(param);
     // 入群申请已拒绝 7
-    param.setSessionMssageType(EventType.APPLY_REFUSE.getValue());
+    param.setSessionMessageType(EventType.APPLY_REFUSE.getValue());
     this.sendMessage(param);
 
     // 入群邀请 8
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.INVITATION.getValue());
+    param.setSessionMessageType(EventType.INVITATION.getValue());
     param.setTemail("c_all");
     this.sendMessage(param);
     // 入群邀请已通过 14
-    param.setSessionMssageType(EventType.INVITATION_ADOPT.getValue());
+    param.setSessionMessageType(EventType.INVITATION_ADOPT.getValue());
     this.sendMessage(param);
     // 入群邀请已拒绝 9
-    param.setSessionMssageType(EventType.INVITATION_REFUSE.getValue());
+    param.setSessionMessageType(EventType.INVITATION_REFUSE.getValue());
     this.sendMessage(param);
 
     // 新成员入群 10
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.ADD_MEMBER.getValue());
+    param.setSessionMessageType(EventType.ADD_MEMBER.getValue());
     param.setType(MemberRole.NORMAL.getValue());
     param.setTemail("b_all");
     param.setName("b_all_name");
@@ -219,7 +235,7 @@ public class NotificationGroupChatServiceTest {
 
     // 消息发送 0
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.RECEIVE.getValue());
+    param.setSessionMessageType(EventType.RECEIVE.getValue());
     param.setTemail("a_all");
     param.setMsgid("g_all_1");
     param.setToMsg("这是一条群聊测试消息！");
@@ -227,19 +243,19 @@ public class NotificationGroupChatServiceTest {
     this.sendMessage(param);
     // 消息已拉取 1
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.PULLED.getValue());
+    param.setSessionMessageType(EventType.PULLED.getValue());
     param.setTemail("b_all");
     param.setMsgid("g_all_1, g_all_2, g_all_3");
     this.sendMessage(param);
     // 消息已撤回 2
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.RETRACT.getValue());
+    param.setSessionMessageType(EventType.RETRACT.getValue());
     param.setTemail("a_all");
     param.setMsgid("g_all_1");
     this.sendMessage(param);
     // 回复消息 18
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.REPLY.getValue());
+    param.setSessionMessageType(EventType.REPLY.getValue());
     param.setTemail("b_all");
     param.setMsgid("g_reply_a");
     param.setToMsg("这是一条回复消息！");
@@ -250,7 +266,7 @@ public class NotificationGroupChatServiceTest {
 
     // 群成员被移除 11
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.DELETE_MEMBER.getValue());
+    param.setSessionMessageType(EventType.DELETE_MEMBER.getValue());
     param.setAdminName("测试管理员名称");
     param.setTemail(gson.toJson(Arrays.asList("e_all", "f_all")));
     param.setName(gson.toJson(Arrays.asList("e_all_name", "f_all_name")));
@@ -258,13 +274,13 @@ public class NotificationGroupChatServiceTest {
 
     // 已退出群聊 15
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.LEAVE_GROUP.getValue());
+    param.setSessionMessageType(EventType.LEAVE_GROUP.getValue());
     param.setTemail("d_all");
     this.sendMessage(param);
 
     // 群名片更新 16
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.UPDATE_GROUP_CARD.getValue());
+    param.setSessionMessageType(EventType.UPDATE_GROUP_CARD.getValue());
     param.setTemail("a_all");
     param.setGroupName("测试组名");
     param.setName("测试当事人名");
@@ -273,7 +289,7 @@ public class NotificationGroupChatServiceTest {
 
     // 群已解散 12
     param = init(groupTemail);
-    param.setSessionMssageType(EventType.DELETE_GROUP.getValue());
+    param.setSessionMessageType(EventType.DELETE_GROUP.getValue());
     param.setTemail("a_all");
     this.sendMessage(param);
   }

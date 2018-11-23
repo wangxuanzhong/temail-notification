@@ -3,6 +3,7 @@ package com.syswin.temail.notification.main.application;
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
+import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +39,7 @@ public class NotificationServiceTest {
    */
   @Test
   public void testEventTypeReceive() throws Exception {
-    params.setSessionMssageType(EventType.RECEIVE.getValue());
+    params.setSessionMessageType(EventType.RECEIVE.getValue());
     params.setMsgid("1");
     params.setSeqNo(1L);
     params.setToMsg("这是一条单聊测试消息！");
@@ -51,7 +52,7 @@ public class NotificationServiceTest {
    */
   @Test
   public void testEventTypePulled() throws Exception {
-    params.setSessionMssageType(EventType.PULLED.getValue());
+    params.setSessionMessageType(EventType.PULLED.getValue());
     params.setMsgid("1,2,3");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
@@ -62,7 +63,7 @@ public class NotificationServiceTest {
    */
   @Test
   public void testEventTypeRetract() throws Exception {
-    params.setSessionMssageType(EventType.RETRACT.getValue());
+    params.setSessionMessageType(EventType.RETRACT.getValue());
     params.setMsgid("1");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
@@ -73,8 +74,33 @@ public class NotificationServiceTest {
    */
   @Test
   public void testEventTypeDestroyed() throws Exception {
-    params.setSessionMssageType(EventType.DESTROYED.getValue());
+    params.setSessionMessageType(EventType.DESTROYED.getValue());
     params.setMsgid("2");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
+   * EventType DESTROYED 4 消息已删除
+   */
+  @Test
+  public void testEventTypeDelete() throws Exception {
+    // 批量删除消息
+    params.setSessionMessageType(EventType.DELETE.getValue());
+    params.setMsgid(gson.toJson(Arrays.asList("1", "2", "3")));
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+
+    // 删除会话
+    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
+    params.setMsgid(null);
+    params.setDeleteAllMsg(false);
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+
+    // 删除会话和消息
+    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
+    params.setDeleteAllMsg(true);
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -84,7 +110,7 @@ public class NotificationServiceTest {
    */
   @Test
   public void testEventTypeDestroy() throws Exception {
-    params.setSessionMssageType(EventType.DESTROY.getValue());
+    params.setSessionMessageType(EventType.DESTROY.getValue());
     params.setMsgid("2");
     params.setSeqNo(2L);
     params.setToMsg("这是一条单聊阅后即焚测试消息！");
@@ -97,7 +123,7 @@ public class NotificationServiceTest {
    */
   @Test
   public void testEventTypeReply() throws Exception {
-    params.setSessionMssageType(EventType.REPLY.getValue());
+    params.setSessionMessageType(EventType.REPLY.getValue());
     params.setMsgid("reply_1");
     params.setParentMsgId("1");
     params.setSeqNo(1L);
