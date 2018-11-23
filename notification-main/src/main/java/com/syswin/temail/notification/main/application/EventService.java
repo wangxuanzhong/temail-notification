@@ -53,17 +53,23 @@ public class EventService {
     // 如果pageSize为空则不限制查询条数
     List<Event> events = eventRepository.selectEventsByTo(to, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
-    Map<String, Event> eventMap = new HashMap<>();
+    Map<String, Map<String, Event>> eventMap = new HashMap<>();
     List<Event> notifyEvents = new ArrayList<>();
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
+      // 按照会话统计事件，方便对单个会话多事件进行处理
+      String key = event.getFrom();
+      if (!eventMap.containsKey(key)) {
+        eventMap.put(key, new HashMap<>());
+      }
+      Map<String, Event> sessionEventMap = eventMap.get(key);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case RECEIVE:
         case DESTROY:
         case DESTROYED:
         case APPLY:
         case REPLY:
-          eventMap.put(event.getMsgId(), event);
+          sessionEventMap.put(event.getMsgId(), event);
           break;
         case DELETE_GROUP:
         case ADD_MEMBER:
@@ -79,16 +85,37 @@ public class EventService {
         case RETRACT:
         case APPLY_ADOPT:
         case APPLY_REFUSE:
-          if (eventMap.containsKey(event.getMsgId())) {
-            eventMap.remove(event.getMsgId());
+          if (sessionEventMap.containsKey(event.getMsgId())) {
+            sessionEventMap.remove(event.getMsgId());
           } else {
-            eventMap.put(event.getMsgId(), event);
+            sessionEventMap.put(event.getMsgId(), event);
+          }
+          break;
+        case DELETE:
+          // msgIds不为空，则为批量删除消息
+          if (event.getMsgIds() != null) {
+            List<String> msgIds = new ArrayList<>(event.getMsgIds());
+            event.getMsgIds().forEach(msgId -> {
+              if (sessionEventMap.containsKey(msgId)) {
+                sessionEventMap.remove(msgId);
+                msgIds.remove(msgId); // 删除已出现的msgId
+              }
+            });
+            // 将此次拉取中未出现的msgId添加到删除事件中，供前端处理
+            if (!msgIds.isEmpty()) {
+              event.setMsgIds(msgIds);
+              notifyEvents.add(event);
+            }
+          } else {  // 单聊删除会话和消息
+            if (event.getDeleteAllMsg() != null && event.getDeleteAllMsg()) {
+              sessionEventMap.clear();
+            }
+            notifyEvents.add(event);
           }
           break;
       }
     });
-
-    notifyEvents.addAll(eventMap.values());
+    eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
 
     Map<String, Object> result = new HashMap<>();
@@ -118,6 +145,7 @@ public class EventService {
 
     Map<String, List<String>> unreadMap = new HashMap<>();
     events.forEach(event -> {
+      event.autoReadExtendParam(jsonService);
       // 为了区分单聊和群聊，给群聊添加后缀
       String key = event.getFrom();
       if (event.getGroupTemail() != null && !event.getGroupTemail().equals("")) {
@@ -158,6 +186,27 @@ public class EventService {
             msgIds.remove(event.getMsgId());
           } else {
             msgIds.add(event.getMsgId());
+          }
+          break;
+        case DELETE:
+          // msgIds不为空，则为批量删除消息
+          if (event.getMsgIds() != null) {
+            List<String> deleteMsgIds = new ArrayList<>(event.getMsgIds());
+            event.getMsgIds().forEach(msgId -> {
+              if (msgIds.remove(msgId)) {
+                deleteMsgIds.remove(msgId);
+              }
+            });
+
+            // 如果有未出现的msgId，则删除通知仍需处理，算入未读数中
+            if (!deleteMsgIds.isEmpty()) {
+              msgIds.add("notify event msgId");
+            }
+          } else { // 单聊删除会话和消息
+            if (event.getDeleteAllMsg() != null && event.getDeleteAllMsg()) {
+              msgIds.clear();
+            }
+            msgIds.add("notify event msgId");
           }
           break;
       }

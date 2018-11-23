@@ -80,7 +80,7 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMessageType(EventType.DELETE.getValue());
     params.setTemail("a");
     params.setAdminName("aa");
-    params.setMsgid(gson.toJson(Arrays.asList("1", "2", "3")));
+    params.setMsgid(gson.toJson(Arrays.asList("g-2", "g-3", "g-4")));
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }

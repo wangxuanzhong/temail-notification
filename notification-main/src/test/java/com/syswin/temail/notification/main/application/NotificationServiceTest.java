@@ -85,9 +85,13 @@ public class NotificationServiceTest {
    */
   @Test
   public void testEventTypeDelete() throws Exception {
-    // 批量删除消息
+    // 删除事件from和to与事件业务相反
+    params.setFrom(TEST_TO);
+    params.setTo(TEST_FROM);
     params.setSessionMessageType(EventType.DELETE.getValue());
-    params.setMsgid(gson.toJson(Arrays.asList("1", "2", "3")));
+
+    // 批量删除消息
+    params.setMsgid(gson.toJson(Arrays.asList("2", "3", "4")));
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
 

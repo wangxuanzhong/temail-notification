@@ -43,7 +43,7 @@ public class RedisService implements SequenceService {
     if (result == null) {
       return false;
     }
-    redisTemplate.expire(key, 3, TimeUnit.HOURS);
+    redisTemplate.expire(key, 10, TimeUnit.MINUTES);
     return result;
   }
 }
