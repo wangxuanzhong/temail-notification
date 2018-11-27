@@ -126,7 +126,7 @@ public class Event {
   /**
    * 自动解析扩展字段
    */
-  public void autoReadExtendParam(JsonService jsonService) {
+  public Event autoReadExtendParam(JsonService jsonService) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
       EventExtendParam extendParam = jsonService.fromJson(this.extendParam, EventExtendParam.class);
       this.name = extendParam.getName();
@@ -136,13 +136,15 @@ public class Event {
       this.msgIds = extendParam.getMsgIds();
       this.deleteAllMsg = extendParam.getDeleteAllMsg();
     }
+    return this;
   }
 
   /**
    * 自动配置扩展字段
    */
-  public void autoWriteExtendParam(JsonService jsonService) {
+  public Event autoWriteExtendParam(JsonService jsonService) {
     this.extendParam = jsonService.toJson(new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg));
+    return this;
   }
 
   /**
@@ -150,15 +152,10 @@ public class Event {
    */
   public void initEventSeqId(SequenceService sequenceService) {
     switch (Objects.requireNonNull(EventType.getByValue(this.eventType))) {
-      case RESET:
-        if (this.parentMsgId != null) {
-          this.eventSeqId = sequenceService.getNextSeq(this.parentMsgId + "_" + this.to);
-        } else {
-          this.eventSeqId = sequenceService.getNextSeq(this.to);
-        }
-        break;
       case REPLY:
-        this.eventSeqId = sequenceService.getNextSeq(this.parentMsgId + "_" + this.to);
+      case REPLY_RETRACT:
+      case REPLY_DELETE:
+        this.eventSeqId = sequenceService.getNextSeq(this.parentMsgId);
         break;
       default:
         this.eventSeqId = sequenceService.getNextSeq(this.to);
@@ -370,7 +367,6 @@ public class Event {
     DESTROYED(3, "消息已焚毁"),
     DELETE(4, "消息已删除"),
     DESTROY(17, "阅后即焚消息发送"),
-    REPLY(18, "回复消息"),
 
     // 群管理部分
     APPLY(5, "入群申请"),
@@ -384,8 +380,12 @@ public class Event {
     DELETE_GROUP(12, "群已解散"),
     ADD_GROUP(13, "新建群"),
     LEAVE_GROUP(15, "已退出群聊"),
-    UPDATE_GROUP_CARD(16, "群名片更新");
+    UPDATE_GROUP_CARD(16, "群名片更新"),
 
+    // 回复部分
+    REPLY(18, "回复消息"),
+    REPLY_RETRACT(19, "回复消息已撤回"),
+    REPLY_DELETE(20, "回复消息已删除");
 
     private final int value;
     private final String description;

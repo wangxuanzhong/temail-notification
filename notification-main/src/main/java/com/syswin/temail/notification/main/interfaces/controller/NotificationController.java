@@ -39,11 +39,18 @@ public class NotificationController {
 
   @ApiOperation(value = "拉取事件 3 0001", consumes = "application/json")
   @GetMapping("/events")
-  public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from", required = true) String to,
+  public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from") String to,
       @RequestParam(required = true) Long eventSeqId, String parentMsgId, Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    Map<String, Object> result = eventService.getEvents(to, parentMsgId, eventSeqId, pageSize);
+
+    Map<String, Object> result = null;
+    if (parentMsgId == null || parentMsgId.isEmpty()) {
+      result = eventService.getEvents(to, eventSeqId, pageSize);
+    } else {
+      result = eventService.getReplyEvents(parentMsgId, eventSeqId, pageSize);
+    }
+
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
@@ -53,7 +60,7 @@ public class NotificationController {
       @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    List<UnreadResponse> result = eventService.getUnread(to, parentMsgId);
+    List<UnreadResponse> result = eventService.getUnread(to);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
@@ -73,5 +80,15 @@ public class NotificationController {
 
     eventService.reset(event);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "获取回复消息总数 3 0005", consumes = "application/json")
+  @GetMapping("/reply/sum")
+  public ResponseEntity<Response<Map<String, Integer>>> getReplySum(@RequestParam(required = true) List<String> msgIds,
+      @RequestHeader(name = CDTP_HEADER) String header) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+    Map<String, Integer> result = eventService.getReplySum(msgIds);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 }

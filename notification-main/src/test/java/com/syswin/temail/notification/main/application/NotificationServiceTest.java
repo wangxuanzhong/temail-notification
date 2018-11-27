@@ -135,4 +135,28 @@ public class NotificationServiceTest {
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
+
+  /**
+   * EventType REPLY_RETRACT 19 回复消息已撤回
+   */
+  @Test
+  public void testEventTypeReplyRetract() throws Exception {
+    params.setSessionMessageType(EventType.REPLY_RETRACT.getValue());
+    params.setMsgid("reply_1");
+    params.setParentMsgId("1");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
+   * EventType REPLY_DELETE 19 回复消息已删除
+   */
+  @Test
+  public void testEventTypeReplyDelete() throws Exception {
+    params.setSessionMessageType(EventType.REPLY_DELETE.getValue());
+    params.setMsgid(gson.toJson(Arrays.asList("reply_2", "reply_3", "reply_4")));
+    params.setParentMsgId("1");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
 }

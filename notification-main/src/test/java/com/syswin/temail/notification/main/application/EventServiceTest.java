@@ -55,7 +55,7 @@ public class EventServiceTest {
     event.setEventSeqId(1L);
     eventRepository.insert(event);
 
-    List<UnreadResponse> result = eventService.getUnread("get_unread_to", null);
+    List<UnreadResponse> result = eventService.getUnread("get_unread_to");
     assertThat(result).size().isEqualTo(1);
     assertThat(result.get(0).getFrom()).isEqualTo("get_unread_from");
     assertThat(result.get(0).getTo()).isEqualTo("get_unread_to");
@@ -68,7 +68,7 @@ public class EventServiceTest {
     event.setEventSeqId(2L);
     eventRepository.insert(event);
 
-    result = eventService.getUnread("get_unread_to", null);
+    result = eventService.getUnread("get_unread_to");
     assertThat(result).size().isEqualTo(2);
   }
 
@@ -83,7 +83,7 @@ public class EventServiceTest {
     event.setEventSeqId(1L);
     eventRepository.insert(event);
 
-    List<UnreadResponse> result = eventService.getUnread("reset_to", null);
+    List<UnreadResponse> result = eventService.getUnread("reset_to");
     assertThat(result).size().isEqualTo(1);
     assertThat(result.get(0).getFrom()).isEqualTo("reset_from");
     assertThat(result.get(0).getTo()).isEqualTo("reset_to");
@@ -96,7 +96,7 @@ public class EventServiceTest {
     event.setEventSeqId(2L);
     eventRepository.insert(event);
 
-    result = eventService.getUnread("reset_to", null);
+    result = eventService.getUnread("reset_to");
     assertThat(result).size().isEqualTo(2);
 
     // 重置单聊消息
@@ -106,7 +106,7 @@ public class EventServiceTest {
     event.setTo("reset_to");
     eventService.reset(event);
 
-    result = eventService.getUnread("reset_to", null);
+    result = eventService.getUnread("reset_to");
     assertThat(result).size().isEqualTo(1);
     assertThat(result.get(0).getFrom()).isEqualTo("reset_group_temail");
     assertThat(result.get(0).getTo()).isEqualTo("reset_to");
@@ -120,7 +120,7 @@ public class EventServiceTest {
     event.setTo("reset_to");
     event.setGroupTemail("reset_group_temail");
     eventService.reset(event);
-    result = eventService.getUnread("reset_to", null);
+    result = eventService.getUnread("reset_to");
     assertThat(result).isEmpty();
   }
 

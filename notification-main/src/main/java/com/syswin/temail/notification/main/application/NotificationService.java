@@ -66,6 +66,7 @@ public class NotificationService {
       case RETRACT:
       case DESTROYED:
       case REPLY:
+      case REPLY_RETRACT:
         sendMessage(event, header);
         break;
       case PULLED:
@@ -79,6 +80,7 @@ public class NotificationService {
         }
         break;
       case DELETE:
+      case REPLY_DELETE:
         // 删除操作msgId是多条，存入msgIds字段
         event.setMsgIds(jsonService.fromJson(event.getMsgId(), List.class));
         event.setMsgId(null);

@@ -35,12 +35,12 @@ public class RedisServiceTest {
   }
 
   //  @Test
-  public void testDeleteKey() {
-    redisService.deleteKey("jack@t.email");
-    redisService.deleteKey("sean@t.email");
-    redisService.deleteKey("Jack@t.email");
-    redisService.deleteKey("Sean@t.email");
-    redisService.deleteKey("bob@temail.com");
-    redisService.deleteKey("alice@temail.com");
+  public void testDeleteSeq() {
+    redisService.deleteSeq("jack@t.email");
+    redisService.deleteSeq("sean@t.email");
+    redisService.deleteSeq("Jack@t.email");
+    redisService.deleteSeq("Sean@t.email");
+    redisService.deleteSeq("bob@temail.com");
+    redisService.deleteSeq("alice@temail.com");
   }
 }

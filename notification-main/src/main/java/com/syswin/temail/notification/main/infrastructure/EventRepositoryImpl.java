@@ -22,8 +22,8 @@ public class EventRepositoryImpl implements EventRepository {
   }
 
   @Override
-  public List<Event> selectEventsByTo(String to, String parentMsgId, Long begin, Long end) {
-    return eventMapper.selectEventsByTo(to, parentMsgId, begin, end);
+  public List<Event> selectEvents(String to, String parentMsgId, Long begin, Long end) {
+    return eventMapper.selectEvents(to, parentMsgId, begin, end);
   }
 
   @Override
@@ -34,5 +34,10 @@ public class EventRepositoryImpl implements EventRepository {
   @Override
   public Integer deleteResetEvents(Event event) {
     return eventMapper.deleteResetEvents(event);
+  }
+
+  @Override
+  public List<Event> selectEventsByParentMsgIds(List<String> parentMsgIds) {
+    return eventMapper.selectEventsByParentMsgIds(parentMsgIds);
   }
 }

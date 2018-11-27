@@ -56,6 +56,7 @@ public class NotificationGroupChatServiceTest {
     params.setTemail("a");
     params.setSeqNo(1L);
     params.setToMsg("这是一条群聊测试消息！");
+    params.setAt("b,c,d");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -157,17 +158,42 @@ public class NotificationGroupChatServiceTest {
   }
 
   /**
-   * EventType REPLY 18
+   * EventType REPLY 18 回复消息
    */
   @Test
   public void testEventTypeReply() throws Exception {
     params.setSessionMessageType(EventType.REPLY.getValue());
-    params.setMsgid(TEST_GROUP_MSG_ID + "reply_5");
-    params.setTemail("a");
-    params.setParentMsgId("g_333");
-    params.setAt("a;b;c");
+    params.setMsgid(TEST_GROUP_MSG_ID + "reply_2");
+    params.setTemail("c");
+    params.setParentMsgId(TEST_GROUP_MSG_ID + "1");
     params.setToMsg("这是一条回复消息！");
     params.setSeqNo(1L);
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
+   * EventType REPLY_RETRACT 19 回复消息已撤回
+   */
+  @Test
+  public void testEventTypeReplyRetract() throws Exception {
+    params.setSessionMessageType(EventType.REPLY_RETRACT.getValue());
+    params.setMsgid(TEST_GROUP_MSG_ID + "reply_1");
+    params.setTemail("c");
+    params.setParentMsgId(TEST_GROUP_MSG_ID + "1");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
+   * EventType REPLY_DELETE 20 回复消息已删除
+   */
+  @Test
+  public void testEventTypeReplyDelete() throws Exception {
+    params.setSessionMessageType(EventType.REPLY_DELETE.getValue());
+    params.setMsgid(gson.toJson(Arrays.asList(TEST_GROUP_MSG_ID + "reply_2", TEST_GROUP_MSG_ID + "reply_3", TEST_GROUP_MSG_ID + "reply_4")));
+    params.setTemail("c");
+    params.setParentMsgId(TEST_GROUP_MSG_ID + "1");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }

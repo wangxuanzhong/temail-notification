@@ -6,9 +6,11 @@ public interface EventRepository {
 
   int insert(Event event);
 
-  List<Event> selectEventsByTo(String to, String parentMsgId, Long begin, Long end);
+  List<Event> selectEvents(String to, String parentMsgId, Long begin, Long end);
 
   List<Event> selectEventsByMsgId(Event event);
 
   Integer deleteResetEvents(Event event);
+
+  List<Event> selectEventsByParentMsgIds(List<String> parentMsgIds);
 }

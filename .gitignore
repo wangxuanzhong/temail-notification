@@ -22,3 +22,6 @@ target/
 .project
 disconf/download/
 disconf
+
+
+*.versionsBackup

@@ -68,7 +68,6 @@ public class NotificationGroupChatService {
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
       case RETRACT:
-      case REPLY:
         event.notifyToAll();
         this.sendGroupMessage(event, header);
         break;
@@ -181,6 +180,28 @@ public class NotificationGroupChatService {
         event.notifyToAll();
         this.sendGroupMessage(event, header);
         break;
+      case REPLY:
+        // 查询父消息的at字段
+        Event condition = new Event();
+        condition.setEventType(EventType.RECEIVE.getValue());
+        condition.setMsgId(event.getParentMsgId());
+        List<Event> events = eventRepository.selectEventsByMsgId(condition);
+        event.setAt(events.get(0).autoReadExtendParam(jsonService).getAt());
+
+        event.notifyToAll();
+        this.sendGroupMessageWithOneEvent(event, header);
+        break;
+      case REPLY_RETRACT:
+        event.notifyToAll();
+        this.sendGroupMessageWithOneEvent(event, header);
+        break;
+      case REPLY_DELETE:
+        // 删除操作msgId是多条，存入msgIds字段
+        event.setMsgIds(jsonService.fromJson(event.getMsgId(), List.class));
+        event.setMsgId(null);
+        event.notifyToAll();
+        this.sendGroupMessageWithOneEvent(event, header);
+        break;
     }
   }
 
@@ -217,6 +238,25 @@ public class NotificationGroupChatService {
     for (String to : tos) {
       event.setTo(to);
       this.insert(event);
+      rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, header, jsonService.toJson(event))));
+    }
+  }
+
+  /**
+   * 发送群消息，事件只存单条
+   */
+  private void sendGroupMessageWithOneEvent(Event event, String header)
+      throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
+    // 只插入一次数据
+    event.setFrom(event.getGroupTemail());
+    event.setTo(event.getGroupTemail());
+    this.insert(event);
+
+    List<String> tos = memberRepository.selectByGroupTemail(event);
+    tos.remove(event.getTemail());
+    LOGGER.info("向{}发送通知，通知类型为：{}", tos, Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+    for (String to : tos) {
+      event.setTo(to);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, header, jsonService.toJson(event))));
     }
   }

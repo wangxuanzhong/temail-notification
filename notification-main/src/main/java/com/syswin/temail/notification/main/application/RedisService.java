@@ -29,10 +29,17 @@ public class RedisService implements SequenceService {
   }
 
   /**
+   * 删除序号
+   */
+  public void deleteSeq(String key) {
+    System.out.println(redisTemplate.delete(getKey(key)));
+  }
+
+  /**
    * 删除数据
    */
   public void deleteKey(String key) {
-    System.out.println(redisTemplate.opsForValue().getOperations().delete(getKey(key)));
+    System.out.println(redisTemplate.delete(key));
   }
 
   /**

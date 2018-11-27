@@ -39,19 +39,14 @@ public class EventService {
    * 拉取事件
    *
    * @param to 发起人
-   * @param parentMsgId 父消息id
    * @param eventSeqId 上次拉取结尾序号
    * @param pageSize 拉取数量
    */
-  public Map<String, Object> getEvents(String to, String parentMsgId, Long eventSeqId, Integer pageSize) {
-    if (parentMsgId == null || parentMsgId.isEmpty()) {
-      LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取接收方[" + to + "]的事件。拉取数量为：" + pageSize);
-    } else {
-      LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取[ " + to + "]消息[" + parentMsgId + "]的回复事件。拉取数量为：" + pageSize);
-    }
+  public Map<String, Object> getEvents(String to, Long eventSeqId, Integer pageSize) {
+    LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取接收方[" + to + "]的事件。拉取数量为：" + pageSize);
 
     // 如果pageSize为空则不限制查询条数
-    List<Event> events = eventRepository.selectEventsByTo(to, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    List<Event> events = eventRepository.selectEvents(to, null, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
     Map<String, Map<String, Event>> eventMap = new HashMap<>();
     List<Event> notifyEvents = new ArrayList<>();
@@ -68,7 +63,6 @@ public class EventService {
         case DESTROY:
         case DESTROYED:
         case APPLY:
-        case REPLY:
           sessionEventMap.put(event.getMsgId(), event);
           break;
         case DELETE_GROUP:
@@ -116,8 +110,66 @@ public class EventService {
       }
     });
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
-    notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
+    return getEventsReturn(events, notifyEvents);
+  }
 
+
+  /**
+   * 拉取回复事件
+   *
+   * @param parentMsgId 父消息id
+   * @param eventSeqId 上次拉取结尾序号
+   * @param pageSize 拉取数量
+   */
+  public Map<String, Object> getReplyEvents(String parentMsgId, Long eventSeqId, Integer pageSize) {
+    LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取消息[" + parentMsgId + "]的回复事件。拉取数量为：" + pageSize);
+
+    // 如果pageSize为空则不限制查询条数
+    List<Event> events = eventRepository.selectEvents(null, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+
+    Map<String, Event> eventMap = new HashMap<>();
+    List<Event> notifyEvents = new ArrayList<>();
+    events.forEach(event -> {
+      event.autoReadExtendParam(jsonService);
+      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+        case REPLY:
+          eventMap.put(event.getMsgId(), event);
+          break;
+        case REPLY_RETRACT:
+          if (eventMap.containsKey(event.getMsgId())) {
+            eventMap.remove(event.getMsgId());
+          } else {
+            eventMap.put(event.getMsgId(), event);
+          }
+          break;
+        case REPLY_DELETE:
+          // msgIds不为空，则为批量删除消息
+          if (event.getMsgIds() != null) {
+            List<String> msgIds = new ArrayList<>(event.getMsgIds());
+            event.getMsgIds().forEach(msgId -> {
+              if (eventMap.containsKey(msgId)) {
+                eventMap.remove(msgId);
+                msgIds.remove(msgId); // 删除已出现的msgId
+              }
+            });
+            // 将此次拉取中未出现的msgId添加到删除事件中，供前端处理
+            if (!msgIds.isEmpty()) {
+              event.setMsgIds(msgIds);
+              notifyEvents.add(event);
+            }
+          }
+          break;
+      }
+    });
+    notifyEvents.addAll(eventMap.values());
+    return getEventsReturn(events, notifyEvents);
+  }
+
+  /**
+   * 拉取事件返回参数拼装
+   */
+  private Map<String, Object> getEventsReturn(List<Event> events, List<Event> notifyEvents) {
+    notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
     Map<String, Object> result = new HashMap<>();
     if (events.isEmpty()) {
       result.put("lastEventSeqId", -1);
@@ -133,15 +185,11 @@ public class EventService {
    * 获取消息未读数
    *
    * @param to 发起人
-   * @param parentMsgId 父消息id
    */
-  public List<UnreadResponse> getUnread(String to, String parentMsgId) {
-    if (parentMsgId == null || parentMsgId.isEmpty()) {
-      LOGGER.info("获取接收方[" + to + "]的未读消息数量。");
-    } else {
-      LOGGER.info("获取[{}]消息[{}]的回复消息未读数量。", to, parentMsgId);
-    }
-    List<Event> events = eventRepository.selectEventsByTo(to, parentMsgId, null, null);
+  public List<UnreadResponse> getUnread(String to) {
+    LOGGER.info("获取接收方[" + to + "]的未读消息数量。");
+
+    List<Event> events = eventRepository.selectEvents(to, null, null, null);
 
     Map<String, List<String>> unreadMap = new HashMap<>();
     events.forEach(event -> {
@@ -165,7 +213,6 @@ public class EventService {
         case DESTROYED:
         case ADD_GROUP:
         case APPLY:
-        case REPLY:
           msgIds.add(event.getMsgId());
           break;
         case DELETE_GROUP:
@@ -244,5 +291,48 @@ public class EventService {
 
     // 删除历史重置事件
     eventRepository.deleteResetEvents(event);
+  }
+
+
+  /**
+   * 获取回复消息总数
+   *
+   * @param parentMsgIds 消息列表
+   */
+  public Map<String, Integer> getReplySum(List<String> parentMsgIds) {
+    LOGGER.info("获取消息{}的回复总数。", parentMsgIds);
+
+    List<Event> events = eventRepository.selectEventsByParentMsgIds(parentMsgIds);
+
+    Map<String, List<String>> replySumMap = new HashMap<>();
+    events.forEach(event -> {
+      event.autoReadExtendParam(jsonService);
+
+      String key = event.getParentMsgId();
+      if (!replySumMap.containsKey(key)) {
+        replySumMap.put(key, new ArrayList<>());
+      }
+      List<String> msgIds = replySumMap.get(key);
+      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+        case REPLY:
+          msgIds.add(event.getMsgId());
+          break;
+        case REPLY_RETRACT:
+          msgIds.remove(event.getMsgId());
+          break;
+        case REPLY_DELETE:
+          event.getMsgIds().forEach(msgId -> msgIds.remove(msgId));
+          break;
+      }
+    });
+
+    // 统计各个消息的回复总数
+    Map<String, Integer> resultMap = new HashMap<>();
+    replySumMap.forEach((key, msgIds) -> {
+      resultMap.put(key, msgIds.size());
+    });
+
+    LOGGER.info("获取回复消息总数结果为：" + resultMap);
+    return resultMap;
   }
 }
