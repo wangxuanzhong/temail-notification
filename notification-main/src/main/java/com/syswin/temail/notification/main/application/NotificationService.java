@@ -47,7 +47,7 @@ public class NotificationService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentSingleChatParams params = jsonService.fromJson(body, MailAgentSingleChatParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId(), params.getDeleteAllMsg());
+        params.getFrom(), params.getTo(), params.getOwner(), params.getTimestamp(), params.getxPacketId(), params.getDeleteAllMsg());
 
     // 前端需要的头信息
     String header = params.getHeader();
@@ -62,10 +62,15 @@ public class NotificationService {
 
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
+      case REPLY:
+        // 只通知收件箱的消息
+        if (event.getTo().equals(event.getOwner())) {
+          sendMessage(event, header);
+        }
+        break;
       case DESTROY:
       case RETRACT:
       case DESTROYED:
-      case REPLY:
       case REPLY_RETRACT:
         sendMessage(event, header);
         break;
