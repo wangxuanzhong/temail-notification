@@ -57,7 +57,7 @@ public class RocketMqConsumer {
    */
   @PostConstruct
   public void start() throws MQClientException {
-    LOGGER.info("MQ：启动消费者");
+    LOGGER.info("MQ：start consumer.");
     initConsumer(singleChatConsumer, singleChatTopic, TYPE_0_SINGLE_CHAT);
     initConsumer(groupChatConsumer, groupChatTopic, TYPE_1_GROUP_CHAT);
   }
@@ -77,11 +77,11 @@ public class RocketMqConsumer {
       public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
         try {
           for (MessageExt msg : list) {
-            LOGGER.info("MQ：接收信息: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
+            LOGGER.info("MQ: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
             handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), type);
           }
         } catch (DuplicateKeyException e) {
-          LOGGER.warn("数据库唯一索引异常：" + e);
+          LOGGER.warn("duplicate key exception: " + e);
         } catch (Exception e) {
           LOGGER.error(e.getMessage(), e);
           return ConsumeConcurrentlyStatus.RECONSUME_LATER;
@@ -111,12 +111,12 @@ public class RocketMqConsumer {
   public void stop() {
     if (singleChatConsumer != null) {
       singleChatConsumer.shutdown();
-      LOGGER.info("MQ：关闭单聊消费者");
+      LOGGER.info("MQ：stop consumer.");
     }
 
     if (groupChatConsumer != null) {
       groupChatConsumer.shutdown();
-      LOGGER.info("MQ：关闭群聊消费者");
+      LOGGER.info("MQ：stop consumer.");
     }
   }
 }

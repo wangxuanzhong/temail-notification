@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/notification")
-@Api(value = "notification", tags = "通知服务")
+@Api(value = "notification", tags = "notification service")
 @CrossOrigin
 public class NotificationController {
 
@@ -37,7 +37,7 @@ public class NotificationController {
     this.eventService = eventService;
   }
 
-  @ApiOperation(value = "拉取事件 3 0001", consumes = "application/json")
+  @ApiOperation(value = "pull event 3 0001", consumes = "application/json")
   @GetMapping("/events")
   public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from") String to,
       @RequestParam(required = true) Long eventSeqId, String parentMsgId, Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
@@ -54,7 +54,7 @@ public class NotificationController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
-  @ApiOperation(value = "获取未读数 3 0002", consumes = "application/json")
+  @ApiOperation(value = "get unread 3 0002", consumes = "application/json")
   @GetMapping("/unread")
   public ResponseEntity<Response<List<UnreadResponse>>> getUnread(@RequestParam(name = "from", required = true) String to, String parentMsgId,
       @RequestHeader(name = CDTP_HEADER) String header) {
@@ -64,25 +64,26 @@ public class NotificationController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
-  @ApiOperation(value = "重置未读数 3 0004", consumes = "application/json")
+  @ApiOperation(value = "reset 3 0004", consumes = "application/json")
   @PutMapping("/reset")
   public ResponseEntity<Response<List<UnreadResponse>>> reset(@RequestBody Event event, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
     if (event.getTo() == null || event.getTo().equals("")) {
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "to不能为空！"), headers, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "to mast not null!"), headers, HttpStatus.BAD_REQUEST);
     }
 
     if ((event.getFrom() == null || event.getFrom().equals("")) && (event.getGroupTemail() == null || event.getGroupTemail().equals(""))) {
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from和groupTemail不能同时为空！"), headers, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from and groupTemail mast not null at the same time!"), headers,
+          HttpStatus.BAD_REQUEST);
     }
 
     eventService.reset(event);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 
-  @ApiOperation(value = "获取回复消息总数 3 0005", consumes = "application/json")
+  @ApiOperation(value = "get reply sum 3 0005", consumes = "application/json")
   @GetMapping("/reply/sum")
   public ResponseEntity<Response<Map<String, Integer>>> getReplySum(@RequestParam(required = true) List<String> msgIds,
       @RequestHeader(name = CDTP_HEADER) String header) {

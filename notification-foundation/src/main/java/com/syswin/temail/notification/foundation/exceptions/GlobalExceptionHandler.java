@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Response> handleException(Exception e) {
     logger.error("Exception:{}", getExceptionStack(e));
-    return new ResponseEntity<>(new Response(HttpStatus.INTERNAL_SERVER_ERROR, "系统异常:" + e), HttpStatus.INTERNAL_SERVER_ERROR);
+    return new ResponseEntity<>(new Response(HttpStatus.INTERNAL_SERVER_ERROR, "system exception: " + e), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   private String getExceptionStack(Exception e) {

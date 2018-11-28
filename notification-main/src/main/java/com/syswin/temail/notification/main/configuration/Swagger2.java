@@ -27,8 +27,8 @@ public class Swagger2 {
 
   private ApiInfo apiInfo() {
     return new ApiInfoBuilder()
-        .title("temail-notification接口文档")
-        .description("temail-notification接口文档")
+        .title("temail-notification interface document")
+        .description("temail-notification interface document")
         .version("0.1.0")
         .build();
   }

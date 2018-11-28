@@ -57,8 +57,8 @@ public class NotificationGroupChatService {
     // 前端需要的头信息
     String header = params.getHeader();
 
-    LOGGER.info("群聊消息内容：\n" + params);
-    LOGGER.info("群聊收到的事件类型为：" + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+    LOGGER.info("group chat params: \n" + params);
+    LOGGER.info("group chat event type: " + Objects.requireNonNull(EventType.getByValue(event.getEventType())));
 
     // 校验收到的数据是否重复
     if (!this.checkUnique(event)) {
@@ -79,7 +79,7 @@ public class NotificationGroupChatService {
           if (eventRepository.selectEventsByMsgId(event).size() == 0) {
             this.sendSingleMessage(event, header);
           } else {
-            LOGGER.info("消息{}已拉取，不重复处理。", msgId);
+            LOGGER.info("message {} is pulled, do nothing!", msgId);
           }
         }
         break;
@@ -108,12 +108,12 @@ public class NotificationGroupChatService {
           try {
             memberRepository.insert(event);
           } catch (DuplicateKeyException e) {
-            LOGGER.warn("重复添加群成员异常：" + e);
+            LOGGER.warn("add member duplicate exception：" + e);
           }
           event.notifyToAll();
           this.sendGroupMessage(event, header);
         } else {
-          LOGGER.info("{}已经是群{}的成员，不重复添加。", event.getTemail(), event.getGroupTemail());
+          LOGGER.info("{} was group {} member，do nothing.", event.getTemail(), event.getGroupTemail());
         }
         break;
       case DELETE_MEMBER:
@@ -121,7 +121,7 @@ public class NotificationGroupChatService {
         List<String> names = jsonService.fromJson(event.getName(), List.class);
 
         if (temails.size() != names.size()) {
-          LOGGER.error("移除群成员temail和name不对应：temails:{}, names:{}", temails, names);
+          LOGGER.error("delete member temail and name mismatching, temails: {}, names: {}", temails, names);
         }
 
         // 删除当事人
@@ -219,7 +219,7 @@ public class NotificationGroupChatService {
    */
   private void sendSingleMessage(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("向{}发送通知，通知类型为：{}", event.getTo(), Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+    LOGGER.info("send message to {}, event type: {}", event.getTo(), Objects.requireNonNull(EventType.getByValue(event.getEventType())));
     if (event.getTo() != null && !event.getTo().isEmpty()) {
       this.insert(event);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), header, jsonService.toJson(event))));
@@ -234,7 +234,7 @@ public class NotificationGroupChatService {
     List<String> tos = memberRepository.selectByGroupTemail(event);
     tos.remove(event.getTemail());
     event.setFrom(event.getGroupTemail());
-    LOGGER.info("向{}发送通知，通知类型为：{}", tos, Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+    LOGGER.info("send message to {}, event type: {}", tos, Objects.requireNonNull(EventType.getByValue(event.getEventType())));
     for (String to : tos) {
       event.setTo(to);
       this.insert(event);
@@ -254,7 +254,7 @@ public class NotificationGroupChatService {
 
     List<String> tos = memberRepository.selectByGroupTemail(event);
     tos.remove(event.getTemail());
-    LOGGER.info("向{}发送通知，通知类型为：{}", tos, Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+    LOGGER.info("send message to {}, event type: {}", tos, Objects.requireNonNull(EventType.getByValue(event.getEventType())));
     for (String to : tos) {
       event.setTo(to);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, header, jsonService.toJson(event))));
@@ -266,14 +266,14 @@ public class NotificationGroupChatService {
    */
   public boolean checkUnique(Event event) {
     if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
-      LOGGER.warn("xPacketId为空！");
+      LOGGER.warn("xPacketId is null!");
       return true;
     }
 
     if (redisService.checkUnique(event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail())) {
       return true;
     } else {
-      LOGGER.warn("幂等校验失败：" + event);
+      LOGGER.warn("check duplicate failure: " + event);
       return false;
     }
   }

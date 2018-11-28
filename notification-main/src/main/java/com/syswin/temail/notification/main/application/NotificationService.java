@@ -52,8 +52,8 @@ public class NotificationService {
     // 前端需要的头信息
     String header = params.getHeader();
 
-    LOGGER.info("单聊消息内容：\n" + params);
-    LOGGER.info("单聊收到的事件类型为：" + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+    LOGGER.info("group chat params: \n" + params);
+    LOGGER.info("group chat event type: " + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
 
     // 校验收到的数据是否重复
     if (!this.checkUnique(event)) {
@@ -80,7 +80,7 @@ public class NotificationService {
           if (eventRepository.selectEventsByMsgId(event).size() == 0) {
             sendMessage(event, header);
           } else {
-            LOGGER.info("消息{}已拉取，不重复处理。", msgId);
+            LOGGER.info("message {} is pulled, do nothing!", msgId);
           }
         }
         break;
@@ -111,7 +111,7 @@ public class NotificationService {
    */
   private void sendMessage(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("向{}发送通知，通知类型为：{}", event.getTo(), Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+    LOGGER.info("send message to {}, event type: {}", event.getTo(), Objects.requireNonNull(EventType.getByValue(event.getEventType())));
     if (event.getTo() != null && !event.getTo().isEmpty()) {
       this.insert(event);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), header, jsonService.toJson(event))));
@@ -123,14 +123,14 @@ public class NotificationService {
    */
   public boolean checkUnique(Event event) {
     if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
-      LOGGER.warn("xPacketId为空！");
+      LOGGER.warn("xPacketId is null!");
       return true;
     }
 
     if (redisService.checkUnique(event.getxPacketId() + "_" + event.getEventType())) {
       return true;
     } else {
-      LOGGER.warn("幂等校验失败：", event);
+      LOGGER.warn("check duplicate failure: ", event);
       return false;
     }
   }

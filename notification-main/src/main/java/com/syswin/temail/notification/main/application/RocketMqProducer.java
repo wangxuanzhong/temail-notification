@@ -41,7 +41,7 @@ public class RocketMqProducer {
    */
   @PostConstruct
   public void start() throws MQClientException {
-    LOGGER.info("MQ：启动生产者");
+    LOGGER.info("MQ：start producer.");
     producer.setNamesrvAddr(host);
     producer.setInstanceName(UUID.randomUUID().toString());
     producer.start();
@@ -53,9 +53,9 @@ public class RocketMqProducer {
   public void sendMessage(String body, String topic, String tags, String keys)
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
     Message mqMsg = new Message(topic, tags, keys, body.getBytes(RemotingHelper.DEFAULT_CHARSET));
-    LOGGER.info("MQ: 发送消息\n{}", body);
+    LOGGER.info("MQ: send message\n{}", body);
     SendResult sendResult = producer.send(mqMsg);
-    LOGGER.info("MQ: 发送结果\n{}", sendResult);
+    LOGGER.info("MQ: send result\n{}", sendResult);
 
     if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
       throw new SendMqMessageException(sendResult.toString());
@@ -74,7 +74,7 @@ public class RocketMqProducer {
   public void stop() {
     if (producer != null) {
       producer.shutdown();
-      LOGGER.info("MQ：关闭生产者");
+      LOGGER.info("MQ：stop producer.");
     }
   }
 }

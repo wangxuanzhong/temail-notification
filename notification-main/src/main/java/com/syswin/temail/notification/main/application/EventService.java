@@ -43,7 +43,7 @@ public class EventService {
    * @param pageSize 拉取数量
    */
   public Map<String, Object> getEvents(String to, Long eventSeqId, Integer pageSize) {
-    LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取接收方[" + to + "]的事件。拉取数量为：" + pageSize);
+    LOGGER.info("pull events called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
 
     // 如果pageSize为空则不限制查询条数
     List<Event> events = eventRepository.selectEvents(to, null, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
@@ -122,7 +122,7 @@ public class EventService {
    * @param pageSize 拉取数量
    */
   public Map<String, Object> getReplyEvents(String parentMsgId, Long eventSeqId, Integer pageSize) {
-    LOGGER.info("从序列号[" + eventSeqId + "]之后开始拉取消息[" + parentMsgId + "]的回复事件。拉取数量为：" + pageSize);
+    LOGGER.info("pull reply events called, parentMsgId: {}, eventSeqId: {}, pageSize: {}", parentMsgId, eventSeqId, pageSize);
 
     // 如果pageSize为空则不限制查询条数
     List<Event> events = eventRepository.selectEvents(null, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
@@ -177,7 +177,7 @@ public class EventService {
       result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
     }
     result.put("events", notifyEvents);
-    LOGGER.info("拉取事件结果为：" + result);
+    LOGGER.info("pull events result: " + result);
     return result;
   }
 
@@ -187,7 +187,7 @@ public class EventService {
    * @param to 发起人
    */
   public List<UnreadResponse> getUnread(String to) {
-    LOGGER.info("获取接收方[" + to + "]的未读消息数量。");
+    LOGGER.info("get unread, to: {}", to);
 
     List<Event> events = eventRepository.selectEvents(to, null, null, null);
 
@@ -271,7 +271,7 @@ public class EventService {
       }
     });
 
-    LOGGER.info("获取未读消息结果为：" + unreadResponses);
+    LOGGER.info("get unread result: " + unreadResponses);
     return unreadResponses;
   }
 
@@ -280,7 +280,7 @@ public class EventService {
    */
   @Transactional(rollbackFor = Exception.class)
   public void reset(Event event) {
-    LOGGER.info("重置[{}]的消息未读数：参数{}", event.getTo(), event);
+    LOGGER.info("reset to: {}, param: {}", event.getTo(), event);
     if (event.getGroupTemail() != null && !event.getGroupTemail().isEmpty()) {
       event.setFrom(event.getGroupTemail());
     }
@@ -300,7 +300,7 @@ public class EventService {
    * @param parentMsgIds 消息列表
    */
   public Map<String, Integer> getReplySum(List<String> parentMsgIds) {
-    LOGGER.info("获取消息{}的回复总数。", parentMsgIds);
+    LOGGER.info("get reply sum, parentMsgIds: ", parentMsgIds);
 
     List<Event> events = eventRepository.selectEventsByParentMsgIds(parentMsgIds);
 
@@ -332,7 +332,7 @@ public class EventService {
       resultMap.put(key, msgIds.size());
     });
 
-    LOGGER.info("获取回复消息总数结果为：" + resultMap);
+    LOGGER.info("get reply sum result: " + resultMap);
     return resultMap;
   }
 }

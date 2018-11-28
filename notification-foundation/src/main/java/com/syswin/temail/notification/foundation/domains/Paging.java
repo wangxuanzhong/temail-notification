@@ -79,7 +79,12 @@ public class Paging {
 
   @Override
   public String toString() {
-    return "Paging:{total=" + total + ", totalPages=" + totalPages + ", pageSize=" + pageSize + ", page=" + page
-        + ", start=" + start + "}";
+    return "Paging{" +
+        "total=" + total +
+        ", totalPages=" + totalPages +
+        ", pageSize=" + pageSize +
+        ", page=" + page +
+        ", start=" + start +
+        '}';
   }
 }
