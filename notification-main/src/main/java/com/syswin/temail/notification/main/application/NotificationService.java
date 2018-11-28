@@ -52,8 +52,8 @@ public class NotificationService {
     // 前端需要的头信息
     String header = params.getHeader();
 
-    LOGGER.info("group chat params: \n" + params);
-    LOGGER.info("group chat event type: " + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+    LOGGER.info("single chat params: \n" + params);
+    LOGGER.info("single chat event type: " + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
 
     // 校验收到的数据是否重复
     if (!this.checkUnique(event)) {
