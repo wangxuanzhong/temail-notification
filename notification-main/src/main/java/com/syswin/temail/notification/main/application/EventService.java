@@ -3,9 +3,11 @@ package com.syswin.temail.notification.main.application;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.foundation.application.SequenceService;
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.EventRepository;
+import com.syswin.temail.notification.main.domains.EventType;
+import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
+import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -13,6 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.rocketmq.client.exception.MQBrokerException;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +32,15 @@ public class EventService {
   private final SequenceService sequenceService;
   private final EventRepository eventRepository;
   private final JsonService jsonService;
+  private final RocketMqProducer rocketMqProducer;
 
   @Autowired
-  public EventService(SequenceService sequenceService, EventRepository eventRepository, JsonService jsonService) {
+  public EventService(SequenceService sequenceService, EventRepository eventRepository, JsonService jsonService,
+      RocketMqProducer rocketMqProducer) {
     this.sequenceService = sequenceService;
     this.eventRepository = eventRepository;
     this.jsonService = jsonService;
+    this.rocketMqProducer = rocketMqProducer;
   }
 
   /**
@@ -279,7 +287,8 @@ public class EventService {
    * 重置消息未读数
    */
   @Transactional(rollbackFor = Exception.class)
-  public void reset(Event event) {
+  public void reset(Event event, String header)
+      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("reset to: {}, param: {}", event.getTo(), event);
     if (event.getGroupTemail() != null && !event.getGroupTemail().isEmpty()) {
       event.setFrom(event.getGroupTemail());
@@ -291,6 +300,10 @@ public class EventService {
 
     // 删除历史重置事件
     eventRepository.deleteResetEvents(event);
+
+    // 发送到MQ以便多端同步
+    LOGGER.info("send reset event to {}", event.getTo());
+    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), header, jsonService.toJson(event))));
   }
 
 
@@ -321,7 +334,8 @@ public class EventService {
           msgIds.remove(event.getMsgId());
           break;
         case REPLY_DELETE:
-          event.getMsgIds().forEach(msgId -> msgIds.remove(msgId));
+          // 计算总数直接删除
+          event.getMsgIds().forEach(msgIds::remove);
           break;
       }
     });

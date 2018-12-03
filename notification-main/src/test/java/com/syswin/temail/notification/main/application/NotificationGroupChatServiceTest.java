@@ -1,9 +1,9 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.Event.MemberRole;
 import com.syswin.temail.notification.main.domains.EventRepository;
+import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.MemberRepository;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public class NotificationGroupChatServiceTest {
 
   @Before
   public void setUp() {
-    params.setHeader("header");
+    params.setHeader("notification-header");
     params.setGroupTemail(TEST_GROUP);
 //    params.setGroupName("测试组名");
 //    params.setName("测试当事人名");

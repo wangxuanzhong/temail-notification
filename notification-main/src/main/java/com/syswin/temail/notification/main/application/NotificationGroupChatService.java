@@ -2,9 +2,9 @@ package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.Event.MemberRole;
 import com.syswin.temail.notification.main.domains.EventRepository;
+import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.MemberRepository;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;

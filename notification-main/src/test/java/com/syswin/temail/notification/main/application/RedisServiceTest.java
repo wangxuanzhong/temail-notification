@@ -19,7 +19,7 @@ public class RedisServiceTest {
   @Test
   public void getNextSeq() {
     String key = "test_user";
-    redisService.deleteKey(key);
+    redisService.deleteSeq(key);
     for (long i = 1; i <= 5; i++) {
       long seq = redisService.getNextSeq(key);
       System.out.println(seq);

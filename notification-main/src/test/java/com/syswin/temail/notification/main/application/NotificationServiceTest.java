@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.main.domains.Event.EventType;
+import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
 import java.util.Arrays;
 import java.util.UUID;
@@ -27,7 +27,7 @@ public class NotificationServiceTest {
 
   @Before
   public void setUp() {
-    params.setHeader("header");
+    params.setHeader("notification-header");
     params.setFrom(TEST_FROM);
     params.setTo(TEST_TO);
     params.setTimestamp(System.currentTimeMillis());

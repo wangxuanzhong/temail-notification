@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.EventRepository;
+import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +20,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 @ActiveProfiles("h2")
 public class EventServiceTest {
+
+  private final String header = "notification-header";
 
   Gson gson = new Gson();
 
@@ -73,7 +75,7 @@ public class EventServiceTest {
   }
 
   @Test
-  public void testReset() {
+  public void testReset() throws Exception {
     // 单聊消息
     Event event = setUp();
     event.setMsgId("reset_1");
@@ -104,7 +106,7 @@ public class EventServiceTest {
     event.setEventSeqId(3L);
     event.setFrom("reset_from");
     event.setTo("reset_to");
-    eventService.reset(event);
+    eventService.reset(event, header);
 
     result = eventService.getUnread("reset_to");
     assertThat(result).size().isEqualTo(1);
@@ -119,7 +121,7 @@ public class EventServiceTest {
     event.setFrom("reset_from");
     event.setTo("reset_to");
     event.setGroupTemail("reset_group_temail");
-    eventService.reset(event);
+    eventService.reset(event, header);
     result = eventService.getUnread("reset_to");
     assertThat(result).isEmpty();
   }

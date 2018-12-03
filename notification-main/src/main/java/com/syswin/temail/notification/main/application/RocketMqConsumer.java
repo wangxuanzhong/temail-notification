@@ -30,26 +30,32 @@ public class RocketMqConsumer {
 
   private final DefaultMQPushConsumer singleChatConsumer = new DefaultMQPushConsumer("notificationSingleChatConsumer");
   private final DefaultMQPushConsumer groupChatConsumer = new DefaultMQPushConsumer("notificationGroupChatConsumer");
+  private final DefaultMQPushConsumer topicConsumer = new DefaultMQPushConsumer("notificationTopicConsumer");
 
   private final int TYPE_0_SINGLE_CHAT = 0;
   private final int TYPE_1_GROUP_CHAT = 1;
+  private final int TYPE_2_TOPIC = 2;
 
   private NotificationService notificationService;
   private NotificationGroupChatService notificationGroupChatService;
+  private TopicService topicService;
   private String host;
   private String singleChatTopic;
   private String groupChatTopic;
+  private String topicChatTopic;
 
-  public RocketMqConsumer(NotificationService notificationService,
-      NotificationGroupChatService notificationGroupChatService,
-      @Value("${spring.rocketmq.host}") String host,
+  public RocketMqConsumer(NotificationService notificationService, NotificationGroupChatService notificationGroupChatService,
+      TopicService topicService, @Value("${spring.rocketmq.host}") String host,
       @Value("${spring.rocketmq.topics.mailAgent.singleChat}") String singleChatTopic,
-      @Value("${spring.rocketmq.topics.mailAgent.groupChat}") String groupChatTopic) {
+      @Value("${spring.rocketmq.topics.mailAgent.groupChat}") String groupChatTopic,
+      @Value("${spring.rocketmq.topics.mailAgent.topicChat}") String topicChatTopic) {
     this.notificationService = notificationService;
     this.notificationGroupChatService = notificationGroupChatService;
+    this.topicService = topicService;
     this.host = host;
     this.singleChatTopic = singleChatTopic;
     this.groupChatTopic = groupChatTopic;
+    this.topicChatTopic = topicChatTopic;
   }
 
   /**
@@ -57,9 +63,10 @@ public class RocketMqConsumer {
    */
   @PostConstruct
   public void start() throws MQClientException {
-    LOGGER.info("MQ：start consumer.");
+    LOGGER.info("MQ: start consumer.");
     initConsumer(singleChatConsumer, singleChatTopic, TYPE_0_SINGLE_CHAT);
     initConsumer(groupChatConsumer, groupChatTopic, TYPE_1_GROUP_CHAT);
+    initConsumer(topicConsumer, topicChatTopic, TYPE_2_TOPIC);
   }
 
 
@@ -77,7 +84,7 @@ public class RocketMqConsumer {
       public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
         try {
           for (MessageExt msg : list) {
-            LOGGER.info("MQ: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
+            LOGGER.info("MQ: MsgId={} TopicEvent={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
             handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), type);
           }
         } catch (DuplicateKeyException e) {
@@ -104,6 +111,9 @@ public class RocketMqConsumer {
       case TYPE_1_GROUP_CHAT:
         notificationGroupChatService.handleMqMessage(body);
         break;
+      case TYPE_2_TOPIC:
+        topicService.handleMqMessage(body);
+        break;
     }
   }
 
@@ -111,12 +121,17 @@ public class RocketMqConsumer {
   public void stop() {
     if (singleChatConsumer != null) {
       singleChatConsumer.shutdown();
-      LOGGER.info("MQ：stop consumer.");
+      LOGGER.info("MQ: stop singleChatConsumer.");
     }
 
     if (groupChatConsumer != null) {
       groupChatConsumer.shutdown();
-      LOGGER.info("MQ：stop consumer.");
+      LOGGER.info("MQ: stop groupChatConsumer.");
+    }
+
+    if (topicConsumer != null) {
+      topicConsumer.shutdown();
+      LOGGER.info("MQ: stop topicConsumer.");
     }
   }
 }

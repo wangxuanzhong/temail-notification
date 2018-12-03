@@ -23,6 +23,9 @@ class EventExtendParam {
   // 单聊删除会话是否同时删除消息
   private Boolean deleteAllMsg;
 
+  public EventExtendParam() {
+  }
+
   public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds, Boolean deleteAllMsg) {
     this.name = name;
     this.adminName = adminName;

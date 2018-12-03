@@ -2,12 +2,17 @@ package com.syswin.temail.notification.main.interfaces.controller;
 
 import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.main.application.EventService;
+import com.syswin.temail.notification.main.application.TopicService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
+import org.apache.rocketmq.client.exception.MQBrokerException;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +36,12 @@ public class NotificationController {
   private final String CDTP_HEADER = "CDTP-header";
 
   private final EventService eventService;
+  private final TopicService topicService;
 
   @Autowired
-  public NotificationController(EventService eventService) {
+  public NotificationController(EventService eventService, TopicService topicService) {
     this.eventService = eventService;
+    this.topicService = topicService;
   }
 
   @ApiOperation(value = "pull event 3 0001", consumes = "application/json")
@@ -66,7 +73,8 @@ public class NotificationController {
 
   @ApiOperation(value = "reset 3 0004", consumes = "application/json")
   @PutMapping("/reset")
-  public ResponseEntity<Response<List<UnreadResponse>>> reset(@RequestBody Event event, @RequestHeader(name = CDTP_HEADER) String header) {
+  public ResponseEntity<Response<List<UnreadResponse>>> reset(@RequestBody Event event, @RequestHeader(name = CDTP_HEADER) String header)
+      throws InterruptedException, RemotingException, UnsupportedEncodingException, MQClientException, MQBrokerException {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
@@ -79,7 +87,7 @@ public class NotificationController {
           HttpStatus.BAD_REQUEST);
     }
 
-    eventService.reset(event);
+    eventService.reset(event, header);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 
@@ -90,6 +98,27 @@ public class NotificationController {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     Map<String, Integer> result = eventService.getReplySum(msgIds);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "pull topic event sum 3 0006", consumes = "application/json")
+  @GetMapping("/topic/events")
+  public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from", required = true) String to,
+      @RequestParam(required = true) Long eventSeqId, @RequestParam(required = true) String topicId, Integer pageSize,
+      @RequestHeader(name = CDTP_HEADER) String header) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+    Map<String, Object> result = topicService.getTopicEvents(to, topicId, eventSeqId, pageSize);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "get topic sum 3 0007", consumes = "application/json")
+  @GetMapping("/topic/sum")
+  public ResponseEntity<Response<Map<String, Object>>> getTopicSum(@RequestParam(name = "from", required = true) String to,
+      @RequestParam(required = true) String topicId, @RequestHeader(name = CDTP_HEADER) String header) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+    Map<String, Object> result = topicService.getTopicSum(to, topicId);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 }

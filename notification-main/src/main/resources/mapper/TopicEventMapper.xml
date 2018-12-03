@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.syswin.temail.notification.main.infrastructure.TopicEventMapper">
+  <resultMap id="EventMap" type="com.syswin.temail.notification.main.domains.TopicEvent">
+    <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="x_packet_id" jdbcType="VARCHAR" property="xPacketId"/>
+    <result column="event_seq_id" jdbcType="BIGINT" property="eventSeqId"/>
+    <result column="event_type" jdbcType="INTEGER" property="eventType"/>
+    <result column="topic_id" jdbcType="VARCHAR" property="topicId"/>
+    <result column="msg_id" jdbcType="VARCHAR" property="msgId"/>
+    <result column="from" jdbcType="VARCHAR" property="from"/>
+    <result column="to" jdbcType="VARCHAR" property="to"/>
+    <result column="extend_param" jdbcType="VARCHAR" property="extendParam"/>
+    <result column="timestamp" jdbcType="BIGINT" property="timestamp"/>
+  </resultMap>
+
+  <sql id="baseField">
+    `id`, `x_packet_id`, `event_seq_id`, `event_type`, `topic_id`, `msg_id`, `from`, `to`, `extend_param`, `timestamp`
+  </sql>
+
+  <insert id="insert" parameterType="com.syswin.temail.notification.main.domains.TopicEvent">
+    INSERT INTO `topic_event`
+    (`x_packet_id`, `event_seq_id`, `event_type`, `topic_id`, `msg_id`, `from`, `to`, `extend_param`, `timestamp`)
+    VALUES
+    (#{xPacketId}, #{eventSeqId}, #{eventType}, #{topicId}, #{msgId}, #{from}, #{to}, #{extendParam}, #{timestamp})
+  </insert>
+
+  <select id="selectEvents" resultMap="EventMap">
+    SELECT
+    <include refid="baseField"/>
+    FROM `topic_event`
+    WHERE `to` = #{to}
+    <if test="topicId != null and topicId != ''">AND `topic_id` = #{topicId}</if>
+    <if test="begin != null">AND event_seq_id > #{begin}</if>
+    <if test="end != null">AND event_seq_id <![CDATA[<=]]> #{end}</if>
+    ORDER BY `event_seq_id`
+  </select>
+
+  <select id="selectEventsByMsgId" parameterType="java.lang.String" resultMap="EventMap">
+    SELECT
+    <include refid="baseField"/>
+    FROM `topic_event`
+    WHERE `msg_id` = #{msgId}
+  </select>
+</mapper>

@@ -8,8 +8,6 @@
     <result column="event_type" jdbcType="INTEGER" property="eventType"/>
     <result column="msg_id" jdbcType="VARCHAR" property="msgId"/>
     <result column="parent_msg_id" jdbcType="VARCHAR" property="parentMsgId"/>
-    <result column="seq_id" jdbcType="BIGINT" property="seqId"/>
-    <result column="message" jdbcType="VARCHAR" property="message"/>
     <result column="from" jdbcType="VARCHAR" property="from"/>
     <result column="to" jdbcType="VARCHAR" property="to"/>
     <result column="group_temail" jdbcType="VARCHAR" property="groupTemail"/>
@@ -36,7 +34,7 @@
     WHERE
     <choose>
       <when test="parentMsgId == null or parentMsgId == ''">
-        (parent_msg_id = #{parentMsgId} OR parent_msg_id = '')
+        (parent_msg_id IS NULL OR parent_msg_id = '')
       </when>
       <otherwise>
         parent_msg_id = #{parentMsgId}

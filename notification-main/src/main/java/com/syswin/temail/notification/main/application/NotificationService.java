@@ -2,8 +2,8 @@ package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.Event.EventType;
 import com.syswin.temail.notification.main.domains.EventRepository;
+import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentParams;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
@@ -47,13 +47,13 @@ public class NotificationService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentSingleChatParams params = jsonService.fromJson(body, MailAgentSingleChatParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getOwner(), params.getTimestamp(), params.getxPacketId(), params.getDeleteAllMsg());
+        params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId(), params.getDeleteAllMsg());
 
     // 前端需要的头信息
     String header = params.getHeader();
 
     LOGGER.info("single chat params: \n" + params);
-    LOGGER.info("single chat event type: " + Objects.requireNonNull(EventType.getByValue(event.getEventType())).getDescription());
+    LOGGER.info("single chat event type: " + Objects.requireNonNull(EventType.getByValue(event.getEventType())));
 
     // 校验收到的数据是否重复
     if (!this.checkUnique(event)) {
@@ -64,7 +64,7 @@ public class NotificationService {
       case RECEIVE:
       case REPLY:
         // 只通知收件箱的消息
-        if (event.getTo().equals(event.getOwner())) {
+        if (event.getTo().equals(params.getOwner())) {
           sendMessage(event, header);
         }
         break;
