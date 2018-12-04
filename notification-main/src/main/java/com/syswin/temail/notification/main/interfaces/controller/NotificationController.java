@@ -46,8 +46,8 @@ public class NotificationController {
 
   @ApiOperation(value = "pull event 3 0001", consumes = "application/json")
   @GetMapping("/events")
-  public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from") String to,
-      @RequestParam(required = true) Long eventSeqId, String parentMsgId, Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
+  public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from") String to, @RequestParam() Long eventSeqId,
+      String parentMsgId, Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
@@ -63,7 +63,7 @@ public class NotificationController {
 
   @ApiOperation(value = "get unread 3 0002", consumes = "application/json")
   @GetMapping("/unread")
-  public ResponseEntity<Response<List<UnreadResponse>>> getUnread(@RequestParam(name = "from", required = true) String to, String parentMsgId,
+  public ResponseEntity<Response<List<UnreadResponse>>> getUnread(@RequestParam(name = "from") String to,
       @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -93,7 +93,7 @@ public class NotificationController {
 
   @ApiOperation(value = "get reply sum 3 0005", consumes = "application/json")
   @GetMapping("/reply/sum")
-  public ResponseEntity<Response<Map<String, Integer>>> getReplySum(@RequestParam(required = true) List<String> msgIds,
+  public ResponseEntity<Response<Map<String, Integer>>> getReplySum(@RequestParam() List<String> msgIds,
       @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -103,9 +103,8 @@ public class NotificationController {
 
   @ApiOperation(value = "pull topic event sum 3 0006", consumes = "application/json")
   @GetMapping("/topic/events")
-  public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from", required = true) String to,
-      @RequestParam(required = true) Long eventSeqId, @RequestParam(required = true) String topicId, Integer pageSize,
-      @RequestHeader(name = CDTP_HEADER) String header) {
+  public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from") String to, @RequestParam() Long eventSeqId,
+      @RequestParam() String topicId, Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     Map<String, Object> result = topicService.getTopicEvents(to, topicId, eventSeqId, pageSize);
@@ -114,8 +113,8 @@ public class NotificationController {
 
   @ApiOperation(value = "get topic sum 3 0007", consumes = "application/json")
   @GetMapping("/topic/sum")
-  public ResponseEntity<Response<Map<String, Object>>> getTopicSum(@RequestParam(name = "from", required = true) String to,
-      @RequestParam(required = true) String topicId, @RequestHeader(name = CDTP_HEADER) String header) {
+  public ResponseEntity<Response<Map<String, Object>>> getTopicSum(@RequestParam(name = "from") String to, @RequestParam() String topicId,
+      @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     Map<String, Object> result = topicService.getTopicSum(to, topicId);

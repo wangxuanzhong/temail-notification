@@ -342,9 +342,7 @@ public class EventService {
 
     // 统计各个消息的回复总数
     Map<String, Integer> resultMap = new HashMap<>();
-    replySumMap.forEach((key, msgIds) -> {
-      resultMap.put(key, msgIds.size());
-    });
+    replySumMap.forEach((key, msgIds) -> resultMap.put(key, msgIds.size()));
 
     LOGGER.info("get reply sum result: " + resultMap);
     return resultMap;

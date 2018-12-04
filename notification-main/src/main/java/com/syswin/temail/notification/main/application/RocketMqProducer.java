@@ -72,9 +72,7 @@ public class RocketMqProducer {
 
   @PreDestroy
   public void stop() {
-    if (producer != null) {
-      producer.shutdown();
-      LOGGER.info("MQ: stop producer.");
-    }
+    producer.shutdown();
+    LOGGER.info("MQ: stop producer.");
   }
 }

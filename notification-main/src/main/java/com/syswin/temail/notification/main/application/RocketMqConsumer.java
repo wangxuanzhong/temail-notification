@@ -119,19 +119,13 @@ public class RocketMqConsumer {
 
   @PreDestroy
   public void stop() {
-    if (singleChatConsumer != null) {
-      singleChatConsumer.shutdown();
-      LOGGER.info("MQ: stop singleChatConsumer.");
-    }
+    singleChatConsumer.shutdown();
+    LOGGER.info("MQ: stop singleChatConsumer.");
 
-    if (groupChatConsumer != null) {
-      groupChatConsumer.shutdown();
-      LOGGER.info("MQ: stop groupChatConsumer.");
-    }
+    groupChatConsumer.shutdown();
+    LOGGER.info("MQ: stop groupChatConsumer.");
 
-    if (topicConsumer != null) {
-      topicConsumer.shutdown();
-      LOGGER.info("MQ: stop topicConsumer.");
-    }
+    topicConsumer.shutdown();
+    LOGGER.info("MQ: stop topicConsumer.");
   }
 }

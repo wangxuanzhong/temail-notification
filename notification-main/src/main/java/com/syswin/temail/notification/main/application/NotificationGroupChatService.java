@@ -127,8 +127,8 @@ public class NotificationGroupChatService {
         }
 
         // 删除当事人
-        for (int i = 0; i < temails.size(); i++) {
-          event.setTemail(temails.get(i));
+        for (String temail : temails) {
+          event.setTemail(temail);
           memberRepository.deleteGroupMember(event);
         }
 
