@@ -33,6 +33,8 @@ public class TopicService {
   private final TopicEventRepository topicEventRepository;
   private final JsonService jsonService;
 
+  private String header = null;
+
   @Autowired
   public TopicService(RocketMqProducer rocketMqProducer, RedisService redisService, TopicEventRepository topicEventRepository,
       JsonService jsonService) {
@@ -53,7 +55,7 @@ public class TopicService {
         params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp());
 
     // 前端需要的头信息
-    String header = params.getHeader();
+    this.header = params.getHeader();
 
     LOGGER.info("topic params: \n" + params);
     LOGGER.info("topic event type: " + Objects.requireNonNull(EventType.getByValue(topicEvent.getEventType())));
@@ -65,20 +67,20 @@ public class TopicService {
           topicEvent.setTitle(params.getTitle());
           topicEvent.setReceivers(params.getReceivers());
           topicEvent.setCC(params.getCC());
-          sendMessage(topicEvent, header);
+          sendMessage(topicEvent);
         }
         break;
       case TOPIC_REPLY:
         // from和to相同为话题发送者的消息，通知服务不处理
         if (!topicEvent.getTo().equals(topicEvent.getFrom())) {
-          sendMessage(topicEvent, header);
+          sendMessage(topicEvent);
         }
         break;
       case TOPIC_RETRACT:
         // 向撤回的消息的所有收件人发送撤回通知
         for (TopicEvent event : topicEventRepository.selectEventsByMsgId(topicEvent.getMsgId())) {
           topicEvent.setTo(event.getTo());
-          sendMessage(topicEvent, header);
+          sendMessage(topicEvent);
         }
         break;
       case TOPIC_DELETE:
@@ -88,7 +90,7 @@ public class TopicService {
         // from和to与正常业务相反
         topicEvent.setFrom(params.getTo());
         topicEvent.setTo(params.getFrom());
-        sendMessage(topicEvent, header);
+        sendMessage(topicEvent);
         break;
     }
   }
@@ -105,12 +107,14 @@ public class TopicService {
   /**
    * 发送消息
    */
-  private void sendMessage(TopicEvent topicEvent, String header)
+  private void sendMessage(TopicEvent topicEvent)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to {}, event type: {}", topicEvent.getTo(), Objects.requireNonNull(EventType.getByValue(topicEvent.getEventType())));
     if (topicEvent.getTo() != null && !topicEvent.getTo().isEmpty()) {
       this.insert(topicEvent);
-      rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(topicEvent.getTo(), header, jsonService.toJson(topicEvent))));
+      rocketMqProducer
+          .sendMessage(
+              jsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), this.header, jsonService.toJson(topicEvent))));
     }
   }
 

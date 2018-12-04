@@ -74,6 +74,17 @@ public class NotificationGroupChatServiceTest {
   }
 
   /**
+   * EventType RETRACT 2
+   */
+  @Test
+  public void testEventTypeRetract() throws Exception {
+    params.setSessionMessageType(EventType.RETRACT.getValue());
+    params.setMsgid("1");
+    params.setTemail("a");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+  }
+
+  /**
    * EventType DESTROYED 4 消息已删除
    */
   @Test
@@ -84,17 +95,6 @@ public class NotificationGroupChatServiceTest {
     params.setMsgid(gson.toJson(Arrays.asList("g-2", "g-3", "g-4")));
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
-  }
-
-  /**
-   * EventType RETRACT 2
-   */
-  @Test
-  public void testEventTypeRetract() throws Exception {
-    params.setSessionMessageType(EventType.RETRACT.getValue());
-    params.setMsgid("1");
-    params.setTemail("a");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
 
   /**

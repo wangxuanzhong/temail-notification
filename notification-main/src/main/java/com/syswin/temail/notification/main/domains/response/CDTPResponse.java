@@ -7,14 +7,16 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class CDTPResponse {
 
   private String receiver;
+  private Integer eventType;
   private String header;
   private String data;
 
   public CDTPResponse() {
   }
 
-  public CDTPResponse(String receiver, String header, String data) {
+  public CDTPResponse(String receiver, Integer eventType, String header, String data) {
     this.receiver = receiver;
+    this.eventType = eventType;
     this.header = header;
     this.data = data;
   }
@@ -25,6 +27,14 @@ public class CDTPResponse {
 
   public void setReceiver(String receiver) {
     this.receiver = receiver;
+  }
+
+  public Integer getEventType() {
+    return eventType;
+  }
+
+  public void setEventType(Integer eventType) {
+    this.eventType = eventType;
   }
 
   public String getHeader() {
@@ -47,8 +57,9 @@ public class CDTPResponse {
   public String toString() {
     return "CDTPResponse{" +
         "receiver='" + receiver + '\'' +
+        ", eventType=" + eventType +
         ", header='" + header + '\'' +
-        ", data=" + data +
+        ", data='" + data + '\'' +
         '}';
   }
 }

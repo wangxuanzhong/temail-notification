@@ -290,8 +290,11 @@ public class EventService {
   public void reset(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("reset to: {}, param: {}", event.getTo(), event);
+    Integer CDTPEventType = event.getEventType();
+    // groupTemail不为空则为群聊
     if (event.getGroupTemail() != null && !event.getGroupTemail().isEmpty()) {
       event.setFrom(event.getGroupTemail());
+      CDTPEventType = EventType.GROUP_RESET.getValue();
     }
     event.setEventType(EventType.RESET.getValue());
     event.setTimestamp(System.currentTimeMillis());
@@ -303,7 +306,7 @@ public class EventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), header, jsonService.toJson(event))));
+    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, jsonService.toJson(event))));
   }
 
 

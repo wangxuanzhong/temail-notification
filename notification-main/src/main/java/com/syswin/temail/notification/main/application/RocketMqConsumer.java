@@ -89,9 +89,11 @@ public class RocketMqConsumer {
           }
         } catch (DuplicateKeyException e) {
           LOGGER.warn("duplicate key exception: " + e);
-        } catch (Exception e) {
+        } catch (InterruptedException | RemotingException | MQClientException | MQBrokerException | UnsupportedEncodingException e) {
           LOGGER.error(e.getMessage(), e);
           return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+        } catch (Exception e) {
+          LOGGER.error(e.getMessage(), e);
         }
         return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
       }

@@ -31,6 +31,8 @@ public class NotificationService {
   private final EventRepository eventRepository;
   private final JsonService jsonService;
 
+  private String header = null;
+
   @Autowired
   public NotificationService(RocketMqProducer rocketMqProducer, RedisService redisService,
       EventRepository eventRepository, JsonService jsonService) {
@@ -51,7 +53,7 @@ public class NotificationService {
         params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId(), params.getDeleteAllMsg());
 
     // 前端需要的头信息
-    String header = params.getHeader();
+    this.header = params.getHeader();
 
     LOGGER.info("single chat params: \n" + params);
     LOGGER.info("single chat event type: " + Objects.requireNonNull(EventType.getByValue(event.getEventType())));
@@ -67,20 +69,20 @@ public class NotificationService {
       case REPLY:
         // 只通知收件箱的消息
         if (event.getTo().equals(params.getOwner())) {
-          sendMessage(event, header);
+          sendMessage(event);
         }
         break;
       case DESTROY:
       case RETRACT:
       case DESTROYED:
       case REPLY_RETRACT:
-        sendMessage(event, header);
+        sendMessage(event);
         break;
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
           if (eventRepository.selectEventsByMsgId(event).size() == 0) {
-            sendMessage(event, header);
+            sendMessage(event);
           } else {
             LOGGER.info("message {} is pulled, do nothing!", msgId);
           }
@@ -94,7 +96,7 @@ public class NotificationService {
         // from和to与正常业务相反
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
-        sendMessage(event, header);
+        sendMessage(event);
         break;
     }
   }
@@ -111,12 +113,12 @@ public class NotificationService {
   /**
    * 发送消息
    */
-  private void sendMessage(Event event, String header)
+  private void sendMessage(Event event)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to {}, event type: {}", event.getTo(), Objects.requireNonNull(EventType.getByValue(event.getEventType())));
     if (event.getTo() != null && !event.getTo().isEmpty()) {
       this.insert(event);
-      rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), header, jsonService.toJson(event))));
+      rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), this.header, jsonService.toJson(event))));
     }
   }
 }

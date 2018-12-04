@@ -11,6 +11,11 @@ public enum EventType {
   DESTROY(17, "阅后即焚消息发送"),
 
   // 群管理部分
+  GROUP_RESET(-101, "重置群聊消息未读数"),
+  GROUP_RECEIVE(100, "群聊消息发送"),
+  GROUP_PULLED(101, "群聊消息已拉取"),
+  GROUP_RETRACT(102, "群聊消息已撤回"),
+  GROUP_DELETE(104, "群聊消息已删除"),
   APPLY(5, "入群申请"),
   APPLY_ADOPT(6, "入群申请已通过"),
   APPLY_REFUSE(7, "入群申请已拒绝"),
