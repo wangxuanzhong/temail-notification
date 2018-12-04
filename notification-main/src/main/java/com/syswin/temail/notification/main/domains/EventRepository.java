@@ -13,4 +13,6 @@ public interface EventRepository {
   Integer deleteResetEvents(Event event);
 
   List<Event> selectEventsByParentMsgIds(List<String> parentMsgIds);
+
+  List<Event> checkUnique(Event event);
 }

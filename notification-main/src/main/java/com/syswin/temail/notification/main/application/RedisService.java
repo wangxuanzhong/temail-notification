@@ -50,7 +50,8 @@ public class RedisService implements SequenceService {
     if (result == null) {
       return false;
     }
-    redisTemplate.expire(key, 10, TimeUnit.MINUTES);
+    // 设置key有效时间为5s
+    redisTemplate.expire(key, 5, TimeUnit.SECONDS);
     return result;
   }
 }

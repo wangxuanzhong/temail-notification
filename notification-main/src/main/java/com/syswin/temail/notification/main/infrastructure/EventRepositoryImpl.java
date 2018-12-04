@@ -40,4 +40,9 @@ public class EventRepositoryImpl implements EventRepository {
   public List<Event> selectEventsByParentMsgIds(List<String> parentMsgIds) {
     return eventMapper.selectEventsByParentMsgIds(parentMsgIds);
   }
+
+  @Override
+  public List<Event> checkUnique(Event event) {
+    return eventMapper.checkUnique(event);
+  }
 }

@@ -7,6 +7,7 @@ import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentParams;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
+import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
@@ -56,7 +57,8 @@ public class NotificationService {
     LOGGER.info("single chat event type: " + Objects.requireNonNull(EventType.getByValue(event.getEventType())));
 
     // 校验收到的数据是否重复
-    if (!this.checkUnique(event)) {
+    String redisKey = event.getxPacketId() + "_" + event.getEventType();
+    if (!NotificationUtil.checkUnique(event, redisKey, eventRepository, redisService)) {
       return;
     }
 
@@ -115,23 +117,6 @@ public class NotificationService {
     if (event.getTo() != null && !event.getTo().isEmpty()) {
       this.insert(event);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), header, jsonService.toJson(event))));
-    }
-  }
-
-  /**
-   * 幂等校验
-   */
-  public boolean checkUnique(Event event) {
-    if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
-      LOGGER.warn("xPacketId is null!");
-      return true;
-    }
-
-    if (redisService.checkUnique(event.getxPacketId() + "_" + event.getEventType())) {
-      return true;
-    } else {
-      LOGGER.warn("check duplicate failure: ", event);
-      return false;
     }
   }
 }

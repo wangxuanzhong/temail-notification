@@ -106,6 +106,7 @@ public class EventServiceTest {
     event.setEventSeqId(3L);
     event.setFrom("reset_from");
     event.setTo("reset_to");
+    event.setxPacketId(UUID.randomUUID().toString());
     eventService.reset(event, header);
 
     result = eventService.getUnread("reset_to");
@@ -121,6 +122,7 @@ public class EventServiceTest {
     event.setFrom("reset_from");
     event.setTo("reset_to");
     event.setGroupTemail("reset_group_temail");
+    event.setxPacketId(UUID.randomUUID().toString());
     eventService.reset(event, header);
     result = eventService.getUnread("reset_to");
     assertThat(result).isEmpty();

@@ -8,6 +8,7 @@ import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.MemberRepository;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
+import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
@@ -61,7 +62,8 @@ public class NotificationGroupChatService {
     LOGGER.info("group chat event type: " + Objects.requireNonNull(EventType.getByValue(event.getEventType())));
 
     // 校验收到的数据是否重复
-    if (!this.checkUnique(event)) {
+    String redisKey = event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail();
+    if (!NotificationUtil.checkUnique(event, redisKey, eventRepository, redisService)) {
       return;
     }
 
@@ -258,23 +260,6 @@ public class NotificationGroupChatService {
     for (String to : tos) {
       event.setTo(to);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, header, jsonService.toJson(event))));
-    }
-  }
-
-  /**
-   * 幂等校验
-   */
-  public boolean checkUnique(Event event) {
-    if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
-      LOGGER.warn("xPacketId is null!");
-      return true;
-    }
-
-    if (redisService.checkUnique(event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail())) {
-      return true;
-    } else {
-      LOGGER.warn("check duplicate failure: " + event);
-      return false;
     }
   }
 }
