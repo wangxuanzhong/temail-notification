@@ -226,7 +226,7 @@ public class NotificationGroupChatService {
    */
   private void sendSingleMessage(Event event)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    this.sendGroupMessage(event, event.getEventType());
+    this.sendSingleMessage(event, event.getEventType());
   }
 
   /**
