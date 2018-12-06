@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class TopicServiceTest {
 
-  private final String TEST_FROM = "t-a";
+  private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
   private final String TOPIC = "temail-topic";
   private final String PREFIX = "temail-notification-";
@@ -55,6 +55,10 @@ public class TopicServiceTest {
     params.setTo("d");
     params.setxPacketId(PREFIX + UUID.randomUUID().toString());
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+
+    params.setTo("a");
+    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
 
@@ -80,7 +84,7 @@ public class TopicServiceTest {
   }
 
   /**
-   * EventType TOPIC_RETRACT 23 话题消息撤回
+   * EventType TOPIC_RETRACT 23 话题回复消息撤回
    */
   @Test
   public void testEventTypeTopicRetract() throws Exception {

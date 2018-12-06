@@ -50,13 +50,13 @@ public class NotificationService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentSingleChatParams params = jsonService.fromJson(body, MailAgentSingleChatParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId(), params.getDeleteAllMsg());
+        params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId(), params.getOwner(), params.getDeleteAllMsg());
 
     // 前端需要的头信息
     this.header = params.getHeader();
 
     LOGGER.info("single chat params: \n" + params);
-    LOGGER.info("single chat event type: " + Objects.requireNonNull(EventType.getByValue(event.getEventType())));
+    LOGGER.info("single chat event type: " + EventType.getByValue(event.getEventType()));
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
@@ -67,9 +67,11 @@ public class NotificationService {
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
       case REPLY:
-        // 只通知收件箱的消息
+        // 只有收件箱的事件才会入库
         if (event.getTo().equals(params.getOwner())) {
           sendMessage(event);
+        } else {
+          sendMessageToSender(event);
         }
         break;
       case DESTROY:
@@ -77,6 +79,7 @@ public class NotificationService {
       case DESTROYED:
       case REPLY_RETRACT:
         sendMessage(event);
+        sendMessageToSender(event);
         break;
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
@@ -97,6 +100,7 @@ public class NotificationService {
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
         sendMessage(event);
+        sendMessageToSender(event);
         break;
     }
   }
@@ -115,10 +119,19 @@ public class NotificationService {
    */
   private void sendMessage(Event event)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("send message to {}, event type: {}", event.getTo(), Objects.requireNonNull(EventType.getByValue(event.getEventType())));
+    LOGGER.info("send message to {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
     if (event.getTo() != null && !event.getTo().isEmpty()) {
       this.insert(event);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), this.header, jsonService.toJson(event))));
     }
+  }
+
+  /**
+   * 发送消息，提供多端同步功能
+   */
+  private void sendMessageToSender(Event event)
+      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+    LOGGER.info("send message to sender {}, event type: {}", event.getFrom(), EventType.getByValue(event.getEventType()));
+    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), this.header, jsonService.toJson(event))));
   }
 }

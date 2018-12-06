@@ -28,6 +28,7 @@ public class Event {
   private String message;
   private String from;
   private String to;
+  private String owner;
   private Long timestamp;
 
   // 群聊参数
@@ -58,7 +59,7 @@ public class Event {
 
   // 单聊
   public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp,
-      String xPacketId, Boolean deleteAllMsg) {
+      String xPacketId, String owner, Boolean deleteAllMsg) {
     this.eventType = eventType;
     this.msgId = msgId;
     this.parentMsgId = parentMsgId;
@@ -68,6 +69,7 @@ public class Event {
     this.to = to;
     this.timestamp = timestamp;
     this.xPacketId = xPacketId;
+    this.owner = owner;
     this.deleteAllMsg = deleteAllMsg;
   }
 
@@ -235,6 +237,14 @@ public class Event {
     this.to = to;
   }
 
+  public String getOwner() {
+    return owner;
+  }
+
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
   public Long getTimestamp() {
     return timestamp;
   }
@@ -344,6 +354,7 @@ public class Event {
         ", message length='" + (message == null ? 0 : message.length()) + '\'' +
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
+        ", owner='" + owner + '\'' +
         ", timestamp=" + timestamp +
         ", groupTemail='" + groupTemail + '\'' +
         ", temail='" + temail + '\'' +

@@ -42,8 +42,13 @@ public class NotificationServiceTest {
     params.setSessionMessageType(EventType.RECEIVE.getValue());
     params.setMsgid("1");
     params.setSeqNo(1L);
-    params.setOwner(TEST_TO);
     params.setToMsg("这是一条单聊测试消息！");
+
+    params.setOwner(TEST_TO);
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+
+    params.setOwner(TEST_FROM);
+    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
@@ -132,8 +137,13 @@ public class NotificationServiceTest {
     params.setMsgid("reply_1");
     params.setParentMsgId("1");
     params.setSeqNo(1L);
-    params.setOwner(TEST_FROM);
     params.setToMsg("这是一条单聊回复测试消息！");
+
+    params.setOwner(TEST_TO);
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+
+    params.setOwner(TEST_FROM);
+    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }

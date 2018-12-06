@@ -58,22 +58,26 @@ public class TopicService {
     this.header = params.getHeader();
 
     LOGGER.info("topic params: \n" + params);
-    LOGGER.info("topic event type: " + Objects.requireNonNull(EventType.getByValue(topicEvent.getEventType())));
+    LOGGER.info("topic event type: " + EventType.getByValue(topicEvent.getEventType()));
 
     switch (Objects.requireNonNull(EventType.getByValue(topicEvent.getEventType()))) {
       case TOPIC:
-        // from和to相同为话题发送者的消息，通知服务不处理
+        // from和to相同为话题发送者的消息，不入库
         if (!topicEvent.getTo().equals(topicEvent.getFrom())) {
           topicEvent.setTitle(params.getTitle());
           topicEvent.setReceivers(params.getReceivers());
           topicEvent.setCC(params.getCC());
           sendMessage(topicEvent);
+        } else {
+          sendMessageToSender(topicEvent);
         }
         break;
       case TOPIC_REPLY:
-        // from和to相同为话题发送者的消息，通知服务不处理
+        // from和to相同为话题发送者的消息，不入库
         if (!topicEvent.getTo().equals(topicEvent.getFrom())) {
           sendMessage(topicEvent);
+        } else {
+          sendMessageToSender(topicEvent);
         }
         break;
       case TOPIC_RETRACT:
@@ -82,6 +86,8 @@ public class TopicService {
           topicEvent.setTo(event.getTo());
           sendMessage(topicEvent);
         }
+        topicEvent.setTo(topicEvent.getFrom());
+        sendMessageToSender(topicEvent);
         break;
       case TOPIC_DELETE:
         // 删除操作msgId是多条，存入msgIds字段
@@ -91,6 +97,7 @@ public class TopicService {
         topicEvent.setFrom(params.getTo());
         topicEvent.setTo(params.getFrom());
         sendMessage(topicEvent);
+        sendMessageToSender(topicEvent);
         break;
     }
   }
@@ -109,14 +116,23 @@ public class TopicService {
    */
   private void sendMessage(TopicEvent topicEvent)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("send message to {}, event type: {}", topicEvent.getTo(), Objects.requireNonNull(EventType.getByValue(topicEvent.getEventType())));
-    if (topicEvent.getTo() != null && !topicEvent.getTo().isEmpty()) {
-      this.insert(topicEvent);
-      rocketMqProducer
-          .sendMessage(
-              jsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), this.header, jsonService.toJson(topicEvent))));
-    }
+    LOGGER.info("send message to {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
+    this.insert(topicEvent);
+    rocketMqProducer.sendMessage(
+        jsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), this.header, jsonService.toJson(topicEvent))));
+
   }
+
+  /**
+   * 发送消息，提供多端同步功能
+   */
+  private void sendMessageToSender(TopicEvent topicEvent)
+      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+    LOGGER.info("send message to sender {}, event type: {}", topicEvent.getFrom(), EventType.getByValue(topicEvent.getEventType()));
+    rocketMqProducer.sendMessage(
+        jsonService.toJson(new CDTPResponse(topicEvent.getFrom(), topicEvent.getEventType(), this.header, jsonService.toJson(topicEvent))));
+  }
+
 
   /**
    * 拉取话题事件
