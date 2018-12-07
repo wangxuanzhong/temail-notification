@@ -9,4 +9,6 @@ public interface TopicEventRepository {
   List<TopicEvent> selectEvents(String to, String topicId, Long begin, Long end);
 
   List<TopicEvent> selectEventsByMsgId(String msgId);
+
+  List<TopicEvent> selectTopic(String topicId);
 }

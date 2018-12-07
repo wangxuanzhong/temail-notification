@@ -38,7 +38,8 @@ public enum EventType {
   TOPIC(21, "话题消息"),
   TOPIC_REPLY(22, "话题回复消息"),
   TOPIC_RETRACT(23, "话题回复消息已撤回"),
-  TOPIC_DELETE(24, "话题消息已删除");
+  TOPIC_REPLY_DELETE(24, "话题回复消息删除"),
+  TOPIC_DELETE(25, "话题已删除");
 
   private final int value;
   private final String description;

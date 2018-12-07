@@ -89,14 +89,20 @@ public class TopicService {
         topicEvent.setTo(topicEvent.getFrom());
         sendMessageToSender(topicEvent);
         break;
-      case TOPIC_DELETE:
+      case TOPIC_REPLY_DELETE:
         // 删除操作msgId是多条，存入msgIds字段
         topicEvent.setMsgIds(jsonService.fromJson(topicEvent.getMsgId(), List.class));
         topicEvent.setMsgId(null);
-        // from和to与正常业务相反
-        topicEvent.setFrom(params.getTo());
-        topicEvent.setTo(params.getFrom());
+        topicEvent.setTo(topicEvent.getFrom());
         sendMessage(topicEvent);
+        break;
+      case TOPIC_DELETE:
+        // 向话题的所有收件人发送删除话题通知
+        for (TopicEvent event : topicEventRepository.selectTopic(topicEvent.getTopicId())) {
+          topicEvent.setTo(event.getTo());
+          sendMessage(topicEvent);
+        }
+        topicEvent.setTo(topicEvent.getFrom());
         sendMessageToSender(topicEvent);
         break;
     }
@@ -164,22 +170,21 @@ public class TopicService {
             eventMap.put(event.getMsgId(), event);
           }
           break;
-        case TOPIC_DELETE:
-          // msgIds不为空，则为批量删除消息
-          if (event.getMsgIds() != null) {
-            List<String> msgIds = new ArrayList<>(event.getMsgIds());
-            event.getMsgIds().forEach(msgId -> {
-              if (eventMap.containsKey(msgId)) {
-                eventMap.remove(msgId);
-                msgIds.remove(msgId); // 删除已出现的msgId
-              }
-            });
-            // 将此次拉取中未出现的msgId添加到删除事件中，供前端处理
-            if (!msgIds.isEmpty()) {
-              event.setMsgIds(msgIds);
-              notifyEvents.add(event);
+        case TOPIC_REPLY_DELETE:
+          List<String> msgIds = new ArrayList<>(event.getMsgIds());
+          event.getMsgIds().forEach(msgId -> {
+            if (eventMap.containsKey(msgId)) {
+              eventMap.remove(msgId);
+              msgIds.remove(msgId); // 删除已出现的msgId
             }
+          });
+          // 将此次拉取中未出现的msgId添加到删除事件中，供前端处理
+          if (!msgIds.isEmpty()) {
+            event.setMsgIds(msgIds);
+            notifyEvents.add(event);
           }
+        case TOPIC_DELETE:
+          eventMap.put(event.getTopicId(), event);
           break;
       }
     });
@@ -193,41 +198,6 @@ public class TopicService {
       result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
     }
     result.put("events", notifyEvents);
-    LOGGER.info("pull events result: " + result);
-    return result;
-  }
-
-  /**
-   * 计算话题总数
-   *
-   * @param to 发起人
-   * @param topicId 话题id
-   */
-  public Map<String, Object> getTopicSum(String to, String topicId) {
-    LOGGER.info("pull reply events called, to: {}, topicId: {}", to, topicId);
-
-    List<TopicEvent> events = topicEventRepository.selectEvents(to, topicId, null, null);
-
-    List<String> msgIds = new ArrayList<>();
-    events.forEach(event -> {
-      event.autoReadExtendParam(jsonService);
-      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
-        case TOPIC:
-        case TOPIC_REPLY:
-          msgIds.add(event.getMsgId());
-          break;
-        case TOPIC_RETRACT:
-          msgIds.remove(event.getMsgId());
-          break;
-        case TOPIC_DELETE:
-          // 计算总数直接删除
-          event.getMsgIds().forEach(msgIds::remove);
-          break;
-      }
-    });
-
-    Map<String, Object> result = new HashMap<>();
-    result.put("sum", msgIds.size());
     LOGGER.info("pull events result: " + result);
     return result;
   }

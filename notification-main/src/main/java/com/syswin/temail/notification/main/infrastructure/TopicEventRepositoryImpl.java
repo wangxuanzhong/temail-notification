@@ -30,4 +30,9 @@ public class TopicEventRepositoryImpl implements TopicEventRepository {
   public List<TopicEvent> selectEventsByMsgId(String msgId) {
     return topicEventMapper.selectEventsByMsgId(msgId);
   }
+
+  @Override
+  public List<TopicEvent> selectTopic(String topicId) {
+    return topicEventMapper.selectTopic(topicId);
+  }
 }

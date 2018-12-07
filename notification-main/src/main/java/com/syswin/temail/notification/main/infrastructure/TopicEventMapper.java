@@ -13,4 +13,6 @@ public interface TopicEventMapper {
   List<TopicEvent> selectEvents(@Param("to") String to, @Param("topicId") String topicId, @Param("begin") Long begin, @Param("end") Long end);
 
   List<TopicEvent> selectEventsByMsgId(String msgId);
+
+  List<TopicEvent> selectTopic(String topicId);
 }

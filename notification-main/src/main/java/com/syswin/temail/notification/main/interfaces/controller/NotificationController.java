@@ -84,17 +84,7 @@ public class NotificationController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 
-  @ApiOperation(value = "get reply sum 3 0005", consumes = "application/json")
-  @GetMapping("/reply/sum")
-  public ResponseEntity<Response<Map<String, Integer>>> getReplySum(@RequestParam List<String> msgIds,
-      @RequestHeader(name = CDTP_HEADER) String header) {
-    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-    headers.add(CDTP_HEADER, header);
-    Map<String, Integer> result = eventService.getReplySum(msgIds);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
-  }
-
-  @ApiOperation(value = "pull reply event 3 0006", consumes = "application/json")
+  @ApiOperation(value = "pull reply event 3 0005", consumes = "application/json")
   @GetMapping("/reply/events")
   public ResponseEntity<Response<Map<String, Object>>> getReplyEvents(@RequestParam Long eventSeqId, @RequestParam String parentMsgId,
       Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
@@ -104,7 +94,7 @@ public class NotificationController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
-  @ApiOperation(value = "pull topic event 3 0007", consumes = "application/json")
+  @ApiOperation(value = "pull topic event 3 0006", consumes = "application/json")
   @GetMapping("/topic/events")
   public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
       @RequestParam String topicId, Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
@@ -114,13 +104,4 @@ public class NotificationController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
-  @ApiOperation(value = "get topic sum 3 0008", consumes = "application/json")
-  @GetMapping("/topic/sum")
-  public ResponseEntity<Response<Map<String, Object>>> getTopicSum(@RequestParam(name = "from") String to, @RequestParam String topicId,
-      @RequestHeader(name = CDTP_HEADER) String header) {
-    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-    headers.add(CDTP_HEADER, header);
-    Map<String, Object> result = topicService.getTopicSum(to, topicId);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
-  }
 }

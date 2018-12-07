@@ -308,46 +308,4 @@ public class EventService {
     LOGGER.info("send reset event to {}", event.getTo());
     rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, jsonService.toJson(event))));
   }
-
-
-  /**
-   * 获取回复消息总数
-   *
-   * @param parentMsgIds 消息列表
-   */
-  public Map<String, Integer> getReplySum(List<String> parentMsgIds) {
-    LOGGER.info("get reply sum, parentMsgIds: ", parentMsgIds);
-
-    List<Event> events = eventRepository.selectEventsByParentMsgIds(parentMsgIds);
-
-    Map<String, List<String>> replySumMap = new HashMap<>();
-    events.forEach(event -> {
-      event.autoReadExtendParam(jsonService);
-
-      String key = event.getParentMsgId();
-      if (!replySumMap.containsKey(key)) {
-        replySumMap.put(key, new ArrayList<>());
-      }
-      List<String> msgIds = replySumMap.get(key);
-      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
-        case REPLY:
-          msgIds.add(event.getMsgId());
-          break;
-        case REPLY_RETRACT:
-          msgIds.remove(event.getMsgId());
-          break;
-        case REPLY_DELETE:
-          // 计算总数直接删除
-          event.getMsgIds().forEach(msgIds::remove);
-          break;
-      }
-    });
-
-    // 统计各个消息的回复总数
-    Map<String, Integer> resultMap = new HashMap<>();
-    replySumMap.forEach((key, msgIds) -> resultMap.put(key, msgIds.size()));
-
-    LOGGER.info("get reply sum result: " + resultMap);
-    return resultMap;
-  }
 }

@@ -42,4 +42,11 @@
     FROM `topic_event`
     WHERE `msg_id` = #{msgId}
   </select>
+
+  <select id="selectTopic" parameterType="java.lang.String" resultMap="EventMap">
+    SELECT
+    <include refid="baseField"/>
+    FROM `topic_event`
+    WHERE `topic_id` = #{topicId} AND `event_type` = ${@com.syswin.temail.notification.main.domains.EventType@TOPIC.getValue()}
+  </select>
 </mapper>

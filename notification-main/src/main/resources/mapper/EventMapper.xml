@@ -61,17 +61,6 @@
     <if test="groupTemail != null and groupTemail != ''">AND `group_temail` = #{groupTemail}</if>
   </delete>
 
-  <select id="selectEventsByParentMsgIds" parameterType="java.util.List" resultMap="EventMap">
-    SELECT
-    <include refid="baseField"/>
-    FROM `event`
-    WHERE `parent_msg_id` IN (
-    <foreach collection="list" index="index" item="item" separator=",">
-      #{item}
-    </foreach>
-    )
-  </select>
-
   <select id="checkUnique" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">
     SELECT
     <include refid="baseField"/>

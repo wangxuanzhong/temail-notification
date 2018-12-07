@@ -96,14 +96,26 @@ public class TopicServiceTest {
   }
 
   /**
-   * EventType TOPIC_DELETE 24 话题消息删除
+   * EventType TOPIC_REPLY_DELETE 24 话题消息删除
+   */
+  @Test
+  public void testEventTypeTopicReplyDelete() throws Exception {
+    params.setSessionMessageType(EventType.TOPIC_REPLY_DELETE.getValue());
+    params.setTopicId("topic_1");
+    params.setMsgid(gson.toJson(Arrays.asList("2", "3", "4")));
+    params.setFrom(TEST_TO);
+    params.setTo(TEST_FROM);
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
+   * EventType TOPIC_DELETE 25 话题删除
    */
   @Test
   public void testEventTypeTopicDelete() throws Exception {
     params.setSessionMessageType(EventType.TOPIC_DELETE.getValue());
     params.setTopicId("topic_1");
-    params.setMsgid(gson.toJson(Arrays.asList("2", "3", "4")));
-    params.setFrom(TEST_TO);
     params.setTo(TEST_FROM);
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
