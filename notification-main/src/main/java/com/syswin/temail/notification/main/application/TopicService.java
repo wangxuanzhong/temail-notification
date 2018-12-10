@@ -52,7 +52,7 @@ public class TopicService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentTopicParams params = jsonService.fromJson(body, MailAgentTopicParams.class);
     TopicEvent topicEvent = new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(), params.getMsgid(),
-        params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp());
+        params.getTopicSeqId(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp());
 
     // 前端需要的头信息
     this.header = params.getHeader();

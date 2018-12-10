@@ -21,7 +21,7 @@ public class TopicEvent {
   // 话题参数
   private String topicId;
   private String msgId;
-  private Long seqId;
+  private Long topicSeqId;
   private String message;
   private String from;
   private String to;
@@ -43,13 +43,13 @@ public class TopicEvent {
   public TopicEvent() {
   }
 
-  public TopicEvent(String xPacketId, Integer eventType, String topicId, String msgId, Long seqId, String message, String from, String to,
+  public TopicEvent(String xPacketId, Integer eventType, String topicId, String msgId, Long topicSeqId, String message, String from, String to,
       Long timestamp) {
     this.xPacketId = xPacketId;
     this.eventType = eventType;
     this.topicId = topicId;
     this.msgId = msgId;
-    this.seqId = seqId;
+    this.topicSeqId = topicSeqId;
     this.message = message;
     this.from = from;
     this.to = to;
@@ -130,12 +130,12 @@ public class TopicEvent {
     this.msgId = msgId;
   }
 
-  public Long getSeqId() {
-    return seqId;
+  public Long getTopicSeqId() {
+    return topicSeqId;
   }
 
-  public void setSeqId(Long seqId) {
-    this.seqId = seqId;
+  public void setTopicSeqId(Long topicSeqId) {
+    this.topicSeqId = topicSeqId;
   }
 
   public String getMessage() {
@@ -219,7 +219,7 @@ public class TopicEvent {
         ", eventType=" + eventType +
         ", topicId='" + topicId + '\'' +
         ", msgId='" + msgId + '\'' +
-        ", seqId=" + seqId +
+        ", topicSeqId=" + topicSeqId +
         ", message length='" + (message == null ? 0 : message.length()) + '\'' +
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +

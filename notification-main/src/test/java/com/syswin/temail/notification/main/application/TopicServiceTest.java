@@ -42,7 +42,7 @@ public class TopicServiceTest {
     params.setSessionMessageType(EventType.TOPIC.getValue());
     params.setTopicId("topic_1");
     params.setMsgid("1");
-    params.setSeqNo(1L);
+    params.setTopicSeqId(1L);
     params.setToMsg("这是一条话题测试消息！");
     params.setTitle("话题标题");
     params.setReceivers(Arrays.asList("b", "c", "d"));
@@ -70,7 +70,7 @@ public class TopicServiceTest {
     params.setSessionMessageType(EventType.TOPIC_REPLY.getValue());
     params.setTopicId("topic_1");
     params.setMsgid("2");
-    params.setSeqNo(2L);
+    params.setTopicSeqId(2L);
     params.setToMsg("这是一条话题回复测试消息！");
     params.setTo("b");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");

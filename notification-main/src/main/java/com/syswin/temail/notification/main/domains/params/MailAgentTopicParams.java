@@ -6,6 +6,8 @@ public class MailAgentTopicParams extends MailAgentParams {
 
   // 话题id
   private String topicId;
+  // 话题序列号
+  private Long topicSeqId;
   // 话题主题
   private String title;
   // 收件人
@@ -19,6 +21,14 @@ public class MailAgentTopicParams extends MailAgentParams {
 
   public void setTopicId(String topicId) {
     this.topicId = topicId;
+  }
+
+  public Long getTopicSeqId() {
+    return topicSeqId;
+  }
+
+  public void setTopicSeqId(Long topicSeqId) {
+    this.topicSeqId = topicSeqId;
   }
 
   public String getTitle() {
@@ -43,5 +53,16 @@ public class MailAgentTopicParams extends MailAgentParams {
 
   public void setCc(List<String> cc) {
     this.cc = cc;
+  }
+
+  @Override
+  public String toString() {
+    return "MailAgentTopicParams{" +
+        "topicId='" + topicId + '\'' +
+        ", topicSeqId='" + topicSeqId + '\'' +
+        ", title='" + title + '\'' +
+        ", receivers=" + receivers +
+        ", cc=" + cc +
+        '}' + super.toString();
   }
 }
