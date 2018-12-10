@@ -20,8 +20,9 @@ public class TopicEvent {
 
   // 话题参数
   private String topicId;
-  private String msgId;
   private Long topicSeqId;
+  private String msgId;
+  private Long seqId;
   private String message;
   private String from;
   private String to;
@@ -43,13 +44,13 @@ public class TopicEvent {
   public TopicEvent() {
   }
 
-  public TopicEvent(String xPacketId, Integer eventType, String topicId, String msgId, Long topicSeqId, String message, String from, String to,
+  public TopicEvent(String xPacketId, Integer eventType, String topicId, String msgId, Long seqId, String message, String from, String to,
       Long timestamp) {
     this.xPacketId = xPacketId;
     this.eventType = eventType;
     this.topicId = topicId;
     this.msgId = msgId;
-    this.topicSeqId = topicSeqId;
+    this.seqId = seqId;
     this.message = message;
     this.from = from;
     this.to = to;
@@ -122,6 +123,14 @@ public class TopicEvent {
     this.topicId = topicId;
   }
 
+  public Long getTopicSeqId() {
+    return topicSeqId;
+  }
+
+  public void setTopicSeqId(Long topicSeqId) {
+    this.topicSeqId = topicSeqId;
+  }
+
   public String getMsgId() {
     return msgId;
   }
@@ -130,12 +139,12 @@ public class TopicEvent {
     this.msgId = msgId;
   }
 
-  public Long getTopicSeqId() {
-    return topicSeqId;
+  public Long getSeqId() {
+    return seqId;
   }
 
-  public void setTopicSeqId(Long topicSeqId) {
-    this.topicSeqId = topicSeqId;
+  public void setSeqId(Long seqId) {
+    this.seqId = seqId;
   }
 
   public String getMessage() {
@@ -218,12 +227,16 @@ public class TopicEvent {
         ", eventSeqId=" + eventSeqId +
         ", eventType=" + eventType +
         ", topicId='" + topicId + '\'' +
-        ", msgId='" + msgId + '\'' +
         ", topicSeqId=" + topicSeqId +
+        ", msgId='" + msgId + '\'' +
+        ", seqId=" + seqId +
         ", message length='" + (message == null ? 0 : message.length()) + '\'' +
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", timestamp=" + timestamp +
+        ", title='" + title + '\'' +
+        ", receivers=" + receivers +
+        ", cc=" + cc +
         ", msgIds=" + msgIds +
         ", extendParam='" + extendParam + '\'' +
         '}';
