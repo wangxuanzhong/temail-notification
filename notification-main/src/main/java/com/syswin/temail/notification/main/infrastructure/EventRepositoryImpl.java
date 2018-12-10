@@ -32,8 +32,13 @@ public class EventRepositoryImpl implements EventRepository {
   }
 
   @Override
-  public Integer deleteResetEvents(Event event) {
-    return eventMapper.deleteResetEvents(event);
+  public List<Long> selectResetEvents(Event event) {
+    return eventMapper.selectResetEvents(event);
+  }
+
+  @Override
+  public void delete(List<Long> ids) {
+    eventMapper.delete(ids);
   }
 
   @Override

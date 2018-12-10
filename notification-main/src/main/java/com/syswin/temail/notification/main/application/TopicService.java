@@ -57,7 +57,7 @@ public class TopicService {
     // 前端需要的头信息
     this.header = params.getHeader();
 
-    LOGGER.info("topic params: \n" + params);
+    LOGGER.info("topic params: " + params);
     LOGGER.info("topic event type: " + EventType.getByValue(topicEvent.getEventType()));
 
     switch (Objects.requireNonNull(EventType.getByValue(topicEvent.getEventType()))) {
@@ -66,7 +66,7 @@ public class TopicService {
         if (!topicEvent.getTo().equals(topicEvent.getFrom())) {
           topicEvent.setTitle(params.getTitle());
           topicEvent.setReceivers(params.getReceivers());
-          topicEvent.setCC(params.getCC());
+          topicEvent.setCc(params.getCc());
           sendMessage(topicEvent);
         } else {
           sendMessageToSender(topicEvent);

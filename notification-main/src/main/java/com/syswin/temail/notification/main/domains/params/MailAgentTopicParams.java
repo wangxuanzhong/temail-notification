@@ -11,7 +11,7 @@ public class MailAgentTopicParams extends MailAgentParams {
   // 收件人
   private List<String> receivers;
   // 抄送
-  private List<String> CC;
+  private List<String> cc;
 
   public String getTopicId() {
     return topicId;
@@ -37,11 +37,11 @@ public class MailAgentTopicParams extends MailAgentParams {
     this.receivers = receivers;
   }
 
-  public List<String> getCC() {
-    return CC;
+  public List<String> getCc() {
+    return cc;
   }
 
-  public void setCC(List<String> CC) {
-    this.CC = CC;
+  public void setCc(List<String> cc) {
+    this.cc = cc;
   }
 }

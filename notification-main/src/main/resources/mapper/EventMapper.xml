@@ -55,10 +55,19 @@
     <if test="to != null and to != ''">AND `to` = #{to}</if>
   </select>
 
-  <delete id="deleteResetEvents" parameterType="com.syswin.temail.notification.main.domains.Event">
-    DELETE FROM `event`
+  <select id="selectResetEvents" parameterType="com.syswin.temail.notification.main.domains.Event" resultType="java.lang.Long">
+    SELECT `id` FROM `event`
     WHERE `event_type` = #{eventType} AND `from` = #{from} AND `to` = #{to} AND event_seq_id <![CDATA[<]]> #{eventSeqId}
     <if test="groupTemail != null and groupTemail != ''">AND `group_temail` = #{groupTemail}</if>
+  </select>
+
+  <delete id="delete" parameterType="com.syswin.temail.notification.main.domains.Event">
+    DELETE FROM `event`
+    WHERE `id` IN (
+    <foreach collection="list" index="index" item="item" separator=",">
+      #{item}
+    </foreach>
+    )
   </delete>
 
   <select id="checkUnique" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">

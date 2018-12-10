@@ -53,9 +53,9 @@ public class RocketMqProducer {
   public void sendMessage(String body, String topic, String tags, String keys)
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
     Message mqMsg = new Message(topic, tags, keys, body.getBytes(RemotingHelper.DEFAULT_CHARSET));
-    LOGGER.info("MQ: send message\n{}", body);
+    LOGGER.info("MQ: send message: {}", body);
     SendResult sendResult = producer.send(mqMsg);
-    LOGGER.info("MQ: send result\n{}", sendResult);
+    LOGGER.info("MQ: send result: {}", sendResult);
 
     if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
       throw new SendMqMessageException(sendResult.toString());

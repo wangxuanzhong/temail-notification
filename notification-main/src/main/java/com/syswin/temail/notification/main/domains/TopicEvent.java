@@ -33,7 +33,7 @@ public class TopicEvent {
   // 收件人
   private List<String> receivers;
   // 抄送
-  private List<String> CC;
+  private List<String> cc;
   // 批量msgId
   private List<String> msgIds;
 
@@ -78,7 +78,7 @@ public class TopicEvent {
    * 自动配置扩展字段
    */
   public TopicEvent autoWriteExtendParam(JsonService jsonService) {
-    this.extendParam = jsonService.toJson(new TopicExtendParam(this.title, this.receivers, this.CC, this.msgIds));
+    this.extendParam = jsonService.toJson(new TopicExtendParam(this.title, this.receivers, this.cc, this.msgIds));
     return this;
   }
 
@@ -186,12 +186,12 @@ public class TopicEvent {
     this.receivers = receivers;
   }
 
-  public List<String> getCC() {
-    return CC;
+  public List<String> getCc() {
+    return cc;
   }
 
-  public void setCC(List<String> CC) {
-    this.CC = CC;
+  public void setCc(List<String> cc) {
+    this.cc = cc;
   }
 
   public List<String> getMsgIds() {

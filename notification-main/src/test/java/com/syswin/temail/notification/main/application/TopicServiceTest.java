@@ -46,7 +46,7 @@ public class TopicServiceTest {
     params.setToMsg("这是一条话题测试消息！");
     params.setTitle("话题标题");
     params.setReceivers(Arrays.asList("b", "c", "d"));
-    params.setCC(Arrays.asList("J", "Q", "K"));
+    params.setCc(Arrays.asList("J", "Q", "K"));
     params.setTo("b");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     params.setTo("c");

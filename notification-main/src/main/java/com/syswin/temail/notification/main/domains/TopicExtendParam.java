@@ -15,17 +15,17 @@ class TopicExtendParam {
   // 收件人
   private List<String> receivers;
   // 抄送
-  private List<String> CC;
+  private List<String> cc;
   // 批量msgId
   private List<String> msgIds;
 
   public TopicExtendParam() {
   }
 
-  public TopicExtendParam(String title, List<String> receivers, List<String> CC, List<String> msgIds) {
+  public TopicExtendParam(String title, List<String> receivers, List<String> cc, List<String> msgIds) {
     this.title = title;
     this.receivers = receivers;
-    this.CC = CC;
+    this.cc = cc;
     this.msgIds = msgIds;
   }
 
@@ -45,12 +45,12 @@ class TopicExtendParam {
     this.receivers = receivers;
   }
 
-  public List<String> getCC() {
-    return CC;
+  public List<String> getCc() {
+    return cc;
   }
 
-  public void setCC(List<String> CC) {
-    this.CC = CC;
+  public void setCc(List<String> cc) {
+    this.cc = cc;
   }
 
   public List<String> getMsgIds() {

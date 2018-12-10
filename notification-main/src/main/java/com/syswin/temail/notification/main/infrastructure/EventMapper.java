@@ -14,7 +14,9 @@ public interface EventMapper {
 
   List<Event> selectEventsByMsgId(Event event);
 
-  Integer deleteResetEvents(Event event);
+  List<Long> selectResetEvents(Event event);
+
+  void delete(List<Long> ids);
 
   List<Event> checkUnique(Event event);
 }

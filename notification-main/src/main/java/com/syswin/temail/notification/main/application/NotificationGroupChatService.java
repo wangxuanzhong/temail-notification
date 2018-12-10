@@ -60,7 +60,7 @@ public class NotificationGroupChatService {
     // 前端需要的头信息
     this.header = params.getHeader();
 
-    LOGGER.info("group chat params: \n" + params);
+    LOGGER.info("group chat params: " + params);
     LOGGER.info("group chat event type: " + EventType.getByValue(event.getEventType()));
 
     // 校验收到的数据是否重复
