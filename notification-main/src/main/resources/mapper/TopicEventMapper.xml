@@ -49,4 +49,9 @@
     FROM `topic_event`
     WHERE `topic_id` = #{topicId} AND `event_type` = ${@com.syswin.temail.notification.main.domains.EventType@TOPIC.getValue()}
   </select>
+
+  <delete id="deleteOldTopic" parameterType="java.time.LocalDateTime">
+    DELETE FROM `topic_event`
+    WHERE `create_timestamp` <![CDATA[<]]> #{createTime}
+  </delete>
 </mapper>

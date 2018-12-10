@@ -1,6 +1,7 @@
 package com.syswin.temail.notification.main.infrastructure;
 
 import com.syswin.temail.notification.main.domains.TopicEvent;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -15,4 +16,6 @@ public interface TopicEventMapper {
   List<TopicEvent> selectEventsByMsgId(String msgId);
 
   List<TopicEvent> selectTopic(String topicId);
+
+  void deleteOldTopic(LocalDateTime createTime);
 }

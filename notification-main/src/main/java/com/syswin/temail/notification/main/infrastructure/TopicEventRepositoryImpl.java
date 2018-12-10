@@ -2,6 +2,7 @@ package com.syswin.temail.notification.main.infrastructure;
 
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.TopicEventRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,5 +35,10 @@ public class TopicEventRepositoryImpl implements TopicEventRepository {
   @Override
   public List<TopicEvent> selectTopic(String topicId) {
     return topicEventMapper.selectTopic(topicId);
+  }
+
+  @Override
+  public void deleteOldTopic(LocalDateTime createTime) {
+    topicEventMapper.deleteOldTopic(createTime);
   }
 }

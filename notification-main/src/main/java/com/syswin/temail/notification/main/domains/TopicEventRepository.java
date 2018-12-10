@@ -1,5 +1,6 @@
 package com.syswin.temail.notification.main.domains;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TopicEventRepository {
@@ -11,4 +12,6 @@ public interface TopicEventRepository {
   List<TopicEvent> selectEventsByMsgId(String msgId);
 
   List<TopicEvent> selectTopic(String topicId);
+
+  void deleteOldTopic(LocalDateTime createTime);
 }
