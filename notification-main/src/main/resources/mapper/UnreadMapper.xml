@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.syswin.temail.notification.main.infrastructure.UnreadMapper">
+  <resultMap id="EventMap" type="com.syswin.temail.notification.main.domains.Unread">
+    <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="from" jdbcType="VARCHAR" property="from"/>
+    <result column="to" jdbcType="VARCHAR" property="to"/>
+    <result column="count" jdbcType="INTEGER" property="count"/>
+  </resultMap>
+
+  <sql id="baseField">
+    `id`, `from`, `to`, `count`
+  </sql>
+
+  <insert id="insert" parameterType="com.syswin.temail.notification.main.domains.Unread">
+    INSERT INTO `unread` VALUES (#{from}, #{to}, #{count}) ON DUPLICATE KEY
+    UPDATE `count` = #{count}
+  </insert>
+
+  <select id="selectCount" parameterType="java.lang.String" resultMap="EventMap">
+    SELECT
+    <include refid="baseField"/>
+    FROM `unread` WHERE `to` = #{to}
+  </select>
+</mapper>

@@ -5,6 +5,8 @@ import com.syswin.temail.notification.foundation.application.SequenceService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.EventType;
+import com.syswin.temail.notification.main.domains.Unread;
+import com.syswin.temail.notification.main.domains.UnreadRepository;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import java.io.UnsupportedEncodingException;
@@ -31,14 +33,16 @@ public class EventService {
 
   private final SequenceService sequenceService;
   private final EventRepository eventRepository;
+  private final UnreadRepository unreadRepository;
   private final JsonService jsonService;
   private final RocketMqProducer rocketMqProducer;
 
   @Autowired
-  public EventService(SequenceService sequenceService, EventRepository eventRepository, JsonService jsonService,
+  public EventService(SequenceService sequenceService, EventRepository eventRepository, UnreadRepository unreadRepository, JsonService jsonService,
       RocketMqProducer rocketMqProducer) {
     this.sequenceService = sequenceService;
     this.eventRepository = eventRepository;
+    this.unreadRepository = unreadRepository;
     this.jsonService = jsonService;
     this.rocketMqProducer = rocketMqProducer;
   }
@@ -197,9 +201,13 @@ public class EventService {
   public List<UnreadResponse> getUnread(String to) {
     LOGGER.info("get unread, to: {}", to);
 
-    List<Event> events = eventRepository.selectEvents(to, null, null, null);
+    // 获取已经删除的事件的未读数
+    List<Unread> unreads = unreadRepository.selectCount(to);
+    Map<String, Integer> unreadMap = new HashMap<>();
+    unreads.forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
 
-    Map<String, List<String>> unreadMap = new HashMap<>();
+    List<Event> events = eventRepository.selectEvents(to, null, null, null);
+    Map<String, List<String>> eventMap = new HashMap<>();
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
       // 为了区分单聊和群聊，给群聊添加后缀
@@ -208,13 +216,14 @@ public class EventService {
         key += Event.GROUP_CHAT_KEY_POSTFIX;
       }
 
-      if (!unreadMap.containsKey(key)) {
-        unreadMap.put(key, new ArrayList<>());
+      if (!eventMap.containsKey(key)) {
+        eventMap.put(key, new ArrayList<>());
       }
-      List<String> msgIds = unreadMap.get(key);
+      List<String> msgIds = eventMap.get(key);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case RESET:
           msgIds.clear();
+          unreadMap.put(event.getFrom(), 0);
           break;
         case RECEIVE:
         case DESTROY:
@@ -260,6 +269,7 @@ public class EventService {
           } else { // 单聊删除会话和消息
             if (event.getDeleteAllMsg() != null && event.getDeleteAllMsg()) {
               msgIds.clear();
+              unreadMap.put(event.getFrom(), 0);
             }
             msgIds.add("notify event msgId");
           }
@@ -269,9 +279,10 @@ public class EventService {
 
     // 统计各个会话的未读数量
     List<UnreadResponse> unreadResponses = new ArrayList<>();
-    unreadMap.forEach((key, msgIds) -> {
+    eventMap.forEach((key, msgIds) -> {
       if (!msgIds.isEmpty()) {
-        UnreadResponse unreadResponse = new UnreadResponse(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds.size());
+        UnreadResponse unreadResponse = new UnreadResponse(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to,
+            msgIds.size() + unreadMap.get(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0]));
         if (key.endsWith(Event.GROUP_CHAT_KEY_POSTFIX)) {
           unreadResponse.setGroupTemail(unreadResponse.getFrom());
         }
