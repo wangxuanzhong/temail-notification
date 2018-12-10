@@ -303,7 +303,9 @@ public class EventService {
 
     // 删除历史重置事件
     List<Long> ids = eventRepository.selectResetEvents(event);
-    eventRepository.delete(ids);
+    if (!ids.isEmpty()) {
+      eventRepository.delete(ids);
+    }
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
