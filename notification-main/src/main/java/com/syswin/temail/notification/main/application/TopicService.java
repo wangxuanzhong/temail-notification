@@ -33,6 +33,8 @@ public class TopicService {
   private final TopicEventRepository topicEventRepository;
   private final JsonService jsonService;
 
+  private String header = null;
+
   @Autowired
   public TopicService(RocketMqProducer rocketMqProducer, RedisService redisService, TopicEventRepository topicEventRepository,
       JsonService jsonService) {
@@ -53,10 +55,10 @@ public class TopicService {
         params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp());
 
     // 前端需要的头信息
-    String header = params.getHeader();
+    this.header = params.getHeader();
 
-    LOGGER.info("topic params: {}", params);
-    LOGGER.info("topic event type: {}", EventType.getByValue(topicEvent.getEventType()));
+    LOGGER.info("topic params: " + params);
+    LOGGER.info("topic event type: " + EventType.getByValue(topicEvent.getEventType()));
 
     switch (Objects.requireNonNull(EventType.getByValue(topicEvent.getEventType()))) {
       case TOPIC:
@@ -66,43 +68,43 @@ public class TopicService {
           topicEvent.setReceivers(params.getReceivers());
           topicEvent.setCc(params.getCc());
           topicEvent.setTopicSeqId(params.getTopicSeqId()); // 话题单独的序列号
-          sendMessage(topicEvent, header);
+          sendMessage(topicEvent);
         } else {
-          sendMessageToSender(topicEvent, header);
+          sendMessageToSender(topicEvent);
         }
         break;
       case TOPIC_REPLY:
         // from和to相同为话题发送者的消息，不入库
         if (!topicEvent.getTo().equals(topicEvent.getFrom())) {
-          sendMessage(topicEvent, header);
+          sendMessage(topicEvent);
         } else {
-          sendMessageToSender(topicEvent, header);
+          sendMessageToSender(topicEvent);
         }
         break;
       case TOPIC_RETRACT:
         // 向撤回的消息的所有收件人发送撤回通知
         for (TopicEvent event : topicEventRepository.selectEventsByMsgId(topicEvent.getMsgId())) {
           topicEvent.setTo(event.getTo());
-          sendMessage(topicEvent, header);
+          sendMessage(topicEvent);
         }
         topicEvent.setTo(topicEvent.getFrom());
-        sendMessageToSender(topicEvent, header);
+        sendMessageToSender(topicEvent);
         break;
       case TOPIC_REPLY_DELETE:
         // 删除操作msgId是多条，存入msgIds字段
         topicEvent.setMsgIds(jsonService.fromJson(topicEvent.getMsgId(), List.class));
         topicEvent.setMsgId(null);
         topicEvent.setTo(topicEvent.getFrom());
-        sendMessage(topicEvent, header);
+        sendMessage(topicEvent);
         break;
       case TOPIC_DELETE:
         // 向话题的所有收件人发送删除话题通知
         for (TopicEvent event : topicEventRepository.selectTopic(topicEvent.getTopicId())) {
           topicEvent.setTo(event.getTo());
-          sendMessage(topicEvent, header);
+          sendMessage(topicEvent);
         }
         topicEvent.setTo(topicEvent.getFrom());
-        sendMessageToSender(topicEvent, header);
+        sendMessageToSender(topicEvent);
         break;
     }
   }
@@ -119,23 +121,23 @@ public class TopicService {
   /**
    * 发送消息
    */
-  private void sendMessage(TopicEvent topicEvent, String header)
+  private void sendMessage(TopicEvent topicEvent)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
     rocketMqProducer.sendMessage(
-        jsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, jsonService.toJson(topicEvent))));
+        jsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), this.header, jsonService.toJson(topicEvent))));
 
   }
 
   /**
    * 发送消息，提供多端同步功能
    */
-  private void sendMessageToSender(TopicEvent topicEvent, String header)
+  private void sendMessageToSender(TopicEvent topicEvent)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to sender {}, event type: {}", topicEvent.getFrom(), EventType.getByValue(topicEvent.getEventType()));
     rocketMqProducer.sendMessage(
-        jsonService.toJson(new CDTPResponse(topicEvent.getFrom(), topicEvent.getEventType(), header, jsonService.toJson(topicEvent))));
+        jsonService.toJson(new CDTPResponse(topicEvent.getFrom(), topicEvent.getEventType(), this.header, jsonService.toJson(topicEvent))));
   }
 
 
@@ -197,7 +199,7 @@ public class TopicService {
       result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
     }
     result.put("events", notifyEvents);
-    LOGGER.info("pull events result: {}", result);
+    LOGGER.info("pull events result: " + result);
     return result;
   }
 }
