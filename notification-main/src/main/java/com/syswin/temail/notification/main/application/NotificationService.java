@@ -53,8 +53,8 @@ public class NotificationService {
     // 前端需要的头信息
     String header = params.getHeader();
 
-    LOGGER.info("single chat params: " + params);
-    LOGGER.info("single chat event type: " + EventType.getByValue(event.getEventType()));
+    LOGGER.info("single chat params: {}", params);
+    LOGGER.info("single chat event type: {}", EventType.getByValue(event.getEventType()));
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();

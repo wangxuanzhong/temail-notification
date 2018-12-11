@@ -106,6 +106,7 @@
   </dependencies>
 
   <build>
+    <finalName>temail-notification-${version}</finalName>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>

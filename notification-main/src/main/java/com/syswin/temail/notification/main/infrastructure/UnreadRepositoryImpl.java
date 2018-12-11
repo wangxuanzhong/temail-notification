@@ -25,4 +25,9 @@ public class UnreadRepositoryImpl implements UnreadRepository {
   public List<Unread> selectCount(String to) {
     return unreadMapper.selectCount(to);
   }
+
+  @Override
+  public void deleteZeroCount() {
+    unreadMapper.deleteZeroCount();
+  }
 }

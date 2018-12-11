@@ -2,6 +2,7 @@ package com.syswin.temail.notification.main.infrastructure;
 
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,5 +45,20 @@ public class EventRepositoryImpl implements EventRepository {
   @Override
   public List<Event> checkUnique(Event event) {
     return eventMapper.checkUnique(event);
+  }
+
+  @Override
+  public List<String> selectOldTo(LocalDateTime createTime) {
+    return eventMapper.selectOldTo(createTime);
+  }
+
+  @Override
+  public List<Event> selectOldEvent(String to, LocalDateTime createTime) {
+    return eventMapper.selectOldEvent(to, createTime);
+  }
+
+  @Override
+  public void deleteOldEvent(LocalDateTime createTime) {
+    eventMapper.deleteOldEvent(createTime);
   }
 }

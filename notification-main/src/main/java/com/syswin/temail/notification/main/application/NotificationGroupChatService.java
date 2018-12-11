@@ -58,8 +58,8 @@ public class NotificationGroupChatService {
     // 前端需要的头信息
     String header = params.getHeader();
 
-    LOGGER.info("group chat params: " + params);
-    LOGGER.info("group chat event type: " + EventType.getByValue(event.getEventType()));
+    LOGGER.info("group chat params: {}", params);
+    LOGGER.info("group chat event type: {}", EventType.getByValue(event.getEventType()));
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail();
@@ -113,7 +113,7 @@ public class NotificationGroupChatService {
           try {
             memberRepository.insert(event);
           } catch (DuplicateKeyException e) {
-            LOGGER.warn("add member duplicate exception：" + e);
+            LOGGER.warn("add member duplicate exception：{}", e);
           }
           event.notifyToAll();
           this.sendGroupMessage(event, header);

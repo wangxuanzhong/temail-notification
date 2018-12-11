@@ -13,8 +13,11 @@
   </sql>
 
   <insert id="insert" parameterType="com.syswin.temail.notification.main.domains.Unread">
-    INSERT INTO `unread` VALUES (#{from}, #{to}, #{count}) ON DUPLICATE KEY
-    UPDATE `count` = #{count}
+    INSERT INTO `unread`
+    (`from`, `to`, `count`)
+    VALUES
+    (#{from}, #{to}, #{count})
+    ON DUPLICATE KEY UPDATE `count` = #{count}
   </insert>
 
   <select id="selectCount" parameterType="java.lang.String" resultMap="EventMap">
@@ -22,4 +25,8 @@
     <include refid="baseField"/>
     FROM `unread` WHERE `to` = #{to}
   </select>
+
+  <delete id="deleteZeroCount">
+    DELETE FROM `unread` WHERE `count` = 0
+  </delete>
 </mapper>

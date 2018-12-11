@@ -78,4 +78,23 @@
     <if test="groupTemail != null and groupTemail != ''">AND `group_temail` = #{groupTemail}</if>
     <if test="temail != null and temail != ''">AND `temail` = #{temail}</if>
   </select>
+
+
+  <!-- 清除历史数据功能所用sql -->
+  <select id="selectOldTo" parameterType="java.time.LocalDateTime" resultType="java.lang.String">
+    SELECT DISTINCT(`to`) FROM `event` WHERE `create_timestamp` <![CDATA[<]]> #{createTime}
+  </select>
+
+  <select id="selectOldEvent" resultMap="EventMap">
+    SELECT
+    <include refid="baseField"/>
+    FROM `event`
+    WHERE `to` = #{to} AND `create_timestamp` <![CDATA[<]]> #{createTime}
+    ORDER BY `event_seq_id`
+  </select>
+
+  <delete id="deleteOldEvent" parameterType="java.time.LocalDateTime">
+    DELETE FROM `event` WHERE `create_timestamp` <![CDATA[<]]> #{createTime}
+  </delete>
+  <!-- end -->
 </mapper>

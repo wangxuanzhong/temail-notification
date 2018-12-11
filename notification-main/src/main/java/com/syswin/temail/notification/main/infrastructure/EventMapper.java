@@ -1,6 +1,7 @@
 package com.syswin.temail.notification.main.infrastructure;
 
 import com.syswin.temail.notification.main.domains.Event;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -19,4 +20,11 @@ public interface EventMapper {
   void delete(List<Long> ids);
 
   List<Event> checkUnique(Event event);
+
+
+  List<String> selectOldTo(LocalDateTime createTime);
+
+  List<Event> selectOldEvent(@Param("to") String to, @Param("createTime") LocalDateTime createTime);
+
+  void deleteOldEvent(LocalDateTime createTime);
 }

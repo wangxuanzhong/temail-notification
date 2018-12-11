@@ -10,4 +10,6 @@ public interface UnreadMapper {
   int insert(Unread unread);
 
   List<Unread> selectCount(String to);
+
+  void deleteZeroCount();
 }

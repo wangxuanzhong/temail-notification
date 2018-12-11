@@ -55,8 +55,8 @@ public class TopicService {
     // 前端需要的头信息
     String header = params.getHeader();
 
-    LOGGER.info("topic params: " + params);
-    LOGGER.info("topic event type: " + EventType.getByValue(topicEvent.getEventType()));
+    LOGGER.info("topic params: {}", params);
+    LOGGER.info("topic event type: {}", EventType.getByValue(topicEvent.getEventType()));
 
     switch (Objects.requireNonNull(EventType.getByValue(topicEvent.getEventType()))) {
       case TOPIC:
@@ -197,7 +197,7 @@ public class TopicService {
       result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
     }
     result.put("events", notifyEvents);
-    LOGGER.info("pull events result: " + result);
+    LOGGER.info("pull events result: {}", result);
     return result;
   }
 }

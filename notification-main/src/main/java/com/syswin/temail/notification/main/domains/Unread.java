@@ -14,8 +14,7 @@ public class Unread {
   public Unread() {
   }
 
-  public Unread(Long id, String from, String to, Integer count) {
-    this.id = id;
+  public Unread(String from, String to, Integer count) {
     this.from = from;
     this.to = to;
     this.count = count;

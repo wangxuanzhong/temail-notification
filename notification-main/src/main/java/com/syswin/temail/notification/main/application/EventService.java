@@ -5,7 +5,6 @@ import com.syswin.temail.notification.foundation.application.SequenceService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.domains.UnreadRepository;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
@@ -189,7 +188,7 @@ public class EventService {
       result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
     }
     result.put("events", notifyEvents);
-    LOGGER.info("pull events result: " + result);
+    LOGGER.info("pull events result: {}", result);
     return result;
   }
 
@@ -202,11 +201,41 @@ public class EventService {
     LOGGER.info("get unread, to: {}", to);
 
     // 获取已经删除的事件的未读数
-    List<Unread> unreads = unreadRepository.selectCount(to);
     Map<String, Integer> unreadMap = new HashMap<>();
-    unreads.forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
+    unreadRepository.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
 
+    // 查询所有事件
     List<Event> events = eventRepository.selectEvents(to, null, null, null);
+
+    // 统计未读数
+    Map<String, List<String>> eventMap = this.calculateUnread(events, unreadMap);
+
+    // 统计各个会话的未读数量
+    List<UnreadResponse> unreadResponses = new ArrayList<>();
+    eventMap.forEach((key, msgIds) -> {
+      if (!msgIds.isEmpty()) {
+        // 计算未读数表中的数据
+        int unread = 0;
+        if (unreadMap.containsKey(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0])) {
+          unread = unreadMap.get(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0]);
+        }
+
+        UnreadResponse unreadResponse = new UnreadResponse(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds.size() + unread);
+        if (key.endsWith(Event.GROUP_CHAT_KEY_POSTFIX)) {
+          unreadResponse.setGroupTemail(unreadResponse.getFrom());
+        }
+        unreadResponses.add(unreadResponse);
+      }
+    });
+
+    LOGGER.info("get unread result: {}", unreadResponses);
+    return unreadResponses;
+  }
+
+  /**
+   * 统计消息未读数
+   */
+  public Map<String, List<String>> calculateUnread(List<Event> events, Map<String, Integer> unreadMap) {
     Map<String, List<String>> eventMap = new HashMap<>();
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
@@ -223,7 +252,7 @@ public class EventService {
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case RESET:
           msgIds.clear();
-          unreadMap.put(event.getFrom(), 0);
+          unreadMap.remove(event.getFrom());
           break;
         case RECEIVE:
         case DESTROY:
@@ -243,6 +272,8 @@ public class EventService {
           msgIds.add("notify event msgId");
           break;
         case PULLED:
+          msgIds.remove(event.getMsgId());
+          break;
         case RETRACT:
         case APPLY_ADOPT:
         case APPLY_REFUSE:
@@ -255,43 +286,17 @@ public class EventService {
         case DELETE:
           // msgIds不为空，则为批量删除消息
           if (event.getMsgIds() != null) {
-            List<String> deleteMsgIds = new ArrayList<>(event.getMsgIds());
-            event.getMsgIds().forEach(msgId -> {
-              if (msgIds.remove(msgId)) {
-                deleteMsgIds.remove(msgId);
-              }
-            });
-
-            // 如果有未出现的msgId，则删除通知仍需处理，算入未读数中
-            if (!deleteMsgIds.isEmpty()) {
-              msgIds.add("notify event msgId");
-            }
+            event.getMsgIds().forEach(msgIds::remove);
           } else { // 单聊删除会话和消息
             if (event.getDeleteAllMsg() != null && event.getDeleteAllMsg()) {
               msgIds.clear();
-              unreadMap.put(event.getFrom(), 0);
+              unreadMap.remove(event.getFrom());
             }
-            msgIds.add("notify event msgId");
           }
           break;
       }
     });
-
-    // 统计各个会话的未读数量
-    List<UnreadResponse> unreadResponses = new ArrayList<>();
-    eventMap.forEach((key, msgIds) -> {
-      if (!msgIds.isEmpty()) {
-        UnreadResponse unreadResponse = new UnreadResponse(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to,
-            msgIds.size() + unreadMap.get(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0]));
-        if (key.endsWith(Event.GROUP_CHAT_KEY_POSTFIX)) {
-          unreadResponse.setGroupTemail(unreadResponse.getFrom());
-        }
-        unreadResponses.add(unreadResponse);
-      }
-    });
-
-    LOGGER.info("get unread result: " + unreadResponses);
-    return unreadResponses;
+    return eventMap;
   }
 
   /**
