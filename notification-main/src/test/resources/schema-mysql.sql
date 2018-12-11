@@ -13,8 +13,8 @@ CREATE TABLE `event` (
   `timestamp` bigint(20) DEFAULT '0' COMMENT '客户端消息发送时间',
   `create_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  KEY `to` (`to`),
-  KEY `xPacketId` (`x_packet_id`)
+  KEY `event_to` (`to`),
+  KEY `event_xPacketId` (`x_packet_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `member` (
@@ -23,7 +23,7 @@ CREATE TABLE `member` (
   `temail` varchar(320) NOT NULL COMMENT '用户邮件',
   `role` tinyint(1) NOT NULL DEFAULT '0' COMMENT '群角色',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique` (`group_temail`,`temail`)
+  UNIQUE KEY `member_unique` (`group_temail`,`temail`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `topic_event` (
@@ -39,8 +39,7 @@ CREATE TABLE `topic_event` (
   `timestamp` bigint(20) NOT NULL DEFAULT '0' COMMENT '客户端消息发送时间',
   `create_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique` (`x_packet_id`,`event_type`,`to`) USING BTREE,
-  KEY `to` (`to`)
+  UNIQUE KEY `topic_event_unique` (`x_packet_id`,`event_type`,`to`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `unread` (
@@ -48,6 +47,6 @@ CREATE TABLE `unread` (
   `from` varchar(320) NOT NULL COMMENT '收件人',
   `to` varchar(320) NOT NULL COMMENT '发件人',
   `count` int(20) NOT NULL COMMENT '未读数',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `unique` (`to`,`from`) USING BTREE
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unread_unique` (`to`,`from`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
