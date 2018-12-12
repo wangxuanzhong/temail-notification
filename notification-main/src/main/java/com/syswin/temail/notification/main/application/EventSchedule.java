@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EventSchedule {
@@ -40,6 +41,7 @@ public class EventSchedule {
   }
 
   @Scheduled(cron = "0 0 4 * * ?") // 每天4点触发
+  @Transactional(rollbackFor = Exception.class)
   public void deleteOldEvent() {
     LOGGER.info("delete old event!");
 
@@ -78,6 +80,7 @@ public class EventSchedule {
   }
 
   @Scheduled(cron = "0 0 3 * * ?") // 每天3点触发
+  @Transactional(rollbackFor = Exception.class)
   public void deleteOldTopic() {
     LOGGER.info("delete old topic!");
     topicEventRepository.deleteOldTopic(this.getDeadline());
