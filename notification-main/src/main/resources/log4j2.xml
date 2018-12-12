@@ -3,12 +3,12 @@
   <appenders>
     <!--控制台打印 -->
     <Console name="CONSOLE" target="SYSTEM_OUT">
-      <PatternLayout pattern="[@project.artifactId@] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %highlight{%-5p} => %cyan{%c.%M(%F:%L)} - %m%n"/>
+      <PatternLayout pattern="[temail-notification] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %highlight{%-5p} => %cyan{%c.%M(%F:%L)} - %m%n"/>
     </Console>
     <!--当日志内容达到指定范围后，以某种定义规则打包日志文件 -->
-    <RollingFile fileName="/opt/logs/@project.artifactId@.log" filePattern="/opt/logs/@project.artifactId@-logs-%d{yyyy-MM-dd}-%i.log"
+    <RollingFile fileName="/opt/logs/temail-notification.log" filePattern="/opt/logs/temail-notification-logs-%d{yyyy-MM-dd}-%i.log"
       name="RollingFile">
-      <PatternLayout pattern="[@project.artifactId@] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p => %c - %m%n"/>
+      <PatternLayout pattern="[temail-notification] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p => %c - %m%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
         <SizeBasedTriggeringPolicy size="50MB"/><!--当日志大小达到50MB时，以上述filePattern定义的格式进行打包压缩 -->
