@@ -43,9 +43,9 @@ public class EventSchedule {
   @Scheduled(cron = "0 0 4 * * ?") // 每天4点触发
   @Transactional(rollbackFor = Exception.class)
   public void deleteOldEvent() {
-    LOGGER.info("delete old event!");
-
     LocalDateTime createTime = this.getDeadline();
+    LOGGER.info("delete old event before {}", createTime);
+
     // 查询出所有的to
     List<String> tos = eventRepository.selectOldTo(createTime);
 
@@ -82,8 +82,9 @@ public class EventSchedule {
   @Scheduled(cron = "0 0 3 * * ?") // 每天3点触发
   @Transactional(rollbackFor = Exception.class)
   public void deleteOldTopic() {
-    LOGGER.info("delete old topic!");
-    topicEventRepository.deleteOldTopic(this.getDeadline());
+    LocalDateTime createTime = this.getDeadline();
+    LOGGER.info("delete old topic before {}", createTime);
+    topicEventRepository.deleteOldTopic(createTime);
   }
 
   private LocalDateTime getDeadline() {
