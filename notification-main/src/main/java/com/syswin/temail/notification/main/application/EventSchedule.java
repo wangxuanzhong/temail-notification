@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,7 +80,7 @@ public class EventSchedule {
     unreadRepository.deleteZeroCount();
   }
 
-  @Scheduled(cron = "0 0 3 * * ?") // 每天3点触发
+  //  @Scheduled(cron = "0 0 3 * * ?") // 每天3点触发
   @Transactional(rollbackFor = Exception.class)
   public void deleteOldTopic() {
     LocalDateTime createTime = this.getDeadline();

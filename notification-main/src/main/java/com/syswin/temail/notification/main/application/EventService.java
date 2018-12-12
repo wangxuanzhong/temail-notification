@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EventService {
@@ -302,17 +301,16 @@ public class EventService {
   /**
    * 重置消息未读数
    */
-  @Transactional(rollbackFor = Exception.class)
   public void reset(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("reset to: {}, param: {}", event.getTo(), event);
+    event.setEventType(EventType.RESET.getValue());
     Integer CDTPEventType = event.getEventType();
     // groupTemail不为空则为群聊
     if (event.getGroupTemail() != null && !event.getGroupTemail().isEmpty()) {
       event.setFrom(event.getGroupTemail());
       CDTPEventType = EventType.GROUP_RESET.getValue();
     }
-    event.setEventType(EventType.RESET.getValue());
     event.setTimestamp(System.currentTimeMillis());
     event.initEventSeqId(sequenceService);
     eventRepository.insert(event);
