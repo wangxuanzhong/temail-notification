@@ -73,9 +73,11 @@ public class EventSchedule {
     });
 
     // 删除旧数据
+    LOGGER.info("delete old events!");
     eventRepository.deleteOldEvent(createTime);
 
     // 删除未读数为0的数据
+    LOGGER.info("delete zero count!");
     unreadRepository.deleteZeroCount();
   }
 
