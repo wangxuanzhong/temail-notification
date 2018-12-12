@@ -94,6 +94,7 @@ public class RocketMqConsumer {
           return ConsumeConcurrentlyStatus.RECONSUME_LATER;
         } catch (Exception e) {
           LOGGER.error(e.getMessage(), e);
+          return ConsumeConcurrentlyStatus.RECONSUME_LATER;
         }
         return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
       }
