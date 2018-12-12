@@ -40,7 +40,7 @@ public class EventSchedule {
     this.deadline = deadline;
   }
 
-  @Scheduled(cron = "0 0 4 * * ?") // 每天4点触发
+  //  @Scheduled(cron = "0 0 4 * * ?") // 每天4点触发
   @Transactional(rollbackFor = Exception.class)
   public void deleteOldEvent() {
     LocalDateTime createTime = this.getDeadline();
