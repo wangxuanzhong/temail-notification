@@ -65,6 +65,7 @@ public class NotificationService {
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
       case REPLY:
+      case DESTROY:
         // 只有收件箱的事件才会入库
         if (event.getTo().equals(params.getOwner())) {
           sendMessage(event, header);
@@ -72,7 +73,6 @@ public class NotificationService {
           sendMessageToSender(event, header);
         }
         break;
-      case DESTROY:
       case RETRACT:
       case DESTROYED:
       case REPLY_RETRACT:
