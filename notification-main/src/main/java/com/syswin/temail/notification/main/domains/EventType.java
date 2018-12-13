@@ -33,6 +33,7 @@ public enum EventType {
   REPLY(18, "回复消息"),
   REPLY_RETRACT(19, "回复消息已撤回"),
   REPLY_DELETE(20, "回复消息已删除"),
+  REPLY_DESTROYED(26, "回复消息已焚毁"),
 
   // 话题部分
   TOPIC(21, "话题消息"),

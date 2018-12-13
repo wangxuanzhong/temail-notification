@@ -66,7 +66,7 @@ public class NotificationService {
       case RECEIVE:
       case REPLY:
       case DESTROY:
-        // 只有收件箱的事件才会入库
+        // 发送时会分别发送到发件人发件箱和收件人收件箱，只有收件箱的事件才会入库
         if (event.getTo().equals(params.getOwner())) {
           sendMessage(event, header);
         } else {
@@ -76,6 +76,7 @@ public class NotificationService {
       case RETRACT:
       case DESTROYED:
       case REPLY_RETRACT:
+      case REPLY_DESTROYED:
         sendMessage(event, header);
         sendMessageToSender(event, header);
         break;
