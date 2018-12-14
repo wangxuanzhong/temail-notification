@@ -195,7 +195,7 @@ public class EventService {
       result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
     }
     result.put("events", notifyEvents);
-    LOGGER.info("pull events result: {}", result);
+//    LOGGER.info("pull events result: {}", result);
     return result;
   }
 
@@ -235,7 +235,7 @@ public class EventService {
       }
     });
 
-    LOGGER.info("get unread result: {}", unreadResponses);
+//    LOGGER.info("get unread result: {}", unreadResponses);
     return unreadResponses;
   }
 

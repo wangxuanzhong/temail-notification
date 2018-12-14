@@ -167,7 +167,7 @@ public class TopicService {
       result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
     }
     result.put("events", notifyEvents);
-    LOGGER.info("pull events result: {}", result);
+//    LOGGER.info("pull events result: {}", result);
     return result;
   }
 }
