@@ -91,7 +91,7 @@ public class TopicServiceTest {
   public void testEventTypeTopicRetract() throws Exception {
     params.setSessionMessageType(EventType.TOPIC_RETRACT.getValue());
     params.setTopicId("topic_1");
-    params.setMsgid("2");
+    params.setMsgid("1");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     Thread.sleep(2000);
   }
