@@ -64,23 +64,27 @@ public class NotificationService {
 
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
-      case REPLY:
       case DESTROY:
-        // 发送时会分别发送到发件人发件箱和收件人收件箱，只有收件箱的事件才会入库
-        if (event.getTo().equals(params.getOwner())) {
-          sendMessage(event, header);
-        } else {
-          sendMessageToSender(event, header);
+        // 发送时会分别发送到发件人收件箱和收件人收件箱，发送到发件人收件箱的消息，事件中对换to和owner字段来保存
+        if (event.getFrom().equals(params.getOwner())) {
+          event.setTo(params.getOwner());
+          event.setOwner(params.getTo());
         }
+        sendMessage(event, header);
         break;
       case RETRACT:
       case DESTROYED:
-      case REPLY_RETRACT:
-      case REPLY_DESTROYED:
+        // 多端同步功能消息同时发给双方，使用owner保存原消息的to，to字段保存接收者
+        event.setOwner(event.getTo());
         sendMessage(event, header);
-        sendMessageToSender(event, header);
+        // 发送给发送方
+        event.setTo(event.getFrom());
+        sendMessage(event, header);
         break;
       case PULLED:
+        // from是消息拉取人
+        event.setFrom(params.getTo());
+        event.setTo(params.getFrom());
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
           if (eventRepository.selectEventsByMsgId(event).size() == 0) {
@@ -95,9 +99,21 @@ public class NotificationService {
         // 删除操作msgId是多条，存入msgIds字段
         event.setMsgIds(jsonService.fromJson(event.getMsgId(), List.class));
         event.setMsgId(null);
-        // from和to与正常业务相反
+        // from是删除者
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
+        sendMessage(event, header);
+        break;
+      case REPLY:
+        // 发送时会分别发送到发件人收件箱和收件人收件箱，只有收件人收件箱的事件才会入库
+        if (event.getTo().equals(params.getOwner())) {
+          sendMessage(event, header);
+        } else {
+          sendMessageToSender(event, header);
+        }
+        break;
+      case REPLY_RETRACT:
+      case REPLY_DESTROYED:
         sendMessage(event, header);
         sendMessageToSender(event, header);
         break;
@@ -119,10 +135,8 @@ public class NotificationService {
   private void sendMessage(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    if (event.getTo() != null && !event.getTo().isEmpty()) {
-      this.insert(event);
-      rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, jsonService.toJson(event))));
-    }
+    this.insert(event);
+    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, jsonService.toJson(event))));
   }
 
   /**

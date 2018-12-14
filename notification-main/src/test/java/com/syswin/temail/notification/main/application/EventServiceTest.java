@@ -2,7 +2,6 @@ package com.syswin.temail.notification.main.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.EventType;
@@ -13,17 +12,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("h2")
+//@ActiveProfiles("h2")
 public class EventServiceTest {
 
   private final String header = "notification-header";
 
-  Gson gson = new Gson();
+  GsonService gsonService = new GsonService();
 
   @Autowired
   private EventService eventService;
@@ -54,7 +52,9 @@ public class EventServiceTest {
     event.setMessage("get_unread_aaaa");
     event.setFrom("get_unread_from");
     event.setTo("get_unread_to");
+    event.setOwner(event.getTo());
     event.setEventSeqId(1L);
+    event.autoWriteExtendParam(gsonService);
     eventRepository.insert(event);
 
     List<UnreadResponse> result = eventService.getUnread("get_unread_to");
@@ -66,7 +66,7 @@ public class EventServiceTest {
     // 群聊消息
     event.setFrom("get_unread_group_temail");
     event.setGroupTemail("get_unread_group_temail");
-    event.setTemail("get_unread_to");
+    event.setTemail("get_unread_from");
     event.setEventSeqId(2L);
     eventRepository.insert(event);
 
@@ -82,7 +82,9 @@ public class EventServiceTest {
     event.setMessage("reset_aaaa");
     event.setFrom("reset_from");
     event.setTo("reset_to");
+    event.setOwner(event.getTo());
     event.setEventSeqId(1L);
+    event.autoWriteExtendParam(gsonService);
     eventRepository.insert(event);
 
     List<UnreadResponse> result = eventService.getUnread("reset_to");
@@ -94,7 +96,7 @@ public class EventServiceTest {
     // 群聊消息
     event.setFrom("reset_group_temail");
     event.setGroupTemail("reset_group_temail");
-    event.setTemail("reset_to");
+    event.setTemail("reset_from");
     event.setEventSeqId(2L);
     eventRepository.insert(event);
 

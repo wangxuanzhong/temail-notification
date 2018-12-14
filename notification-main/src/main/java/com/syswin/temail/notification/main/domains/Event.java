@@ -28,7 +28,6 @@ public class Event {
   private String message;
   private String from;
   private String to;
-  private String owner;
   private Long timestamp;
 
   // 群聊参数
@@ -50,6 +49,8 @@ public class Event {
   private List<String> msgIds;
   // 单聊删除会话是否同时删除消息
   private Boolean deleteAllMsg;
+  // 单聊消息拥有者
+  private String owner;
 
   @JsonIgnore
   private String extendParam;
@@ -137,6 +138,7 @@ public class Event {
       this.at = extendParam.getAt();
       this.msgIds = extendParam.getMsgIds();
       this.deleteAllMsg = extendParam.getDeleteAllMsg();
+      this.owner = extendParam.getOwner();
     }
     return this;
   }
@@ -145,7 +147,8 @@ public class Event {
    * 自动配置扩展字段
    */
   public Event autoWriteExtendParam(JsonService jsonService) {
-    this.extendParam = jsonService.toJson(new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg));
+    this.extendParam = jsonService
+        .toJson(new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner));
     return this;
   }
 

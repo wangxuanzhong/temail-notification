@@ -22,17 +22,20 @@ class EventExtendParam {
   private List<String> msgIds;
   // 单聊删除会话是否同时删除消息
   private Boolean deleteAllMsg;
+  // 单聊消息拥有者
+  private String owner;
 
   public EventExtendParam() {
   }
 
-  public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds, Boolean deleteAllMsg) {
+  public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds, Boolean deleteAllMsg, String owner) {
     this.name = name;
     this.adminName = adminName;
     this.groupName = groupName;
     this.at = at;
     this.msgIds = msgIds;
     this.deleteAllMsg = deleteAllMsg;
+    this.owner = owner;
   }
 
   public String getName() {
@@ -81,5 +84,13 @@ class EventExtendParam {
 
   public void setDeleteAllMsg(Boolean deleteAllMsg) {
     this.deleteAllMsg = deleteAllMsg;
+  }
+
+  public String getOwner() {
+    return owner;
+  }
+
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 }

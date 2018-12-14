@@ -67,21 +67,27 @@ public class EventService {
       if (!eventMap.containsKey(key)) {
         eventMap.put(key, new HashMap<>());
       }
+
+      // 数据库中存储的owner为消息接受者，owner为通知者，查询结果恢复原结构
+      if (event.getFrom().equals(event.getTo())) {
+        event.setTo(event.getOwner());
+        event.setOwner(event.getFrom());
+      }
+
       Map<String, Event> sessionEventMap = eventMap.get(key);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case RECEIVE:
         case DESTROY:
         case DESTROYED:
         case APPLY:
+        case INVITATION:
           sessionEventMap.put(event.getMsgId(), event);
           break;
         case DELETE_GROUP:
+        case ADD_GROUP:
         case ADD_MEMBER:
         case DELETE_MEMBER:
         case LEAVE_GROUP:
-        case INVITATION:
-        case INVITATION_ADOPT:
-        case INVITATION_REFUSE:
         case UPDATE_GROUP_CARD:
           notifyEvents.add(event);
           break;
@@ -89,6 +95,8 @@ public class EventService {
         case RETRACT:
         case APPLY_ADOPT:
         case APPLY_REFUSE:
+        case INVITATION_ADOPT:
+        case INVITATION_REFUSE:
           if (sessionEventMap.containsKey(event.getMsgId())) {
             sessionEventMap.remove(event.getMsgId());
           } else {
@@ -249,37 +257,27 @@ public class EventService {
       }
       List<String> msgIds = eventMap.get(key);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
-        case RESET:
+        case RESET: // 清空未读数
           msgIds.clear();
           unreadMap.remove(event.getFrom());
           break;
-        case RECEIVE:
-        case DESTROY:
-        case DESTROYED:
-        case ADD_GROUP:
-        case APPLY:
-          msgIds.add(event.getMsgId());
-          break;
-        case DELETE_GROUP:
-        case ADD_MEMBER:
-        case DELETE_MEMBER:
-        case LEAVE_GROUP:
-        case INVITATION:
-        case INVITATION_ADOPT:
-        case INVITATION_REFUSE:
-        case UPDATE_GROUP_CARD:
-          msgIds.add("notify event msgId");
+        case RECEIVE: // 消息发送者不计未读数
+        case DESTROY: // 焚毁消息发送者不计未读数
+        case DESTROYED: // 消息已焚毁消息发送者不计未读数
+          if (!event.getTo().equals(event.getTemail()) && !event.getFrom().equals(event.getTo())) {
+            msgIds.add(event.getMsgId());
+          }
           break;
         case PULLED:
           msgIds.remove(event.getMsgId());
           break;
-        case RETRACT:
-        case APPLY_ADOPT:
-        case APPLY_REFUSE:
-          if (msgIds.contains(event.getMsgId())) {
-            msgIds.remove(event.getMsgId());
-          } else {
-            msgIds.add(event.getMsgId());
+        case RETRACT: // 撤回消息发送者不计未读数
+          if (!event.getTo().equals(event.getTemail()) && !event.getFrom().equals(event.getTo())) {
+            if (msgIds.contains(event.getMsgId())) {
+              msgIds.remove(event.getMsgId());
+            } else {
+              msgIds.add(event.getMsgId());
+            }
           }
           break;
         case DELETE:
@@ -292,6 +290,35 @@ public class EventService {
               unreadMap.remove(event.getFrom());
             }
           }
+          break;
+        case APPLY: // 入群申请只有管理员收到消息，直接未读数+1
+        case INVITATION: // 邀请入群是单人事件，直接未读数+1
+          msgIds.add(event.getMsgId());
+          break;
+        case APPLY_ADOPT: // 申请通过，管理员触发不计算未读，申请人计算未读
+        case APPLY_REFUSE: // 申请拒绝，管理员触发不计算未读，申请人计算未读
+          msgIds.remove(event.getMsgId());
+          if (event.getTo().equals(event.getTemail())) {
+            msgIds.add("notify event msgId");
+          }
+          break;
+        case INVITATION_ADOPT: // 邀请同意，被邀请人触发事件，管理员计算未读
+        case INVITATION_REFUSE: // 邀请拒绝，被邀请人触发事件，管理员计算未读
+          msgIds.remove(event.getMsgId());
+          if (!event.getTo().equals(event.getTemail())) {
+            msgIds.add("notify event msgId");
+          }
+          break;
+        case DELETE_GROUP: // 解散群解散人不计算未读
+        case ADD_MEMBER: // 新成员入群入群者不计算未读
+        case LEAVE_GROUP: // 离开群聊离开人不计算未读
+        case UPDATE_GROUP_CARD: // 更新群名片，更新人不计算未读
+          if (!event.getTo().equals(event.getTemail())) {
+            msgIds.add("notify event msgId");
+          }
+          break;
+        case DELETE_MEMBER: // 移出群成员，管理员触发，无法判断，直接计算
+          msgIds.add("notify event msgId");
           break;
       }
     });

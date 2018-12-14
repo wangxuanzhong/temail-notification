@@ -98,6 +98,9 @@ public class NotificationGroupChatService {
       case ADD_GROUP:
         event.setRole(MemberRole.ADMIN.getValue());
         memberRepository.insert(event);
+        event.setFrom(event.getGroupTemail());
+        event.setTo(event.getTemail());
+        this.sendSingleMessage(event, header);
         break;
       case DELETE_GROUP:
         event.notifyToAll();
@@ -147,12 +150,11 @@ public class NotificationGroupChatService {
           event.setTemail(temails.get(i));
           this.sendSingleMessage(event, header);
         }
-
         break;
       case LEAVE_GROUP:
-        memberRepository.deleteGroupMember(event);
         event.notifyToAll();
         this.sendGroupMessage(event, header);
+        memberRepository.deleteGroupMember(event);
         break;
       case APPLY:
         event.notifyToAdmin();
@@ -161,7 +163,7 @@ public class NotificationGroupChatService {
         break;
       case APPLY_ADOPT:
       case APPLY_REFUSE:
-        // 通知所有管理员
+        // 通知所有管理员，提供多端同步功能
         event.notifyToAdmin();
         event.addEventMsgId(EventType.APPLY);
         this.sendGroupMessage(event, header);
@@ -174,6 +176,7 @@ public class NotificationGroupChatService {
       case INVITATION:
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
+        event.addEventMsgId(EventType.INVITATION);
         this.sendSingleMessage(event, header);
         break;
       case INVITATION_ADOPT:
@@ -183,6 +186,7 @@ public class NotificationGroupChatService {
         // 通知自己，提供多端同步功能
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
+        event.addEventMsgId(EventType.INVITATION);
         this.sendSingleMessage(event, header);
         break;
       case UPDATE_GROUP_CARD:
@@ -195,6 +199,10 @@ public class NotificationGroupChatService {
         condition.setEventType(EventType.RECEIVE.getValue());
         condition.setMsgId(event.getParentMsgId());
         List<Event> events = eventRepository.selectEventsByMsgId(condition);
+        if (events.isEmpty()) {
+          LOGGER.error("source message not found!");
+          return;
+        }
         event.setAt(events.get(0).autoReadExtendParam(jsonService).getAt());
 
         event.notifyToAll();
@@ -256,17 +264,12 @@ public class NotificationGroupChatService {
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
     List<String> tos = memberRepository.selectByGroupTemail(event);
     LOGGER.info("send message to {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
-    tos.remove(event.getTemail());
     event.setFrom(event.getGroupTemail());
     for (String to : tos) {
       event.setTo(to);
       this.insert(event);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, CDTPEventType, header, jsonService.toJson(event))));
     }
-
-    // 发送给发送方的通知，提供多端同步功能
-    event.setTo(event.getTemail());
-    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTemail(), CDTPEventType, header, jsonService.toJson(event))));
   }
 
   /**
@@ -281,15 +284,9 @@ public class NotificationGroupChatService {
 
     List<String> tos = memberRepository.selectByGroupTemail(event);
     LOGGER.info("send message to {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
-    tos.remove(event.getTemail());
     for (String to : tos) {
       event.setTo(to);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, event.getEventType(), header, jsonService.toJson(event))));
     }
-
-    // 发送给发送方的通知，提供多端同步功能
-    event.setTo(event.getTemail());
-    rocketMqProducer
-        .sendMessage(jsonService.toJson(new CDTPResponse(event.getTemail(), event.getEventType(), header, jsonService.toJson(event))));
   }
 }

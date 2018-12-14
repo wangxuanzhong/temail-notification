@@ -79,7 +79,7 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeRetract() throws Exception {
     params.setSessionMessageType(EventType.RETRACT.getValue());
-    params.setMsgid("1");
+    params.setMsgid(TEST_GROUP_MSG_ID + "1");
     params.setTemail("a");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
@@ -123,11 +123,23 @@ public class NotificationGroupChatServiceTest {
   }
 
   /**
+   * EventType DELETE_GROUP 12
+   */
+  @Test
+  public void testEventTypeDeleteGroup() throws Exception {
+    params.setSessionMessageType(EventType.DELETE_GROUP.getValue());
+    params.setGroupTemail("g");
+    params.setTemail("a");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+  }
+
+  /**
    * EventType ADD_GROUP 13
    */
   @Test
   public void testEventTypeAddGroup() throws Exception {
     params.setSessionMessageType(EventType.ADD_GROUP.getValue());
+    params.setGroupTemail("g2");
     params.setTemail("a");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
   }
@@ -146,11 +158,67 @@ public class NotificationGroupChatServiceTest {
   }
 
   /**
+   * EventType LEAVE_GROUP 22
+   */
+  @Test
+  public void testEventTypeLeaveGroup() throws Exception {
+    params.setSessionMessageType(EventType.LEAVE_GROUP.getValue());
+    params.setTemail("c");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
+   * EventType APPLY 12
+   */
+  @Test
+  public void testEventTypeApply() throws Exception {
+    params.setSessionMessageType(EventType.APPLY.getValue());
+    params.setTemail("c");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
+   * EventType APPLY_REFUSE 14
+   */
+  @Test
+  public void testEventTypeApplyRefuse() throws Exception {
+    params.setSessionMessageType(EventType.APPLY_REFUSE.getValue());
+    params.setTemail("c");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
+   * EventType INVITATION 15
+   */
+  @Test
+  public void testEventTypeInvitation() throws Exception {
+    params.setSessionMessageType(EventType.INVITATION.getValue());
+    params.setTemail("c");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
+   * EventType INVITATION_ADOPT 15
+   */
+  @Test
+  public void testEventTypeInvitationAdopt() throws Exception {
+    params.setSessionMessageType(EventType.INVITATION_ADOPT.getValue());
+    params.setTemail("c");
+    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    Thread.sleep(2000);
+  }
+
+  /**
    * EventType UPDATE_GROUP_CARD 16
    */
   @Test
   public void testEventTypeUpdateGroupCard() throws Exception {
     params.setSessionMessageType(EventType.UPDATE_GROUP_CARD.getValue());
+    params.setTemail("a");
     params.setGroupName("测试组名");
     params.setName("测试当事人名");
     params.setAdminName("测试触发人名");
