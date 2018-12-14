@@ -158,7 +158,7 @@ public class NotificationGroupChatServiceTest {
   }
 
   /**
-   * EventType LEAVE_GROUP 22
+   * EventType LEAVE_GROUP 15
    */
   @Test
   public void testEventTypeLeaveGroup() throws Exception {
@@ -169,7 +169,7 @@ public class NotificationGroupChatServiceTest {
   }
 
   /**
-   * EventType APPLY 12
+   * EventType APPLY 5
    */
   @Test
   public void testEventTypeApply() throws Exception {
@@ -180,7 +180,7 @@ public class NotificationGroupChatServiceTest {
   }
 
   /**
-   * EventType APPLY_REFUSE 14
+   * EventType APPLY_REFUSE 7
    */
   @Test
   public void testEventTypeApplyRefuse() throws Exception {
@@ -191,7 +191,7 @@ public class NotificationGroupChatServiceTest {
   }
 
   /**
-   * EventType INVITATION 15
+   * EventType INVITATION 8
    */
   @Test
   public void testEventTypeInvitation() throws Exception {
@@ -202,7 +202,7 @@ public class NotificationGroupChatServiceTest {
   }
 
   /**
-   * EventType INVITATION_ADOPT 15
+   * EventType INVITATION_ADOPT 14
    */
   @Test
   public void testEventTypeInvitationAdopt() throws Exception {
