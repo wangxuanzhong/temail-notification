@@ -69,7 +69,7 @@ public class EventService {
       }
 
       // 数据库中存储的owner为消息接受者，owner为通知者，查询结果恢复原结构
-      if (event.getFrom().equals(event.getTo())) {
+      if (event.getFrom().equals(event.getTo()) && event.getOwner() != null) {
         event.setTo(event.getOwner());
         event.setOwner(event.getFrom());
       }

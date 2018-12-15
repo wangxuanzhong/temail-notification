@@ -65,21 +65,29 @@ public class NotificationService {
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
       case DESTROY:
-        // 发送时会分别发送到发件人收件箱和收件人收件箱，发送到发件人收件箱的消息，事件中对换to和owner字段来保存
+        // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
+          sendMessageToSender(event, header);
+          // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
           event.setTo(params.getOwner());
           event.setOwner(params.getTo());
+          insert(event);
+        } else {
+          sendMessage(event, header);
         }
-        sendMessage(event, header);
         break;
       case RETRACT:
       case DESTROYED:
-        // 多端同步功能消息同时发给双方，使用owner保存原消息的to，to字段保存接收者
-        event.setOwner(event.getTo());
+        // 多端同步功能消息同时发给双方
+        event.setOwner(params.getTo());
         sendMessage(event, header);
         // 发送给发送方
-        event.setTo(event.getFrom());
-        sendMessage(event, header);
+        event.setOwner(params.getFrom());
+        sendMessageToSender(event, header);
+        // 插入数据库，使用owner保存原消息的to，to字段保存接收者
+        event.setTo(params.getFrom());
+        event.setOwner(params.getTo());
+        insert(event);
         break;
       case PULLED:
         // from是消息拉取人
