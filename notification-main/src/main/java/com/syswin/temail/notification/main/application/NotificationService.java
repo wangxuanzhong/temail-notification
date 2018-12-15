@@ -67,11 +67,14 @@ public class NotificationService {
       case DESTROY:
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
+          event.initEventSeqId(redisService);
+          event.autoWriteExtendParam(jsonService);
           sendMessageToSender(event, header);
           // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
           event.setTo(params.getOwner());
           event.setOwner(params.getTo());
-          insert(event);
+          event.autoWriteExtendParam(jsonService);
+          eventRepository.insert(event);
         } else {
           sendMessage(event, header);
         }
@@ -83,10 +86,13 @@ public class NotificationService {
         sendMessage(event, header);
         // 发送给发送方
         event.setOwner(params.getFrom());
+        event.initEventSeqId(redisService);
+        event.autoWriteExtendParam(jsonService);
         sendMessageToSender(event, header);
         // 插入数据库，使用owner保存原消息的to，to字段保存接收者
         event.setTo(params.getFrom());
         event.setOwner(params.getTo());
+        event.autoWriteExtendParam(jsonService);
         insert(event);
         break;
       case PULLED:
