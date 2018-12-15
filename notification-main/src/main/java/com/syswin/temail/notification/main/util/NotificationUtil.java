@@ -23,15 +23,15 @@ public class NotificationUtil {
       return false;
     }
 
-    // 第一步：查询数据库是否存在重复数据，保证数据的唯一性
-    if (!eventRepository.checkUnique(event).isEmpty()) {
-      LOGGER.warn("check unique from database failed: {}", event);
+    // 第一步：查询redis，是否key值未过期，解决并发问题
+    if (!redisService.checkUnique(redisKey)) {
+      LOGGER.warn("check unique from redis failed: {}", event);
       return false;
     }
 
-    // 第二部：查询redis，是否key值未过期，解决并发问题
-    if (!redisService.checkUnique(redisKey)) {
-      LOGGER.warn("check unique from redis failed: {}", event);
+    // 第二步：查询数据库是否存在重复数据，保证数据的唯一性
+    if (!eventRepository.checkUnique(event).isEmpty()) {
+      LOGGER.warn("check unique from database failed: {}", event);
       return false;
     }
 
