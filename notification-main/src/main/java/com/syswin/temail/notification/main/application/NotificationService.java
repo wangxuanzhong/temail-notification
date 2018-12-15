@@ -93,7 +93,7 @@ public class NotificationService {
         event.setTo(params.getFrom());
         event.setOwner(params.getTo());
         event.autoWriteExtendParam(jsonService);
-        insert(event);
+        eventRepository.insert(event);
         break;
       case PULLED:
         // from是消息拉取人
