@@ -13,9 +13,9 @@ public interface TopicEventMapper {
 
   List<TopicEvent> selectEvents(@Param("to") String to, @Param("topicId") String topicId, @Param("begin") Long begin, @Param("end") Long end);
 
-  List<TopicEvent> selectEventsByMsgId(String msgId);
+  Long selectLastEventSeqId(@Param("to") String to, @Param("topicId") String topicId);
 
-  List<TopicEvent> selectTopic(String topicId);
+  List<TopicEvent> selectEventsByMsgId(String msgId);
 
   void deleteOldTopic(LocalDateTime createTime);
 }

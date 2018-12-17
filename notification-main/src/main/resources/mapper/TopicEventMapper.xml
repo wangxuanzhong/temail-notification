@@ -36,18 +36,17 @@
     ORDER BY `event_seq_id`
   </select>
 
+  <select id="selectLastEventSeqId" resultType="java.lang.Long">
+    SELECT MAX(`event_seq_id`) FROM `topic_event`
+    WHERE `to` = #{to}
+    <if test="topicId != null and topicId != ''">AND `topic_id` = #{topicId}</if>
+  </select>
+
   <select id="selectEventsByMsgId" parameterType="java.lang.String" resultMap="EventMap">
     SELECT
     <include refid="baseField"/>
     FROM `topic_event`
     WHERE `msg_id` = #{msgId}
-  </select>
-
-  <select id="selectTopic" parameterType="java.lang.String" resultMap="EventMap">
-    SELECT
-    <include refid="baseField"/>
-    FROM `topic_event`
-    WHERE `topic_id` = #{topicId} AND `event_type` = ${@com.syswin.temail.notification.main.domains.EventType@TOPIC.getValue()}
   </select>
 
   <delete id="deleteOldTopic" parameterType="java.time.LocalDateTime">

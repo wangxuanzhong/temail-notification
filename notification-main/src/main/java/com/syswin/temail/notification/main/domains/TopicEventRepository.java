@@ -9,9 +9,9 @@ public interface TopicEventRepository {
 
   List<TopicEvent> selectEvents(String to, String topicId, Long begin, Long end);
 
-  List<TopicEvent> selectEventsByMsgId(String msgId);
+  Long selectLastEventSeqId(String to, String topicId);
 
-  List<TopicEvent> selectTopic(String topicId);
+  List<TopicEvent> selectEventsByMsgId(String msgId);
 
   void deleteOldTopic(LocalDateTime createTime);
 }

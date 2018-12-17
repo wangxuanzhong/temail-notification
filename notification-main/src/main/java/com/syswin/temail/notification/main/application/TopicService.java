@@ -123,6 +123,14 @@ public class TopicService {
     // 如果pageSize为空则不限制查询条数
     List<TopicEvent> events = topicEventRepository.selectEvents(to, topicId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
+    // 获取当前最新eventSeqId
+    Long lastEventSeqId = 0L;
+    if (events.isEmpty()) {
+      lastEventSeqId = topicEventRepository.selectLastEventSeqId(to, topicId);
+    } else {
+      lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
+    }
+
     Map<String, TopicEvent> eventMap = new HashMap<>();
     List<TopicEvent> notifyEvents = new ArrayList<>();
     events.forEach(event -> {
@@ -161,13 +169,9 @@ public class TopicService {
     notifyEvents.sort(Comparator.comparing(TopicEvent::getEventSeqId));
 
     Map<String, Object> result = new HashMap<>();
-    if (events.isEmpty()) {
-      result.put("lastEventSeqId", -1);
-    } else {
-      result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
-    }
+    result.put("lastEventSeqId", lastEventSeqId);
     result.put("events", notifyEvents);
-//    LOGGER.info("pull events result: {}", result);
+    // LOGGER.info("pull events result: {}", result);
     return result;
   }
 }
