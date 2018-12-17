@@ -169,7 +169,7 @@ public class TopicService {
     notifyEvents.sort(Comparator.comparing(TopicEvent::getEventSeqId));
 
     Map<String, Object> result = new HashMap<>();
-    result.put("lastEventSeqId", lastEventSeqId);
+    result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("events", notifyEvents);
     // LOGGER.info("pull events result: {}", result);
     return result;

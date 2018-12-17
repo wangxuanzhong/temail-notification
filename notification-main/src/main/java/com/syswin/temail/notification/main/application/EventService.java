@@ -205,9 +205,9 @@ public class EventService {
   private Map<String, Object> getEventsReturn(List<Event> notifyEvents, Long lastEventSeqId) {
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
     Map<String, Object> result = new HashMap<>();
-    result.put("lastEventSeqId", lastEventSeqId);
+    result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("events", notifyEvents);
-//    LOGGER.info("pull events result: {}", result);
+    // LOGGER.info("pull events result: {}", result);
     return result;
   }
 
@@ -247,7 +247,7 @@ public class EventService {
       }
     });
 
-//    LOGGER.info("get unread result: {}", unreadResponses);
+    // LOGGER.info("get unread result: {}", unreadResponses);
     return unreadResponses;
   }
 
@@ -275,22 +275,13 @@ public class EventService {
           break;
         case RECEIVE: // 消息发送者不计未读数
         case DESTROY: // 焚毁消息发送者不计未读数
-        case DESTROYED: // 消息已焚毁消息发送者不计未读数
-          if (!event.getTo().equals(event.getTemail()) && !event.getFrom().equals(event.getTo())) {
+          if (!event.getFrom().equals(event.getTo()) && !event.getTo().equals(event.getTemail())) {
             msgIds.add(event.getMsgId());
           }
           break;
         case PULLED:
+        case RETRACT:
           msgIds.remove(event.getMsgId());
-          break;
-        case RETRACT: // 撤回消息发送者不计未读数
-          if (!event.getTo().equals(event.getTemail()) && !event.getFrom().equals(event.getTo())) {
-            if (msgIds.contains(event.getMsgId())) {
-              msgIds.remove(event.getMsgId());
-            } else {
-              msgIds.add(event.getMsgId());
-            }
-          }
           break;
         case DELETE:
           // msgIds不为空，则为批量删除消息
@@ -302,35 +293,6 @@ public class EventService {
               unreadMap.remove(event.getFrom());
             }
           }
-          break;
-        case APPLY: // 入群申请只有管理员收到消息，直接未读数+1
-        case INVITATION: // 邀请入群是单人事件，直接未读数+1
-          msgIds.add(event.getMsgId());
-          break;
-        case APPLY_ADOPT: // 申请通过，管理员触发不计算未读，申请人计算未读
-        case APPLY_REFUSE: // 申请拒绝，管理员触发不计算未读，申请人计算未读
-          msgIds.remove(event.getMsgId());
-          if (event.getTo().equals(event.getTemail())) {
-            msgIds.add("notify event msgId");
-          }
-          break;
-        case INVITATION_ADOPT: // 邀请同意，被邀请人触发事件，管理员计算未读
-        case INVITATION_REFUSE: // 邀请拒绝，被邀请人触发事件，管理员计算未读
-          msgIds.remove(event.getMsgId());
-          if (!event.getTo().equals(event.getTemail())) {
-            msgIds.add("notify event msgId");
-          }
-          break;
-        case DELETE_GROUP: // 解散群解散人不计算未读
-        case ADD_MEMBER: // 新成员入群入群者不计算未读
-        case LEAVE_GROUP: // 离开群聊离开人不计算未读
-        case UPDATE_GROUP_CARD: // 更新群名片，更新人不计算未读
-          if (!event.getTo().equals(event.getTemail())) {
-            msgIds.add("notify event msgId");
-          }
-          break;
-        case DELETE_MEMBER: // 移出群成员，管理员触发，无法判断，直接计算
-          msgIds.add("notify event msgId");
           break;
       }
     });
