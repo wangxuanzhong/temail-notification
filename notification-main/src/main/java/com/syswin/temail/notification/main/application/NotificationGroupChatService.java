@@ -84,7 +84,7 @@ public class NotificationGroupChatService {
           if (eventRepository.selectEventsByMsgId(event).size() == 0) {
             this.sendSingleMessage(event, EventType.GROUP_PULLED.getValue(), header);
           } else {
-            LOGGER.info("message {} is pulled, do nothing!", msgId);
+            LOGGER.warn("message {} is pulled, do nothing!", msgId);
           }
         }
         break;
@@ -116,12 +116,13 @@ public class NotificationGroupChatService {
           try {
             memberRepository.insert(event);
           } catch (DuplicateKeyException e) {
-            LOGGER.warn("add member duplicate exception：{}", e);
+            LOGGER.warn("add member duplicate exception: ", e);
+            break;
           }
           event.notifyToAll();
           this.sendGroupMessage(event, header);
         } else {
-          LOGGER.info("{} was group {} member，do nothing.", event.getTemail(), event.getGroupTemail());
+          LOGGER.warn("{} was group {} member, do nothing.", event.getTemail(), event.getGroupTemail());
         }
         break;
       case DELETE_MEMBER:
@@ -130,6 +131,7 @@ public class NotificationGroupChatService {
 
         if (temails.size() != names.size()) {
           LOGGER.error("delete member temail and name mismatching, temails: {}, names: {}", temails, names);
+          break;
         }
 
         // 删除当事人
@@ -201,7 +203,7 @@ public class NotificationGroupChatService {
         List<Event> events = eventRepository.selectEventsByMsgId(condition);
         if (events.isEmpty()) {
           LOGGER.error("source message not found!");
-          return;
+          break;
         }
         event.setAt(events.get(0).autoReadExtendParam(jsonService).getAt());
 

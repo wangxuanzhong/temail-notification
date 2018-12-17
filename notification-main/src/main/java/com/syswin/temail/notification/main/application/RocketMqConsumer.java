@@ -88,7 +88,7 @@ public class RocketMqConsumer {
             handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), type);
           }
         } catch (DuplicateKeyException e) {
-          LOGGER.warn("duplicate key exception: {}", e);
+          LOGGER.warn("duplicate key exception: ", e);
         } catch (InterruptedException | RemotingException | MQClientException | MQBrokerException | UnsupportedEncodingException e) {
           LOGGER.error(e.getMessage(), e);
           return ConsumeConcurrentlyStatus.RECONSUME_LATER;

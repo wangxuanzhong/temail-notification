@@ -108,10 +108,7 @@ public class NotificationGroupChatServiceTest {
     params.setTemail("d");
     params.setName("dd");
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
     rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
     params.setTemail("e");
     params.setName("ee");
