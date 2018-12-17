@@ -28,6 +28,11 @@ public class EventRepositoryImpl implements EventRepository {
   }
 
   @Override
+  public Long selectLastEventSeqId(String to, String parentMsgId) {
+    return eventMapper.selectLastEventSeqId(to, parentMsgId);
+  }
+
+  @Override
   public List<Event> selectEventsByMsgId(Event event) {
     return eventMapper.selectEventsByMsgId(event);
   }

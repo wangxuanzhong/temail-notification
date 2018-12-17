@@ -9,6 +9,8 @@ public interface EventRepository {
 
   List<Event> selectEvents(String to, String parentMsgId, Long begin, Long end);
 
+  Long selectLastEventSeqId(String to, String parentMsgId);
+
   List<Event> selectEventsByMsgId(Event event);
 
   List<Long> selectResetEvents(Event event);

@@ -58,6 +58,14 @@ public class EventService {
     // 如果pageSize为空则不限制查询条数
     List<Event> events = eventRepository.selectEvents(to, null, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
+    // 获取当前最新eventSeqId
+    Long maxEventSeqId = 0L;
+    if (events.isEmpty()) {
+      maxEventSeqId = eventRepository.selectLastEventSeqId(to, null);
+    } else {
+      maxEventSeqId = events.get(events.size() - 1).getEventSeqId();
+    }
+
     Map<String, Map<String, Event>> eventMap = new HashMap<>();
     List<Event> notifyEvents = new ArrayList<>();
     events.forEach(event -> {
@@ -128,7 +136,7 @@ public class EventService {
       }
     });
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
-    return getEventsReturn(events, notifyEvents);
+    return getEventsReturn(notifyEvents, maxEventSeqId);
   }
 
 
@@ -144,6 +152,14 @@ public class EventService {
 
     // 如果pageSize为空则不限制查询条数
     List<Event> events = eventRepository.selectEvents(null, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+
+    // 获取当前最新eventSeqId
+    Long lastEventSeqId = 0L;
+    if (events.isEmpty()) {
+      lastEventSeqId = eventRepository.selectLastEventSeqId(null, parentMsgId);
+    } else {
+      lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
+    }
 
     Map<String, Event> eventMap = new HashMap<>();
     List<Event> notifyEvents = new ArrayList<>();
@@ -180,20 +196,16 @@ public class EventService {
       }
     });
     notifyEvents.addAll(eventMap.values());
-    return getEventsReturn(events, notifyEvents);
+    return getEventsReturn(notifyEvents, lastEventSeqId);
   }
 
   /**
    * 拉取事件返回参数拼装
    */
-  private Map<String, Object> getEventsReturn(List<Event> events, List<Event> notifyEvents) {
+  private Map<String, Object> getEventsReturn(List<Event> notifyEvents, Long lastEventSeqId) {
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
     Map<String, Object> result = new HashMap<>();
-    if (events.isEmpty()) {
-      result.put("lastEventSeqId", -1);
-    } else {
-      result.put("lastEventSeqId", events.get(events.size() - 1).getEventSeqId());
-    }
+    result.put("lastEventSeqId", lastEventSeqId);
     result.put("events", notifyEvents);
 //    LOGGER.info("pull events result: {}", result);
     return result;
