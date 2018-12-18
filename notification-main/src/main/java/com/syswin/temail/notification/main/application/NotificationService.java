@@ -119,6 +119,7 @@ public class NotificationService {
         sendMessage(event, header);
         break;
       case REPLY:
+        // 回复拉取时是根据parentMsgId拉取，因此发送人的通知不需要入库
         // 发送时会分别发送到发件人收件箱和收件人收件箱，只有收件人收件箱的事件才会入库
         if (event.getTo().equals(params.getOwner())) {
           sendMessage(event, header);
@@ -148,7 +149,7 @@ public class NotificationService {
    */
   private void sendMessage(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("send message to {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
+    LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
     this.insert(event);
     rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, jsonService.toJson(event))));
   }
@@ -158,7 +159,7 @@ public class NotificationService {
    */
   private void sendMessageToSender(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("send message to sender {}, event type: {}", event.getFrom(), EventType.getByValue(event.getEventType()));
+    LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(), EventType.getByValue(event.getEventType()));
     rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, jsonService.toJson(event))));
   }
 }

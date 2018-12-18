@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.remoting.exception.RemotingException;
@@ -67,7 +68,6 @@ public class EventService {
     }
 
     Map<String, Map<String, Event>> eventMap = new HashMap<>();
-    List<Event> notifyEvents = new ArrayList<>();
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
       // 按照会话统计事件，方便对单个会话多事件进行处理
@@ -76,7 +76,7 @@ public class EventService {
         eventMap.put(key, new HashMap<>());
       }
 
-      // 数据库中存储的owner为消息接受者，owner为通知者，查询结果恢复原结构
+      // 单聊逻辑: 数据库中存储的owner为消息接收者，to为通知者，查询结果恢复原结构
       if (event.getFrom().equals(event.getTo()) && event.getOwner() != null) {
         event.setTo(event.getOwner());
         event.setOwner(event.getFrom());
@@ -91,13 +91,24 @@ public class EventService {
         case INVITATION:
           sessionEventMap.put(event.getMsgId(), event);
           break;
-        case DELETE_GROUP:
         case ADD_GROUP:
         case ADD_MEMBER:
+        case UPDATE_GROUP_CARD:
+          // 没有msgId的事件，使用随机key
+          sessionEventMap.put(UUID.randomUUID().toString(), event);
+          break;
+        case DELETE_GROUP:
+          // 清除所有人的事件，并添加此事件
+          sessionEventMap.clear();
+          sessionEventMap.put(UUID.randomUUID().toString(), event);
+          break;
         case DELETE_MEMBER:
         case LEAVE_GROUP:
-        case UPDATE_GROUP_CARD:
-          notifyEvents.add(event);
+          // 只清除当事人的事件，并添加此事件
+          if (to.equals(event.getTemail())) {
+            sessionEventMap.clear();
+          }
+          sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
         case PULLED:
         case RETRACT:
@@ -124,17 +135,19 @@ public class EventService {
             // 将此次拉取中未出现的msgId添加到删除事件中，供前端处理
             if (!msgIds.isEmpty()) {
               event.setMsgIds(msgIds);
-              notifyEvents.add(event);
+              sessionEventMap.put(UUID.randomUUID().toString(), event);
             }
           } else {  // 单聊删除会话和消息
             if (event.getDeleteAllMsg() != null && event.getDeleteAllMsg()) {
               sessionEventMap.clear();
             }
-            notifyEvents.add(event);
+            sessionEventMap.put(UUID.randomUUID().toString(), event);
           }
           break;
       }
     });
+
+    List<Event> notifyEvents = new ArrayList<>();
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
     return getEventsReturn(notifyEvents, maxEventSeqId);
   }

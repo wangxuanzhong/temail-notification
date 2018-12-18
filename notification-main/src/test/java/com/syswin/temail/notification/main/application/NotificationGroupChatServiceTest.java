@@ -23,6 +23,7 @@ public class NotificationGroupChatServiceTest {
   private final String TEST_GROUP_MSG_ID = "g-";
   private final String TOPIC = "temail-groupmail";
   private final String PREFIX = "temail-notification-";
+  private final boolean useMQ = false;
   MailAgentGroupChatParams params = new MailAgentGroupChatParams();
   @Autowired
   private NotificationGroupChatService notificationGroupChatService;
@@ -33,7 +34,6 @@ public class NotificationGroupChatServiceTest {
   @Autowired
   private MemberRepository memberRepository;
   private Gson gson = new Gson();
-
 
   @Before
   public void setUp() {
@@ -57,8 +57,7 @@ public class NotificationGroupChatServiceTest {
     params.setSeqNo(1L);
     params.setToMsg("这是一条群聊测试消息！");
     params.setAt("b,c,d");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -69,8 +68,7 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMessageType(EventType.PULLED.getValue());
     params.setMsgid(TEST_GROUP_MSG_ID + "1," + TEST_GROUP_MSG_ID + "2," + TEST_GROUP_MSG_ID + "3");
     params.setTemail("b");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -81,7 +79,7 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMessageType(EventType.RETRACT.getValue());
     params.setMsgid(TEST_GROUP_MSG_ID + "1");
     params.setTemail("a");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
   }
 
   /**
@@ -93,8 +91,7 @@ public class NotificationGroupChatServiceTest {
     params.setTemail("a");
     params.setAdminName("aa");
     params.setMsgid(gson.toJson(Arrays.asList("g-2", "g-3", "g-4")));
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -107,16 +104,15 @@ public class NotificationGroupChatServiceTest {
     params.setType(MemberRole.NORMAL.getValue());
     params.setTemail("d");
     params.setName("dd");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
     params.setxPacketId(PREFIX + UUID.randomUUID().toString());
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
     params.setTemail("e");
     params.setName("ee");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
     params.setTemail("f");
     params.setName("ff");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -127,7 +123,8 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMessageType(EventType.DELETE_GROUP.getValue());
     params.setGroupTemail("g");
     params.setTemail("a");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    params.setAdminName("aa");
+    this.sendMessage(params);
   }
 
   /**
@@ -136,9 +133,9 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeAddGroup() throws Exception {
     params.setSessionMessageType(EventType.ADD_GROUP.getValue());
-    params.setGroupTemail("g2");
+    params.setGroupTemail("g");
     params.setTemail("a");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
   }
 
   /**
@@ -150,8 +147,7 @@ public class NotificationGroupChatServiceTest {
     params.setTemail(gson.toJson(Arrays.asList("d", "e", "f")));
     params.setName(gson.toJson(Arrays.asList("dd", "ee", "ff")));
     params.setSessionMessageType(EventType.DELETE_MEMBER.getValue());
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -161,8 +157,7 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeLeaveGroup() throws Exception {
     params.setSessionMessageType(EventType.LEAVE_GROUP.getValue());
     params.setTemail("c");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -172,8 +167,7 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeApply() throws Exception {
     params.setSessionMessageType(EventType.APPLY.getValue());
     params.setTemail("c");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -183,8 +177,7 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeApplyRefuse() throws Exception {
     params.setSessionMessageType(EventType.APPLY_REFUSE.getValue());
     params.setTemail("c");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -194,8 +187,7 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeInvitation() throws Exception {
     params.setSessionMessageType(EventType.INVITATION.getValue());
     params.setTemail("c");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -205,8 +197,7 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeInvitationAdopt() throws Exception {
     params.setSessionMessageType(EventType.INVITATION_ADOPT.getValue());
     params.setTemail("c");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -219,7 +210,7 @@ public class NotificationGroupChatServiceTest {
     params.setGroupName("测试组名");
     params.setName("测试当事人名");
     params.setAdminName("测试触发人名");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
   }
 
   /**
@@ -233,8 +224,7 @@ public class NotificationGroupChatServiceTest {
     params.setParentMsgId(TEST_GROUP_MSG_ID + "1");
     params.setToMsg("这是一条回复消息！");
     params.setSeqNo(1L);
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -246,8 +236,7 @@ public class NotificationGroupChatServiceTest {
     params.setMsgid(TEST_GROUP_MSG_ID + "reply_1");
     params.setTemail("c");
     params.setParentMsgId(TEST_GROUP_MSG_ID + "1");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -259,8 +248,7 @@ public class NotificationGroupChatServiceTest {
     params.setMsgid(gson.toJson(Arrays.asList(TEST_GROUP_MSG_ID + "reply_2", TEST_GROUP_MSG_ID + "reply_3", TEST_GROUP_MSG_ID + "reply_4")));
     params.setTemail("c");
     params.setParentMsgId(TEST_GROUP_MSG_ID + "1");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
 
@@ -400,7 +388,11 @@ public class NotificationGroupChatServiceTest {
     if (!isSamePacket) {
       param.setxPacketId(PREFIX + UUID.randomUUID().toString());
     }
-    rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
-    Thread.sleep(2000);
+    if (useMQ) {
+      rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
+      Thread.sleep(2000);
+    } else {
+      notificationGroupChatService.handleMqMessage(gson.toJson(params));
+    }
   }
 }

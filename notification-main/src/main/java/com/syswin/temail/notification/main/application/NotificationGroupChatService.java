@@ -246,7 +246,7 @@ public class NotificationGroupChatService {
    */
   private void sendSingleMessage(Event event, Integer CDTPEventType, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("send message to {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
+    LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
     this.insert(event);
     rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, jsonService.toJson(event))));
   }
@@ -265,7 +265,7 @@ public class NotificationGroupChatService {
   private void sendGroupMessage(Event event, Integer CDTPEventType, String header)
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
     List<String> tos = memberRepository.selectByGroupTemail(event);
-    LOGGER.info("send message to {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
+    LOGGER.info("send message to --->> {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
     event.setFrom(event.getGroupTemail());
     for (String to : tos) {
       event.setTo(to);
@@ -285,7 +285,7 @@ public class NotificationGroupChatService {
     this.insert(event);
 
     List<String> tos = memberRepository.selectByGroupTemail(event);
-    LOGGER.info("send message to {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
+    LOGGER.info("send message to --->> {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
     for (String to : tos) {
       event.setTo(to);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, event.getEventType(), header, jsonService.toJson(event))));

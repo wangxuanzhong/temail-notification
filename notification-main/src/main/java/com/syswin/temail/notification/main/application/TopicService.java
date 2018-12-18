@@ -102,7 +102,7 @@ public class TopicService {
    */
   private void sendMessage(TopicEvent topicEvent, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("send message to {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
+    LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
     rocketMqProducer.sendMessage(
         jsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, jsonService.toJson(topicEvent))));
