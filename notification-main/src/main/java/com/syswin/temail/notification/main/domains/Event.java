@@ -51,6 +51,8 @@ public class Event {
   private Boolean deleteAllMsg;
   // 单聊消息拥有者
   private String owner;
+  // 废纸篓删除的消息明细
+  private String trashMsgInfo;
 
   @JsonIgnore
   private String extendParam;
@@ -111,16 +113,25 @@ public class Event {
 
 
   /**
-   * 设置通知类消息的msgId
+   * 自定义单聊消息的msgId
    *
    * @param eventType 需要匹配的通知类型
    */
-  public void addEventMsgId(EventType eventType) {
+  public void addMsgId(EventType eventType) {
+    this.msgId = this.from + "_" + this.to + "_" + eventType.getValue();
+  }
+
+  /**
+   * 自定义群聊消息的msgId
+   *
+   * @param eventType 需要匹配的通知类型
+   */
+  public void addGroupMsgId(EventType eventType) {
     this.msgId = this.groupTemail + "_" + this.temail + "_" + eventType.getValue();
   }
 
   /**
-   * 清除通知类消息的msgId
+   * 清除消息的msgId
    */
   public void removeEventMsgId() {
     this.msgId = null;
@@ -139,6 +150,7 @@ public class Event {
       this.msgIds = extendParam.getMsgIds();
       this.deleteAllMsg = extendParam.getDeleteAllMsg();
       this.owner = extendParam.getOwner();
+      this.trashMsgInfo = extendParam.getTrashMsgInfo();
     }
     return this;
   }
@@ -147,8 +159,8 @@ public class Event {
    * 自动配置扩展字段
    */
   public Event autoWriteExtendParam(JsonService jsonService) {
-    this.extendParam = jsonService
-        .toJson(new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner));
+    this.extendParam = jsonService.toJson(
+        new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner, this.trashMsgInfo));
     return this;
   }
 
@@ -342,6 +354,14 @@ public class Event {
 
   public void setDeleteAllMsg(Boolean deleteAllMsg) {
     this.deleteAllMsg = deleteAllMsg;
+  }
+
+  public String getTrashMsgInfo() {
+    return trashMsgInfo;
+  }
+
+  public void setTrashMsgInfo(String trashMsgInfo) {
+    this.trashMsgInfo = trashMsgInfo;
   }
 
   @Override

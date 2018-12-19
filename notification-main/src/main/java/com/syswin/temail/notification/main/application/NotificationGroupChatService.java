@@ -160,14 +160,14 @@ public class NotificationGroupChatService {
         break;
       case APPLY:
         event.notifyToAdmin();
-        event.addEventMsgId(EventType.APPLY);
+        event.addGroupMsgId(EventType.APPLY);
         this.sendGroupMessage(event, header);
         break;
       case APPLY_ADOPT:
       case APPLY_REFUSE:
         // 通知所有管理员，提供多端同步功能
         event.notifyToAdmin();
-        event.addEventMsgId(EventType.APPLY);
+        event.addGroupMsgId(EventType.APPLY);
         this.sendGroupMessage(event, header);
         // 通知申请人
         event.removeEventMsgId();
@@ -178,7 +178,7 @@ public class NotificationGroupChatService {
       case INVITATION:
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
-        event.addEventMsgId(EventType.INVITATION);
+        event.addGroupMsgId(EventType.INVITATION);
         this.sendSingleMessage(event, header);
         break;
       case INVITATION_ADOPT:
@@ -188,7 +188,7 @@ public class NotificationGroupChatService {
         // 通知自己，提供多端同步功能
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
-        event.addEventMsgId(EventType.INVITATION);
+        event.addGroupMsgId(EventType.INVITATION);
         this.sendSingleMessage(event, header);
         break;
       case UPDATE_GROUP_CARD:
@@ -220,6 +220,19 @@ public class NotificationGroupChatService {
         event.setMsgId(null);
         event.notifyToAll();
         this.sendGroupMessageWithOneEvent(event, header);
+        break;
+      case GROUP_ARCHIVE:
+      case GROUP_ARCHIVE_CANCEL:
+        event.setFrom(event.getGroupTemail());
+        event.setTo(event.getTemail());
+        event.addGroupMsgId(EventType.GROUP_ARCHIVE);
+        this.sendSingleMessage(event, header);
+        break;
+      case GROUP_STICK:
+      case GROUP_STICK_CANCEL:
+        event.setFrom(event.getGroupTemail());
+        event.setTo(event.getTemail());
+        this.sendSingleMessage(event, header);
         break;
     }
   }

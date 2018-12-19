@@ -20,8 +20,11 @@ public class TopicServiceTest {
   private final String TEST_TO = "b";
   private final String TOPIC = "temail-topic";
   private final String PREFIX = "temail-notification-";
+  private final boolean useMQ = false;
   MailAgentTopicParams params = new MailAgentTopicParams();
   private Gson gson = new Gson();
+  @Autowired
+  private TopicService topicService;
   @Autowired
   private RocketMqProducer rocketMqProducer;
 
@@ -31,7 +34,6 @@ public class TopicServiceTest {
     params.setFrom(TEST_FROM);
     params.setTo(TEST_TO);
     params.setTimestamp(System.currentTimeMillis());
-    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
   }
 
   /**
@@ -49,18 +51,14 @@ public class TopicServiceTest {
     params.setReceivers(Arrays.asList("b", "c", "d"));
     params.setCc(Arrays.asList("J", "Q", "K"));
     params.setTo("b");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
     params.setTo("c");
-    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
     params.setTo("d");
-    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
 
     params.setTo("a");
-    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -74,14 +72,11 @@ public class TopicServiceTest {
     params.setSeqNo(2L);
     params.setToMsg("这是一条话题回复测试消息！");
     params.setTo("b");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
     params.setTo("c");
-    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
+    this.sendMessage(params);
     params.setTo("d");
-    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -92,8 +87,7 @@ public class TopicServiceTest {
     params.setSessionMessageType(EventType.TOPIC_RETRACT.getValue());
     params.setTopicId("topic_1");
     params.setMsgid("1");
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -106,8 +100,7 @@ public class TopicServiceTest {
     params.setMsgid(gson.toJson(Arrays.asList("2", "3", "4")));
     params.setFrom(TEST_TO);
     params.setTo(TEST_FROM);
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
   }
 
   /**
@@ -118,7 +111,44 @@ public class TopicServiceTest {
     params.setSessionMessageType(EventType.TOPIC_DELETE.getValue());
     params.setTopicId("topic_1");
     params.setTo(TEST_FROM);
-    rocketMqProducer.sendMessage(gson.toJson(params), TOPIC, "", "");
-    Thread.sleep(2000);
+    this.sendMessage(params);
+  }
+
+  /**
+   * EventType TOPIC_ARCHIVE 29 话题归档
+   */
+  @Test
+  public void testEventTypeTopicArchive() throws Exception {
+    params.setSessionMessageType(EventType.TOPIC_ARCHIVE.getValue());
+    params.setTopicId("topic_1");
+    params.setTo(null);
+    this.sendMessage(params);
+  }
+
+  /**
+   * EventType TOPIC_ARCHIVE_CANCEL 30 话题归档取消
+   */
+  @Test
+  public void testEventTypeTopicArchiveCancel() throws Exception {
+    params.setSessionMessageType(EventType.TOPIC_ARCHIVE_CANCEL.getValue());
+    params.setTopicId("topic_1");
+    params.setTo(null);
+    this.sendMessage(params);
+  }
+
+  private void sendMessage(MailAgentTopicParams param) throws Exception {
+    sendMessage(param, false);
+  }
+
+  private void sendMessage(MailAgentTopicParams param, boolean isSamePacket) throws Exception {
+    if (!isSamePacket) {
+      param.setxPacketId(PREFIX + UUID.randomUUID().toString());
+    }
+    if (useMQ) {
+      rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
+      Thread.sleep(2000);
+    } else {
+      topicService.handleMqMessage(gson.toJson(param));
+    }
   }
 }

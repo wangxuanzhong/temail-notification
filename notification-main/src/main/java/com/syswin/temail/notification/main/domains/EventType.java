@@ -10,6 +10,13 @@ public enum EventType {
   DELETE(4, "消息已删除"),
   DESTROY(17, "阅后即焚消息发送"),
 
+  // 单聊部分
+  ARCHIVE(33, "归档"),
+  ARCHIVE_CANCEL(34, "归档取消"),
+  TRASH(35, "移送废纸篓"),
+  TRASH_CANCEL(36, "废纸篓消息还原"),
+  TRASH_DELETE(37, "废纸篓消息删除"),
+
   // 群管理部分
   GROUP_RESET(-101, "重置群聊消息未读数"),
   GROUP_RECEIVE(100, "群聊消息发送"),
@@ -28,6 +35,10 @@ public enum EventType {
   ADD_GROUP(13, "新建群"),
   LEAVE_GROUP(15, "已退出群聊"),
   UPDATE_GROUP_CARD(16, "群名片更新"),
+  GROUP_ARCHIVE(27, "群聊归档"),
+  GROUP_ARCHIVE_CANCEL(28, "群聊归档取消"),
+  GROUP_STICK(31, "群聊置顶"),
+  GROUP_STICK_CANCEL(32, "群聊置顶取消"),
 
   // 回复部分
   REPLY(18, "回复消息"),
@@ -40,7 +51,10 @@ public enum EventType {
   TOPIC_REPLY(22, "话题回复消息"),
   TOPIC_RETRACT(23, "话题回复消息已撤回"),
   TOPIC_REPLY_DELETE(24, "话题回复消息删除"),
-  TOPIC_DELETE(25, "话题已删除");
+  TOPIC_DELETE(25, "话题已删除"),
+  TOPIC_ARCHIVE(29, "话题归档"),
+  TOPIC_ARCHIVE_CANCEL(30, "话题归档取消");
+
 
   private final int value;
   private final String description;

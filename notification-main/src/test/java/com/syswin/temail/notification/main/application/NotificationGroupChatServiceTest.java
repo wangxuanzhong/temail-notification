@@ -2,9 +2,7 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.main.domains.Event.MemberRole;
-import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.domains.MemberRepository;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import java.util.Arrays;
 import java.util.UUID;
@@ -29,10 +27,6 @@ public class NotificationGroupChatServiceTest {
   private NotificationGroupChatService notificationGroupChatService;
   @Autowired
   private RocketMqProducer rocketMqProducer;
-  @Autowired
-  private EventRepository eventRepository;
-  @Autowired
-  private MemberRepository memberRepository;
   private Gson gson = new Gson();
 
   @Before
@@ -251,6 +245,48 @@ public class NotificationGroupChatServiceTest {
     this.sendMessage(params);
   }
 
+  /**
+   * EventType GROUP_ARCHIVE 27 群聊归档
+   */
+  @Test
+  public void testEventTypeGroupArchive() throws Exception {
+    params.setSessionMessageType(EventType.GROUP_ARCHIVE.getValue());
+    params.setTemail("b");
+    this.sendMessage(params);
+  }
+
+  /**
+   * EventType GROUP_ARCHIVE_CANCEL 28 群聊归档取消
+   */
+  @Test
+  public void testEventTypeGroupArchiveCancel() throws Exception {
+    params.setSessionMessageType(EventType.GROUP_ARCHIVE_CANCEL.getValue());
+    params.setTemail("b");
+    this.sendMessage(params);
+  }
+
+  /**
+   * EventType GROUP_STICK 31 群聊置顶
+   */
+  @Test
+  public void testEventTypeGroupStick() throws Exception {
+    params.setSessionMessageType(EventType.GROUP_STICK.getValue());
+    params.setMsgid("1");
+    params.setTemail("b");
+    this.sendMessage(params);
+  }
+
+  /**
+   * EventType GROUP_STICK_CANCEL 32 群聊置顶取消
+   */
+  @Test
+  public void testEventTypeGroupStickCancel() throws Exception {
+    params.setSessionMessageType(EventType.GROUP_STICK_CANCEL.getValue());
+    params.setMsgid("1");
+    params.setTemail("b");
+    this.sendMessage(params);
+  }
+
 
   /**
    * 完成群聊流程
@@ -392,7 +428,7 @@ public class NotificationGroupChatServiceTest {
       rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
       Thread.sleep(2000);
     } else {
-      notificationGroupChatService.handleMqMessage(gson.toJson(params));
+      notificationGroupChatService.handleMqMessage(gson.toJson(param));
     }
   }
 }

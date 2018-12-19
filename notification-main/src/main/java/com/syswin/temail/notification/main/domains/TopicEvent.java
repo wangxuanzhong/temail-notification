@@ -83,6 +83,15 @@ public class TopicEvent {
     return this;
   }
 
+  /**
+   * 自定义消息的msgId
+   *
+   * @param eventType 需要匹配的通知类型
+   */
+  public void addEventMsgId(EventType eventType) {
+    this.msgId = this.topicId + "_" + this.from + "_" + this.to + "_" + eventType.getValue();
+  }
+
   public Long getId() {
     return id;
   }

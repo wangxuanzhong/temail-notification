@@ -110,10 +110,11 @@ public class NotificationService {
         break;
       case DELETE:
       case REPLY_DELETE:
+      case TRASH:
         // 删除操作msgId是多条，存入msgIds字段
         event.setMsgIds(jsonService.fromJson(event.getMsgId(), List.class));
         event.setMsgId(null);
-        // from是删除者
+        // from是操作人
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
         sendMessage(event, header);
@@ -132,6 +133,22 @@ public class NotificationService {
         sendMessage(event, header);
         sendMessageToSender(event, header);
         break;
+      case ARCHIVE:
+      case ARCHIVE_CANCEL:
+        // from是操作人，to是会话的另一方
+        event.setFrom(params.getTo());
+        event.setTo(params.getFrom());
+        event.addMsgId(EventType.ARCHIVE);
+        sendMessage(event, header);
+        break;
+      case TRASH_CANCEL:
+      case TRASH_DELETE:
+        // owner是操作人，from和to都为空，msgId为空
+        event.setTrashMsgInfo(params.getTrashMsgInfo());
+        event.setFrom(params.getOwner());
+        event.setTo(params.getOwner());
+        sendMessage(event, header);
+        break;
     }
   }
 
@@ -149,9 +166,17 @@ public class NotificationService {
    */
   private void sendMessage(Event event, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
+    this.sendMessage(event, event.getTo(), header);
+  }
+
+  /**
+   * 发送消息
+   */
+  private void sendMessage(Event event, String to, String header)
+      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+    LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     this.insert(event);
-    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, jsonService.toJson(event))));
+    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, event.getEventType(), header, jsonService.toJson(event))));
   }
 
   /**

@@ -76,24 +76,43 @@ public class EventService {
         eventMap.put(key, new HashMap<>());
       }
 
-      // 单聊逻辑: 数据库中存储的owner为消息接收者，to为通知者，查询结果恢复原结构
-      if (event.getFrom().equals(event.getTo()) && event.getOwner() != null) {
-        event.setTo(event.getOwner());
-        event.setOwner(event.getFrom());
-      }
-
       Map<String, Event> sessionEventMap = eventMap.get(key);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case RECEIVE:
         case DESTROY:
         case DESTROYED:
+          // 单聊逻辑: 当from和to相同时，数据库中存储的owner为消息接收者，to为通知者，查询结果恢复原结构
+          if (event.getFrom().equals(event.getTo()) && event.getOwner() != null) {
+            event.setTo(event.getOwner());
+            event.setOwner(event.getFrom());
+          }
+          sessionEventMap.put(event.getMsgId(), event);
+          break;
+        case RETRACT:
+          // 单聊逻辑: 当from和to相同时，数据库中存储的owner为消息接收者，to为通知者，查询结果恢复原结构
+          if (event.getFrom().equals(event.getTo()) && event.getOwner() != null) {
+            event.setTo(event.getOwner());
+            event.setOwner(event.getFrom());
+          }
+          if (sessionEventMap.containsKey(event.getMsgId())) {
+            sessionEventMap.remove(event.getMsgId());
+          } else {
+            sessionEventMap.put(event.getMsgId(), event);
+          }
+          break;
         case APPLY:
         case INVITATION:
+        case ARCHIVE:
+        case GROUP_ARCHIVE:
+        case GROUP_STICK:
           sessionEventMap.put(event.getMsgId(), event);
           break;
         case ADD_GROUP:
         case ADD_MEMBER:
         case UPDATE_GROUP_CARD:
+        case TRASH:
+        case TRASH_CANCEL:
+        case TRASH_DELETE: // 废纸篓删除不进行任何操作，直接返回给前端
           // 没有msgId的事件，使用随机key
           sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
@@ -111,11 +130,13 @@ public class EventService {
           sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
         case PULLED:
-        case RETRACT:
         case APPLY_ADOPT:
         case APPLY_REFUSE:
         case INVITATION_ADOPT:
         case INVITATION_REFUSE:
+        case ARCHIVE_CANCEL:
+        case GROUP_ARCHIVE_CANCEL:
+        case GROUP_STICK_CANCEL:
           if (sessionEventMap.containsKey(event.getMsgId())) {
             sessionEventMap.remove(event.getMsgId());
           } else {

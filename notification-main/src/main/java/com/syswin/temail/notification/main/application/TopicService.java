@@ -85,6 +85,13 @@ public class TopicService {
         topicEvent.setTo(topicEvent.getFrom());
         sendMessage(topicEvent, header);
         break;
+      case TOPIC_ARCHIVE:
+      case TOPIC_ARCHIVE_CANCEL:
+        // from是操作人，to为空
+        topicEvent.setTo(params.getFrom());
+        topicEvent.addEventMsgId(EventType.ARCHIVE);
+        sendMessage(topicEvent, header);
+        break;
     }
   }
 
@@ -138,9 +145,11 @@ public class TopicService {
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case TOPIC:
         case TOPIC_REPLY:
+        case TOPIC_ARCHIVE:
           eventMap.put(event.getMsgId(), event);
           break;
         case TOPIC_RETRACT:
+        case TOPIC_ARCHIVE_CANCEL:
           if (eventMap.containsKey(event.getMsgId())) {
             eventMap.remove(event.getMsgId());
           } else {

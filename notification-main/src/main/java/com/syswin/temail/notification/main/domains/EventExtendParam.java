@@ -24,11 +24,15 @@ class EventExtendParam {
   private Boolean deleteAllMsg;
   // 单聊消息拥有者
   private String owner;
+  // 废纸篓删除的消息明细
+  private String trashMsgInfo;
+
 
   public EventExtendParam() {
   }
 
-  public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds, Boolean deleteAllMsg, String owner) {
+  public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds, Boolean deleteAllMsg, String owner,
+      String trashMsgInfo) {
     this.name = name;
     this.adminName = adminName;
     this.groupName = groupName;
@@ -36,6 +40,7 @@ class EventExtendParam {
     this.msgIds = msgIds;
     this.deleteAllMsg = deleteAllMsg;
     this.owner = owner;
+    this.trashMsgInfo = trashMsgInfo;
   }
 
   public String getName() {
@@ -92,5 +97,13 @@ class EventExtendParam {
 
   public void setOwner(String owner) {
     this.owner = owner;
+  }
+
+  public String getTrashMsgInfo() {
+    return trashMsgInfo;
+  }
+
+  public void setTrashMsgInfo(String trashMsgInfo) {
+    this.trashMsgInfo = trashMsgInfo;
   }
 }
