@@ -54,4 +54,17 @@ public class RedisService implements SequenceService {
     redisTemplate.expire(key, 5, TimeUnit.SECONDS);
     return result;
   }
+
+  /**
+   * 添加锁
+   */
+  public boolean checkLock(String key, long timeout, TimeUnit unit) {
+    Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "value");
+    if (result == null) {
+      return false;
+    }
+    // 设置key有效时间为5s
+    redisTemplate.expire(key, timeout, unit);
+    return result;
+  }
 }

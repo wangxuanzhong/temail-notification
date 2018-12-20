@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +29,18 @@ public class EventSchedule {
   private final EventService eventService;
   private final TopicEventRepository topicEventRepository;
   private final UnreadRepository unreadRepository;
+  private final RedisService redisService;
+  private final String DELETE_OLD_EVENT_KEY = "notification_deleteOldEvent";
   private int deadline;
 
   @Autowired
   public EventSchedule(EventRepository eventRepository, EventService eventService, TopicEventRepository topicEventRepository,
-      UnreadRepository unreadRepository, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
+      UnreadRepository unreadRepository, RedisService redisService, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
     this.eventRepository = eventRepository;
     this.eventService = eventService;
     this.topicEventRepository = topicEventRepository;
     this.unreadRepository = unreadRepository;
+    this.redisService = redisService;
     this.deadline = deadline;
   }
 
@@ -45,6 +49,11 @@ public class EventSchedule {
   public void deleteOldEvent() {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old event before {}", createTime);
+
+    if (!redisService.checkLock(DELETE_OLD_EVENT_KEY, 10, TimeUnit.MINUTES)) {
+      LOGGER.warn("check lock from redis failed!");
+      return;
+    }
 
     // 查询出所有的to
     List<String> tos = eventRepository.selectOldTo(createTime);
