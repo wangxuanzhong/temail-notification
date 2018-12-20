@@ -79,7 +79,7 @@ public class TopicService {
         }
         break;
       case TOPIC_REPLY_DELETE:
-        // 删除操作msgId是多条，存入msgIds字段
+        // 删除操作msgId是多条，存入msgIds字段，from为操作人
         topicEvent.setMsgIds(jsonService.fromJson(topicEvent.getMsgId(), List.class));
         topicEvent.setMsgId(null);
         topicEvent.setTo(topicEvent.getFrom());

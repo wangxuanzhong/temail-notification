@@ -39,7 +39,7 @@ public class MailAgentSingleChatParams extends MailAgentParams {
         "deleteAllMsg=" + deleteAllMsg +
         ", owner='" + owner + '\'' +
         ", trashMsgInfo='" + trashMsgInfo + '\'' +
-        '}';
+        '}' + super.toString();
   }
 
   public static class TrashMsgInfo {
