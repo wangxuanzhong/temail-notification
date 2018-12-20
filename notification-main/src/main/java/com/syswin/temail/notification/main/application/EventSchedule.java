@@ -50,7 +50,7 @@ public class EventSchedule {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old event before {}", createTime);
 
-    if (!redisService.checkLock(DELETE_OLD_EVENT_KEY, 10, TimeUnit.MINUTES)) {
+    if (!redisService.checkLock(DELETE_OLD_EVENT_KEY, 20, TimeUnit.MINUTES)) {
       LOGGER.warn("check lock from redis failed!");
       return;
     }
