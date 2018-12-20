@@ -38,6 +38,11 @@ public class TopicEventRepositoryImpl implements TopicEventRepository {
   }
 
   @Override
+  public List<TopicEvent> selectEventsByTopicId(String topicId) {
+    return topicEventMapper.selectEventsByTopicId(topicId);
+  }
+
+  @Override
   public void deleteOldTopic(LocalDateTime createTime) {
     topicEventMapper.deleteOldTopic(createTime);
   }

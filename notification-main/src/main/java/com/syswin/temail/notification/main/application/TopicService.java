@@ -71,7 +71,6 @@ public class TopicService {
         sendMessage(topicEvent, header);
         break;
       case TOPIC_RETRACT:
-      case TOPIC_DELETE:
         // 向撤回的消息的所有收件人发送通知
         for (TopicEvent event : topicEventRepository.selectEventsByMsgId(topicEvent.getMsgId())) {
           topicEvent.setTo(event.getTo());
@@ -84,6 +83,13 @@ public class TopicService {
         topicEvent.setMsgId(null);
         topicEvent.setTo(topicEvent.getFrom());
         sendMessage(topicEvent, header);
+        break;
+      case TOPIC_DELETE:
+        // 向话题接收的所有人发送通知
+        for (TopicEvent event : topicEventRepository.selectEventsByTopicId(topicEvent.getTopicId())) {
+          topicEvent.setTo(event.getTo());
+          sendMessage(topicEvent, header);
+        }
         break;
       case TOPIC_ARCHIVE:
       case TOPIC_ARCHIVE_CANCEL:

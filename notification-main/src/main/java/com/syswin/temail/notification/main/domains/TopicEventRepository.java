@@ -13,5 +13,7 @@ public interface TopicEventRepository {
 
   List<TopicEvent> selectEventsByMsgId(String msgId);
 
+  List<TopicEvent> selectEventsByTopicId(String topicId);
+
   void deleteOldTopic(LocalDateTime createTime);
 }

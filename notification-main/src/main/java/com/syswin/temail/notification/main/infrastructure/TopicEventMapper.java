@@ -17,5 +17,7 @@ public interface TopicEventMapper {
 
   List<TopicEvent> selectEventsByMsgId(String msgId);
 
+  List<TopicEvent> selectEventsByTopicId(String topicId);
+
   void deleteOldTopic(LocalDateTime createTime);
 }
