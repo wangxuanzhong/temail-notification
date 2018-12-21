@@ -172,6 +172,7 @@ public class Event {
       case REPLY:
       case REPLY_RETRACT:
       case REPLY_DELETE:
+      case REPLY_DESTROYED:
         this.eventSeqId = sequenceService.getNextSeq(this.parentMsgId);
         break;
       default:
