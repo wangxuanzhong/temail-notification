@@ -230,9 +230,8 @@ public class NotificationGroupChatService {
         break;
       case GROUP_STICK:
       case GROUP_STICK_CANCEL:
-        event.setFrom(event.getGroupTemail());
-        event.setTo(event.getTemail());
-        this.sendSingleMessage(event, header);
+        event.notifyToAll();
+        this.sendGroupMessage(event, header);
         break;
     }
   }

@@ -114,7 +114,7 @@ public class NotificationService {
         // 删除操作msgId是多条，存入msgIds字段
         event.setMsgIds(jsonService.fromJson(event.getMsgId(), List.class));
         event.setMsgId(null);
-        // from是操作人
+        // from是操作人，to是会话另一方
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
         sendMessage(event, header);

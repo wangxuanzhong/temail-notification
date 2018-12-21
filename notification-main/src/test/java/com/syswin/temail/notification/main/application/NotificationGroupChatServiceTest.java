@@ -272,7 +272,7 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeGroupStick() throws Exception {
     params.setSessionMessageType(EventType.GROUP_STICK.getValue());
     params.setMsgid("1");
-    params.setTemail("b");
+    params.setTemail("a");
     this.sendMessage(params);
   }
 
