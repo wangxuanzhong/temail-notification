@@ -47,7 +47,7 @@ public class NotificationController {
   @ApiOperation(value = "pull event 3 0001", consumes = "application/json")
   @GetMapping("/events")
   public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
-      Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
+      Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     Map<String, Object> result = eventService.getEvents(to, eventSeqId, pageSize);
@@ -57,7 +57,7 @@ public class NotificationController {
   @ApiOperation(value = "get unread 3 0002", consumes = "application/json")
   @GetMapping("/unread")
   public ResponseEntity<Response<List<UnreadResponse>>> getUnread(@RequestParam(name = "from") String to,
-      @RequestHeader(name = CDTP_HEADER) String header) {
+      @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     List<UnreadResponse> result = eventService.getUnread(to);
@@ -66,7 +66,8 @@ public class NotificationController {
 
   @ApiOperation(value = "reset 3 0004", consumes = "application/json")
   @PutMapping("/reset")
-  public ResponseEntity<Response<List<UnreadResponse>>> reset(@RequestBody Event event, @RequestHeader(name = CDTP_HEADER) String header)
+  public ResponseEntity<Response<List<UnreadResponse>>> reset(@RequestBody Event event,
+      @RequestHeader(name = CDTP_HEADER, required = false) String header)
       throws InterruptedException, RemotingException, UnsupportedEncodingException, MQClientException, MQBrokerException {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -87,7 +88,7 @@ public class NotificationController {
   @ApiOperation(value = "pull reply event 3 0005", consumes = "application/json")
   @GetMapping("/reply/events")
   public ResponseEntity<Response<Map<String, Object>>> getReplyEvents(@RequestParam Long eventSeqId, @RequestParam String parentMsgId,
-      Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
+      Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     Map<String, Object> result = eventService.getReplyEvents(parentMsgId, eventSeqId, pageSize);
@@ -97,7 +98,7 @@ public class NotificationController {
   @ApiOperation(value = "pull topic event 3 0006", consumes = "application/json")
   @GetMapping("/topic/events")
   public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
-      @RequestParam String topicId, Integer pageSize, @RequestHeader(name = CDTP_HEADER) String header) {
+      @RequestParam String topicId, Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
     Map<String, Object> result = topicService.getTopicEvents(to, topicId, eventSeqId, pageSize);

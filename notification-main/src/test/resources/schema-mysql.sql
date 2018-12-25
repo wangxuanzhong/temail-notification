@@ -14,7 +14,8 @@ CREATE TABLE `event` (
   `create_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `event_to` (`to`),
-  KEY `event_xPacketId` (`x_packet_id`)
+  KEY `event_xPacketId` (`x_packet_id`),
+  KEY `msgId` (`msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `member` (
