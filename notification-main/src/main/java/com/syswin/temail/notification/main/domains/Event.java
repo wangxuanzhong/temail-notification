@@ -169,6 +169,12 @@ public class Event {
    */
   public void initEventSeqId(SequenceService sequenceService) {
     switch (Objects.requireNonNull(EventType.getByValue(this.eventType))) {
+      case RECEIVE:
+      case RETRACT:
+      case DESTROY:
+      case DESTROYED:
+        this.eventSeqId = sequenceService.getNextSeq(this.owner == null ? this.to : this.owner);
+        break;
       case REPLY:
       case REPLY_RETRACT:
       case REPLY_DELETE:
