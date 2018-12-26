@@ -151,17 +151,7 @@ public class TopicService {
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case TOPIC:
         case TOPIC_REPLY:
-        case TOPIC_ARCHIVE:
-          eventMap.put(event.getMsgId(), event);
-          break;
         case TOPIC_RETRACT:
-        case TOPIC_ARCHIVE_CANCEL:
-          if (eventMap.containsKey(event.getMsgId())) {
-            eventMap.remove(event.getMsgId());
-          } else {
-            eventMap.put(event.getMsgId(), event);
-          }
-          break;
         case TOPIC_REPLY_DELETE:
           List<String> msgIds = new ArrayList<>(event.getMsgIds());
           event.getMsgIds().forEach(msgId -> {
