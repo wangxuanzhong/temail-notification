@@ -146,25 +146,32 @@ public class TopicService {
 
     Map<String, TopicEvent> eventMap = new HashMap<>();
     List<TopicEvent> notifyEvents = new ArrayList<>();
+    String replyEventKey = "reply";
+    //避免eventMap.get("reply").getMsgId()时，出现NPE
+    eventMap.put(replyEventKey, new TopicEvent());
+
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
-      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
-        case TOPIC:
-        case TOPIC_REPLY:
-        case TOPIC_RETRACT:
+        switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+          case TOPIC:
+              eventMap.put(event.getMsgId(), event);
+              break;
+          case TOPIC_REPLY:
+              eventMap.put(replyEventKey, event);
+              break;
+          case TOPIC_RETRACT:
+              if (eventMap.get(replyEventKey).getMsgId().equals(event.getMsgId())) {
+                  eventMap.remove(event.getMsgId());
+              }
+              break;
         case TOPIC_REPLY_DELETE:
-          List<String> msgIds = new ArrayList<>(event.getMsgIds());
-          event.getMsgIds().forEach(msgId -> {
-            if (eventMap.containsKey(msgId)) {
+          for (String msgId : event.getMsgIds()) {
+            if (eventMap.get(replyEventKey).getMsgId().equals(msgId)) {
               eventMap.remove(msgId);
-              msgIds.remove(msgId); // 删除已出现的msgId
+              break;
             }
-          });
-          // 将此次拉取中未出现的msgId添加到删除事件中，供前端处理
-          if (!msgIds.isEmpty()) {
-            event.setMsgIds(msgIds);
-            notifyEvents.add(event);
           }
+          break;
         case TOPIC_DELETE:
           eventMap.put(event.getTopicId(), event);
           break;
