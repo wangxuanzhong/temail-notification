@@ -4,7 +4,7 @@
 
   <groupId>com.syswin.temail</groupId>
   <artifactId>temail-notification</artifactId>
-  <version>0.1.9-SNAPSHOT</version>
+  <version>0.1.10-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
     <module>notification-foundation</module>
@@ -25,12 +25,12 @@
       <dependency>
         <groupId>com.syswin.temail</groupId>
         <artifactId>notification-foundation</artifactId>
-        <version>0.1.9-SNAPSHOT</version>
+        <version>0.1.10-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>com.syswin.temail</groupId>
         <artifactId>notification-main</artifactId>
-        <version>0.1.9-SNAPSHOT</version>
+        <version>0.1.10-SNAPSHOT</version>
       </dependency>
 
       <dependency>
