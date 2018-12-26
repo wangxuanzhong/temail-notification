@@ -1,11 +1,13 @@
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.foundation.application.SequenceService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.UnreadRepository;
+import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import java.io.UnsupportedEncodingException;
@@ -68,6 +70,8 @@ public class EventService {
     }
 
     Map<String, Map<String, Event>> eventMap = new HashMap<>();
+    List<String> messages = new ArrayList<>();  // 存放普通消息，以便抵消操作处理
+    List<String> trashMsgIds = new ArrayList<>();  // 存放废纸篓消息，以便还原操作处理
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
       // 按照会话统计事件，方便对单个会话多事件进行处理
@@ -79,6 +83,8 @@ public class EventService {
       Map<String, Event> sessionEventMap = eventMap.get(key);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case RECEIVE:
+          messages.add(event.getMsgId());
+          break;
         case DESTROY:
         case DESTROYED:
           // 单聊逻辑: 当from和to相同时，数据库中存储的owner为消息接收者，to为通知者，查询结果恢复原结构
@@ -94,27 +100,34 @@ public class EventService {
             event.setTo(event.getOwner());
             event.setOwner(event.getFrom());
           }
-          if (sessionEventMap.containsKey(event.getMsgId())) {
-            sessionEventMap.remove(event.getMsgId());
-          } else {
+          if (!messages.contains(event.getMsgId())) {
             sessionEventMap.put(event.getMsgId(), event);
           }
           break;
+        case ADD_GROUP:
         case APPLY:
         case INVITATION:
-        case ARCHIVE:
-        case GROUP_ARCHIVE:
+        case UPDATE_GROUP_CARD:
         case GROUP_STICK:
           sessionEventMap.put(event.getMsgId(), event);
           break;
-        case ADD_GROUP:
-        case ADD_MEMBER:
-        case UPDATE_GROUP_CARD:
-        case TRASH:
+        case TRASH: // 移动到废纸篓不需要查询返回，只需要记录移动的消息id
+          trashMsgIds.addAll(event.getMsgIds());
+          break;
         case TRASH_CANCEL:
-        case TRASH_DELETE: // 废纸篓删除不进行任何操作，直接返回给前端
-          // 没有msgId的事件，使用随机key
-          sessionEventMap.put(UUID.randomUUID().toString(), event);
+          List<TrashMsgInfo> newInfos = new ArrayList<>();
+          List<TrashMsgInfo> infos = jsonService.fromJson(event.getTrashMsgInfo(), new TypeToken<List<TrashMsgInfo>>() {
+          }.getType());
+          // 如果查询到的事件中，有移入移出的操作则对于msgId不需要返回给前端
+          infos.forEach(info -> {
+            if (!trashMsgIds.contains(info.getMsgId())) {
+              newInfos.add(info);
+            }
+          });
+          if (!newInfos.isEmpty()) {
+            event.setTrashMsgInfo(jsonService.toJson(newInfos));
+            sessionEventMap.put(UUID.randomUUID().toString(), event);
+          }
           break;
         case DELETE_GROUP:
           // 清除所有人的事件，并添加此事件
@@ -129,13 +142,10 @@ public class EventService {
           }
           sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
-        case PULLED:
         case APPLY_ADOPT:
         case APPLY_REFUSE:
         case INVITATION_ADOPT:
         case INVITATION_REFUSE:
-        case ARCHIVE_CANCEL:
-        case GROUP_ARCHIVE_CANCEL:
         case GROUP_STICK_CANCEL:
           if (sessionEventMap.containsKey(event.getMsgId())) {
             sessionEventMap.remove(event.getMsgId());
@@ -148,8 +158,7 @@ public class EventService {
           if (event.getMsgIds() != null) {
             List<String> msgIds = new ArrayList<>(event.getMsgIds());
             event.getMsgIds().forEach(msgId -> {
-              if (sessionEventMap.containsKey(msgId)) {
-                sessionEventMap.remove(msgId);
+              if (messages.contains(msgId)) {
                 msgIds.remove(msgId); // 删除已出现的msgId
               }
             });
@@ -240,7 +249,13 @@ public class EventService {
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
     Map<String, Object> result = new HashMap<>();
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
-    result.put("events", notifyEvents);
+
+    // 返回结果最多1000条
+    if (notifyEvents.size() > 1000) {
+      result.put("events", notifyEvents.subList(notifyEvents.size() - 1001, notifyEvents.size() - 1));
+    } else {
+      result.put("events", notifyEvents);
+    }
     // LOGGER.info("pull events result: {}", result);
     return result;
   }

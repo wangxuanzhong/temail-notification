@@ -2,6 +2,7 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.JsonService;
+import java.lang.reflect.Type;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,4 +19,11 @@ public class GsonService implements JsonService {
   public <T> T fromJson(String json, Class<T> classOfT) {
     return gson.fromJson(json, classOfT);
   }
+
+  @Override
+  public <T> T fromJson(String json, Type typeOfT) {
+    return gson.fromJson(json, typeOfT);
+  }
+
+
 }

@@ -129,7 +129,7 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeAddGroup() throws Exception {
     params.setSessionMessageType(EventType.ADD_GROUP.getValue());
-    params.setGroupTemail("g");
+    params.setGroupTemail("g2");
     params.setTemail("a");
     this.sendMessage(params);
   }

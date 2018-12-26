@@ -45,7 +45,7 @@ public class NotificationServiceTest {
   @Test
   public void testEventTypeReceive() throws Exception {
     params.setSessionMessageType(EventType.RECEIVE.getValue());
-    params.setMsgid("1");
+    params.setMsgid("5");
     params.setSeqNo(1L);
     params.setToMsg("这是一条单聊测试消息！");
 
@@ -103,11 +103,11 @@ public class NotificationServiceTest {
     // 删除会话
     params.setMsgid(null);
     params.setDeleteAllMsg(false);
-    this.sendMessage(params);
+//    this.sendMessage(params);
 
     // 删除会话和消息
     params.setDeleteAllMsg(true);
-    this.sendMessage(params);
+//    this.sendMessage(params);
   }
 
   /**
@@ -116,9 +116,14 @@ public class NotificationServiceTest {
   @Test
   public void testEventTypeDestroy() throws Exception {
     params.setSessionMessageType(EventType.DESTROY.getValue());
-    params.setMsgid("2");
-    params.setSeqNo(2L);
+    params.setMsgid("5");
+    params.setSeqNo(1L);
     params.setToMsg("这是一条单聊阅后即焚测试消息！");
+
+    params.setOwner(TEST_TO);
+    this.sendMessage(params);
+
+    params.setOwner(TEST_FROM);
     this.sendMessage(params);
   }
 

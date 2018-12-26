@@ -100,6 +100,7 @@ public class NotificationGroupChatService {
         memberRepository.insert(event);
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
+        event.addGroupMsgId(EventType.ADD_GROUP);
         this.sendSingleMessage(event, header);
         break;
       case DELETE_GROUP:
@@ -193,6 +194,7 @@ public class NotificationGroupChatService {
         break;
       case UPDATE_GROUP_CARD:
         event.notifyToAll();
+        event.addGroupMsgId(EventType.UPDATE_GROUP_CARD); // 查询时只需要返回一条，因此添加msgId
         this.sendGroupMessage(event, header);
         break;
       case REPLY:
