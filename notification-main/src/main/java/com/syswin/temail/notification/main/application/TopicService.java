@@ -147,9 +147,6 @@ public class TopicService {
     Map<String, TopicEvent> eventMap = new HashMap<>();
     List<TopicEvent> notifyEvents = new ArrayList<>();
     String replyEventKey = "reply";
-    //避免eventMap.get("reply").getMsgId()时，出现NPE
-    eventMap.put(replyEventKey, new TopicEvent());
-
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
         switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
@@ -160,13 +157,13 @@ public class TopicService {
               eventMap.put(replyEventKey, event);
               break;
           case TOPIC_RETRACT:
-              if (eventMap.get(replyEventKey).getMsgId().equals(event.getMsgId())) {
-                  eventMap.remove(event.getMsgId());
+              if (eventMap.get(replyEventKey) != null && eventMap.get(replyEventKey).getMsgId().equals(event.getMsgId())) {
+                  eventMap.remove(replyEventKey);
               }
               break;
         case TOPIC_REPLY_DELETE:
           for (String msgId : event.getMsgIds()) {
-            if (eventMap.get(replyEventKey).getMsgId().equals(msgId)) {
+            if (eventMap.get(replyEventKey) != null && eventMap.get(replyEventKey).getMsgId().equals(msgId)) {
               eventMap.remove(msgId);
               break;
             }
