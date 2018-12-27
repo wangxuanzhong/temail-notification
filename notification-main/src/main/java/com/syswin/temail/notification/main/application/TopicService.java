@@ -167,10 +167,10 @@ public class TopicService {
                 //记录所有的回复消息，用于与撤回的消息事件抵消
                 replyMsgIds.add(event.getMsgId());
                 break;
-            case REPLY_RETRACT:
-                //撤回的消息需要和回复消息被抵消，如果撤回的消息不在本次拉到的回复消息范围内，需要提醒
+            case TOPIC_RETRACT:
+                //撤回的消息需要和回复消息做抵消，如果撤回的消息不在本次拉到的回复消息范围内，需要提醒
                 if (replyMsgIds.add(event.getMsgId())) {
-                    //这里set.add()返回true，说明这条撤回的消息，不再本次拉到的回复消息内，需要提醒客户端
+                    //这里set.add()返回true，说明这条撤回的消息，不在本次拉到的回复消息内，需要提醒客户端
                     eventMap.put(event.getMsgId(), event);
                 } else if(event.getMsgId().equals(eventMap.get(replyEventKey).getMsgId())){
                     //若set.add()返回false，说明这条撤回的消息，在本次拉到的回复的消息内，需要做事件抵消。

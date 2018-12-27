@@ -57,6 +57,19 @@ public class TopicEvent {
     this.timestamp = timestamp;
   }
 
+  public TopicEvent(Long id, String xPacketId, Long eventSeqId, Integer eventType, String topicId, String msgId, String from, String to, String extentParam, Long timestamp) {
+    this.id = id;
+    this.xPacketId = xPacketId;
+    this.eventSeqId = eventSeqId;
+    this.eventType = eventType;
+    this.topicId = topicId;
+    this.msgId = msgId;
+    this.from = from;
+    this.to = to;
+    this.extendParam = extentParam;
+    this.timestamp = timestamp;
+  }
+
   /**
    * 生成seqId
    */
