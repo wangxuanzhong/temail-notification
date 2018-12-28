@@ -205,7 +205,6 @@ public class EventService {
     }
 
     Map<String, Event> eventMap = new HashMap<>();
-    List<Event> notifyEvents = new ArrayList<>();
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
@@ -222,23 +221,12 @@ public class EventService {
         case REPLY_DELETE:
           // msgIds不为空，则为批量删除消息
           if (event.getMsgIds() != null) {
-            List<String> msgIds = new ArrayList<>(event.getMsgIds());
-            event.getMsgIds().forEach(msgId -> {
-              if (eventMap.containsKey(msgId)) {
-                eventMap.remove(msgId);
-                msgIds.remove(msgId); // 删除已出现的msgId
-              }
-            });
-            // 将此次拉取中未出现的msgId添加到删除事件中，供前端处理
-            if (!msgIds.isEmpty()) {
-              event.setMsgIds(msgIds);
-              notifyEvents.add(event);
-            }
+            event.getMsgIds().forEach(eventMap::remove);
           }
           break;
       }
     });
-    notifyEvents.addAll(eventMap.values());
+    List<Event> notifyEvents = new ArrayList<>(eventMap.values());
     return getEventsReturn(notifyEvents, lastEventSeqId);
   }
 

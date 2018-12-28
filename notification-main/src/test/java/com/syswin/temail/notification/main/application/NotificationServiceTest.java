@@ -45,7 +45,7 @@ public class NotificationServiceTest {
   @Test
   public void testEventTypeReceive() throws Exception {
     params.setSessionMessageType(EventType.RECEIVE.getValue());
-    params.setMsgid("5");
+    params.setMsgid("1");
     params.setSeqNo(1L);
     params.setToMsg("这是一条单聊测试消息！");
 
