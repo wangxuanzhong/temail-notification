@@ -1,7 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.foundation.application.JsonService;
-import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.TopicEventRepository;
@@ -10,14 +9,11 @@ import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.remoting.exception.RemotingException;
@@ -26,8 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.syswin.temail.notification.main.domains.EventType.TOPIC_REPLY;
 
 @Service
 public class TopicService {
@@ -139,6 +133,9 @@ public class TopicService {
   public Map<String, Object> getTopicEvents(String to, String topicId, Long eventSeqId, Integer pageSize) {
     LOGGER.info("pull reply events called, to: {}, topicId: {}, eventSeqId: {}, pageSize: {}", to, topicId, eventSeqId, pageSize);
 
+    //最多返回1000条
+    final int maxReturnNum = 1000;
+
     // 如果pageSize为空则不限制查询条数
     List<TopicEvent> events = topicEventRepository.selectEvents(to, topicId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
@@ -150,56 +147,58 @@ public class TopicService {
       lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
 
-    Map<String, TopicEvent> eventMap = new HashMap<>();
+    //LinkedHashMap可以维持数据插入顺序
+    Map<String, TopicEvent> eventMap = new LinkedHashMap<>();
     List<TopicEvent> notifyEvents = new ArrayList<>();
-    String replyEventKey = "reply";
-    Set<String> replyMsgIds = new HashSet<>();
+    Map<String, TopicEvent> replyEventMap = new LinkedHashMap<>();
+
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
       //话题归档和取消归档事件不考虑离线消息提醒
-        switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
-          case TOPIC:
-              eventMap.put(event.getMsgId(), event);
-              break;
-            case TOPIC_REPLY:
-                //回复消息保留最新一条
-                eventMap.put(replyEventKey, event);
-                //记录所有的回复消息，用于与撤回的消息事件抵消
-                replyMsgIds.add(event.getMsgId());
-                break;
-            case TOPIC_RETRACT:
-                //撤回的消息需要和回复消息做抵消，如果撤回的消息不在本次拉到的回复消息范围内，需要提醒
-                if (replyMsgIds.add(event.getMsgId())) {
-                    //这里set.add()返回true，说明这条撤回的消息，不在本次拉到的回复消息内，需要提醒客户端
-                    eventMap.put(event.getMsgId(), event);
-                } else if(event.getMsgId().equals(eventMap.get(replyEventKey).getMsgId())){
-                    //若set.add()返回false，说明这条撤回的消息，在本次拉到的回复的消息内，需要做事件抵消。
-                    // 未记录的回复消息事件，也不用记录它的撤回事件，最新一条回复消息，需要remove
-                    eventMap.remove(replyEventKey);
-                }
-                break;
-            case TOPIC_REPLY_DELETE:
-                //删除的消息不考虑离线事件提醒，只有最新一条的回复消息被删除需要抵消'回复消息事件'的提醒
-                for (String msgId :
-                        event.getMsgIds()) {
-                    if (eventMap.get(replyEventKey) != null && msgId.equals(eventMap.get(replyEventKey).getMsgId())) {
-                        eventMap.remove(replyEventKey);
-                        break;
-                    }
-                }
-                break;
+      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+        case TOPIC:
+          eventMap.put(event.getMsgId(), event);
+          break;
+        case TOPIC_REPLY:
+          //单独记录所有的回复消息
+          replyEventMap.put(event.getMsgId(), event);
+          break;
+        case TOPIC_RETRACT:
+          //撤回的消息需要和回复消息做抵消，如果撤回的消息不在本次拉到的回复消息范围内，需要提醒客户端
+          if (replyEventMap.containsKey(event.getMsgId())) {
+            replyEventMap.remove(event.getMsgId());
+          } else {
+            eventMap.put(event.getMsgId(), event);
+          }
+          break;
+        case TOPIC_REPLY_DELETE:
+          //删除的消息不考虑离线事件提醒，只需要考虑删除消息和回复消息抵消的情况
+          for (String msgId :
+              event.getMsgIds()) {
+            //存在值为msgId的key，才会删除value
+            replyEventMap.remove(msgId);
+          }
+          break;
         case TOPIC_DELETE:
           eventMap.put(event.getTopicId(), event);
           break;
       }
     });
     notifyEvents.addAll(eventMap.values());
-    notifyEvents.sort(Comparator.comparing(TopicEvent::getEventSeqId));
+    //返回统计后，最新一条回复消息
+    if (!replyEventMap.isEmpty()) {
+      List<TopicEvent> replyEvents = new ArrayList<>(replyEventMap.values());
+      notifyEvents.add(replyEvents.get(replyEvents.size() - 1));
+    }
+
+    //返回事件超过1000条，只返回最后一千条
+    if (notifyEvents.size() > maxReturnNum) {
+      notifyEvents.subList(0, notifyEvents.size() - maxReturnNum).clear();
+    }
 
     Map<String, Object> result = new HashMap<>();
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("events", notifyEvents);
-    // LOGGER.info("pull events result: {}", result);
     return result;
   }
 }

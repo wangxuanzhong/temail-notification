@@ -1,33 +1,30 @@
 package com.syswin.temail.notification.main.application;
 
+import static com.syswin.temail.notification.main.domains.EventType.TOPIC_REPLY;
+import static com.syswin.temail.notification.main.domains.EventType.TOPIC_REPLY_DELETE;
+import static com.syswin.temail.notification.main.domains.EventType.TOPIC_RETRACT;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.TopicEventRepository;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static com.syswin.temail.notification.main.domains.EventType.TOPIC_REPLY;
-import static com.syswin.temail.notification.main.domains.EventType.TOPIC_REPLY_DELETE;
-import static com.syswin.temail.notification.main.domains.EventType.TOPIC_RETRACT;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -169,52 +166,57 @@ public class TopicServiceTest {
     Map<String, Object> resultMap = topicService.getTopicEvents("a@t.email", "123", 10L, null);
 
     assertThat(resultMap).isNotEmpty();
-    assertThat(resultMap).containsKeys("lastEventSeqId", "events");
-    assertThat(resultMap.get("lastEventSeqId")).isEqualTo(10L);
+    assertThat(resultMap).containsKeys("events");
     assertThat(resultMap.get("events")).isEqualTo(new ArrayList<>());
   }
 
   @Test
   public void shouldOffEventWhenReplyRetract() {
-    TopicEvent reply1 = new TopicEvent(1L, "x_packet_id1", 1L, TOPIC_REPLY.getValue(), "topicId", "msgid1", "a@t.email", "b@t.email", "{}", 123L);
-    TopicEvent reply2 = new TopicEvent(2L, "x_packet_id2", 2L, TOPIC_REPLY.getValue(), "topicId", "msgid2", "c@t.email", "b@t.email", "{}", 124L);
-    TopicEvent retract1 = new TopicEvent(3L, "x_packet_id3", 3L, TOPIC_RETRACT.getValue(), "topicId", "msgidx", "d@t.email", "b@t.email", "{}", 125L);
-    TopicEvent retract2 = new TopicEvent(4L, "x_packet_id4", 4L, TOPIC_RETRACT.getValue(), "topicId", "msgid2", "e@t.email", "b@t.email", "{}", 126L);
+    TopicEvent reply1 = new TopicEvent(1L, "x_packet_id1", TOPIC_REPLY.getValue(), "topicId", "msgid1", "a@t.email", "b@t.email", "{}", 123L);
+    reply1.initTopicEventSeqId(redisService);
+    TopicEvent reply2 = new TopicEvent(2L, "x_packet_id2", TOPIC_REPLY.getValue(), "topicId", "msgid2", "c@t.email", "b@t.email", "{}", 124L);
+    reply2.initTopicEventSeqId(redisService);
+    TopicEvent retract1 = new TopicEvent(3L, "x_packet_id3", TOPIC_RETRACT.getValue(), "topicId", "msgidx", "d@t.email", "b@t.email", "{}", 125L);
+    retract1.initTopicEventSeqId(redisService);
+    TopicEvent retract2 = new TopicEvent(4L, "x_packet_id4", TOPIC_RETRACT.getValue(), "topicId", "msgid2", "e@t.email", "b@t.email", "{}", 126L);
+    retract2.initTopicEventSeqId(redisService);
     when(topicRepo.selectEvents("b@t.email", "topicId", 1L, null)).thenReturn(Arrays.asList(reply1, reply2, retract1, retract2));
 
     Map<String, Object> resultMap = topicService.getTopicEvents("b@t.email", "topicId", 1L, null);
     assertThat(resultMap).isNotEmpty();
-    assertThat(resultMap).containsKeys("lastEventSeqId", "events");
-    assertThat(resultMap.get("lastEventSeqId")).isEqualTo(4L);
-    assertThat(((List<TopicEvent>)resultMap.get("events")).contains(retract1)).isTrue();
+    assertThat(resultMap).containsKeys("events");
+    assertThat(((List<TopicEvent>) resultMap.get("events")).contains(retract1)).isTrue();
   }
 
   @Test
   public void shouldOffEventWhenReplyDelete() {
-    TopicEvent reply1 = new TopicEvent(1L, "x_packet_id1", 1L, TOPIC_REPLY.getValue(), "topicId", "msgid1", "a@t.email", "b@t.email", "{}", 123L);
-    TopicEvent delete1 = new TopicEvent(4L, "x_packet_id4", 4L, TOPIC_REPLY_DELETE.getValue(), "topicId", "", "e@t.email", "b@t.email", "{\"msgIds\":[\"msgidx\", \"msgid1\"]}", 126L);
+    TopicEvent reply1 = new TopicEvent(1L, "x_packet_id1", TOPIC_REPLY.getValue(), "topicId", "msgid1", "a@t.email", "b@t.email", "{}", 123L);
+    reply1.initTopicEventSeqId(redisService);
+    TopicEvent delete1 = new TopicEvent(4L, "x_packet_id4", TOPIC_REPLY_DELETE.getValue(), "topicId", "", "e@t.email", "b@t.email",
+        "{\"msgIds\":[\"msgidx\", \"msgid1\"]}", 126L);
+
+    delete1.initTopicEventSeqId(redisService);
     when(topicRepo.selectEvents("b@t.email", "topicId", 1L, null)).thenReturn(Arrays.asList(reply1, delete1));
 
     Map<String, Object> resultMap = topicService.getTopicEvents("b@t.email", "topicId", 1L, null);
     assertThat(resultMap).isNotEmpty();
-    assertThat(resultMap).containsKeys("lastEventSeqId", "events");
-    assertThat(resultMap.get("lastEventSeqId")).isEqualTo(4L);
+    assertThat(resultMap).containsKeys("events");
     assertThat(resultMap.get("events")).isEqualTo(new ArrayList<>());
   }
 
   @Test
   public void shouldReturnLastedReplyWhenManyReplyExist() {
-    TopicEvent reply1 = new TopicEvent(1L, "x_packet_id1", 1L, TOPIC_REPLY.getValue(), "topicId", "msgid1", "a@t.email", "b@t.email", "{}", 123L);
-    TopicEvent reply2 = new TopicEvent(2L, "x_packet_id2", 2L, TOPIC_REPLY.getValue(), "topicId", "msgid2", "c@t.email", "b@t.email", "{}", 124L);
+    TopicEvent reply1 = new TopicEvent(1L, "x_packet_id1", TOPIC_REPLY.getValue(), "topicId", "msgid1", "a@t.email", "b@t.email", "{}", 123L);
+    reply1.initTopicEventSeqId(redisService);
+    TopicEvent reply2 = new TopicEvent(2L, "x_packet_id2", TOPIC_REPLY.getValue(), "topicId", "msgid2", "c@t.email", "b@t.email", "{}", 124L);
+    reply2.initTopicEventSeqId(redisService);
     when(topicRepo.selectEvents("b@t.email", "topicId", 1L, null)).thenReturn(Arrays.asList(reply1, reply2));
 
     Map<String, Object> resultMap = topicService.getTopicEvents("b@t.email", "topicId", 1L, null);
     assertThat(resultMap).isNotEmpty();
-    assertThat(resultMap).containsKeys("lastEventSeqId", "events");
-    assertThat(resultMap.get("lastEventSeqId")).isEqualTo(2L);
-    assertThat(((List<TopicEvent>)resultMap.get("events")).contains(reply2)).isTrue();
+    assertThat(resultMap).containsKeys("events");
+    assertThat(((List<TopicEvent>) resultMap.get("events")).contains(reply2)).isTrue();
   }
-
 
   private void sendMessage(MailAgentTopicParams param) throws Exception {
     sendMessage(param, false);
