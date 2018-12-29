@@ -9,6 +9,7 @@ import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -190,6 +191,9 @@ public class TopicService {
       List<TopicEvent> replyEvents = new ArrayList<>(replyEventMap.values());
       notifyEvents.add(replyEvents.get(replyEvents.size() - 1));
     }
+
+    //给事件按照eventSeqId重新排序
+    notifyEvents.sort(Comparator.comparing(TopicEvent::getEventSeqId));
 
     //返回事件超过1000条，只返回最后一千条
     if (notifyEvents.size() > maxReturnNum) {
