@@ -240,7 +240,7 @@ public class EventService {
 
     // 返回结果最多1000条
     if (notifyEvents.size() > 1000) {
-      result.put("events", notifyEvents.subList(notifyEvents.size() - 1001, notifyEvents.size() - 1));
+      result.put("events", notifyEvents.subList(notifyEvents.size() - 1000, notifyEvents.size()));
     } else {
       result.put("events", notifyEvents);
     }
