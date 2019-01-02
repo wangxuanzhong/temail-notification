@@ -4,12 +4,12 @@ import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.foundation.application.SequenceService;
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.domains.UnreadRepository;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
+import com.syswin.temail.notification.main.infrastructure.EventMapper;
+import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -33,17 +33,17 @@ public class EventService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final SequenceService sequenceService;
-  private final EventRepository eventRepository;
-  private final UnreadRepository unreadRepository;
+  private final EventMapper eventMapper;
+  private final UnreadMapper unreadMapper;
   private final JsonService jsonService;
   private final RocketMqProducer rocketMqProducer;
 
   @Autowired
-  public EventService(SequenceService sequenceService, EventRepository eventRepository, UnreadRepository unreadRepository, JsonService jsonService,
+  public EventService(SequenceService sequenceService, EventMapper eventMapper, UnreadMapper unreadMapper, JsonService jsonService,
       RocketMqProducer rocketMqProducer) {
     this.sequenceService = sequenceService;
-    this.eventRepository = eventRepository;
-    this.unreadRepository = unreadRepository;
+    this.eventMapper = eventMapper;
+    this.unreadMapper = unreadMapper;
     this.jsonService = jsonService;
     this.rocketMqProducer = rocketMqProducer;
   }
@@ -59,12 +59,12 @@ public class EventService {
     LOGGER.info("pull events called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
 
     // 如果pageSize为空则不限制查询条数
-    List<Event> events = eventRepository.selectEvents(to, null, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    List<Event> events = eventMapper.selectEvents(to, null, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
     // 获取当前最新eventSeqId
     Long maxEventSeqId = 0L;
     if (events.isEmpty()) {
-      maxEventSeqId = eventRepository.selectLastEventSeqId(to, null);
+      maxEventSeqId = eventMapper.selectLastEventSeqId(to, null);
     } else {
       maxEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
@@ -194,12 +194,12 @@ public class EventService {
     LOGGER.info("pull reply events called, parentMsgId: {}, eventSeqId: {}, pageSize: {}", parentMsgId, eventSeqId, pageSize);
 
     // 如果pageSize为空则不限制查询条数
-    List<Event> events = eventRepository.selectEvents(null, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    List<Event> events = eventMapper.selectEvents(null, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
     // 获取当前最新eventSeqId
     Long lastEventSeqId = 0L;
     if (events.isEmpty()) {
-      lastEventSeqId = eventRepository.selectLastEventSeqId(null, parentMsgId);
+      lastEventSeqId = eventMapper.selectLastEventSeqId(null, parentMsgId);
     } else {
       lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
@@ -258,10 +258,10 @@ public class EventService {
 
     // 获取已经删除的事件的未读数
     Map<String, Integer> unreadMap = new HashMap<>();
-    unreadRepository.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
+    unreadMapper.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
 
     // 查询所有事件
-    List<Event> events = eventRepository.selectEvents(to, null, null, null);
+    List<Event> events = eventMapper.selectEvents(to, null, null, null);
 
     // 统计未读数
     Map<String, List<String>> eventMap = this.calculateUnread(events, unreadMap);
@@ -351,12 +351,12 @@ public class EventService {
     }
     event.setTimestamp(System.currentTimeMillis());
     event.initEventSeqId(sequenceService);
-    eventRepository.insert(event);
+    eventMapper.insert(event);
 
     // 删除历史重置事件
-    List<Long> ids = eventRepository.selectResetEvents(event);
+    List<Long> ids = eventMapper.selectResetEvents(event);
     if (!ids.isEmpty()) {
-      eventRepository.delete(ids);
+      eventMapper.delete(ids);
     }
 
     // 发送到MQ以便多端同步

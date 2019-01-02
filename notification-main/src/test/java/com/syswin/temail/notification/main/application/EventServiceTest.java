@@ -3,9 +3,9 @@ package com.syswin.temail.notification.main.application;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
+import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class EventServiceTest {
   private EventService eventService;
 
   @Autowired
-  private EventRepository eventRepository;
+  private EventMapper eventMapper;
 
   public Event setUp() {
     Event event = new Event();
@@ -56,7 +56,7 @@ public class EventServiceTest {
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
     event.autoWriteExtendParam(gsonService);
-    eventRepository.insert(event);
+    eventMapper.insert(event);
 
     List<UnreadResponse> result = eventService.getUnread("get_unread_to");
     assertThat(result).size().isEqualTo(1);
@@ -69,7 +69,7 @@ public class EventServiceTest {
     event.setGroupTemail("get_unread_group_temail");
     event.setTemail("get_unread_from");
     event.setEventSeqId(2L);
-    eventRepository.insert(event);
+    eventMapper.insert(event);
 
     result = eventService.getUnread("get_unread_to");
     assertThat(result).size().isEqualTo(2);
@@ -86,7 +86,7 @@ public class EventServiceTest {
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
     event.autoWriteExtendParam(gsonService);
-    eventRepository.insert(event);
+    eventMapper.insert(event);
 
     List<UnreadResponse> result = eventService.getUnread("reset_to");
     assertThat(result).size().isEqualTo(1);
@@ -99,7 +99,7 @@ public class EventServiceTest {
     event.setGroupTemail("reset_group_temail");
     event.setTemail("reset_from");
     event.setEventSeqId(2L);
-    eventRepository.insert(event);
+    eventMapper.insert(event);
 
     result = eventService.getUnread("reset_to");
     assertThat(result).size().isEqualTo(2);

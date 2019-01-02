@@ -30,7 +30,6 @@
     <include refid="baseField"/>
     FROM `topic_event`
     WHERE `to` = #{to}
-    <if test="topicId != null and topicId != ''">AND `topic_id` = #{topicId}</if>
     <if test="begin != null">AND event_seq_id > #{begin}</if>
     <if test="end != null">AND event_seq_id <![CDATA[<=]]> #{end}</if>
     ORDER BY `event_seq_id`
@@ -39,7 +38,6 @@
   <select id="selectLastEventSeqId" resultType="java.lang.Long">
     SELECT MAX(`event_seq_id`) FROM `topic_event`
     WHERE `to` = #{to}
-    <if test="topicId != null and topicId != ''">AND `topic_id` = #{topicId}</if>
   </select>
 
   <select id="selectEventsByMsgId" parameterType="java.lang.String" resultMap="EventMap">

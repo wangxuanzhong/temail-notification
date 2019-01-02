@@ -75,7 +75,7 @@ public class TopicEvent {
    * 生成seqId
    */
   public void initTopicEventSeqId(SequenceService sequenceService) {
-    this.eventSeqId = sequenceService.getNextSeq(this.topicId + "_" + this.to);
+    this.eventSeqId = sequenceService.getNextSeq("topic_" + this.to);
   }
 
   /**

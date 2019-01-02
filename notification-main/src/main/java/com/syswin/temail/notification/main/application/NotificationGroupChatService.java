@@ -3,11 +3,11 @@ package com.syswin.temail.notification.main.application;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Event.MemberRole;
-import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.domains.MemberRepository;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
+import com.syswin.temail.notification.main.infrastructure.EventMapper;
+import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
@@ -30,17 +30,17 @@ public class NotificationGroupChatService {
 
   private final RocketMqProducer rocketMqProducer;
   private final RedisService redisService;
-  private final EventRepository eventRepository;
-  private final MemberRepository memberRepository;
+  private final EventMapper eventMapper;
+  private final MemberMapper memberMapper;
   private final JsonService jsonService;
 
   @Autowired
-  public NotificationGroupChatService(RocketMqProducer rocketMqProducer, RedisService redisService, EventRepository eventRepository,
-      MemberRepository memberRepository, JsonService jsonService) {
+  public NotificationGroupChatService(RocketMqProducer rocketMqProducer, RedisService redisService, EventMapper eventMapper,
+      MemberMapper memberMapper, JsonService jsonService) {
     this.rocketMqProducer = rocketMqProducer;
     this.redisService = redisService;
-    this.eventRepository = eventRepository;
-    this.memberRepository = memberRepository;
+    this.eventMapper = eventMapper;
+    this.memberMapper = memberMapper;
     this.jsonService = jsonService;
   }
 
@@ -63,7 +63,7 @@ public class NotificationGroupChatService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventRepository, redisService)) {
+    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, redisService)) {
       return;
     }
 
@@ -81,7 +81,7 @@ public class NotificationGroupChatService {
           event.setFrom(event.getGroupTemail());
           event.setTo(event.getTemail());
           event.setMsgId(msgId);
-          if (eventRepository.selectEventsByMsgId(event).size() == 0) {
+          if (eventMapper.selectEventsByMsgId(event).size() == 0) {
             this.sendSingleMessage(event, EventType.GROUP_PULLED.getValue(), header);
           } else {
             LOGGER.warn("message {} is pulled, do nothing!", msgId);
@@ -97,7 +97,7 @@ public class NotificationGroupChatService {
         break;
       case ADD_GROUP:
         event.setRole(MemberRole.ADMIN.getValue());
-        memberRepository.insert(event);
+        memberMapper.insert(event);
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
         event.addGroupMsgId(EventType.ADD_GROUP);
@@ -107,15 +107,15 @@ public class NotificationGroupChatService {
         event.notifyToAll();
         this.sendGroupMessage(event, header);
         event.setTemail(null);
-        memberRepository.deleteGroupMember(event);
+        memberMapper.deleteGroupMember(event);
         break;
       case ADD_MEMBER:
         // 校验群成员是否已存在，不存在时添加到数据库
-        List<String> members = memberRepository.selectByGroupTemail(event);
+        List<String> members = memberMapper.selectByGroupTemail(event);
         if (!members.contains(event.getTemail())) {
           // 添加唯一索引校验，防止并发问题
           try {
-            memberRepository.insert(event);
+            memberMapper.insert(event);
           } catch (DuplicateKeyException e) {
             LOGGER.warn("add member duplicate exception: ", e);
             break;
@@ -138,7 +138,7 @@ public class NotificationGroupChatService {
         // 删除当事人
         for (String temail : temails) {
           event.setTemail(temail);
-          memberRepository.deleteGroupMember(event);
+          memberMapper.deleteGroupMember(event);
         }
 
         for (int i = 0; i < temails.size(); i++) {
@@ -157,7 +157,7 @@ public class NotificationGroupChatService {
       case LEAVE_GROUP:
         event.notifyToAll();
         this.sendGroupMessage(event, header);
-        memberRepository.deleteGroupMember(event);
+        memberMapper.deleteGroupMember(event);
         break;
       case APPLY:
         event.notifyToAdmin();
@@ -202,7 +202,7 @@ public class NotificationGroupChatService {
         Event condition = new Event();
         condition.setEventType(EventType.RECEIVE.getValue());
         condition.setMsgId(event.getParentMsgId());
-        List<Event> events = eventRepository.selectEventsByMsgId(condition);
+        List<Event> events = eventMapper.selectEventsByMsgId(condition);
         if (events.isEmpty()) {
           LOGGER.error("source message not found!");
           break;
@@ -244,7 +244,7 @@ public class NotificationGroupChatService {
   private void insert(Event event) {
     event.initEventSeqId(redisService);
     event.autoWriteExtendParam(jsonService);
-    eventRepository.insert(event);
+    eventMapper.insert(event);
   }
 
   /**
@@ -278,7 +278,7 @@ public class NotificationGroupChatService {
    */
   private void sendGroupMessage(Event event, Integer CDTPEventType, String header)
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
-    List<String> tos = memberRepository.selectByGroupTemail(event);
+    List<String> tos = memberMapper.selectByGroupTemail(event);
     LOGGER.info("send message to --->> {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
     event.setFrom(event.getGroupTemail());
     for (String to : tos) {
@@ -298,7 +298,7 @@ public class NotificationGroupChatService {
     event.setTo(event.getGroupTemail());
     this.insert(event);
 
-    List<String> tos = memberRepository.selectByGroupTemail(event);
+    List<String> tos = memberMapper.selectByGroupTemail(event);
     LOGGER.info("send message to --->> {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
     for (String to : tos) {
       event.setTo(to);

@@ -98,10 +98,10 @@ public class NotificationController {
   @ApiOperation(value = "pull topic event 3 0006", consumes = "application/json")
   @GetMapping("/topic/events")
   public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
-      @RequestParam String topicId, Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
+      Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    Map<String, Object> result = topicService.getTopicEvents(to, topicId, eventSeqId, pageSize);
+    Map<String, Object> result = topicService.getTopicEvents(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 

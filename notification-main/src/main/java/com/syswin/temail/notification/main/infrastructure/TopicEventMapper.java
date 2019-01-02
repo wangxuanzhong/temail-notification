@@ -11,9 +11,9 @@ public interface TopicEventMapper {
 
   int insert(TopicEvent topicEvent);
 
-  List<TopicEvent> selectEvents(@Param("to") String to, @Param("topicId") String topicId, @Param("begin") Long begin, @Param("end") Long end);
+  List<TopicEvent> selectEvents(@Param("to") String to, @Param("begin") Long begin, @Param("end") Long end);
 
-  Long selectLastEventSeqId(@Param("to") String to, @Param("topicId") String topicId);
+  Long selectLastEventSeqId(String to);
 
   List<TopicEvent> selectEventsByMsgId(String msgId);
 

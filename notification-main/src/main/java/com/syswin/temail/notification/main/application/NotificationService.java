@@ -2,11 +2,11 @@ package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.EventRepository;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentParams;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
+import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
@@ -28,15 +28,15 @@ public class NotificationService {
 
   private final RocketMqProducer rocketMqProducer;
   private final RedisService redisService;
-  private final EventRepository eventRepository;
+  private final EventMapper eventMapper;
   private final JsonService jsonService;
 
   @Autowired
   public NotificationService(RocketMqProducer rocketMqProducer, RedisService redisService,
-      EventRepository eventRepository, JsonService jsonService) {
+      EventMapper eventMapper, JsonService jsonService) {
     this.rocketMqProducer = rocketMqProducer;
     this.redisService = redisService;
-    this.eventRepository = eventRepository;
+    this.eventMapper = eventMapper;
     this.jsonService = jsonService;
   }
 
@@ -58,7 +58,7 @@ public class NotificationService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventRepository, redisService)) {
+    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, redisService)) {
       return;
     }
 
@@ -74,7 +74,7 @@ public class NotificationService {
           event.setTo(params.getOwner());
           event.setOwner(params.getTo());
           event.autoWriteExtendParam(jsonService);
-          eventRepository.insert(event);
+          eventMapper.insert(event);
         } else {
           sendMessage(event, header);
         }
@@ -93,7 +93,7 @@ public class NotificationService {
         event.setTo(params.getFrom());
         event.setOwner(params.getTo());
         event.autoWriteExtendParam(jsonService);
-        eventRepository.insert(event);
+        eventMapper.insert(event);
         break;
       case PULLED:
         // from是消息拉取人
@@ -101,7 +101,7 @@ public class NotificationService {
         event.setTo(params.getFrom());
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
-          if (eventRepository.selectEventsByMsgId(event).size() == 0) {
+          if (eventMapper.selectEventsByMsgId(event).size() == 0) {
             sendMessage(event, header);
           } else {
             LOGGER.info("message {} is pulled, do nothing!", msgId);
@@ -158,7 +158,7 @@ public class NotificationService {
   private void insert(Event event) {
     event.initEventSeqId(redisService);
     event.autoWriteExtendParam(jsonService);
-    eventRepository.insert(event);
+    eventMapper.insert(event);
   }
 
   /**

@@ -11,8 +11,8 @@ import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
-import com.syswin.temail.notification.main.domains.TopicEventRepository;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
+import com.syswin.temail.notification.main.infrastructure.TopicEventMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,9 +37,12 @@ public class TopicServiceTest {
   private final String PREFIX = "temail-notification-";
   private final boolean useMQ = false;
   MailAgentTopicParams params = new MailAgentTopicParams();
+  TopicEventMapper topicRepo = mock(TopicEventMapper.class);
   private Gson gson = new Gson();
-
+  @Autowired
   private TopicService topicService;
+  @Autowired
+  private TopicService topicServiceMock;
   @Autowired
   private RocketMqProducer rocketMqProducer;
   @Autowired
@@ -47,11 +50,9 @@ public class TopicServiceTest {
   @Autowired
   private RedisService redisService;
 
-  TopicEventRepository topicRepo = mock(TopicEventRepository.class);
-
   @Before
   public void setUp() {
-    topicService = new TopicService(rocketMqProducer, redisService, topicRepo, jsonService);
+    topicServiceMock = new TopicService(rocketMqProducer, redisService, topicRepo, jsonService);
 
     params.setHeader("notification-header");
     params.setFrom(TEST_FROM);
@@ -65,7 +66,7 @@ public class TopicServiceTest {
   @Test
   public void testEventTypeTopic() throws Exception {
     params.setSessionMessageType(EventType.TOPIC.getValue());
-    params.setTopicId("topic_1");
+    params.setTopicId("topic_2");
     params.setMsgid("1");
     params.setSeqNo(1L);
     params.setTopicSeqId(1L);
@@ -91,7 +92,7 @@ public class TopicServiceTest {
   public void testEventTypeTopicReply() throws Exception {
     params.setSessionMessageType(TOPIC_REPLY.getValue());
     params.setTopicId("topic_1");
-    params.setMsgid("2");
+    params.setMsgid("3");
     params.setSeqNo(2L);
     params.setToMsg("这是一条话题回复测试消息！");
     params.setTo("b");
@@ -109,7 +110,7 @@ public class TopicServiceTest {
   public void testEventTypeTopicRetract() throws Exception {
     params.setSessionMessageType(EventType.TOPIC_RETRACT.getValue());
     params.setTopicId("topic_1");
-    params.setMsgid("1");
+    params.setMsgid("3");
     this.sendMessage(params);
   }
 
@@ -120,7 +121,7 @@ public class TopicServiceTest {
   public void testEventTypeTopicReplyDelete() throws Exception {
     params.setSessionMessageType(EventType.TOPIC_REPLY_DELETE.getValue());
     params.setTopicId("topic_1");
-    params.setMsgid(gson.toJson(Arrays.asList("2", "3", "4")));
+    params.setMsgid(gson.toJson(Arrays.asList("22", "3", "43")));
     params.setFrom(TEST_TO);
     params.setTo(TEST_FROM);
     this.sendMessage(params);
@@ -159,11 +160,28 @@ public class TopicServiceTest {
     this.sendMessage(params);
   }
 
+  private void sendMessage(MailAgentTopicParams param) throws Exception {
+    sendMessage(param, false);
+  }
+
+  private void sendMessage(MailAgentTopicParams param, boolean isSamePacket) throws Exception {
+    if (!isSamePacket) {
+      param.setxPacketId(PREFIX + UUID.randomUUID().toString());
+    }
+    if (useMQ) {
+      rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
+      Thread.sleep(2000);
+    } else {
+      topicService.handleMqMessage(gson.toJson(param));
+    }
+  }
+
+  // mock测试部分
   @Test
   public void shouldGetNoneWhenTopicSilence() {
-    when(topicRepo.selectEvents("a@t.email", "123", 10L, null)).thenReturn(new ArrayList<>());
-    when(topicRepo.selectLastEventSeqId("a@t.email", "123")).thenReturn(10L);
-    Map<String, Object> resultMap = topicService.getTopicEvents("a@t.email", "123", 10L, null);
+    when(topicRepo.selectEvents("a@t.email", 10L, null)).thenReturn(new ArrayList<>());
+    when(topicRepo.selectLastEventSeqId("a@t.email")).thenReturn(10L);
+    Map<String, Object> resultMap = topicServiceMock.getTopicEvents("a@t.email", 10L, null);
 
     assertThat(resultMap).isNotEmpty();
     assertThat(resultMap).containsKeys("events");
@@ -180,9 +198,9 @@ public class TopicServiceTest {
     retract1.initTopicEventSeqId(redisService);
     TopicEvent retract2 = new TopicEvent(4L, "x_packet_id4", TOPIC_RETRACT.getValue(), "topicId", "msgid2", "e@t.email", "b@t.email", "{}", 126L);
     retract2.initTopicEventSeqId(redisService);
-    when(topicRepo.selectEvents("b@t.email", "topicId", 1L, null)).thenReturn(Arrays.asList(reply1, reply2, retract1, retract2));
+    when(topicRepo.selectEvents("b@t.email", 1L, null)).thenReturn(Arrays.asList(reply1, reply2, retract1, retract2));
 
-    Map<String, Object> resultMap = topicService.getTopicEvents("b@t.email", "topicId", 1L, null);
+    Map<String, Object> resultMap = topicServiceMock.getTopicEvents("b@t.email", 1L, null);
     assertThat(resultMap).isNotEmpty();
     assertThat(resultMap).containsKeys("events");
     assertThat(((List<TopicEvent>) resultMap.get("events")).contains(retract1)).isTrue();
@@ -196,9 +214,9 @@ public class TopicServiceTest {
         "{\"msgIds\":[\"msgidx\", \"msgid1\"]}", 126L);
 
     delete1.initTopicEventSeqId(redisService);
-    when(topicRepo.selectEvents("b@t.email", "topicId", 1L, null)).thenReturn(Arrays.asList(reply1, delete1));
+    when(topicRepo.selectEvents("b@t.email", 1L, null)).thenReturn(Arrays.asList(reply1, delete1));
 
-    Map<String, Object> resultMap = topicService.getTopicEvents("b@t.email", "topicId", 1L, null);
+    Map<String, Object> resultMap = topicServiceMock.getTopicEvents("b@t.email", 1L, null);
     assertThat(resultMap).isNotEmpty();
     assertThat(resultMap).containsKeys("events");
     assertThat(resultMap.get("events")).isEqualTo(new ArrayList<>());
@@ -210,27 +228,11 @@ public class TopicServiceTest {
     reply1.initTopicEventSeqId(redisService);
     TopicEvent reply2 = new TopicEvent(2L, "x_packet_id2", TOPIC_REPLY.getValue(), "topicId", "msgid2", "c@t.email", "b@t.email", "{}", 124L);
     reply2.initTopicEventSeqId(redisService);
-    when(topicRepo.selectEvents("b@t.email", "topicId", 1L, null)).thenReturn(Arrays.asList(reply1, reply2));
+    when(topicRepo.selectEvents("b@t.email", 1L, null)).thenReturn(Arrays.asList(reply1, reply2));
 
-    Map<String, Object> resultMap = topicService.getTopicEvents("b@t.email", "topicId", 1L, null);
+    Map<String, Object> resultMap = topicServiceMock.getTopicEvents("b@t.email", 1L, null);
     assertThat(resultMap).isNotEmpty();
     assertThat(resultMap).containsKeys("events");
     assertThat(((List<TopicEvent>) resultMap.get("events")).contains(reply2)).isTrue();
-  }
-
-  private void sendMessage(MailAgentTopicParams param) throws Exception {
-    sendMessage(param, false);
-  }
-
-  private void sendMessage(MailAgentTopicParams param, boolean isSamePacket) throws Exception {
-    if (!isSamePacket) {
-      param.setxPacketId(PREFIX + UUID.randomUUID().toString());
-    }
-    if (useMQ) {
-      rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
-      Thread.sleep(2000);
-    } else {
-      topicService.handleMqMessage(gson.toJson(param));
-    }
   }
 }

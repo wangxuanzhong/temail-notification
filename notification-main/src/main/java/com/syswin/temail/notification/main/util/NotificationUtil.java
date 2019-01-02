@@ -2,7 +2,7 @@ package com.syswin.temail.notification.main.util;
 
 import com.syswin.temail.notification.main.application.RedisService;
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.EventRepository;
+import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ public class NotificationUtil {
   /**
    * 幂等校验
    */
-  public static boolean checkUnique(Event event, String redisKey, EventRepository eventRepository, RedisService redisService) {
+  public static boolean checkUnique(Event event, String redisKey, EventMapper eventMapper, RedisService redisService) {
     // xPacketId为空则认为是无效数据
     if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
       LOGGER.warn("xPacketId is null!");
@@ -30,7 +30,7 @@ public class NotificationUtil {
     }
 
     // 第二步：查询数据库是否存在重复数据，保证数据的唯一性
-    if (!eventRepository.checkUnique(event).isEmpty()) {
+    if (!eventMapper.checkUnique(event).isEmpty()) {
       LOGGER.warn("check unique from database failed: {}", event);
       return false;
     }

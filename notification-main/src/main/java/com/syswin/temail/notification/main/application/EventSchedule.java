@@ -1,10 +1,10 @@
 package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.EventRepository;
-import com.syswin.temail.notification.main.domains.TopicEventRepository;
 import com.syswin.temail.notification.main.domains.Unread;
-import com.syswin.temail.notification.main.domains.UnreadRepository;
+import com.syswin.temail.notification.main.infrastructure.EventMapper;
+import com.syswin.temail.notification.main.infrastructure.TopicEventMapper;
+import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,21 +25,21 @@ public class EventSchedule {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final EventRepository eventRepository;
+  private final EventMapper eventMapper;
   private final EventService eventService;
-  private final TopicEventRepository topicEventRepository;
-  private final UnreadRepository unreadRepository;
+  private final TopicEventMapper topicEventMapper;
+  private final UnreadMapper unreadMapper;
   private final RedisService redisService;
   private final String DELETE_OLD_EVENT_KEY = "notification_deleteOldEvent";
   private int deadline;
 
   @Autowired
-  public EventSchedule(EventRepository eventRepository, EventService eventService, TopicEventRepository topicEventRepository,
-      UnreadRepository unreadRepository, RedisService redisService, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
-    this.eventRepository = eventRepository;
+  public EventSchedule(EventMapper eventMapper, EventService eventService, TopicEventMapper topicEventMapper, UnreadMapper unreadMapper,
+      RedisService redisService, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
+    this.eventMapper = eventMapper;
     this.eventService = eventService;
-    this.topicEventRepository = topicEventRepository;
-    this.unreadRepository = unreadRepository;
+    this.topicEventMapper = topicEventMapper;
+    this.unreadMapper = unreadMapper;
     this.redisService = redisService;
     this.deadline = deadline;
   }
@@ -56,15 +56,15 @@ public class EventSchedule {
     }
 
     // 查询出所有的to
-    List<String> tos = eventRepository.selectOldTo(createTime);
+    List<String> tos = eventMapper.selectOldTo(createTime);
 
     // 循环计算出所有to的未读数并插入数据库
     tos.forEach(to -> {
       // 获取已经删除的事件的未读数
       Map<String, Integer> unreadMap = new HashMap<>();
-      unreadRepository.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
+      unreadMapper.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
 
-      List<Event> events = eventRepository.selectOldEvent(to, createTime);
+      List<Event> events = eventMapper.selectOldEvent(to, createTime);
 
       // 统计未读数
       LOGGER.info("calculate {}'s events: {}", to, events);
@@ -77,17 +77,17 @@ public class EventSchedule {
         if (unreadMap.containsKey(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0])) {
           count = unreadMap.get(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0]);
         }
-        unreadRepository.insert(new Unread(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds.size() + count));
+        unreadMapper.insert(new Unread(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds.size() + count));
       });
     });
 
     // 删除旧数据
     LOGGER.info("delete old events!");
-    eventRepository.deleteOldEvent(createTime);
+    eventMapper.deleteOldEvent(createTime);
 
     // 删除未读数为0的数据
     LOGGER.info("delete zero count!");
-    unreadRepository.deleteZeroCount();
+    unreadMapper.deleteZeroCount();
   }
 
   @Scheduled(cron = "0 0 3 * * ?") // 每天3点触发
@@ -95,7 +95,7 @@ public class EventSchedule {
   public void deleteOldTopic() {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old topic before {}", createTime);
-    topicEventRepository.deleteOldTopic(createTime);
+    topicEventMapper.deleteOldTopic(createTime);
   }
 
   private LocalDateTime getDeadline() {

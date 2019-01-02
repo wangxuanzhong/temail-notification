@@ -3,9 +3,9 @@ package com.syswin.temail.notification.main.application;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
-import com.syswin.temail.notification.main.domains.TopicEventRepository;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
+import com.syswin.temail.notification.main.infrastructure.TopicEventMapper;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -31,15 +31,14 @@ public class TopicService {
 
   private final RocketMqProducer rocketMqProducer;
   private final RedisService redisService;
-  private final TopicEventRepository topicEventRepository;
+  private final TopicEventMapper topicEventMapper;
   private final JsonService jsonService;
 
   @Autowired
-  public TopicService(RocketMqProducer rocketMqProducer, RedisService redisService, TopicEventRepository topicEventRepository,
-      JsonService jsonService) {
+  public TopicService(RocketMqProducer rocketMqProducer, RedisService redisService, TopicEventMapper topicEventMapper, JsonService jsonService) {
     this.rocketMqProducer = rocketMqProducer;
     this.redisService = redisService;
-    this.topicEventRepository = topicEventRepository;
+    this.topicEventMapper = topicEventMapper;
     this.jsonService = jsonService;
   }
 
@@ -73,7 +72,7 @@ public class TopicService {
         break;
       case TOPIC_RETRACT:
         // 向撤回的消息的所有收件人发送通知
-        for (TopicEvent event : topicEventRepository.selectEventsByMsgId(topicEvent.getMsgId())) {
+        for (TopicEvent event : topicEventMapper.selectEventsByMsgId(topicEvent.getMsgId())) {
           topicEvent.setTo(event.getTo());
           sendMessage(topicEvent, header);
         }
@@ -87,7 +86,7 @@ public class TopicService {
         break;
       case TOPIC_DELETE:
         // 向话题接收的所有人发送通知
-        for (TopicEvent event : topicEventRepository.selectEventsByTopicId(topicEvent.getTopicId())) {
+        for (TopicEvent event : topicEventMapper.selectEventsByTopicId(topicEvent.getTopicId())) {
           topicEvent.setTo(event.getTo());
           sendMessage(topicEvent, header);
         }
@@ -108,7 +107,7 @@ public class TopicService {
   private void insert(TopicEvent topicEvent) {
     topicEvent.initTopicEventSeqId(redisService);
     topicEvent.autoWriteExtendParam(jsonService);
-    topicEventRepository.insert(topicEvent);
+    topicEventMapper.insert(topicEvent);
   }
 
   /**
@@ -127,75 +126,75 @@ public class TopicService {
    * 拉取话题事件
    *
    * @param to 发起人
-   * @param topicId 话题id
    * @param eventSeqId 上次拉取结尾序号
    * @param pageSize 拉取数量
    */
-  public Map<String, Object> getTopicEvents(String to, String topicId, Long eventSeqId, Integer pageSize) {
-    LOGGER.info("pull reply events called, to: {}, topicId: {}, eventSeqId: {}, pageSize: {}", to, topicId, eventSeqId, pageSize);
-
-    //最多返回1000条
-    final int maxReturnNum = 1000;
+  public Map<String, Object> getTopicEvents(String to, Long eventSeqId, Integer pageSize) {
+    LOGGER.info("pull topic events called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
 
     // 如果pageSize为空则不限制查询条数
-    List<TopicEvent> events = topicEventRepository.selectEvents(to, topicId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    List<TopicEvent> events = topicEventMapper.selectEvents(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
     // 获取当前最新eventSeqId
     Long lastEventSeqId = 0L;
     if (events.isEmpty()) {
-      lastEventSeqId = topicEventRepository.selectLastEventSeqId(to, topicId);
+      lastEventSeqId = topicEventMapper.selectLastEventSeqId(to);
     } else {
       lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
 
-    //LinkedHashMap可以维持数据插入顺序
-    Map<String, TopicEvent> eventMap = new LinkedHashMap<>();
     List<TopicEvent> notifyEvents = new ArrayList<>();
-    Map<String, TopicEvent> replyEventMap = new LinkedHashMap<>();
-
+    Map<String, Map<String, TopicEvent>> replyEventMap = new HashMap<>();
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
-      //话题归档和取消归档事件不考虑离线消息提醒
+
+      // 按照话题统计回复消息
+      String key = event.getTopicId();
+      if (!replyEventMap.containsKey(key)) {
+        replyEventMap.put(key, new LinkedHashMap<>());
+      }
+      Map<String, TopicEvent> topicMap = replyEventMap.get(key);
+
+      // 话题归档和取消归档事件不考虑离线消息提醒
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case TOPIC:
-          eventMap.put(event.getMsgId(), event);
+          notifyEvents.add(event);
           break;
         case TOPIC_REPLY:
-          //单独记录所有的回复消息
-          replyEventMap.put(event.getMsgId(), event);
+          // 单独记录所有的回复消息
+          topicMap.put(event.getMsgId(), event);
           break;
         case TOPIC_RETRACT:
-          //撤回的消息需要和回复消息做抵消，如果撤回的消息不在本次拉到的回复消息范围内，需要提醒客户端
-          if (replyEventMap.containsKey(event.getMsgId())) {
-            replyEventMap.remove(event.getMsgId());
+          // 撤回的消息需要和回复消息做抵消，如果撤回的消息不在本次拉到的回复消息范围内，需要提醒客户端
+          if (topicMap.containsKey(event.getMsgId())) {
+            topicMap.remove(event.getMsgId());
           } else {
-            eventMap.put(event.getMsgId(), event);
+            notifyEvents.add(event);
           }
           break;
         case TOPIC_REPLY_DELETE:
-          //删除的消息不考虑离线事件提醒，只需要考虑删除消息和回复消息抵消的情况
-          for (String msgId :
-              event.getMsgIds()) {
-            //存在值为msgId的key，才会删除value
-            replyEventMap.remove(msgId);
-          }
+          // 删除的消息不考虑离线事件提醒，只需要考虑删除消息和回复消息抵消的情况
+          event.getMsgIds().forEach(topicMap::remove);
           break;
         case TOPIC_DELETE:
-          eventMap.put(event.getTopicId(), event);
+          notifyEvents.add(event);
           break;
       }
     });
-    notifyEvents.addAll(eventMap.values());
-    //返回统计后，最新一条回复消息
-    if (!replyEventMap.isEmpty()) {
-      List<TopicEvent> replyEvents = new ArrayList<>(replyEventMap.values());
-      notifyEvents.add(replyEvents.get(replyEvents.size() - 1));
-    }
+
+    // 每个话题只返回最新一条回复消息
+    replyEventMap.values().forEach(map -> {
+      if (!map.isEmpty()) {
+        List<TopicEvent> replys = new ArrayList<>(map.values());
+        notifyEvents.add(replys.get(replys.size() - 1));
+      }
+    });
 
     //给事件按照eventSeqId重新排序
     notifyEvents.sort(Comparator.comparing(TopicEvent::getEventSeqId));
 
     //返回事件超过1000条，只返回最后一千条
+    final int maxReturnNum = 1000;
     if (notifyEvents.size() > maxReturnNum) {
       notifyEvents.subList(0, notifyEvents.size() - maxReturnNum).clear();
     }
