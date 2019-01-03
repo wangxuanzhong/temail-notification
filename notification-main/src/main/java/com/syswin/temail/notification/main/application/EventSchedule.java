@@ -31,6 +31,7 @@ public class EventSchedule {
   private final UnreadMapper unreadMapper;
   private final RedisService redisService;
   private final String DELETE_OLD_EVENT_KEY = "notification_deleteOldEvent";
+  private final int PAGE_SIZE = 100000; // 分页删除，每次删除10W条
   private int deadline;
 
   @Autowired
@@ -50,7 +51,7 @@ public class EventSchedule {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old event before {}", createTime);
 
-    if (!redisService.checkLock(DELETE_OLD_EVENT_KEY, 20, TimeUnit.MINUTES)) {
+    if (!redisService.checkLock(DELETE_OLD_EVENT_KEY, 10, TimeUnit.MINUTES)) {
       LOGGER.warn("check lock from redis failed!");
       return;
     }
@@ -67,7 +68,7 @@ public class EventSchedule {
       List<Event> events = eventMapper.selectOldEvent(to, createTime);
 
       // 统计未读数
-      LOGGER.info("calculate {}'s events: {}", to, events);
+      LOGGER.info("calculate {}'s event, size : {}", to, events.size());
       Map<String, List<String>> eventMap = eventService.calculateUnread(events, unreadMap);
 
       // 统计各个会话的未读数量，并插入数据库
@@ -81,9 +82,16 @@ public class EventSchedule {
       });
     });
 
-    // 删除旧数据
+    // 分页删除旧数据
     LOGGER.info("delete old events!");
-    eventMapper.deleteOldEvent(createTime);
+    while (true) {
+      List<Long> ids = eventMapper.selectOldEventId(createTime, 0, PAGE_SIZE);
+      if (ids.isEmpty()) {
+        break;
+      }
+      LOGGER.info("delete {} events", ids.size());
+      eventMapper.delete(ids);
+    }
 
     // 删除未读数为0的数据
     LOGGER.info("delete zero count!");

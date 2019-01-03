@@ -23,10 +23,10 @@ public interface EventMapper {
 
   List<Event> checkUnique(Event event);
 
-
+  // 清除历史数据功能所用sql
   List<String> selectOldTo(LocalDateTime createTime);
 
   List<Event> selectOldEvent(@Param("to") String to, @Param("createTime") LocalDateTime createTime);
 
-  void deleteOldEvent(LocalDateTime createTime);
+  List<Long> selectOldEventId(@Param("createTime") LocalDateTime createTime, @Param("start") int start, @Param("pageSize") int pageSize);
 }

@@ -107,8 +107,8 @@
     ORDER BY `event_seq_id`
   </select>
 
-  <delete id="deleteOldEvent" parameterType="java.time.LocalDateTime">
-    DELETE FROM `event` WHERE `create_timestamp` <![CDATA[<]]> #{createTime}
-  </delete>
+  <select id="selectOldEventId" resultType="java.lang.Long">
+    SELECT `id` FROM `event` WHERE `create_timestamp` <![CDATA[<]]> #{createTime} LIMIT #{start},#{pageSize}
+  </select>
   <!-- end -->
 </mapper>
