@@ -1,5 +1,7 @@
-package com.syswin.temail.notification.main.application;
+package com.syswin.temail.notification.main.application.scheduler;
 
+import com.syswin.temail.notification.main.application.EventService;
+import com.syswin.temail.notification.main.application.RedisService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
@@ -16,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,17 +27,18 @@ public class EventSchedule {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final EventMapper eventMapper;
-  private final EventService eventService;
-  private final TopicEventMapper topicEventMapper;
   private final UnreadMapper unreadMapper;
+  private final EventService eventService;
   private final RedisService redisService;
+  private final TopicEventMapper topicEventMapper;
+  private final int deadline;
+
   private final String DELETE_OLD_EVENT_KEY = "notification_deleteOldEvent";
   private final int PAGE_SIZE = 100000; // 分页删除，每次删除10W条
-  private int deadline;
 
   @Autowired
-  public EventSchedule(EventMapper eventMapper, EventService eventService, TopicEventMapper topicEventMapper, UnreadMapper unreadMapper,
-      RedisService redisService, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
+  public EventSchedule(EventMapper eventMapper, UnreadMapper unreadMapper, EventService eventService, RedisService redisService,
+      TopicEventMapper topicEventMapper, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
     this.eventMapper = eventMapper;
     this.eventService = eventService;
     this.topicEventMapper = topicEventMapper;
@@ -45,7 +47,6 @@ public class EventSchedule {
     this.deadline = deadline;
   }
 
-  @Scheduled(cron = "0 0 4 * * ?") // 每天4点触发
   @Transactional(rollbackFor = Exception.class)
   public void deleteOldEvent() {
     LocalDateTime createTime = this.getDeadline();
@@ -68,7 +69,7 @@ public class EventSchedule {
       List<Event> events = eventMapper.selectOldEvent(to, createTime);
 
       // 统计未读数
-      LOGGER.info("calculate {}'s event, size : {}", to, events.size());
+      LOGGER.info("calculate [{}]'s event, size : {}", to, events.size());
       Map<String, List<String>> eventMap = eventService.calculateUnread(events, unreadMap);
 
       // 统计各个会话的未读数量，并插入数据库
@@ -98,8 +99,6 @@ public class EventSchedule {
     unreadMapper.deleteZeroCount();
   }
 
-  @Scheduled(cron = "0 0 3 * * ?") // 每天3点触发
-  @Transactional(rollbackFor = Exception.class)
   public void deleteOldTopic() {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old topic before {}", createTime);

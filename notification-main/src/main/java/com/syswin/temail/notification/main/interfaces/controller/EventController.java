@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.interfaces.controller;
 
 import com.syswin.temail.notification.foundation.domains.Response;
-import com.syswin.temail.notification.main.application.EventSchedule;
+import com.syswin.temail.notification.main.application.scheduler.EventSchedule;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
