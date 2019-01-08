@@ -98,6 +98,12 @@ public class TopicService {
         topicEvent.addEventMsgId(EventType.ARCHIVE);
         sendMessage(topicEvent, header);
         break;
+      case TOPIC_SESSION_DELETE:
+        //话题会话删除，发送同步消息
+        topicEvent.setTo(params.getFrom());
+        topicEvent.addEventMsgId(EventType.TOPIC_SESSION_DELETE);
+        sendMessage(topicEvent, header);
+        break;
     }
   }
 

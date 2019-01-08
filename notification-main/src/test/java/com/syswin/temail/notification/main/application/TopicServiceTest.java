@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
@@ -235,4 +236,13 @@ public class TopicServiceTest {
     assertThat(resultMap).containsKeys("events");
     assertThat(((List<TopicEvent>) resultMap.get("events")).contains(reply2)).isTrue();
   }
+
+  @Test
+  public void topicSessionDeleteEventTest() throws Exception {
+    params.setSessionMessageType(EventType.TOPIC_SESSION_DELETE.getValue());
+    params.setTopicId("topic_12");
+    params.setTo(null);
+    this.sendMessage(params);
+  }
+
 }

@@ -409,6 +409,12 @@ public class NotificationGroupChatServiceTest {
     param.setSessionMessageType(EventType.DELETE_GROUP.getValue());
     param.setTemail("a_all");
     this.sendMessage(param);
+
+    // 群会话隐藏
+    param = init(groupTemail);
+    param.setSessionMessageType(EventType.GROUP_SESSION_HIDDEN.getValue());
+    param.setTemail("h_1");
+    this.sendMessage(param);
   }
 
   private MailAgentGroupChatParams init(String groupTemail) {
