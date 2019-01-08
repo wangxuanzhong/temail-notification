@@ -185,6 +185,10 @@ public class TopicService {
         case TOPIC_DELETE:
           notifyEvents.add(event);
           break;
+        case TOPIC_SESSION_DELETE:
+          //话题会话删除，清空消息
+          topicMap.clear();
+          break;
       }
     });
 
