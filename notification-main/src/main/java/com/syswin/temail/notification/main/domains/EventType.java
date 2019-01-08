@@ -39,7 +39,7 @@ public enum EventType {
   GROUP_ARCHIVE_CANCEL(28, "群聊归档取消"),
   GROUP_STICK(31, "群聊置顶"),
   GROUP_STICK_CANCEL(32, "群聊置顶取消"),
-  GROUP_HIDDEN(38, "群会话隐藏"),
+  GROUP_SESSION_HIDDEN(38, "群会话隐藏"),
 
   // 回复部分
   REPLY(18, "回复消息"),

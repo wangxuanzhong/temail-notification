@@ -235,6 +235,13 @@ public class NotificationGroupChatService {
         event.notifyToAll();
         this.sendGroupMessage(event, header);
         break;
+      case GROUP_SESSION_HIDDEN:
+        //多端同步
+        event.setFrom(event.getGroupTemail());
+        event.setTo(event.getTemail());
+        event.addGroupMsgId(EventType.GROUP_SESSION_HIDDEN);
+        this.sendSingleMessage(event, header);
+        break;
     }
   }
 
