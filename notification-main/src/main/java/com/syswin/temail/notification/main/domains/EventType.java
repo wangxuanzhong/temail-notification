@@ -39,6 +39,7 @@ public enum EventType {
   GROUP_ARCHIVE_CANCEL(28, "群聊归档取消"),
   GROUP_STICK(31, "群聊置顶"),
   GROUP_STICK_CANCEL(32, "群聊置顶取消"),
+  GROUP_HIDDEN(38, "群会话隐藏"),
 
   // 回复部分
   REPLY(18, "回复消息"),
@@ -53,7 +54,8 @@ public enum EventType {
   TOPIC_REPLY_DELETE(24, "话题回复消息删除"),
   TOPIC_DELETE(25, "话题已删除"),
   TOPIC_ARCHIVE(29, "话题归档"),
-  TOPIC_ARCHIVE_CANCEL(30, "话题归档取消");
+  TOPIC_ARCHIVE_CANCEL(30, "话题归档取消"),
+  TOPIC_SESSION_DELETE(39, "话题会话删除");
 
 
   private final int value;
