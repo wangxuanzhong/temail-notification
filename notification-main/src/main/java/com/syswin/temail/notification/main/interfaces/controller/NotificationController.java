@@ -4,15 +4,20 @@ import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.main.application.EventService;
 import com.syswin.temail.notification.main.application.TopicService;
 import com.syswin.temail.notification.main.domains.Event;
+import com.syswin.temail.notification.main.domains.Member;
+import com.syswin.temail.notification.main.domains.Member.UserStatus;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.remoting.exception.RemotingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value = "notification", tags = "notification service")
 @CrossOrigin
 public class NotificationController {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final String CDTP_HEADER = "CDTP-header";
 
@@ -66,8 +73,8 @@ public class NotificationController {
 
   @ApiOperation(value = "reset 3 0004", consumes = "application/json")
   @PutMapping("/reset")
-  public ResponseEntity<Response<List<UnreadResponse>>> reset(@RequestBody Event event,
-      @RequestHeader(name = CDTP_HEADER, required = false) String header)
+  public ResponseEntity<Response> reset(@RequestBody Event event,
+      @RequestHeader(name = CDTP_HEADER) String header)
       throws InterruptedException, RemotingException, UnsupportedEncodingException, MQClientException, MQBrokerException {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -105,4 +112,32 @@ public class NotificationController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
+  @ApiOperation(value = "update group chat user status 3 0007", consumes = "application/json")
+  @PutMapping("/groupchat/user/status")
+  public ResponseEntity<Response> updateGroupChatUserStatus(@RequestBody Member member,
+      @RequestHeader(name = CDTP_HEADER) String header)
+      throws InterruptedException, RemotingException, UnsupportedEncodingException, MQClientException, MQBrokerException {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+
+    UserStatus userStatus = UserStatus.getByValue(member.getUserStatus());
+    if (userStatus == null) {
+      LOGGER.error("status is illegal!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "status is illegal!"), headers, HttpStatus.BAD_REQUEST);
+    }
+
+    eventService.updateGroupChatUserStatus(member, userStatus, header);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "get do not disturb group 3 0008", consumes = "application/json")
+  @GetMapping("/groupchat/user/disturb/not")
+  public ResponseEntity<Response<List<String>>> getUserDoNotDisturbGroups(@RequestParam String temail,
+      @RequestHeader(name = CDTP_HEADER, required = false) String header) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+
+    List<String> result = eventService.getUserDoNotDisturbGroups(temail);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+  }
 }

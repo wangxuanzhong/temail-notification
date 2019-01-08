@@ -5,10 +5,13 @@ import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.foundation.application.SequenceService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
+import com.syswin.temail.notification.main.domains.Member;
+import com.syswin.temail.notification.main.domains.Member.UserStatus;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
+import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
@@ -26,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EventService {
@@ -35,15 +39,17 @@ public class EventService {
   private final SequenceService sequenceService;
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
+  private final MemberMapper memberMapper;
   private final JsonService jsonService;
   private final RocketMqProducer rocketMqProducer;
 
   @Autowired
-  public EventService(SequenceService sequenceService, EventMapper eventMapper, UnreadMapper unreadMapper, JsonService jsonService,
-      RocketMqProducer rocketMqProducer) {
+  public EventService(SequenceService sequenceService, EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
+      JsonService jsonService, RocketMqProducer rocketMqProducer) {
     this.sequenceService = sequenceService;
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
+    this.memberMapper = memberMapper;
     this.jsonService = jsonService;
     this.rocketMqProducer = rocketMqProducer;
   }
@@ -362,5 +368,40 @@ public class EventService {
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
     rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, jsonService.toJson(event))));
+  }
+
+  /**
+   * 修改群成员个人状态
+   */
+  @Transactional(rollbackFor = Exception.class)
+  public void updateGroupChatUserStatus(Member member, UserStatus userStatus, String header)
+      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+    LOGGER.info("update user status, param: {}", member);
+    Event event = new Event(null, null, null, null, null,
+        member.getGroupTemail(), member.getTemail(), System.currentTimeMillis(), member.getGroupTemail(), member.getTemail(),
+        null, null, null, null, null, null);
+
+    switch (userStatus) {
+      case NORMAL:
+        event.setEventType(EventType.DO_NOT_DISTURB_CANCEL.getValue());
+        memberMapper.updateUserStatus(member);
+        break;
+      case DO_NOT_DISTURB:
+        event.setEventType(EventType.DO_NOT_DISTURB.getValue());
+        memberMapper.updateUserStatus(member);
+        break;
+    }
+
+    // 发送到MQ以便多端同步
+    LOGGER.info("send reset event to {}", event.getTo());
+    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, jsonService.toJson(event))));
+  }
+
+  /**
+   * 获取查询人所有设置为免打扰的群
+   */
+  public List<String> getUserDoNotDisturbGroups(String temail) {
+    LOGGER.info("get do not disturb group, temail: {}", temail);
+    return memberMapper.selectDoNotDisturbGroups(temail);
   }
 }

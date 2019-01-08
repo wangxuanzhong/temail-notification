@@ -40,6 +40,10 @@ public enum EventType {
   GROUP_STICK(31, "群聊置顶"),
   GROUP_STICK_CANCEL(32, "群聊置顶取消"),
   GROUP_SESSION_HIDDEN(38, "群会话隐藏"),
+  BLACKLIST(40, "群黑名单"),
+  BLACKLIST_CANCEL(41, "群黑名单取消"),
+  DO_NOT_DISTURB(42, "个人免打扰"),
+  DO_NOT_DISTURB_CANCEL(43, "个人免打扰取消"),
 
   // 回复部分
   REPLY(18, "回复消息"),

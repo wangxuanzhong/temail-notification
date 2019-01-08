@@ -47,6 +47,9 @@ public class EventSchedule {
     this.deadline = deadline;
   }
 
+  /**
+   * 删除旧的单群聊事件，并统计未读数
+   */
   @Transactional(rollbackFor = Exception.class)
   public void deleteOldEvent() {
     LocalDateTime createTime = this.getDeadline();
@@ -99,6 +102,9 @@ public class EventSchedule {
     unreadMapper.deleteZeroCount();
   }
 
+  /**
+   * 删除旧的话题事件
+   */
   public void deleteOldTopic() {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old topic before {}", createTime);

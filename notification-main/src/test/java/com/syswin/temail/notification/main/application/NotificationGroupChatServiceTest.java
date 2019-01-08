@@ -1,8 +1,8 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.main.domains.Event.MemberRole;
 import com.syswin.temail.notification.main.domains.EventType;
+import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import java.util.Arrays;
 import java.util.UUID;
@@ -286,6 +286,26 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMessageType(EventType.GROUP_STICK_CANCEL.getValue());
     params.setMsgid("1");
     params.setTemail("b");
+    this.sendMessage(params);
+  }
+
+  /**
+   * EventType BLACKLIST 40 群黑名单
+   */
+  @Test
+  public void testEventTypeBlacklist() throws Exception {
+    params.setSessionMessageType(EventType.BLACKLIST.getValue());
+    params.setTemail(gson.toJson(Arrays.asList("b", "e", "f")));
+    this.sendMessage(params);
+  }
+
+  /**
+   * EventType BLACKLIST_CANCEL 41 群黑名单取消
+   */
+  @Test
+  public void testEventTypeBlacklistCancel() throws Exception {
+    params.setSessionMessageType(EventType.BLACKLIST_CANCEL.getValue());
+    params.setTemail(gson.toJson(Arrays.asList("e", "f")));
     this.sendMessage(params);
   }
 

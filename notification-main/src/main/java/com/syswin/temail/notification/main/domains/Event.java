@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.foundation.application.SequenceService;
+import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import java.util.List;
 import java.util.Objects;
 
@@ -398,22 +399,4 @@ public class Event {
         ", extendParam='" + extendParam + '\'' +
         '}';
   }
-
-  public enum MemberRole {
-    NORMAL(0, "普通成员"),
-    ADMIN(1, "管理员");
-
-    private final int value;
-    private final String description;
-
-    MemberRole(int value, String description) {
-      this.value = value;
-      this.description = description;
-    }
-
-    public int getValue() {
-      return value;
-    }
-  }
-
 }

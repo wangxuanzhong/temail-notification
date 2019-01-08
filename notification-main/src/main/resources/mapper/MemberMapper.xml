@@ -29,4 +29,27 @@
     <if test="temail != null">AND `temail` = #{temail}</if>
     AND id > 0
   </delete>
+
+  <select id="selectAvaliableMember" parameterType="com.syswin.temail.notification.main.domains.Event" resultType="java.lang.String">
+    SELECT `temail`
+    FROM `member`
+    WHERE `group_temail` = #{groupTemail}
+    AND `user_status` = ${@com.syswin.temail.notification.main.domains.Member$UserStatus@NORMAL.getValue()}
+    AND `group_status` = ${@com.syswin.temail.notification.main.domains.Member$GroupStatus@NORMAL.getValue()}
+    <if test="role != null and role != '' ">AND `role` = #{role}</if>
+  </select>
+
+  <update id="updateUserStatus" parameterType="com.syswin.temail.notification.main.domains.Member">
+    UPDATE `member` SET `user_status` = ${userStatus} WHERE `group_temail` = #{groupTemail} AND `temail` = #{temail}
+  </update>
+
+  <update id="updateGroupStatus">
+    UPDATE `member` SET `group_status` = ${groupStatus} WHERE `group_temail` = #{groupTemail} AND `temail` = #{temail}
+  </update>
+
+  <select id="selectDoNotDisturbGroups" parameterType="java.lang.String" resultType="java.lang.String">
+    SELECT `group_temail` FROM `member`
+    WHERE `temail` = #{temail}
+    AND `user_status` = ${@com.syswin.temail.notification.main.domains.Member$UserStatus@DO_NOT_DISTURB.getValue()}
+  </select>
 </mapper>
