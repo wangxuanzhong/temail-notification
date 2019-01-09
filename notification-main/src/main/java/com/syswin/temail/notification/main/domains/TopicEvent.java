@@ -275,6 +275,7 @@ public class TopicEvent {
         ", receivers=" + receivers +
         ", cc=" + cc +
         ", msgIds=" + msgIds +
+        ", deleteAllMsg=" + deleteAllMsg +
         ", extendParam='" + extendParam + '\'' +
         '}';
   }
