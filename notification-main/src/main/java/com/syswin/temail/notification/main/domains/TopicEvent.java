@@ -37,6 +37,8 @@ public class TopicEvent {
   private List<String> cc;
   // 批量msgId
   private List<String> msgIds;
+  // 删除会话是否同时删除消息
+  private Boolean deleteAllMsg;
 
   @JsonIgnore
   private String extendParam;
@@ -84,7 +86,11 @@ public class TopicEvent {
   public TopicEvent autoReadExtendParam(JsonService jsonService) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
       TopicExtendParam extendParam = jsonService.fromJson(this.extendParam, TopicExtendParam.class);
+      this.title = extendParam.getTitle();
+      this.receivers = extendParam.getReceivers();
+      this.cc = extendParam.getCc();
       this.msgIds = extendParam.getMsgIds();
+      this.deleteAllMsg = extendParam.getDeleteAllMsg();
     }
     return this;
   }
@@ -93,7 +99,7 @@ public class TopicEvent {
    * 自动配置扩展字段
    */
   public TopicEvent autoWriteExtendParam(JsonService jsonService) {
-    this.extendParam = jsonService.toJson(new TopicExtendParam(this.title, this.receivers, this.cc, this.msgIds));
+    this.extendParam = jsonService.toJson(new TopicExtendParam(this.title, this.receivers, this.cc, this.msgIds, this.deleteAllMsg));
     return this;
   }
 
@@ -232,6 +238,14 @@ public class TopicEvent {
 
   public void setMsgIds(List<String> msgIds) {
     this.msgIds = msgIds;
+  }
+
+  public Boolean getDeleteAllMsg() {
+    return deleteAllMsg;
+  }
+
+  public void setDeleteAllMsg(Boolean deleteAllMsg) {
+    this.deleteAllMsg = deleteAllMsg;
   }
 
   public String getExtendParam() {

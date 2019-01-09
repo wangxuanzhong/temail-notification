@@ -231,6 +231,7 @@ public class NotificationGroupChatService {
         break;
       case GROUP_ARCHIVE:
       case GROUP_ARCHIVE_CANCEL:
+      case GROUP_SESSION_HIDDEN:
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
         this.sendSingleMessage(event, header);
@@ -257,13 +258,6 @@ public class NotificationGroupChatService {
           event.setTemail(temail);
           this.sendGroupMessageToAvaliableMembers(event, header);
         }
-        break;
-      case GROUP_SESSION_HIDDEN:
-        //多端同步
-        event.setFrom(event.getGroupTemail());
-        event.setTo(event.getTemail());
-        event.addGroupMsgId(EventType.GROUP_SESSION_HIDDEN);
-        this.sendSingleMessage(event, header);
         break;
     }
   }

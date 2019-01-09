@@ -14,6 +14,8 @@ public class MailAgentTopicParams extends MailAgentParams {
   private List<String> receivers;
   // 抄送
   private List<String> cc;
+  // 删除会话是否同时删除消息
+  private Boolean deleteAllMsg;
 
   public String getTopicId() {
     return topicId;
@@ -55,6 +57,14 @@ public class MailAgentTopicParams extends MailAgentParams {
     this.cc = cc;
   }
 
+  public Boolean getDeleteAllMsg() {
+    return deleteAllMsg;
+  }
+
+  public void setDeleteAllMsg(Boolean deleteAllMsg) {
+    this.deleteAllMsg = deleteAllMsg;
+  }
+
   @Override
   public String toString() {
     return "MailAgentTopicParams{" +
@@ -63,6 +73,7 @@ public class MailAgentTopicParams extends MailAgentParams {
         ", title='" + title + '\'' +
         ", receivers=" + receivers +
         ", cc=" + cc +
+        ", deleteAllMsg=" + deleteAllMsg +
         '}' + super.toString();
   }
 }

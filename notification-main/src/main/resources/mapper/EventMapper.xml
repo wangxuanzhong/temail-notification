@@ -75,7 +75,7 @@
     <if test="groupTemail != null and groupTemail != ''">AND `group_temail` = #{groupTemail}</if>
   </select>
 
-  <delete id="delete" parameterType="com.syswin.temail.notification.main.domains.Event">
+  <delete id="delete" parameterType="java.util.List">
     DELETE FROM `event`
     WHERE `id` IN (
     <foreach collection="list" index="index" item="item" separator=",">

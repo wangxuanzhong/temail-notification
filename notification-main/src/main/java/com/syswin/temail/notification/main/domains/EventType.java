@@ -40,10 +40,10 @@ public enum EventType {
   GROUP_STICK(31, "群聊置顶"),
   GROUP_STICK_CANCEL(32, "群聊置顶取消"),
   GROUP_SESSION_HIDDEN(38, "群会话隐藏"),
-  BLACKLIST(40, "群黑名单"),
-  BLACKLIST_CANCEL(41, "群黑名单取消"),
-  DO_NOT_DISTURB(42, "个人免打扰"),
-  DO_NOT_DISTURB_CANCEL(43, "个人免打扰取消"),
+  BLACKLIST(40, "群成员加入黑名单"),
+  BLACKLIST_CANCEL(41, "群成员移出黑名单"),
+  DO_NOT_DISTURB(42, "设置群免打扰"),
+  DO_NOT_DISTURB_CANCEL(43, "设置群免打扰取消"),
 
   // 回复部分
   REPLY(18, "回复消息"),
@@ -54,7 +54,7 @@ public enum EventType {
   // 话题部分
   TOPIC(21, "话题消息"),
   TOPIC_REPLY(22, "话题回复消息"),
-  TOPIC_RETRACT(23, "话题回复消息已撤回"),
+  TOPIC_REPLY_RETRACT(23, "话题回复消息已撤回"),
   TOPIC_REPLY_DELETE(24, "话题回复消息删除"),
   TOPIC_DELETE(25, "话题已删除"),
   TOPIC_ARCHIVE(29, "话题归档"),

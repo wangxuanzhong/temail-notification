@@ -2,14 +2,13 @@ package com.syswin.temail.notification.main.application;
 
 import static com.syswin.temail.notification.main.domains.EventType.TOPIC_REPLY;
 import static com.syswin.temail.notification.main.domains.EventType.TOPIC_REPLY_DELETE;
-import static com.syswin.temail.notification.main.domains.EventType.TOPIC_RETRACT;
+import static com.syswin.temail.notification.main.domains.EventType.TOPIC_REPLY_RETRACT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.JsonService;
-import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
@@ -24,12 +23,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("h2")
+//@ActiveProfiles("h2")
 public class TopicServiceTest {
 
   private final String TEST_FROM = "a";
@@ -67,7 +65,7 @@ public class TopicServiceTest {
   @Test
   public void testEventTypeTopic() throws Exception {
     params.setSessionMessageType(EventType.TOPIC.getValue());
-    params.setTopicId("topic_2");
+    params.setTopicId("topic_1");
     params.setMsgid("1");
     params.setSeqNo(1L);
     params.setTopicSeqId(1L);
@@ -93,7 +91,7 @@ public class TopicServiceTest {
   public void testEventTypeTopicReply() throws Exception {
     params.setSessionMessageType(TOPIC_REPLY.getValue());
     params.setTopicId("topic_1");
-    params.setMsgid("3");
+    params.setMsgid("2");
     params.setSeqNo(2L);
     params.setToMsg("这是一条话题回复测试消息！");
     params.setTo("b");
@@ -105,18 +103,18 @@ public class TopicServiceTest {
   }
 
   /**
-   * EventType TOPIC_RETRACT 23 话题回复消息撤回
+   * EventType TOPIC_REPLY_RETRACT 23 话题回复消息撤回
    */
   @Test
   public void testEventTypeTopicRetract() throws Exception {
-    params.setSessionMessageType(EventType.TOPIC_RETRACT.getValue());
+    params.setSessionMessageType(EventType.TOPIC_REPLY_RETRACT.getValue());
     params.setTopicId("topic_1");
-    params.setMsgid("3");
+    params.setMsgid("1");
     this.sendMessage(params);
   }
 
   /**
-   * EventType TOPIC_REPLY_DELETE 24 话题消息删除
+   * EventType TOPIC_REPLY_DELETE 24 话题回复消息删除
    */
   @Test
   public void testEventTypeTopicReplyDelete() throws Exception {
@@ -195,9 +193,11 @@ public class TopicServiceTest {
     reply1.initTopicEventSeqId(redisService);
     TopicEvent reply2 = new TopicEvent(2L, "x_packet_id2", TOPIC_REPLY.getValue(), "topicId", "msgid2", "c@t.email", "b@t.email", "{}", 124L);
     reply2.initTopicEventSeqId(redisService);
-    TopicEvent retract1 = new TopicEvent(3L, "x_packet_id3", TOPIC_RETRACT.getValue(), "topicId", "msgidx", "d@t.email", "b@t.email", "{}", 125L);
+    TopicEvent retract1 = new TopicEvent(3L, "x_packet_id3", TOPIC_REPLY_RETRACT.getValue(), "topicId", "msgidx", "d@t.email", "b@t.email", "{}",
+        125L);
     retract1.initTopicEventSeqId(redisService);
-    TopicEvent retract2 = new TopicEvent(4L, "x_packet_id4", TOPIC_RETRACT.getValue(), "topicId", "msgid2", "e@t.email", "b@t.email", "{}", 126L);
+    TopicEvent retract2 = new TopicEvent(4L, "x_packet_id4", TOPIC_REPLY_RETRACT.getValue(), "topicId", "msgid2", "e@t.email", "b@t.email", "{}",
+        126L);
     retract2.initTopicEventSeqId(redisService);
     when(topicRepo.selectEvents("b@t.email", 1L, null)).thenReturn(Arrays.asList(reply1, reply2, retract1, retract2));
 
@@ -240,8 +240,10 @@ public class TopicServiceTest {
   @Test
   public void topicSessionDeleteEventTest() throws Exception {
     params.setSessionMessageType(EventType.TOPIC_SESSION_DELETE.getValue());
-    params.setTopicId("topic_12");
+    params.setTopicId("topic_1");
+    params.setFrom("b");
     params.setTo(null);
+    params.setDeleteAllMsg(true);
     this.sendMessage(params);
   }
 

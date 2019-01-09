@@ -70,7 +70,7 @@ public class TopicService {
       case TOPIC_REPLY:
         sendMessage(topicEvent, header);
         break;
-      case TOPIC_RETRACT:
+      case TOPIC_REPLY_RETRACT:
         // 向撤回的消息的所有收件人发送通知
         for (TopicEvent event : topicEventMapper.selectEventsByMsgId(topicEvent.getMsgId())) {
           topicEvent.setTo(event.getTo());
@@ -99,9 +99,9 @@ public class TopicService {
         sendMessage(topicEvent, header);
         break;
       case TOPIC_SESSION_DELETE:
-        //话题会话删除，发送同步消息
+        // from是操作人，to为空
         topicEvent.setTo(params.getFrom());
-        topicEvent.addEventMsgId(EventType.TOPIC_SESSION_DELETE);
+        topicEvent.setDeleteAllMsg(params.getDeleteAllMsg());
         sendMessage(topicEvent, header);
         break;
     }
@@ -149,51 +149,64 @@ public class TopicService {
       lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
 
+    Map<String, Map<String, TopicEvent>> allTopicMap = new HashMap<>();
+    Map<String, Map<String, TopicEvent>> allReplyMap = new HashMap<>();
     List<TopicEvent> notifyEvents = new ArrayList<>();
-    Map<String, Map<String, TopicEvent>> replyEventMap = new HashMap<>();
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
 
-      // 按照话题统计回复消息
-      String key = event.getTopicId();
-      if (!replyEventMap.containsKey(key)) {
-        replyEventMap.put(key, new LinkedHashMap<>());
+      // 按照话题统计事件
+      if (!allTopicMap.containsKey(event.getTopicId())) {
+        allTopicMap.put(event.getTopicId(), new LinkedHashMap<>());
       }
-      Map<String, TopicEvent> topicMap = replyEventMap.get(key);
+      Map<String, TopicEvent> topicMap = allTopicMap.get(event.getTopicId());
+
+      // 按照话题统计回复消息
+      if (!allReplyMap.containsKey(event.getTopicId())) {
+        allReplyMap.put(event.getTopicId(), new LinkedHashMap<>());
+      }
+      Map<String, TopicEvent> replyMap = allReplyMap.get(event.getTopicId());
 
       // 话题归档和取消归档事件不考虑离线消息提醒
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case TOPIC:
-          notifyEvents.add(event);
+          topicMap.put(event.getMsgId(), event);
           break;
         case TOPIC_REPLY:
           // 单独记录所有的回复消息
-          topicMap.put(event.getMsgId(), event);
+          replyMap.put(event.getMsgId(), event);
           break;
-        case TOPIC_RETRACT:
+        case TOPIC_REPLY_RETRACT:
           // 撤回的消息需要和回复消息做抵消，如果撤回的消息不在本次拉到的回复消息范围内，需要提醒客户端
-          if (topicMap.containsKey(event.getMsgId())) {
-            topicMap.remove(event.getMsgId());
+          if (replyMap.containsKey(event.getMsgId())) {
+            replyMap.remove(event.getMsgId());
           } else {
-            notifyEvents.add(event);
+            topicMap.put(event.getMsgId(), event);
           }
           break;
         case TOPIC_REPLY_DELETE:
           // 删除的消息不考虑离线事件提醒，只需要考虑删除消息和回复消息抵消的情况
-          event.getMsgIds().forEach(topicMap::remove);
+          event.getMsgIds().forEach(replyMap::remove);
           break;
         case TOPIC_DELETE:
-          notifyEvents.add(event);
+          topicMap.clear();
+          replyMap.clear();
+          topicMap.put(event.getTopicId(), event);
           break;
         case TOPIC_SESSION_DELETE:
-          //话题会话删除，清空消息
-          topicMap.clear();
+          if (event.getDeleteAllMsg()) {
+            topicMap.clear();
+            replyMap.clear();
+          }
+          topicMap.put(event.getTopicId(), event);
           break;
       }
     });
 
+    allTopicMap.values().forEach(map -> notifyEvents.addAll(map.values()));
+
     // 每个话题只返回最新一条回复消息
-    replyEventMap.values().forEach(map -> {
+    allReplyMap.values().forEach(map -> {
       if (!map.isEmpty()) {
         List<TopicEvent> replys = new ArrayList<>(map.values());
         notifyEvents.add(replys.get(replys.size() - 1));

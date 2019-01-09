@@ -18,15 +18,18 @@ class TopicExtendParam {
   private List<String> cc;
   // 批量msgId
   private List<String> msgIds;
+  // 删除会话是否同时删除消息
+  private Boolean deleteAllMsg;
 
   public TopicExtendParam() {
   }
 
-  public TopicExtendParam(String title, List<String> receivers, List<String> cc, List<String> msgIds) {
+  public TopicExtendParam(String title, List<String> receivers, List<String> cc, List<String> msgIds, Boolean deleteAllMsg) {
     this.title = title;
     this.receivers = receivers;
     this.cc = cc;
     this.msgIds = msgIds;
+    this.deleteAllMsg = deleteAllMsg;
   }
 
   public String getTitle() {
@@ -59,5 +62,13 @@ class TopicExtendParam {
 
   public void setMsgIds(List<String> msgIds) {
     this.msgIds = msgIds;
+  }
+
+  public Boolean getDeleteAllMsg() {
+    return deleteAllMsg;
+  }
+
+  public void setDeleteAllMsg(Boolean deleteAllMsg) {
+    this.deleteAllMsg = deleteAllMsg;
   }
 }
