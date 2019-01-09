@@ -15,7 +15,8 @@ CREATE TABLE `event` (
   PRIMARY KEY (`id`),
   KEY `event_to` (`to`),
   KEY `event_xPacketId` (`x_packet_id`),
-  KEY `msgId` (`msg_id`)
+  KEY `event_msgId` (`msg_id`),
+  KEY `event_parentMsgId` (`parent_msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `member` (

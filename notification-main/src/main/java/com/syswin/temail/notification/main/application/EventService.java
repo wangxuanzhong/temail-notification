@@ -400,8 +400,10 @@ public class EventService {
   /**
    * 获取查询人所有设置为免打扰的群
    */
-  public List<String> getUserDoNotDisturbGroups(String temail) {
+  public Map<String, List<String>> getUserDoNotDisturbGroups(String temail) {
     LOGGER.info("get do not disturb group, temail: {}", temail);
-    return memberMapper.selectDoNotDisturbGroups(temail);
+    Map<String, List<String>> result = new HashMap<>();
+    result.put("groupTemail", memberMapper.selectDoNotDisturbGroups(temail));
+    return result;
   }
 }
