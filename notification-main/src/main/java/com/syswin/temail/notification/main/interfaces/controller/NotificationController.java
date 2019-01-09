@@ -131,13 +131,13 @@ public class NotificationController {
   }
 
   @ApiOperation(value = "get do not disturb group 3 0008", consumes = "application/json")
-  @GetMapping("/groupchat/user/disturb/not")
-  public ResponseEntity<Response<Map<String, List<String>>>> getUserDoNotDisturbGroups(@RequestParam String temail,
+  @GetMapping("/groupchat/user/status")
+  public ResponseEntity<Response<Map<String, Integer>>> getUserDoNotDisturbGroups(@RequestParam String temail, @RequestParam String groupTemail,
       @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
-    Map<String, List<String>> result = eventService.getUserDoNotDisturbGroups(temail);
+    Map<String, Integer> result = eventService.getGroupChatUserStatus(temail, groupTemail);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 }

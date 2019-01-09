@@ -398,12 +398,12 @@ public class EventService {
   }
 
   /**
-   * 获取查询人所有设置为免打扰的群
+   * 查询群成员个人状态
    */
-  public Map<String, List<String>> getUserDoNotDisturbGroups(String temail) {
+  public Map<String, Integer> getGroupChatUserStatus(String temail, String groupTemail) {
     LOGGER.info("get do not disturb group, temail: {}", temail);
-    Map<String, List<String>> result = new HashMap<>();
-    result.put("groupTemail", memberMapper.selectDoNotDisturbGroups(temail));
+    Map<String, Integer> result = new HashMap<>();
+    result.put("userStatus", memberMapper.selectUserStatus(temail, groupTemail));
     return result;
   }
 }

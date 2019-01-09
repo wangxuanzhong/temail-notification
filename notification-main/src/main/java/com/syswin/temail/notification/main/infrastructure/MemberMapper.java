@@ -21,5 +21,5 @@ public interface MemberMapper {
 
   void updateGroupStatus(@Param("groupStatus") int groupStatus, @Param("groupTemail") String groupTemail, @Param("temail") String temail);
 
-  List<String> selectDoNotDisturbGroups(String temail);
+  Integer selectUserStatus(@Param("temail") String temail, @Param("groupTemail") String groupTemail);
 }

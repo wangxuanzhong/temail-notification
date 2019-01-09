@@ -47,9 +47,7 @@
     UPDATE `member` SET `group_status` = ${groupStatus} WHERE `group_temail` = #{groupTemail} AND `temail` = #{temail}
   </update>
 
-  <select id="selectDoNotDisturbGroups" parameterType="java.lang.String" resultType="java.lang.String">
-    SELECT `group_temail` FROM `member`
-    WHERE `temail` = #{temail}
-    AND `user_status` = ${@com.syswin.temail.notification.main.domains.Member$UserStatus@DO_NOT_DISTURB.getValue()}
+  <select id="selectUserStatus" resultType="java.lang.Integer">
+    SELECT `user_status` FROM `member` WHERE `temail` = #{temail} AND `group_temail` = #{groupTemail}
   </select>
 </mapper>
