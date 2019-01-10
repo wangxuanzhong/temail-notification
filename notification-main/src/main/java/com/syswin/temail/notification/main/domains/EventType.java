@@ -45,6 +45,9 @@ public enum EventType {
   DO_NOT_DISTURB(42, "设置群免打扰"),
   DO_NOT_DISTURB_CANCEL(43, "设置群免打扰取消"),
 
+  // @部分
+  RECEIVE_AT(44, "@消息发送"),
+
   // 回复部分
   REPLY(18, "回复消息"),
   REPLY_RETRACT(19, "回复消息已撤回"),

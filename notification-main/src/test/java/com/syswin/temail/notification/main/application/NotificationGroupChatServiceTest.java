@@ -215,9 +215,9 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeReply() throws Exception {
     params.setSessionMessageType(EventType.REPLY.getValue());
-    params.setMsgid(TEST_GROUP_MSG_ID + "reply_2");
-    params.setTemail("c");
-    params.setParentMsgId(TEST_GROUP_MSG_ID + "1");
+    params.setMsgid("reply_5");
+    params.setTemail("e");
+    params.setParentMsgId("at1");
     params.setToMsg("这是一条回复消息！");
     params.setSeqNo(1L);
     this.sendMessage(params);
@@ -229,9 +229,9 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeReplyRetract() throws Exception {
     params.setSessionMessageType(EventType.REPLY_RETRACT.getValue());
-    params.setMsgid(TEST_GROUP_MSG_ID + "reply_1");
-    params.setTemail("c");
-    params.setParentMsgId(TEST_GROUP_MSG_ID + "1");
+    params.setMsgid("reply_1");
+    params.setTemail("e");
+    params.setParentMsgId("at1");
     this.sendMessage(params);
   }
 
@@ -241,9 +241,9 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeReplyDelete() throws Exception {
     params.setSessionMessageType(EventType.REPLY_DELETE.getValue());
-    params.setMsgid(gson.toJson(Arrays.asList(TEST_GROUP_MSG_ID + "reply_2", TEST_GROUP_MSG_ID + "reply_3", TEST_GROUP_MSG_ID + "reply_4")));
-    params.setTemail("c");
-    params.setParentMsgId(TEST_GROUP_MSG_ID + "1");
+    params.setMsgid(gson.toJson(Arrays.asList("reply_2", "reply_3", "reply_4")));
+    params.setTemail("e");
+    params.setParentMsgId("at1");
     this.sendMessage(params);
   }
 
@@ -306,6 +306,20 @@ public class NotificationGroupChatServiceTest {
   public void testEventTypeBlacklistCancel() throws Exception {
     params.setSessionMessageType(EventType.BLACKLIST_CANCEL.getValue());
     params.setTemail(gson.toJson(Arrays.asList("e", "f")));
+    this.sendMessage(params);
+  }
+
+  /**
+   * EventType RECEIVE_AT 44 @消息发送
+   */
+  @Test
+  public void testEventTypeReceiveAt() throws Exception {
+    params.setSessionMessageType(EventType.RECEIVE_AT.getValue());
+    params.setMsgid("at1");
+    params.setTemail("a");
+    params.setSeqNo(1L);
+    params.setToMsg("这是一条群聊测试@消息！");
+    params.setAt(gson.toJson(Arrays.asList("e", "f")));
     this.sendMessage(params);
   }
 

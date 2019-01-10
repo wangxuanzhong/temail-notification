@@ -17,8 +17,6 @@ public class MailAgentParams {
   private String toMsg;
   // 时间戳
   private Long timestamp;
-  // @对象
-  private String at;
 
   private String header;
   private String xPacketId;
@@ -98,14 +96,6 @@ public class MailAgentParams {
     this.header = header;
   }
 
-  public String getAt() {
-    return at;
-  }
-
-  public void setAt(String at) {
-    this.at = at;
-  }
-
   public String getxPacketId() {
     return xPacketId;
   }
@@ -125,7 +115,6 @@ public class MailAgentParams {
         ", seqNo=" + seqNo +
         ", toMsg length='" + (toMsg == null ? 0 : toMsg.length()) + '\'' +
         ", timestamp=" + timestamp +
-        ", at='" + at + '\'' +
         ", header='" + header + '\'' +
         ", xPacketId='" + xPacketId + '\'' +
         '}';

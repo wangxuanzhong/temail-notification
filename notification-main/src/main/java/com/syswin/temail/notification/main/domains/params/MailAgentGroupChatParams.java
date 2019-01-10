@@ -14,6 +14,8 @@ public class MailAgentGroupChatParams extends MailAgentParams {
   private String adminName;
   // 成员类型
   private Integer type;
+  // @对象
+  private String at;
 
 
   public String getGroupTemail() {
@@ -64,6 +66,14 @@ public class MailAgentGroupChatParams extends MailAgentParams {
     this.type = type;
   }
 
+  public String getAt() {
+    return at;
+  }
+
+  public void setAt(String at) {
+    this.at = at;
+  }
+
   @Override
   public String toString() {
     return "MailAgentGroupChatParams{" +
@@ -73,6 +83,7 @@ public class MailAgentGroupChatParams extends MailAgentParams {
         ", name='" + name + '\'' +
         ", adminName='" + adminName + '\'' +
         ", type=" + type +
+        ", at='" + at + '\'' +
         '}' + super.toString();
   }
 }

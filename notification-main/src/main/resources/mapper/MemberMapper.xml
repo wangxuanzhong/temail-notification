@@ -34,7 +34,6 @@
     SELECT `temail`
     FROM `member`
     WHERE `group_temail` = #{groupTemail}
-    AND `user_status` = ${@com.syswin.temail.notification.main.domains.Member$UserStatus@NORMAL.getValue()}
     AND `group_status` = ${@com.syswin.temail.notification.main.domains.Member$GroupStatus@NORMAL.getValue()}
     <if test="role != null and role != '' ">AND `role` = #{role}</if>
   </select>
