@@ -100,7 +100,7 @@ public class NotificationServiceTest {
 
     // 批量删除消息
     params.setMsgid(gson.toJson(Arrays.asList("2", "3", "4")));
-    this.sendMessage(params);
+//    this.sendMessage(params);
 
     // 删除会话
     params.setMsgid(null);
@@ -109,7 +109,7 @@ public class NotificationServiceTest {
 
     // 删除会话和消息
     params.setDeleteAllMsg(true);
-//    this.sendMessage(params);
+    this.sendMessage(params);
   }
 
   /**

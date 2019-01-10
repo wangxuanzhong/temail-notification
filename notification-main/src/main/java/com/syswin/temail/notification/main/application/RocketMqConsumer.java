@@ -31,31 +31,39 @@ public class RocketMqConsumer {
   private final DefaultMQPushConsumer singleChatConsumer = new DefaultMQPushConsumer("notificationSingleChatConsumer");
   private final DefaultMQPushConsumer groupChatConsumer = new DefaultMQPushConsumer("notificationGroupChatConsumer");
   private final DefaultMQPushConsumer topicConsumer = new DefaultMQPushConsumer("notificationTopicConsumer");
+  private final DefaultMQPushConsumer ossConsumer = new DefaultMQPushConsumer("temail_oss_notification_consumer");
 
   private final int TYPE_0_SINGLE_CHAT = 0;
   private final int TYPE_1_GROUP_CHAT = 1;
   private final int TYPE_2_TOPIC = 2;
+  private final int TYPE_3_OSS = 3;
 
   private NotificationService notificationService;
   private NotificationGroupChatService notificationGroupChatService;
   private TopicService topicService;
+  private NotificationOssService ossService;
   private String host;
   private String singleChatTopic;
   private String groupChatTopic;
   private String topicChatTopic;
+  private String ossTopic;
 
   public RocketMqConsumer(NotificationService notificationService, NotificationGroupChatService notificationGroupChatService,
-      TopicService topicService, @Value("${spring.rocketmq.host}") String host,
+      TopicService topicService, NotificationOssService ossService,
+      @Value("${spring.rocketmq.host}") String host,
       @Value("${spring.rocketmq.topics.mailAgent.singleChat}") String singleChatTopic,
       @Value("${spring.rocketmq.topics.mailAgent.groupChat}") String groupChatTopic,
-      @Value("${spring.rocketmq.topics.mailAgent.topicChat}") String topicChatTopic) {
+      @Value("${spring.rocketmq.topics.mailAgent.topicChat}") String topicChatTopic,
+      @Value("spring.rocketmq.topics.mailAgent.oss") String ossTopic) {
     this.notificationService = notificationService;
     this.notificationGroupChatService = notificationGroupChatService;
     this.topicService = topicService;
+    this.ossService = ossService;
     this.host = host;
     this.singleChatTopic = singleChatTopic;
     this.groupChatTopic = groupChatTopic;
     this.topicChatTopic = topicChatTopic;
+    this.ossTopic = ossTopic;
   }
 
   /**
@@ -67,6 +75,7 @@ public class RocketMqConsumer {
     initConsumer(singleChatConsumer, singleChatTopic, TYPE_0_SINGLE_CHAT);
     initConsumer(groupChatConsumer, groupChatTopic, TYPE_1_GROUP_CHAT);
     initConsumer(topicConsumer, topicChatTopic, TYPE_2_TOPIC);
+    initConsumer(ossConsumer, ossTopic, TYPE_3_OSS);
   }
 
 
@@ -116,6 +125,9 @@ public class RocketMqConsumer {
         break;
       case TYPE_2_TOPIC:
         topicService.handleMqMessage(body);
+        break;
+      case TYPE_3_OSS:
+        ossService.handleMqMessage(body);
         break;
     }
   }
