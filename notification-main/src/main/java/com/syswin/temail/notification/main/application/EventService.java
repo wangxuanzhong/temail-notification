@@ -390,6 +390,8 @@ public class EventService {
         event.setEventType(EventType.DO_NOT_DISTURB.getValue());
         memberMapper.updateUserStatus(member);
         break;
+      default:
+        return;
     }
 
     // 发送到MQ以便多端同步
