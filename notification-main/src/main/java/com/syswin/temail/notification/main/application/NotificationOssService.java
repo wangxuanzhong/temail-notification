@@ -3,15 +3,15 @@ package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.OssEventType;
-import com.syswin.temail.notification.main.domains.params.MailAgentOssParams;
+import com.syswin.temail.notification.main.domains.params.OSSParams;
 import com.syswin.temail.notification.main.infrastructure.OssEventMapper;
-import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class NotificationOssService {
@@ -30,16 +30,16 @@ public class NotificationOssService {
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body) {
 
-    MailAgentOssParams params = jsonService.fromJson(body, MailAgentOssParams.class);
+    OSSParams params = jsonService.fromJson(body, OSSParams.class);
 
     LOGGER.info("temail-oss params: {}", params);
     LOGGER.info("temail-oss event type: {}", OssEventType.getByValue(params.getType()));
 
-
     switch (Objects.requireNonNull(OssEventType.getByValue(params.getType()))) {
       case USER_TEMAIL_DELETED:
-        List<String> temails = jsonService.fromJson(params.getTemails(), List.class);
-        temails.forEach(ossEventMapper::deleteTemail);
+        if(CollectionUtils.isEmpty(params.getTemails())) {
+          params.getTemails().forEach(ossEventMapper::deleteTemail);
+        }
         break;
     }
 
