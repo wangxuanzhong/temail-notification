@@ -3,7 +3,7 @@ package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.OssEventType;
-import com.syswin.temail.notification.main.domains.params.OSSParams;
+import com.syswin.temail.notification.main.domains.params.OssParams;
 import com.syswin.temail.notification.main.infrastructure.OssEventMapper;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class NotificationOssService {
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body) {
 
-    OSSParams params = jsonService.fromJson(body, OSSParams.class);
+    OssParams params = jsonService.fromJson(body, OssParams.class);
 
     LOGGER.info("temail-oss params: {}", params);
     LOGGER.info("temail-oss event type: {}", OssEventType.getByValue(params.getType()));

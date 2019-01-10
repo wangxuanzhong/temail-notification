@@ -54,7 +54,7 @@ public class RocketMqConsumer {
       @Value("${spring.rocketmq.topics.mailAgent.singleChat}") String singleChatTopic,
       @Value("${spring.rocketmq.topics.mailAgent.groupChat}") String groupChatTopic,
       @Value("${spring.rocketmq.topics.mailAgent.topicChat}") String topicChatTopic,
-      @Value("spring.rocketmq.topics.mailAgent.oss") String ossTopic) {
+      @Value("${spring.rocketmq.topics.mailAgent.oss}") String ossTopic) {
     this.notificationService = notificationService;
     this.notificationGroupChatService = notificationGroupChatService;
     this.topicService = topicService;

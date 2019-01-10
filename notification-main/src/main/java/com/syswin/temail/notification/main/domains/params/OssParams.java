@@ -5,7 +5,7 @@ import java.util.List;
 /**
  *  运营后台mq消息实体类
  */
-public class OSSParams {
+public class OssParams {
 
   private Integer id;
   //temail集合
@@ -47,7 +47,7 @@ public class OSSParams {
 
   @Override
   public String toString() {
-    return "OSSParams{" +
+    return "OssParams{" +
         "id=" + id +
         ", temails=" + temails +
         ", type='" + type + '\'' +
