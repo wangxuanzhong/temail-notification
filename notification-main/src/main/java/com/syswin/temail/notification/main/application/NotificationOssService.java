@@ -37,7 +37,7 @@ public class NotificationOssService {
 
     switch (Objects.requireNonNull(OssEventType.getByValue(params.getType()))) {
       case USER_TEMAIL_DELETED:
-        if(CollectionUtils.isEmpty(params.getTemails())) {
+        if(!CollectionUtils.isEmpty(params.getTemails())) {
           params.getTemails().forEach(ossEventMapper::deleteTemail);
         }
         break;
