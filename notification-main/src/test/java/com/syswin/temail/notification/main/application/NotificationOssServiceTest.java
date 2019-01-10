@@ -23,7 +23,7 @@ public class NotificationOssServiceTest {
   @Before
   public void setUp() {
     params = new OssParams();
-    params.setId(2);
+    params.setId(2L);
     params.setTemails(Arrays.asList("a@t.email", "b@t.email", "c@t.email"));
     params.setType(OssEventType.USER_TEMAIL_DELETED.getValue());
     params.setTimestamp(System.currentTimeMillis());

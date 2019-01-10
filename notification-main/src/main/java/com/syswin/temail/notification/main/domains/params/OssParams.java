@@ -7,17 +7,17 @@ import java.util.List;
  */
 public class OssParams {
 
-  private Integer id;
+  private Long id;
   //temail集合
   private List<String> temails;
   private String type;
   private Long timestamp;
 
-  public Integer getId() {
+  public Long getId() {
     return id;
   }
 
-  public void setId(Integer id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
