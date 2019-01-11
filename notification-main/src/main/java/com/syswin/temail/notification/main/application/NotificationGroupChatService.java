@@ -80,8 +80,6 @@ public class NotificationGroupChatService {
         break;
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentGroupChatParams.MSG_ID_SPLIT)) {
-          event.setFrom(event.getGroupTemail());
-          event.setTo(event.getTemail());
           event.setMsgId(msgId);
           if (eventMapper.selectEventsByMsgId(event).size() == 0) {
             this.sendSingleMessage(event, EventType.GROUP_PULLED.getValue(), header);
@@ -101,8 +99,6 @@ public class NotificationGroupChatService {
       case ADD_GROUP:
         event.setRole(MemberRole.ADMIN.getValue());
         memberMapper.insert(event);
-        event.setFrom(event.getGroupTemail());
-        event.setTo(event.getTemail());
         event.addGroupMsgId(EventType.ADD_GROUP);
         this.sendSingleMessage(event, header);
         break;
@@ -112,7 +108,7 @@ public class NotificationGroupChatService {
         event.setTemail(null);
         memberMapper.deleteGroupMember(event);
         break;
-      case ADD_MEMBER:
+      case ADD_MEMBER: // 只通知被添加的人
         // 校验群成员是否已存在，不存在时添加到数据库
         List<String> members = memberMapper.selectByGroupTemail(event);
         if (!members.contains(event.getTemail())) {
@@ -123,13 +119,12 @@ public class NotificationGroupChatService {
             LOGGER.warn("add member duplicate exception: ", e);
             break;
           }
-          event.notifyToAll();
-          this.sendGroupMessageToAvaliableMembers(event, header);
+          this.sendSingleMessage(event, header);
         } else {
           LOGGER.warn("{} was group {} member, do nothing.", event.getTemail(), event.getGroupTemail());
         }
         break;
-      case DELETE_MEMBER:
+      case DELETE_MEMBER: // 只通知被删除的人
         List<String> temails = jsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
         }.getType());
         List<String> names = jsonService.fromJson(event.getName(), new TypeToken<List<String>>() {
@@ -146,27 +141,16 @@ public class NotificationGroupChatService {
           memberMapper.deleteGroupMember(event);
         }
 
+        // 通知当事人被移除群聊
         for (int i = 0; i < temails.size(); i++) {
-          event.setTemail(temails.get(i));
           event.setName(names.get(i));
-          // 通知所有人
-          event.notifyToAll();
-          this.sendGroupMessageToAvaliableMembers(event, header);
-          // 通知当事人被移除群聊
-          event.setFrom(event.getGroupTemail());
-          event.setTo(temails.get(i));
           event.setTemail(temails.get(i));
           this.sendSingleMessage(event, header);
         }
         break;
-      case LEAVE_GROUP:
+      case LEAVE_GROUP: // 只通知被当事人
         memberMapper.deleteGroupMember(event);
-        // 通知所有人
-        event.notifyToAll();
-        this.sendGroupMessageToAvaliableMembers(event, header);
         // 通知当事人
-        event.setFrom(event.getGroupTemail());
-        event.setTo(event.getTemail());
         this.sendSingleMessage(event, header);
         break;
       case APPLY:
@@ -182,13 +166,9 @@ public class NotificationGroupChatService {
         this.sendGroupMessageToAvaliableMembers(event, header);
         // 通知申请人
         event.removeEventMsgId();
-        event.setFrom(event.getGroupTemail());
-        event.setTo(event.getTemail());
         this.sendSingleMessage(event, header);
         break;
       case INVITATION:
-        event.setFrom(event.getGroupTemail());
-        event.setTo(event.getTemail());
         event.addGroupMsgId(EventType.INVITATION);
         this.sendSingleMessage(event, header);
         break;
@@ -197,8 +177,6 @@ public class NotificationGroupChatService {
         event.notifyToAdmin();
         this.sendGroupMessageToAvaliableMembers(event, header);
         // 通知自己，提供多端同步功能
-        event.setFrom(event.getGroupTemail());
-        event.setTo(event.getTemail());
         event.addGroupMsgId(EventType.INVITATION);
         this.sendSingleMessage(event, header);
         break;
@@ -223,8 +201,6 @@ public class NotificationGroupChatService {
       case GROUP_ARCHIVE:
       case GROUP_ARCHIVE_CANCEL:
       case GROUP_SESSION_HIDDEN:
-        event.setFrom(event.getGroupTemail());
-        event.setTo(event.getTemail());
         this.sendSingleMessage(event, header);
         break;
       case GROUP_STICK:
@@ -308,6 +284,8 @@ public class NotificationGroupChatService {
   private void sendSingleMessage(Event event, Integer CDTPEventType, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
+    event.setFrom(event.getGroupTemail());
+    event.setTo(event.getTemail());
     this.insert(event);
     rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, jsonService.toJson(event))));
   }
