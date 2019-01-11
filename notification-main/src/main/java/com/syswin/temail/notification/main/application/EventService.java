@@ -89,6 +89,7 @@ public class EventService {
       Map<String, Event> sessionEventMap = eventMap.get(key);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
         case RECEIVE:
+        case RECEIVE_AT:
           messages.add(event.getMsgId());
           break;
         case DESTROY:
@@ -101,6 +102,7 @@ public class EventService {
           sessionEventMap.put(event.getMsgId(), event);
           break;
         case RETRACT:
+        case DELETE_AT:
           // 单聊逻辑: 当from和to相同时，数据库中存储的owner为消息接收者，to为通知者，查询结果恢复原结构
           if (event.getFrom().equals(event.getTo()) && event.getOwner() != null) {
             event.setTo(event.getOwner());

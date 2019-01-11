@@ -256,8 +256,32 @@ public class NotificationGroupChatService {
         List<String> ats = jsonService.fromJson(event.getAt(), new TypeToken<List<String>>() {
         }.getType());
         ats.add(event.getTemail());
-        this.sendAtMessage(event, ats, header);
+        // at中的人如果不是正常状态，则不发送通知
+        List<String> avaliableMembers = memberMapper.selectAvaliableMember(event);
+        ats.removeIf(at -> !avaliableMembers.contains(at));
+        this.sendGroupMessage(event, ats, event.getEventType(), header);
         break;
+      case DELETE_AT:
+        // 查询父消息，如果是@消息则只发送给@的人，否则发送给所有人
+        Event condition = new Event();
+        condition.setEventType(EventType.RECEIVE_AT.getValue());
+        condition.setMsgId(event.getMsgId());
+
+        List<Event> events = eventMapper.selectEventsByMsgId(condition);
+        if (events.isEmpty()) {
+          LOGGER.error("do not found source message!");
+          break;
+        } else {
+          Event parentEvent = events.get(0).autoReadExtendParam(jsonService);
+          List<String> tos = jsonService.fromJson(parentEvent.getAt(), new TypeToken<List<String>>() {
+          }.getType());
+          // 添加原消息发送者
+          tos.add(parentEvent.getTemail());
+          this.sendGroupMessage(event, tos, event.getEventType(), header);
+        }
+        break;
+      default:
+        LOGGER.warn("unsupport event type!");
     }
   }
 
@@ -324,18 +348,6 @@ public class NotificationGroupChatService {
       this.insert(event);
       rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, CDTPEventType, header, jsonService.toJson(event))));
     }
-  }
-
-  /**
-   * 发送给At的人
-   */
-  private void sendAtMessage(Event event, List<String> ats, String header)
-      throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
-    // at中的人如果不是正常状态，则不发送通知
-    List<String> avaliableMembers = memberMapper.selectAvaliableMember(event);
-    ats.removeIf(at -> !avaliableMembers.contains(at));
-
-    this.sendGroupMessage(event, ats, event.getEventType(), header);
   }
 
   /**

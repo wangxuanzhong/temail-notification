@@ -323,6 +323,17 @@ public class NotificationGroupChatServiceTest {
     this.sendMessage(params);
   }
 
+  /**
+   * EventType DELETE_AT 45 @消息删除
+   */
+  @Test
+  public void testEventTypeDeleteAt() throws Exception {
+    params.setSessionMessageType(EventType.DELETE_AT.getValue());
+    params.setMsgid("at1");
+    params.setTemail("a");
+    this.sendMessage(params);
+  }
+
 
   /**
    * 完成群聊流程

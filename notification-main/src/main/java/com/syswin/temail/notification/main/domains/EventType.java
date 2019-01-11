@@ -47,6 +47,7 @@ public enum EventType {
 
   // @部分
   RECEIVE_AT(44, "@消息发送"),
+  DELETE_AT(45, "@消息删除"),
 
   // 回复部分
   REPLY(18, "回复消息"),
