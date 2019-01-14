@@ -256,6 +256,20 @@ public class NotificationGroupChatService {
           this.sendGroupMessage(event, tos, event.getEventType(), header);
         }
         break;
+      case ADD_ADMIN:
+        event.setRole(MemberRole.ADMIN.getValue());
+        memberMapper.updateRole(event);
+        event.addGroupMsgId(EventType.ADD_ADMIN);
+        event.notifyToAll();
+        this.sendGroupMessageToAvaliableMembers(event, header);
+        break;
+      case DELETE_ADMIN:
+        event.setRole(MemberRole.NORMAL.getValue());
+        memberMapper.updateRole(event);
+        event.notifyToAll();
+        event.addGroupMsgId(EventType.ADD_ADMIN);
+        this.sendGroupMessageToAvaliableMembers(event, header);
+        break;
       default:
         LOGGER.warn("unsupport event type!");
     }

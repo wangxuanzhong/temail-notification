@@ -49,4 +49,8 @@
   <select id="selectUserStatus" resultType="java.lang.Integer">
     SELECT `user_status` FROM `member` WHERE `temail` = #{temail} AND `group_temail` = #{groupTemail}
   </select>
+
+  <update id="updateRole" parameterType="com.syswin.temail.notification.main.domains.Event">
+    UPDATE `member` SET `role` = #{role} WHERE `group_temail` = #{groupTemail} AND `temail` = #{temail}
+  </update>
 </mapper>

@@ -11,12 +11,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("h2")
+//@ActiveProfiles("h2")
 public class NotificationGroupChatServiceTest {
 
   private final String TEST_GROUP = "g";
@@ -331,6 +330,26 @@ public class NotificationGroupChatServiceTest {
     params.setSessionMessageType(EventType.DELETE_AT.getValue());
     params.setMsgid("at1");
     params.setTemail("a");
+    this.sendMessage(params);
+  }
+
+  /**
+   * EventType ADD_ADMIN 46 添加群管理员
+   */
+  @Test
+  public void testEventTypeAddAdmin() throws Exception {
+    params.setSessionMessageType(EventType.ADD_ADMIN.getValue());
+    params.setTemail("b");
+    this.sendMessage(params);
+  }
+
+  /**
+   * EventType DELETE_ADMIN 47 移除群管理员
+   */
+  @Test
+  public void testEventTypeDeleteAdmin() throws Exception {
+    params.setSessionMessageType(EventType.DELETE_ADMIN.getValue());
+    params.setTemail("b");
     this.sendMessage(params);
   }
 

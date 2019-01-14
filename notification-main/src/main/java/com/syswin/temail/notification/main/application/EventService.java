@@ -182,6 +182,21 @@ public class EventService {
             sessionEventMap.put(UUID.randomUUID().toString(), event);
           }
           break;
+        case ADD_ADMIN:
+          // 只有当事人添加此事件
+          if (to.equals(event.getTemail())) {
+            sessionEventMap.put(event.getMsgId(), event);
+          }
+          break;
+        case DELETE_ADMIN:
+          if (sessionEventMap.containsKey(event.getMsgId())) {
+            sessionEventMap.remove(event.getMsgId());
+          } else {
+            // 只有当事人添加此事件
+            if (to.equals(event.getTemail())) {
+              sessionEventMap.put(event.getMsgId(), event);
+            }
+          }
       }
     });
 

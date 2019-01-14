@@ -44,6 +44,8 @@ public enum EventType {
   BLACKLIST_CANCEL(41, "群成员移出黑名单"),
   DO_NOT_DISTURB(42, "设置群免打扰"),
   DO_NOT_DISTURB_CANCEL(43, "设置群免打扰取消"),
+  ADD_ADMIN(46, "添加群管理员"),
+  DELETE_ADMIN(47, "移除群管理员"),
 
   // @部分
   RECEIVE_AT(44, "@消息发送"),
