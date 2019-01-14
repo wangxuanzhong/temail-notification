@@ -147,7 +147,7 @@ public class NotificationGroupChatService {
           event.setName(names.get(i));
           // 通知所有人
           event.notifyToAll();
-          this.sendGroupMessageToAvaliableMembers(event, header);
+          this.sendGroupMessageWithOneEvent(event, header);
           // 通知当事人被移除群聊
           event.setFrom(event.getGroupTemail());
           event.setTo(temails.get(i));
@@ -159,7 +159,7 @@ public class NotificationGroupChatService {
         memberMapper.deleteGroupMember(event);
         // 通知所有人
         event.notifyToAll();
-        this.sendGroupMessageToAvaliableMembers(event, header);
+        this.sendGroupMessageWithOneEvent(event, header);
         // 通知当事人
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
@@ -168,14 +168,14 @@ public class NotificationGroupChatService {
       case APPLY:
         event.notifyToAdmin();
         event.addGroupMsgId(EventType.APPLY);
-        this.sendGroupMessageToAvaliableMembers(event, header);
+        this.sendGroupMessageWithOneEvent(event, header);
         break;
       case APPLY_ADOPT:
       case APPLY_REFUSE:
         // 通知所有管理员，提供多端同步功能
         event.notifyToAdmin();
         event.addGroupMsgId(EventType.APPLY);
-        this.sendGroupMessageToAvaliableMembers(event, header);
+        this.sendGroupMessageWithOneEvent(event, header);
         // 通知申请人
         event.removeEventMsgId();
         event.setFrom(event.getGroupTemail());
@@ -191,7 +191,7 @@ public class NotificationGroupChatService {
       case INVITATION_ADOPT:
       case INVITATION_REFUSE:
         event.notifyToAdmin();
-        this.sendGroupMessageToAvaliableMembers(event, header);
+        this.sendGroupMessageWithOneEvent(event, header);
         // 通知自己，提供多端同步功能
         event.setFrom(event.getGroupTemail());
         event.setTo(event.getTemail());
