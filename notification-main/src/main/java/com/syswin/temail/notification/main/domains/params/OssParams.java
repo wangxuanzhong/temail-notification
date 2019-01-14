@@ -3,7 +3,7 @@ package com.syswin.temail.notification.main.domains.params;
 import java.util.List;
 
 /**
- *  运营后台mq消息实体类
+ * 运营后台mq消息实体类
  */
 public class OssParams {
 

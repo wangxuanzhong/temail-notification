@@ -3,7 +3,7 @@ package com.syswin.temail.notification.main.domains;
 /**
  * 运营后台时间类型
  */
-public enum OssEventType {
+public enum OssType {
 
   //temail账号注销
   USER_TEMAIL_DELETED("UserTemailDeleted");
@@ -11,12 +11,12 @@ public enum OssEventType {
 
   private String value;
 
-  OssEventType(String type) {
+  OssType(String type) {
     this.value = type;
   }
 
-  public static OssEventType getByValue(String value) {
-    for (OssEventType event :
+  public static OssType getByValue(String value) {
+    for (OssType event :
         values()) {
       if (event.getValue().equals(value)) {
         return event;

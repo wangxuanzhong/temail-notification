@@ -4,7 +4,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface OssEventMapper {
+public interface OssMapper {
 
   void deleteTemail(@Param("to") String to);
 

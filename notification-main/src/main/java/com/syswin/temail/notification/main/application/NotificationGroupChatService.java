@@ -148,7 +148,7 @@ public class NotificationGroupChatService {
           this.sendSingleMessage(event, header);
         }
         break;
-      case LEAVE_GROUP: // 只通知被当事人
+      case LEAVE_GROUP: // 只通知当事人
         memberMapper.deleteGroupMember(event);
         // 通知当事人
         this.sendSingleMessage(event, header);

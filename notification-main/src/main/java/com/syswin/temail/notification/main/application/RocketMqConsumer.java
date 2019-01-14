@@ -41,7 +41,7 @@ public class RocketMqConsumer {
   private NotificationService notificationService;
   private NotificationGroupChatService notificationGroupChatService;
   private TopicService topicService;
-  private NotificationOssService ossService;
+  private OssService ossService;
   private String host;
   private String singleChatTopic;
   private String groupChatTopic;
@@ -49,12 +49,12 @@ public class RocketMqConsumer {
   private String ossTopic;
 
   public RocketMqConsumer(NotificationService notificationService, NotificationGroupChatService notificationGroupChatService,
-      TopicService topicService, NotificationOssService ossService,
+      TopicService topicService, OssService ossService,
       @Value("${spring.rocketmq.host}") String host,
       @Value("${spring.rocketmq.topics.mailAgent.singleChat}") String singleChatTopic,
       @Value("${spring.rocketmq.topics.mailAgent.groupChat}") String groupChatTopic,
       @Value("${spring.rocketmq.topics.mailAgent.topicChat}") String topicChatTopic,
-      @Value("${spring.rocketmq.topics.mailAgent.oss}") String ossTopic) {
+      @Value("${spring.rocketmq.topics.oss}") String ossTopic) {
     this.notificationService = notificationService;
     this.notificationGroupChatService = notificationGroupChatService;
     this.topicService = topicService;

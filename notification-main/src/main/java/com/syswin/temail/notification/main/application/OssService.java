@@ -2,9 +2,9 @@ package com.syswin.temail.notification.main.application;
 
 
 import com.syswin.temail.notification.foundation.application.JsonService;
-import com.syswin.temail.notification.main.domains.OssEventType;
+import com.syswin.temail.notification.main.domains.OssType;
 import com.syswin.temail.notification.main.domains.params.OssParams;
-import com.syswin.temail.notification.main.infrastructure.OssEventMapper;
+import com.syswin.temail.notification.main.infrastructure.OssMapper;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,15 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @Service
-public class NotificationOssService {
+public class OssService {
 
-  private Logger LOGGER  = LoggerFactory.getLogger(NotificationOssService.class);
-  private final OssEventMapper ossEventMapper;
+  private final OssMapper ossMapper;
   private final JsonService jsonService;
+  private Logger LOGGER = LoggerFactory.getLogger(OssService.class);
 
   @Autowired
-  public NotificationOssService(OssEventMapper ossEventMapper, JsonService jsonService) {
-    this.ossEventMapper = ossEventMapper;
+  public OssService(OssMapper ossMapper, JsonService jsonService) {
+    this.ossMapper = ossMapper;
     this.jsonService = jsonService;
   }
 
@@ -33,12 +33,12 @@ public class NotificationOssService {
     OssParams params = jsonService.fromJson(body, OssParams.class);
 
     LOGGER.info("temail-oss params: {}", params);
-    LOGGER.info("temail-oss event type: {}", OssEventType.getByValue(params.getType()));
+    LOGGER.info("temail-oss event type: {}", OssType.getByValue(params.getType()));
 
-    switch (Objects.requireNonNull(OssEventType.getByValue(params.getType()))) {
+    switch (Objects.requireNonNull(OssType.getByValue(params.getType()))) {
       case USER_TEMAIL_DELETED:
-        if(!CollectionUtils.isEmpty(params.getTemails())) {
-          params.getTemails().forEach(ossEventMapper::deleteTemail);
+        if (!CollectionUtils.isEmpty(params.getTemails())) {
+          params.getTemails().forEach(ossMapper::deleteTemail);
         }
         break;
     }
