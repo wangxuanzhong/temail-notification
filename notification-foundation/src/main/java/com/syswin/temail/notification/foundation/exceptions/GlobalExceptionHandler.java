@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Response> handleException(Exception e) {
-    logger.error("Exception:{}", getExceptionStack(e));
+    LOGGER.error("Exception:{}", getExceptionStack(e));
     return new ResponseEntity<>(new Response(HttpStatus.INTERNAL_SERVER_ERROR, "system exception: " + e), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 

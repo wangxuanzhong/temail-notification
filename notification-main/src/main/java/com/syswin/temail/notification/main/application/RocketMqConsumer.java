@@ -93,7 +93,7 @@ public class RocketMqConsumer {
       public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
         try {
           for (MessageExt msg : list) {
-            LOGGER.info("MQ: MsgId={} TopicEvent={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
+            LOGGER.info("MQ: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
             handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), type);
           }
         } catch (DuplicateKeyException e) {
@@ -142,5 +142,8 @@ public class RocketMqConsumer {
 
     topicConsumer.shutdown();
     LOGGER.info("MQ: stop topicConsumer.");
+
+    ossConsumer.shutdown();
+    LOGGER.info("MQ: stop ossConsumer.");
   }
 }

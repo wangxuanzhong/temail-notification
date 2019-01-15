@@ -5,6 +5,7 @@ import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.OssType;
 import com.syswin.temail.notification.main.domains.params.OssParams;
 import com.syswin.temail.notification.main.infrastructure.OssMapper;
+import java.lang.invoke.MethodHandles;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +17,10 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class OssService {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   private final OssMapper ossMapper;
   private final JsonService jsonService;
-  private Logger LOGGER = LoggerFactory.getLogger(OssService.class);
 
   @Autowired
   public OssService(OssMapper ossMapper, JsonService jsonService) {
@@ -33,7 +35,7 @@ public class OssService {
     OssParams params = jsonService.fromJson(body, OssParams.class);
 
     LOGGER.info("temail-oss params: {}", params);
-    LOGGER.info("temail-oss event type: {}", OssType.getByValue(params.getType()));
+    LOGGER.info("temail-oss type: {}", OssType.getByValue(params.getType()));
 
     switch (Objects.requireNonNull(OssType.getByValue(params.getType()))) {
       case USER_TEMAIL_DELETED:
