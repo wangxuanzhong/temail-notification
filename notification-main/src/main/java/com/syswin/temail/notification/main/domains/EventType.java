@@ -16,6 +16,8 @@ public enum EventType {
   TRASH(35, "移送废纸篓"),
   TRASH_CANCEL(36, "废纸篓消息还原"),
   TRASH_DELETE(37, "废纸篓消息删除"),
+  DO_NOT_DISTURB(48, "设置免打扰"),
+  DO_NOT_DISTURB_CANCEL(49, "设置免打扰取消"),
 
   // 群管理部分
   GROUP_RESET(-101, "重置群聊消息未读数"),
@@ -42,8 +44,8 @@ public enum EventType {
   GROUP_SESSION_HIDDEN(38, "群会话隐藏"),
   BLACKLIST(40, "群成员加入黑名单"),
   BLACKLIST_CANCEL(41, "群成员移出黑名单"),
-  DO_NOT_DISTURB(42, "设置群免打扰"),
-  DO_NOT_DISTURB_CANCEL(43, "设置群免打扰取消"),
+  GROUP_DO_NOT_DISTURB(42, "设置群免打扰"),
+  GROUP_DO_NOT_DISTURB_CANCEL(43, "设置群免打扰取消"),
   ADD_ADMIN(46, "添加群管理员"),
   DELETE_ADMIN(47, "移除群管理员"),
 

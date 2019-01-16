@@ -114,28 +114,40 @@ public class Event {
 
 
   /**
-   * 自定义单聊消息的msgId
-   *
-   * @param eventType 需要匹配的通知类型
+   * 获取msgId，如果msgId为空则临时生成，反向业务使用对立事件类型生成
    */
-  public void addMsgId(EventType eventType) {
-    this.msgId = this.from + "_" + this.to + "_" + eventType.getValue();
-  }
+  public String getMsgId(EventType eventType) {
+    EventType againstEventType;
+    switch (eventType) {
+      // 单聊
+      case DO_NOT_DISTURB_CANCEL:
+        againstEventType = EventType.DO_NOT_DISTURB;
+        break;
+      // 群聊
+      case APPLY_ADOPT:
+      case APPLY_REFUSE:
+        againstEventType = EventType.APPLY;
+        break;
+      case INVITATION_ADOPT:
+      case INVITATION_REFUSE:
+        againstEventType = EventType.INVITATION;
+        break;
+      case DELETE_ADMIN:
+        againstEventType = EventType.ADD_ADMIN;
+        break;
+      case GROUP_DO_NOT_DISTURB_CANCEL:
+        againstEventType = EventType.GROUP_DO_NOT_DISTURB;
+        break;
+      default:
+        againstEventType = eventType;
+        break;
+    }
 
-  /**
-   * 自定义群聊消息的msgId
-   *
-   * @param eventType 需要匹配的通知类型
-   */
-  public void addGroupMsgId(EventType eventType) {
-    this.msgId = this.groupTemail + "_" + this.temail + "_" + eventType.getValue();
-  }
-
-  /**
-   * 清除消息的msgId
-   */
-  public void removeEventMsgId() {
-    this.msgId = null;
+    if (this.msgId == null) {
+      return this.from + "_" + this.to + "_" + this.temail + "_" + againstEventType;
+    } else {
+      return this.msgId;
+    }
   }
 
   /**

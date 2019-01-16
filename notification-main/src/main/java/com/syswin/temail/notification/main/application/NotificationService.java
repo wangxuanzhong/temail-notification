@@ -1,5 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
@@ -112,7 +113,8 @@ public class NotificationService {
       case REPLY_DELETE:
       case TRASH:
         // 删除操作msgId是多条，存入msgIds字段
-        event.setMsgIds(jsonService.fromJson(event.getMsgId(), List.class));
+        event.setMsgIds(jsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
+        }.getType()));
         event.setMsgId(null);
         // from是操作人，to是会话另一方
         event.setFrom(params.getTo());
@@ -138,7 +140,6 @@ public class NotificationService {
         // from是操作人，to是会话的另一方
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
-        event.addMsgId(EventType.ARCHIVE);
         sendMessage(event, header);
         break;
       case TRASH_CANCEL:
@@ -149,6 +150,12 @@ public class NotificationService {
         event.setTo(params.getOwner());
         sendMessage(event, header);
         break;
+      case DO_NOT_DISTURB:
+      case DO_NOT_DISTURB_CANCEL:
+        this.sendMessage(event, header);
+        break;
+      default:
+        LOGGER.warn("unsupport event type!");
     }
   }
 

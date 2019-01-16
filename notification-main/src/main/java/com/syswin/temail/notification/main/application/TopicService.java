@@ -95,7 +95,6 @@ public class TopicService {
       case TOPIC_ARCHIVE_CANCEL:
         // from是操作人，to为空
         topicEvent.setTo(params.getFrom());
-        topicEvent.addEventMsgId(EventType.ARCHIVE);
         sendMessage(topicEvent, header);
         break;
       case TOPIC_SESSION_DELETE:

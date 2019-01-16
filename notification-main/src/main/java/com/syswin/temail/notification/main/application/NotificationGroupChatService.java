@@ -99,7 +99,6 @@ public class NotificationGroupChatService {
       case ADD_GROUP:
         event.setRole(MemberRole.ADMIN.getValue());
         memberMapper.insert(event);
-        event.addGroupMsgId(EventType.ADD_GROUP);
         this.sendSingleMessage(event, header);
         break;
       case DELETE_GROUP:
@@ -155,21 +154,17 @@ public class NotificationGroupChatService {
         break;
       case APPLY:
         event.notifyToAdmin();
-        event.addGroupMsgId(EventType.APPLY);
         this.sendGroupMessageToAvaliableMembers(event, header);
         break;
       case APPLY_ADOPT:
       case APPLY_REFUSE:
         // 通知所有管理员，提供多端同步功能
         event.notifyToAdmin();
-        event.addGroupMsgId(EventType.APPLY);
         this.sendGroupMessageToAvaliableMembers(event, header);
         // 通知申请人
-        event.removeEventMsgId();
         this.sendSingleMessage(event, header);
         break;
       case INVITATION:
-        event.addGroupMsgId(EventType.INVITATION);
         this.sendSingleMessage(event, header);
         break;
       case INVITATION_ADOPT:
@@ -177,12 +172,10 @@ public class NotificationGroupChatService {
         event.notifyToAdmin();
         this.sendGroupMessageToAvaliableMembers(event, header);
         // 通知自己，提供多端同步功能
-        event.addGroupMsgId(EventType.INVITATION);
         this.sendSingleMessage(event, header);
         break;
       case UPDATE_GROUP_CARD:
         event.notifyToAll();
-        event.addGroupMsgId(EventType.UPDATE_GROUP_CARD); // 查询时只需要返回一条，因此添加msgId
         this.sendGroupMessageToAll(event, header);
         break;
       case REPLY:
@@ -201,6 +194,8 @@ public class NotificationGroupChatService {
       case GROUP_ARCHIVE:
       case GROUP_ARCHIVE_CANCEL:
       case GROUP_SESSION_HIDDEN:
+      case GROUP_DO_NOT_DISTURB:  // 暂时无此事件
+      case GROUP_DO_NOT_DISTURB_CANCEL:  // 暂时无此事件
         this.sendSingleMessage(event, header);
         break;
       case GROUP_STICK:
@@ -259,7 +254,6 @@ public class NotificationGroupChatService {
       case ADD_ADMIN:
         event.setRole(MemberRole.ADMIN.getValue());
         memberMapper.updateRole(event);
-        event.addGroupMsgId(EventType.ADD_ADMIN);
         event.notifyToAll();
         this.sendGroupMessageToAvaliableMembers(event, header);
         break;
@@ -267,7 +261,6 @@ public class NotificationGroupChatService {
         event.setRole(MemberRole.NORMAL.getValue());
         memberMapper.updateRole(event);
         event.notifyToAll();
-        event.addGroupMsgId(EventType.ADD_ADMIN);
         this.sendGroupMessageToAvaliableMembers(event, header);
         break;
       default:

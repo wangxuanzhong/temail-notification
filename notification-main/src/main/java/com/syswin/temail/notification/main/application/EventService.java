@@ -87,7 +87,8 @@ public class EventService {
       }
 
       Map<String, Event> sessionEventMap = eventMap.get(key);
-      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+      EventType eventType = EventType.getByValue(event.getEventType());
+      switch (Objects.requireNonNull(eventType)) {
         case RECEIVE:
         case RECEIVE_AT:
           messages.add(event.getMsgId());
@@ -117,7 +118,9 @@ public class EventService {
         case INVITATION:
         case UPDATE_GROUP_CARD:
         case GROUP_STICK:
-          sessionEventMap.put(event.getMsgId(), event);
+        case GROUP_DO_NOT_DISTURB:
+        case DO_NOT_DISTURB:
+          sessionEventMap.put(event.getMsgId(eventType), event);
           break;
         case TRASH: // 移动到废纸篓不需要查询返回，只需要记录移动的消息id
           trashMsgIds.addAll(event.getMsgIds());
@@ -155,10 +158,12 @@ public class EventService {
         case INVITATION_ADOPT:
         case INVITATION_REFUSE:
         case GROUP_STICK_CANCEL:
-          if (sessionEventMap.containsKey(event.getMsgId())) {
-            sessionEventMap.remove(event.getMsgId());
+        case GROUP_DO_NOT_DISTURB_CANCEL:
+        case DO_NOT_DISTURB_CANCEL:
+          if (sessionEventMap.containsKey(event.getMsgId(eventType))) {
+            sessionEventMap.remove(event.getMsgId(eventType));
           } else {
-            sessionEventMap.put(event.getMsgId(), event);
+            sessionEventMap.put(event.getMsgId(eventType), event);
           }
           break;
         case DELETE:
@@ -189,12 +194,12 @@ public class EventService {
           }
           break;
         case DELETE_ADMIN:
-          if (sessionEventMap.containsKey(event.getMsgId())) {
-            sessionEventMap.remove(event.getMsgId());
+          if (sessionEventMap.containsKey(event.getMsgId(eventType))) {
+            sessionEventMap.remove(event.getMsgId(eventType));
           } else {
             // 只有当事人添加此事件
             if (to.equals(event.getTemail())) {
-              sessionEventMap.put(event.getMsgId(), event);
+              sessionEventMap.put(event.getMsgId(eventType), event);
             }
           }
       }
@@ -400,11 +405,11 @@ public class EventService {
 
     switch (userStatus) {
       case NORMAL:
-        event.setEventType(EventType.DO_NOT_DISTURB_CANCEL.getValue());
+        event.setEventType(EventType.GROUP_DO_NOT_DISTURB_CANCEL.getValue());
         memberMapper.updateUserStatus(member);
         break;
       case DO_NOT_DISTURB:
-        event.setEventType(EventType.DO_NOT_DISTURB.getValue());
+        event.setEventType(EventType.GROUP_DO_NOT_DISTURB.getValue());
         memberMapper.updateUserStatus(member);
         break;
       default:
