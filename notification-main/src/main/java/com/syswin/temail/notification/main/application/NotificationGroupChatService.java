@@ -290,10 +290,10 @@ public class NotificationGroupChatService {
    */
   private void sendSingleMessage(Event event, Integer CDTPEventType, String header)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
     event.setFrom(event.getGroupTemail());
     event.setTo(event.getTemail());
     this.insert(event);
+    LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
     rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, jsonService.toJson(event))));
   }
 
