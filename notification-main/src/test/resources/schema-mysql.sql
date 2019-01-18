@@ -25,7 +25,6 @@ CREATE TABLE `member` (
   `temail` varchar(320) NOT NULL COMMENT '用户邮件',
   `role` tinyint(1) NOT NULL DEFAULT '0' COMMENT '群角色',
   `user_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '个人状态',
-  `group_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '群状态',
   PRIMARY KEY (`id`),
   UNIQUE KEY `member_unique` (`group_temail`,`temail`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -4,7 +4,6 @@ import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.domains.Member.GroupStatus;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
@@ -72,11 +71,11 @@ public class NotificationGroupChatService {
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
         event.notifyToAll();
-        this.sendGroupMessageToAvaliableMembers(event, EventType.GROUP_RECEIVE.getValue(), header);
+        this.sendGroupMessageToAll(event, EventType.GROUP_RECEIVE.getValue(), header);
         break;
       case RETRACT:
         event.notifyToAll();
-        this.sendGroupMessageToAvaliableMembers(event, EventType.GROUP_RETRACT.getValue(), header);
+        this.sendGroupMessageToAll(event, EventType.GROUP_RETRACT.getValue(), header);
         break;
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentGroupChatParams.MSG_ID_SPLIT)) {
@@ -94,7 +93,7 @@ public class NotificationGroupChatService {
         }.getType()));
         event.setMsgId(null);
         event.notifyToAll();
-        this.sendGroupMessageToAvaliableMembers(event, EventType.GROUP_DELETE.getValue(), header);
+        this.sendGroupMessageToAll(event, EventType.GROUP_DELETE.getValue(), header);
         break;
       case ADD_GROUP:
         event.setRole(MemberRole.ADMIN.getValue());
@@ -109,7 +108,7 @@ public class NotificationGroupChatService {
         break;
       case ADD_MEMBER: // 只通知被添加的人
         // 校验群成员是否已存在，不存在时添加到数据库
-        List<String> members = memberMapper.selectByGroupTemail(event);
+        List<String> members = memberMapper.selectMember(event);
         if (!members.contains(event.getTemail())) {
           // 添加唯一索引校验，防止并发问题
           try {
@@ -154,13 +153,13 @@ public class NotificationGroupChatService {
         break;
       case APPLY:
         event.notifyToAdmin();
-        this.sendGroupMessageToAvaliableMembers(event, header);
+        this.sendGroupMessageToAll(event, header);
         break;
       case APPLY_ADOPT:
       case APPLY_REFUSE:
         // 通知所有管理员，提供多端同步功能
         event.notifyToAdmin();
-        this.sendGroupMessageToAvaliableMembers(event, header);
+        this.sendGroupMessageToAll(event, header);
         // 通知申请人
         this.sendSingleMessage(event, header);
         break;
@@ -170,7 +169,7 @@ public class NotificationGroupChatService {
       case INVITATION_ADOPT:
       case INVITATION_REFUSE:
         event.notifyToAdmin();
-        this.sendGroupMessageToAvaliableMembers(event, header);
+        this.sendGroupMessageToAll(event, header);
         // 通知自己，提供多端同步功能
         this.sendSingleMessage(event, header);
         break;
@@ -201,35 +200,22 @@ public class NotificationGroupChatService {
       case GROUP_STICK:
       case GROUP_STICK_CANCEL:
         event.notifyToAll();
-        this.sendGroupMessageToAvaliableMembers(event, header);
+        this.sendGroupMessageToAll(event, header);
         break;
       case BLACKLIST:
-        event.notifyToAdmin();
-        temails = jsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
-        }.getType());
-        for (String temail : temails) {
-          memberMapper.updateGroupStatus(GroupStatus.BLACKLIST.getValue(), event.getGroupTemail(), temail);
-          event.setTemail(temail);
-          this.sendGroupMessageToAvaliableMembers(event, header);
-        }
-        break;
       case BLACKLIST_CANCEL:
         event.notifyToAdmin();
         temails = jsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
         }.getType());
         for (String temail : temails) {
-          memberMapper.updateGroupStatus(GroupStatus.NORMAL.getValue(), event.getGroupTemail(), temail);
           event.setTemail(temail);
-          this.sendGroupMessageToAvaliableMembers(event, header);
+          this.sendGroupMessageToAll(event, header);
         }
         break;
       case RECEIVE_AT:
         List<String> ats = jsonService.fromJson(event.getAt(), new TypeToken<List<String>>() {
         }.getType());
         ats.add(event.getTemail());
-        // at中的人如果不是正常状态，则不发送通知
-        List<String> avaliableMembers = memberMapper.selectAvaliableMember(event);
-        ats.removeIf(at -> !avaliableMembers.contains(at));
         this.sendGroupMessage(event, ats, event.getEventType(), header);
         break;
       case DELETE_AT:
@@ -255,13 +241,13 @@ public class NotificationGroupChatService {
         event.setRole(MemberRole.ADMIN.getValue());
         memberMapper.updateRole(event);
         event.notifyToAll();
-        this.sendGroupMessageToAvaliableMembers(event, header);
+        this.sendGroupMessageToAll(event, header);
         break;
       case DELETE_ADMIN:
         event.setRole(MemberRole.NORMAL.getValue());
         memberMapper.updateRole(event);
         event.notifyToAll();
-        this.sendGroupMessageToAvaliableMembers(event, header);
+        this.sendGroupMessageToAll(event, header);
         break;
       default:
         LOGGER.warn("unsupport event type!");
@@ -298,27 +284,19 @@ public class NotificationGroupChatService {
   }
 
   /**
-   * 向所有群成员发送群消息 群解散、群名称修改、被踢出群事件需要通知非正常用户
+   * 向所有群成员发送群消息
    */
   private void sendGroupMessageToAll(Event event, String header)
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
-    this.sendGroupMessage(event, memberMapper.selectByGroupTemail(event), event.getEventType(), header);
+    this.sendGroupMessage(event, memberMapper.selectMember(event), event.getEventType(), header);
   }
 
   /**
    * 向正常状态群成员发送群消息
    */
-  private void sendGroupMessageToAvaliableMembers(Event event, String header)
+  private void sendGroupMessageToAll(Event event, Integer CDTPEventType, String header)
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
-    this.sendGroupMessageToAvaliableMembers(event, event.getEventType(), header);
-  }
-
-  /**
-   * 向正常状态群成员发送群消息
-   */
-  private void sendGroupMessageToAvaliableMembers(Event event, Integer CDTPEventType, String header)
-      throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
-    this.sendGroupMessage(event, memberMapper.selectAvaliableMember(event), CDTPEventType, header);
+    this.sendGroupMessage(event, memberMapper.selectMember(event), CDTPEventType, header);
   }
 
   /**
@@ -345,7 +323,6 @@ public class NotificationGroupChatService {
     event.setTo(event.getGroupTemail());
     this.insert(event);
 
-    List<String> avaliableMembers = memberMapper.selectAvaliableMember(event);
     // 查询父消息，如果是@消息则只发送给@的人，否则发送给所有人
     Event condition = new Event();
     condition.setEventType(EventType.RECEIVE_AT.getValue());
@@ -354,15 +331,13 @@ public class NotificationGroupChatService {
     List<String> tos;
     List<Event> events = eventMapper.selectEventsByMsgId(condition);
     if (events.isEmpty()) {
-      tos = avaliableMembers;
+      tos = memberMapper.selectMember(event);
     } else {
       Event parentEvent = events.get(0).autoReadExtendParam(jsonService);
       tos = jsonService.fromJson(parentEvent.getAt(), new TypeToken<List<String>>() {
       }.getType());
       // 添加原消息发送者
       tos.add(parentEvent.getTemail());
-      // at中的人如果不是正常状态，则不发送通知
-      tos.removeIf(to -> !avaliableMembers.contains(to));
     }
 
     LOGGER.info("send message to --->> {}, event type: {}", tos, EventType.getByValue(event.getEventType()));

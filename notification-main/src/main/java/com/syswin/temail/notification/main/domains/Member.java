@@ -120,30 +120,4 @@ public class Member {
       return value;
     }
   }
-
-  public enum GroupStatus {
-    NORMAL(0, "正常"),
-    BLACKLIST(1, "群黑名单");
-
-    private final int value;
-    private final String description;
-
-    GroupStatus(int value, String description) {
-      this.value = value;
-      this.description = description;
-    }
-
-    public static GroupStatus getByValue(int value) {
-      for (GroupStatus groupStatus : values()) {
-        if (groupStatus.getValue() == value) {
-          return groupStatus;
-        }
-      }
-      return null;
-    }
-
-    public int getValue() {
-      return value;
-    }
-  }
 }

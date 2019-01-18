@@ -16,7 +16,7 @@
     (#{groupTemail}, #{temail}, #{role})
   </insert>
 
-  <select id="selectByGroupTemail" parameterType="com.syswin.temail.notification.main.domains.Event" resultType="java.lang.String">
+  <select id="selectMember" parameterType="com.syswin.temail.notification.main.domains.Event" resultType="java.lang.String">
     SELECT `temail`
     FROM `member`
     WHERE `group_temail` = #{groupTemail}
@@ -30,20 +30,8 @@
     AND id > 0
   </delete>
 
-  <select id="selectAvaliableMember" parameterType="com.syswin.temail.notification.main.domains.Event" resultType="java.lang.String">
-    SELECT `temail`
-    FROM `member`
-    WHERE `group_temail` = #{groupTemail}
-    AND `group_status` = ${@com.syswin.temail.notification.main.domains.Member$GroupStatus@NORMAL.getValue()}
-    <if test="role != null and role != '' ">AND `role` = #{role}</if>
-  </select>
-
   <update id="updateUserStatus" parameterType="com.syswin.temail.notification.main.domains.Member">
     UPDATE `member` SET `user_status` = ${userStatus} WHERE `group_temail` = #{groupTemail} AND `temail` = #{temail}
-  </update>
-
-  <update id="updateGroupStatus">
-    UPDATE `member` SET `group_status` = ${groupStatus} WHERE `group_temail` = #{groupTemail} AND `temail` = #{temail}
   </update>
 
   <select id="selectUserStatus" resultType="java.lang.Integer">

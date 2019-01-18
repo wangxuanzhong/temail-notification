@@ -11,15 +11,11 @@ public interface MemberMapper {
 
   int insert(Event event);
 
-  List<String> selectByGroupTemail(Event event);
+  List<String> selectMember(Event event);
 
-  int deleteGroupMember(Event event);
-
-  List<String> selectAvaliableMember(Event event);
+  void deleteGroupMember(Event event);
 
   void updateUserStatus(Member member);
-
-  void updateGroupStatus(@Param("groupStatus") int groupStatus, @Param("groupTemail") String groupTemail, @Param("temail") String temail);
 
   Integer selectUserStatus(@Param("temail") String temail, @Param("groupTemail") String groupTemail);
 
