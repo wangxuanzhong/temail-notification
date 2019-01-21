@@ -48,6 +48,7 @@ public enum EventType {
   GROUP_DO_NOT_DISTURB_CANCEL(43, "设置群免打扰取消"),
   ADD_ADMIN(46, "添加群管理员"),
   DELETE_ADMIN(47, "移除群管理员"),
+  ABANDON_ADMIN(50, "放弃群管理员"),
 
   // @部分
   RECEIVE_AT(44, "@消息发送"),

@@ -226,7 +226,7 @@ public class NotificationGroupChatService {
 
         List<Event> events = eventMapper.selectEventsByMsgId(condition);
         if (events.isEmpty()) {
-          LOGGER.error("do not found source message!");
+          LOGGER.warn("do not found source message!");
           break;
         } else {
           Event parentEvent = events.get(0).autoReadExtendParam(jsonService);
@@ -244,6 +244,7 @@ public class NotificationGroupChatService {
         this.sendGroupMessageToAll(event, header);
         break;
       case DELETE_ADMIN:
+      case ABANDON_ADMIN:
         event.setRole(MemberRole.NORMAL.getValue());
         memberMapper.updateRole(event);
         event.notifyToAll();

@@ -194,6 +194,7 @@ public class EventService {
           }
           break;
         case DELETE_ADMIN:
+        case ABANDON_ADMIN:
           if (sessionEventMap.containsKey(event.getMsgId(eventType))) {
             sessionEventMap.remove(event.getMsgId(eventType));
           } else {

@@ -122,7 +122,7 @@ public class NotificationController {
 
     UserStatus userStatus = UserStatus.getByValue(member.getUserStatus());
     if (userStatus == null) {
-      LOGGER.error("status is illegal!");
+      LOGGER.warn("status is illegal!");
       return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "status is illegal!"), headers, HttpStatus.BAD_REQUEST);
     }
 
