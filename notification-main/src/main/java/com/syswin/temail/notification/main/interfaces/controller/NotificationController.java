@@ -80,10 +80,12 @@ public class NotificationController {
     headers.add(CDTP_HEADER, header);
 
     if (event.getTo() == null || event.getTo().equals("")) {
+      LOGGER.warn("reset 3 0004 : to mast not null!");
       return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "to mast not null!"), headers, HttpStatus.BAD_REQUEST);
     }
 
     if ((event.getFrom() == null || event.getFrom().equals("")) && (event.getGroupTemail() == null || event.getGroupTemail().equals(""))) {
+      LOGGER.warn("reset 3 0004 : from and groupTemail mast not null at the same time!");
       return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from and groupTemail mast not null at the same time!"), headers,
           HttpStatus.BAD_REQUEST);
     }
@@ -122,7 +124,7 @@ public class NotificationController {
 
     UserStatus userStatus = UserStatus.getByValue(member.getUserStatus());
     if (userStatus == null) {
-      LOGGER.warn("status is illegal!");
+      LOGGER.warn("update group chat user status 3 0007 : status is illegal!");
       return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "status is illegal!"), headers, HttpStatus.BAD_REQUEST);
     }
 
