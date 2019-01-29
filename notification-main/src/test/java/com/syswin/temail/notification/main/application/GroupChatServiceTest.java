@@ -17,16 +17,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("h2")
-public class NotificationGroupChatServiceTest {
+public class GroupChatServiceTest {
 
   private final String TEST_GROUP = "g";
-  private final String TEST_GROUP_MSG_ID = "g-";
+  private final String TEST_GROUP_MSG_ID = "g_";
   private final String TOPIC = "temail-groupmail";
   private final String PREFIX = "temail-notification-";
   private final boolean useMQ = false;
   MailAgentGroupChatParams params = new MailAgentGroupChatParams();
   @Autowired
-  private NotificationGroupChatService notificationGroupChatService;
+  private GroupChatService groupChatService;
   @Autowired
   private RocketMqProducer rocketMqProducer;
   private Gson gson = new Gson();
@@ -215,7 +215,7 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeReply() throws Exception {
     params.setSessionMessageType(EventType.REPLY.getValue());
-    params.setMsgid("reply_5");
+    params.setMsgid("reply_g_1");
     params.setTemail("e");
     params.setParentMsgId("at1");
     params.setToMsg("这是一条回复消息！");
@@ -229,9 +229,9 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeReplyRetract() throws Exception {
     params.setSessionMessageType(EventType.REPLY_RETRACT.getValue());
-    params.setMsgid("reply_1");
+    params.setMsgid("reply_g_2");
     params.setTemail("e");
-    params.setParentMsgId("at1");
+    params.setParentMsgId("g_1");
     this.sendMessage(params);
   }
 
@@ -241,9 +241,9 @@ public class NotificationGroupChatServiceTest {
   @Test
   public void testEventTypeReplyDelete() throws Exception {
     params.setSessionMessageType(EventType.REPLY_DELETE.getValue());
-    params.setMsgid(gson.toJson(Arrays.asList("reply_2", "reply_3", "reply_4")));
+    params.setMsgid(gson.toJson(Arrays.asList("reply_1", "reply_3", "reply_4")));
     params.setTemail("e");
-    params.setParentMsgId("at1");
+    params.setParentMsgId("g_1");
     this.sendMessage(params);
   }
 
@@ -501,7 +501,7 @@ public class NotificationGroupChatServiceTest {
       rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
       Thread.sleep(2000);
     } else {
-      notificationGroupChatService.handleMqMessage(gson.toJson(param));
+      groupChatService.handleMqMessage(gson.toJson(param));
     }
   }
 }

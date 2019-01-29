@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class NotificationGroupChatService {
+public class GroupChatService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -36,7 +36,7 @@ public class NotificationGroupChatService {
   private final JsonService jsonService;
 
   @Autowired
-  public NotificationGroupChatService(RocketMqProducer rocketMqProducer, RedisService redisService, EventMapper eventMapper,
+  public GroupChatService(RocketMqProducer rocketMqProducer, RedisService redisService, EventMapper eventMapper,
       MemberMapper memberMapper, JsonService jsonService) {
     this.rocketMqProducer = rocketMqProducer;
     this.redisService = redisService;
@@ -319,11 +319,6 @@ public class NotificationGroupChatService {
    */
   private void sendReplyMessage(Event event, String header)
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
-    // 只插入一次数据
-    event.setFrom(event.getGroupTemail());
-    event.setTo(event.getGroupTemail());
-    this.insert(event);
-
     // 查询父消息，如果是@消息则只发送给@的人，否则发送给所有人
     Event condition = new Event();
     condition.setEventType(EventType.RECEIVE_AT.getValue());
@@ -341,10 +336,6 @@ public class NotificationGroupChatService {
       tos.add(parentEvent.getTemail());
     }
 
-    LOGGER.info("send message to --->> {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
-    for (String to : tos) {
-      event.setTo(to);
-      rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, event.getEventType(), header, jsonService.toJson(event))));
-    }
+    this.sendGroupMessage(event, tos, event.getEventType(), header);
   }
 }

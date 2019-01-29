@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TopicEventMapper {
+public interface TopicMapper {
 
   int insert(TopicEvent topicEvent);
 

@@ -19,7 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("h2")
-public class NotificationServiceTest {
+public class SingleChatServiceTest {
 
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
@@ -29,7 +29,7 @@ public class NotificationServiceTest {
   MailAgentSingleChatParams params = new MailAgentSingleChatParams();
   private Gson gson = new Gson();
   @Autowired
-  private NotificationService notificationService;
+  private SingleChatService singleChatService;
   @Autowired
   private RocketMqProducer rocketMqProducer;
 
@@ -74,7 +74,7 @@ public class NotificationServiceTest {
   @Test
   public void testEventTypeRetract() throws Exception {
     params.setSessionMessageType(EventType.RETRACT.getValue());
-    params.setMsgid("1");
+    params.setMsgid("2");
     this.sendMessage(params);
   }
 
@@ -94,13 +94,13 @@ public class NotificationServiceTest {
   @Test
   public void testEventTypeDelete() throws Exception {
     // 删除事件from和to与事件业务相反
-    params.setFrom(TEST_TO);
-    params.setTo(TEST_FROM);
+//    params.setFrom(TEST_TO);
+//    params.setTo(TEST_FROM);
     params.setSessionMessageType(EventType.DELETE.getValue());
 
     // 批量删除消息
     params.setMsgid(gson.toJson(Arrays.asList("2", "3", "4")));
-//    this.sendMessage(params);
+    this.sendMessage(params);
 
     // 删除会话
     params.setMsgid(null);
@@ -109,7 +109,7 @@ public class NotificationServiceTest {
 
     // 删除会话和消息
     params.setDeleteAllMsg(true);
-    this.sendMessage(params);
+//    this.sendMessage(params);
   }
 
   /**
@@ -135,7 +135,7 @@ public class NotificationServiceTest {
   @Test
   public void testEventTypeReply() throws Exception {
     params.setSessionMessageType(EventType.REPLY.getValue());
-    params.setMsgid("reply_1");
+    params.setMsgid("reply_3");
     params.setParentMsgId("1");
     params.setSeqNo(1L);
     params.setToMsg("这是一条单聊回复测试消息！");
@@ -164,7 +164,7 @@ public class NotificationServiceTest {
   @Test
   public void testEventTypeReplyDelete() throws Exception {
     params.setSessionMessageType(EventType.REPLY_DELETE.getValue());
-    params.setMsgid(gson.toJson(Arrays.asList("reply_2", "reply_3", "reply_4")));
+    params.setMsgid(gson.toJson(Arrays.asList("reply_5", "reply_3", "reply_4")));
     params.setParentMsgId("1");
     this.sendMessage(params);
   }
@@ -244,7 +244,7 @@ public class NotificationServiceTest {
       rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
       Thread.sleep(2000);
     } else {
-      notificationService.handleMqMessage(gson.toJson(param));
+      singleChatService.handleMqMessage(gson.toJson(param));
     }
   }
 }

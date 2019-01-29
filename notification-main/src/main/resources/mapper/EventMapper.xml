@@ -31,33 +31,15 @@
     SELECT
     <include refid="baseField"/>
     FROM `event`
-    WHERE
-    <choose>
-      <when test="parentMsgId == null or parentMsgId == ''">
-        (`parent_msg_id` IS NULL OR `parent_msg_id` = '')
-      </when>
-      <otherwise>
-        `parent_msg_id` = #{parentMsgId}
-      </otherwise>
-    </choose>
+    WHERE 1=1
     <if test="to != null and to != ''">AND `to` = #{to}</if>
     <if test="begin != null">AND `event_seq_id` > #{begin}</if>
     <if test="end != null">AND `event_seq_id` <![CDATA[<=]]> #{end}</if>
     ORDER BY `event_seq_id`
   </select>
 
-  <select id="selectLastEventSeqId" resultType="java.lang.Long">
-    SELECT MAX(`event_seq_id`) FROM `event`
-    WHERE
-    <choose>
-      <when test="parentMsgId == null or parentMsgId == ''">
-        (`parent_msg_id` IS NULL OR `parent_msg_id` = '')
-      </when>
-      <otherwise>
-        `parent_msg_id` = #{parentMsgId}
-      </otherwise>
-    </choose>
-    <if test="to != null and to != ''">AND `to` = #{to}</if>
+  <select id="selectLastEventSeqId" parameterType="java.lang.String" resultType="java.lang.Long">
+    SELECT MAX(`event_seq_id`) FROM `event` WHERE `to` = #{to}
   </select>
 
   <select id="selectEventsByMsgId" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">

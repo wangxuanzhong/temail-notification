@@ -16,14 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/schedule")
 @Api(value = "schedule", tags = "event schedule")
 @CrossOrigin
-public class EventController {
-
-  private final String CDTP_HEADER = "CDTP-header";
+public class ScheduleController {
 
   private final EventSchedule eventSchedule;
 
   @Autowired
-  public EventController(EventSchedule eventSchedule) {
+  public ScheduleController(EventSchedule eventSchedule) {
     this.eventSchedule = eventSchedule;
   }
 
@@ -34,7 +32,7 @@ public class EventController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), HttpStatus.OK);
   }
 
-  @ApiOperation(value = "delete events", consumes = "application/json")
+  @ApiOperation(value = "delete topics", consumes = "application/json")
   @DeleteMapping("/delete/topic")
   public ResponseEntity<Response> deleteTopic() {
     eventSchedule.deleteOldTopic();

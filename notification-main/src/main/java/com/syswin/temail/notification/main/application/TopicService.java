@@ -5,7 +5,7 @@ import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
-import com.syswin.temail.notification.main.infrastructure.TopicEventMapper;
+import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -31,14 +31,14 @@ public class TopicService {
 
   private final RocketMqProducer rocketMqProducer;
   private final RedisService redisService;
-  private final TopicEventMapper topicEventMapper;
+  private final TopicMapper topicMapper;
   private final JsonService jsonService;
 
   @Autowired
-  public TopicService(RocketMqProducer rocketMqProducer, RedisService redisService, TopicEventMapper topicEventMapper, JsonService jsonService) {
+  public TopicService(RocketMqProducer rocketMqProducer, RedisService redisService, TopicMapper topicMapper, JsonService jsonService) {
     this.rocketMqProducer = rocketMqProducer;
     this.redisService = redisService;
-    this.topicEventMapper = topicEventMapper;
+    this.topicMapper = topicMapper;
     this.jsonService = jsonService;
   }
 
@@ -72,7 +72,7 @@ public class TopicService {
         break;
       case TOPIC_REPLY_RETRACT:
         // 向撤回的消息的所有收件人发送通知
-        for (TopicEvent event : topicEventMapper.selectEventsByMsgId(topicEvent.getMsgId())) {
+        for (TopicEvent event : topicMapper.selectEventsByMsgId(topicEvent.getMsgId())) {
           topicEvent.setTo(event.getTo());
           sendMessage(topicEvent, header);
         }
@@ -86,7 +86,7 @@ public class TopicService {
         break;
       case TOPIC_DELETE:
         // 向话题接收的所有人发送通知
-        for (TopicEvent event : topicEventMapper.selectEventsByTopicId(topicEvent.getTopicId())) {
+        for (TopicEvent event : topicMapper.selectEventsByTopicId(topicEvent.getTopicId())) {
           topicEvent.setTo(event.getTo());
           sendMessage(topicEvent, header);
         }
@@ -112,7 +112,7 @@ public class TopicService {
   private void insert(TopicEvent topicEvent) {
     topicEvent.initTopicEventSeqId(redisService);
     topicEvent.autoWriteExtendParam(jsonService);
-    topicEventMapper.insert(topicEvent);
+    topicMapper.insert(topicEvent);
   }
 
   /**
@@ -138,12 +138,12 @@ public class TopicService {
     LOGGER.info("pull topic events called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
 
     // 如果pageSize为空则不限制查询条数
-    List<TopicEvent> events = topicEventMapper.selectEvents(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    List<TopicEvent> events = topicMapper.selectEvents(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
     // 获取当前最新eventSeqId
     Long lastEventSeqId = 0L;
     if (events.isEmpty()) {
-      lastEventSeqId = topicEventMapper.selectLastEventSeqId(to);
+      lastEventSeqId = topicMapper.selectLastEventSeqId(to);
     } else {
       lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }

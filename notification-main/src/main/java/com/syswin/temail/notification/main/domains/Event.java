@@ -186,13 +186,11 @@ public class Event {
       case RETRACT:
       case DESTROY:
       case DESTROYED:
-        this.eventSeqId = sequenceService.getNextSeq(this.owner == null ? this.to : this.owner);
-        break;
       case REPLY:
       case REPLY_RETRACT:
       case REPLY_DELETE:
       case REPLY_DESTROYED:
-        this.eventSeqId = sequenceService.getNextSeq(this.parentMsgId);
+        this.eventSeqId = sequenceService.getNextSeq(this.owner == null ? this.to : this.owner);
         break;
       default:
         this.eventSeqId = sequenceService.getNextSeq(this.to);

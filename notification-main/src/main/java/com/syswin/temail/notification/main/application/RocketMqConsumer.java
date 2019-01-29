@@ -38,8 +38,8 @@ public class RocketMqConsumer {
   private final int TYPE_2_TOPIC = 2;
   private final int TYPE_3_OSS = 3;
 
-  private NotificationService notificationService;
-  private NotificationGroupChatService notificationGroupChatService;
+  private SingleChatService singleChatService;
+  private GroupChatService groupChatService;
   private TopicService topicService;
   private OssService ossService;
   private String host;
@@ -48,15 +48,15 @@ public class RocketMqConsumer {
   private String topicChatTopic;
   private String ossTopic;
 
-  public RocketMqConsumer(NotificationService notificationService, NotificationGroupChatService notificationGroupChatService,
+  public RocketMqConsumer(SingleChatService singleChatService, GroupChatService groupChatService,
       TopicService topicService, OssService ossService,
       @Value("${spring.rocketmq.host}") String host,
       @Value("${spring.rocketmq.topics.mailAgent.singleChat}") String singleChatTopic,
       @Value("${spring.rocketmq.topics.mailAgent.groupChat}") String groupChatTopic,
       @Value("${spring.rocketmq.topics.mailAgent.topicChat}") String topicChatTopic,
       @Value("${spring.rocketmq.topics.oss}") String ossTopic) {
-    this.notificationService = notificationService;
-    this.notificationGroupChatService = notificationGroupChatService;
+    this.singleChatService = singleChatService;
+    this.groupChatService = groupChatService;
     this.topicService = topicService;
     this.ossService = ossService;
     this.host = host;
@@ -118,10 +118,10 @@ public class RocketMqConsumer {
       throws InterruptedException, RemotingException, UnsupportedEncodingException, MQClientException, MQBrokerException {
     switch (type) {
       case TYPE_0_SINGLE_CHAT:
-        notificationService.handleMqMessage(body);
+        singleChatService.handleMqMessage(body);
         break;
       case TYPE_1_GROUP_CHAT:
-        notificationGroupChatService.handleMqMessage(body);
+        groupChatService.handleMqMessage(body);
         break;
       case TYPE_2_TOPIC:
         topicService.handleMqMessage(body);

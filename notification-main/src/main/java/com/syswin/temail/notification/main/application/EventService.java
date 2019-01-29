@@ -65,14 +65,14 @@ public class EventService {
     LOGGER.info("pull events called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
 
     // 如果pageSize为空则不限制查询条数
-    List<Event> events = eventMapper.selectEvents(to, null, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    List<Event> events = eventMapper.selectEvents(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
     // 获取当前最新eventSeqId
-    Long maxEventSeqId = 0L;
+    Long lastEventSeqId = 0L;
     if (events.isEmpty()) {
-      maxEventSeqId = eventMapper.selectLastEventSeqId(to, null);
+      lastEventSeqId = eventMapper.selectLastEventSeqId(to);
     } else {
-      maxEventSeqId = events.get(events.size() - 1).getEventSeqId();
+      lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
 
     Map<String, Map<String, Event>> eventMap = new HashMap<>();
@@ -80,8 +80,17 @@ public class EventService {
     List<String> trashMsgIds = new ArrayList<>();  // 存放废纸篓消息，以便还原操作处理
     events.forEach(event -> {
       event.autoReadExtendParam(jsonService);
+
       // 按照会话统计事件，方便对单个会话多事件进行处理
       String key = event.getFrom();
+
+      // 单聊逻辑: 当from和to相同时，数据库中存储的owner为会话的另一方，to为通知者，查询结果恢复原结构
+      if (event.getFrom().equals(event.getTo()) && event.getOwner() != null) {
+        event.setTo(event.getOwner());
+        event.setOwner(event.getFrom());
+        key = event.getTo();
+      }
+
       if (!eventMap.containsKey(key)) {
         eventMap.put(key, new HashMap<>());
       }
@@ -91,25 +100,24 @@ public class EventService {
       switch (Objects.requireNonNull(eventType)) {
         case RECEIVE:
         case RECEIVE_AT:
+        case DESTROY:
           messages.add(event.getMsgId());
           break;
-        case DESTROY:
         case DESTROYED:
-          // 单聊逻辑: 当from和to相同时，数据库中存储的owner为消息接收者，to为通知者，查询结果恢复原结构
-          if (event.getFrom().equals(event.getTo()) && event.getOwner() != null) {
-            event.setTo(event.getOwner());
-            event.setOwner(event.getFrom());
-          }
+        case REPLY_DESTROYED:
+        case REPLY:
           sessionEventMap.put(event.getMsgId(), event);
           break;
         case RETRACT:
         case DELETE_AT:
-          // 单聊逻辑: 当from和to相同时，数据库中存储的owner为消息接收者，to为通知者，查询结果恢复原结构
-          if (event.getFrom().equals(event.getTo()) && event.getOwner() != null) {
-            event.setTo(event.getOwner());
-            event.setOwner(event.getFrom());
-          }
           if (!messages.contains(event.getMsgId())) {
+            sessionEventMap.put(event.getMsgId(), event);
+          }
+          break;
+        case REPLY_RETRACT:
+          if (sessionEventMap.containsKey(event.getMsgId())) {
+            sessionEventMap.remove(event.getMsgId());
+          } else {
             sessionEventMap.put(event.getMsgId(), event);
           }
           break;
@@ -187,6 +195,15 @@ public class EventService {
             sessionEventMap.put(UUID.randomUUID().toString(), event);
           }
           break;
+        case REPLY_DELETE:
+          if (event.getMsgIds() != null) {
+            event.getMsgIds().forEach(msgId -> {
+              if (sessionEventMap.containsKey(msgId)) {
+                sessionEventMap.remove(msgId); // 删除已出现的msgId
+              }
+            });
+          }
+          break;
         case ADD_ADMIN:
           // 只有当事人添加此事件
           if (to.equals(event.getTemail())) {
@@ -208,61 +225,7 @@ public class EventService {
 
     List<Event> notifyEvents = new ArrayList<>();
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
-    return getEventsReturn(notifyEvents, maxEventSeqId);
-  }
 
-
-  /**
-   * 拉取回复事件
-   *
-   * @param parentMsgId 父消息id
-   * @param eventSeqId 上次拉取结尾序号
-   * @param pageSize 拉取数量
-   */
-  public Map<String, Object> getReplyEvents(String parentMsgId, Long eventSeqId, Integer pageSize) {
-    LOGGER.info("pull reply events called, parentMsgId: {}, eventSeqId: {}, pageSize: {}", parentMsgId, eventSeqId, pageSize);
-
-    // 如果pageSize为空则不限制查询条数
-    List<Event> events = eventMapper.selectEvents(null, parentMsgId, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
-
-    // 获取当前最新eventSeqId
-    Long lastEventSeqId = 0L;
-    if (events.isEmpty()) {
-      lastEventSeqId = eventMapper.selectLastEventSeqId(null, parentMsgId);
-    } else {
-      lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
-    }
-
-    Map<String, Event> eventMap = new HashMap<>();
-    events.forEach(event -> {
-      event.autoReadExtendParam(jsonService);
-      switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
-        case REPLY:
-          eventMap.put(event.getMsgId(), event);
-          break;
-        case REPLY_RETRACT:
-          if (eventMap.containsKey(event.getMsgId())) {
-            eventMap.remove(event.getMsgId());
-          } else {
-            eventMap.put(event.getMsgId(), event);
-          }
-          break;
-        case REPLY_DELETE:
-          // msgIds不为空，则为批量删除消息
-          if (event.getMsgIds() != null) {
-            event.getMsgIds().forEach(eventMap::remove);
-          }
-          break;
-      }
-    });
-    List<Event> notifyEvents = new ArrayList<>(eventMap.values());
-    return getEventsReturn(notifyEvents, lastEventSeqId);
-  }
-
-  /**
-   * 拉取事件返回参数拼装
-   */
-  private Map<String, Object> getEventsReturn(List<Event> notifyEvents, Long lastEventSeqId) {
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
     Map<String, Object> result = new HashMap<>();
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
@@ -290,7 +253,7 @@ public class EventService {
     unreadMapper.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
 
     // 查询所有事件
-    List<Event> events = eventMapper.selectEvents(to, null, null, null);
+    List<Event> events = eventMapper.selectEvents(to, null, null);
 
     // 统计未读数
     Map<String, List<String>> eventMap = this.calculateUnread(events, unreadMap);

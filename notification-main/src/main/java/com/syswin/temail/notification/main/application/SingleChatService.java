@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class NotificationService {
+public class SingleChatService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -33,7 +33,7 @@ public class NotificationService {
   private final JsonService jsonService;
 
   @Autowired
-  public NotificationService(RocketMqProducer rocketMqProducer, RedisService redisService,
+  public SingleChatService(RocketMqProducer rocketMqProducer, RedisService redisService,
       EventMapper eventMapper, JsonService jsonService) {
     this.rocketMqProducer = rocketMqProducer;
     this.redisService = redisService;
@@ -66,6 +66,7 @@ public class NotificationService {
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
       case DESTROY:
+      case REPLY:
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
           event.initEventSeqId(redisService);
@@ -82,6 +83,8 @@ public class NotificationService {
         break;
       case RETRACT:
       case DESTROYED:
+      case REPLY_RETRACT:
+      case REPLY_DESTROYED:
         // 多端同步功能消息同时发给双方
         event.setOwner(params.getTo());
         sendMessage(event, header);
@@ -120,20 +123,6 @@ public class NotificationService {
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
         sendMessage(event, header);
-        break;
-      case REPLY:
-        // 回复拉取时是根据parentMsgId拉取，因此发送人的通知不需要入库
-        // 发送时会分别发送到发件人收件箱和收件人收件箱，只有收件人收件箱的事件才会入库
-        if (event.getTo().equals(params.getOwner())) {
-          sendMessage(event, header);
-        } else {
-          sendMessageToSender(event, header);
-        }
-        break;
-      case REPLY_RETRACT:
-      case REPLY_DESTROYED:
-        sendMessage(event, header);
-        sendMessageToSender(event, header);
         break;
       case ARCHIVE:
       case ARCHIVE_CANCEL:

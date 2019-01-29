@@ -5,7 +5,7 @@ import com.syswin.temail.notification.main.application.RedisService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
-import com.syswin.temail.notification.main.infrastructure.TopicEventMapper;
+import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
@@ -30,7 +30,7 @@ public class EventSchedule {
   private final UnreadMapper unreadMapper;
   private final EventService eventService;
   private final RedisService redisService;
-  private final TopicEventMapper topicEventMapper;
+  private final TopicMapper topicMapper;
   private final int deadline;
 
   private final String DELETE_OLD_EVENT_KEY = "notification_deleteOldEvent";
@@ -38,10 +38,10 @@ public class EventSchedule {
 
   @Autowired
   public EventSchedule(EventMapper eventMapper, UnreadMapper unreadMapper, EventService eventService, RedisService redisService,
-      TopicEventMapper topicEventMapper, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
+      TopicMapper topicMapper, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
     this.eventMapper = eventMapper;
     this.eventService = eventService;
-    this.topicEventMapper = topicEventMapper;
+    this.topicMapper = topicMapper;
     this.unreadMapper = unreadMapper;
     this.redisService = redisService;
     this.deadline = deadline;
@@ -108,7 +108,7 @@ public class EventSchedule {
   public void deleteOldTopic() {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old topic before {}", createTime);
-    topicEventMapper.deleteOldTopic(createTime);
+    topicMapper.deleteOldTopic(createTime);
   }
 
   private LocalDateTime getDeadline() {

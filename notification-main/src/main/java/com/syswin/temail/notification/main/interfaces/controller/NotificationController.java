@@ -94,14 +94,18 @@ public class NotificationController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 
-  @ApiOperation(value = "pull reply event 3 0005", consumes = "application/json")
+  /**
+   * 接口功能合并到单群聊拉取接口中，此接口已废弃
+   *
+   * @deprecated
+   */
+  @ApiOperation(value = "pull reply event 3 0005 (deprecated)", consumes = "application/json")
   @GetMapping("/reply/events")
   public ResponseEntity<Response<Map<String, Object>>> getReplyEvents(@RequestParam Long eventSeqId, @RequestParam String parentMsgId,
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    Map<String, Object> result = eventService.getReplyEvents(parentMsgId, eventSeqId, pageSize);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 
   @ApiOperation(value = "pull topic event 3 0006", consumes = "application/json")

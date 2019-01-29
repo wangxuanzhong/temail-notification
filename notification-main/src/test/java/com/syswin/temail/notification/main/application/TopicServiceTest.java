@@ -12,7 +12,7 @@ import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
-import com.syswin.temail.notification.main.infrastructure.TopicEventMapper;
+import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +37,7 @@ public class TopicServiceTest {
   private final String PREFIX = "temail-notification-";
   private final boolean useMQ = false;
   MailAgentTopicParams params = new MailAgentTopicParams();
-  TopicEventMapper topicRepo = mock(TopicEventMapper.class);
+  TopicMapper topicRepo = mock(TopicMapper.class);
   private Gson gson = new Gson();
   @Autowired
   private TopicService topicService;
