@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("/notification")
@@ -100,6 +101,7 @@ public class NotificationController {
    * @deprecated
    */
   @ApiOperation(value = "pull reply event 3 0005 (deprecated)", consumes = "application/json")
+  @ApiIgnore
   @GetMapping("/reply/events")
   public ResponseEntity<Response<Map<String, Object>>> getReplyEvents(@RequestParam Long eventSeqId, @RequestParam String parentMsgId,
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
