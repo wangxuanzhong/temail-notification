@@ -1,9 +1,13 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
+import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams.TrashMsgInfo;
+import com.syswin.temail.notification.main.infrastructure.EventMapper;
+import com.syswin.temail.notification.main.mock.ConstantMock;
+import com.syswin.temail.notification.main.mock.RocketMqProducerMock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,30 +16,49 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("h2")
+@ActiveProfiles("test")
 public class SingleChatServiceTest {
 
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
-  private final String TOPIC = "temail-usermail";
-  private final String PREFIX = "temail-notification-";
   private final boolean useMQ = false;
-  MailAgentSingleChatParams params = new MailAgentSingleChatParams();
+  private MailAgentSingleChatParams params = new MailAgentSingleChatParams();
   private Gson gson = new Gson();
-  @Autowired
-  private SingleChatService singleChatService;
+
+  @Value("spring.rocketmq.topics.mailAgent.singleChat")
+  private String topic;
+  @Value("mock")
+  private String mock;
+
   @Autowired
   private RocketMqProducer rocketMqProducer;
+  @Autowired
+  private RedisService redisService;
+  @Autowired
+  private EventMapper eventMapper;
+  @Autowired
+  private JsonService jsonService;
+  @Autowired
+  private RocketMqProducerMock rocketMqProducerMock;
+
+  private SingleChatService singleChatService;
 
   @Before
   public void setUp() {
-    params.setHeader("notification-header");
+    if (ConstantMock.IS_MOCK.equals(mock)) {
+      singleChatService = new SingleChatService(rocketMqProducerMock, redisService, eventMapper, jsonService);
+    } else {
+      singleChatService = new SingleChatService(rocketMqProducer, redisService, eventMapper, jsonService);
+    }
+
+    params.setHeader(ConstantMock.HEADER);
     params.setFrom(TEST_FROM);
     params.setTo(TEST_TO);
     params.setTimestamp(System.currentTimeMillis());
@@ -238,10 +261,10 @@ public class SingleChatServiceTest {
 
   private void sendMessage(MailAgentSingleChatParams param, boolean isSamePacket) throws Exception {
     if (!isSamePacket) {
-      param.setxPacketId(PREFIX + UUID.randomUUID().toString());
+      param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
     if (useMQ) {
-      rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
+      rocketMqProducer.sendMessage(gson.toJson(param), topic, "", "");
       Thread.sleep(2000);
     } else {
       singleChatService.handleMqMessage(gson.toJson(param));

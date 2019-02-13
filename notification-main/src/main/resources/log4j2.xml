@@ -2,7 +2,6 @@
 <configuration monitorInterval="1800" status="INFO">
   <properties> 
     <property name="project_name">@project.parent.artifactId@</property>
-     
   </properties>
   <appenders>
     <!--控制台打印 -->

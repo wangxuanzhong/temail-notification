@@ -1,45 +1,68 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
+import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
+import com.syswin.temail.notification.main.infrastructure.EventMapper;
+import com.syswin.temail.notification.main.infrastructure.MemberMapper;
+import com.syswin.temail.notification.main.mock.ConstantMock;
+import com.syswin.temail.notification.main.mock.RocketMqProducerMock;
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("h2")
+@ActiveProfiles("test")
 public class GroupChatServiceTest {
 
   private final String TEST_GROUP = "g";
   private final String TEST_GROUP_MSG_ID = "g_";
-  private final String TOPIC = "temail-groupmail";
-  private final String PREFIX = "temail-notification-";
   private final boolean useMQ = false;
-  MailAgentGroupChatParams params = new MailAgentGroupChatParams();
-  @Autowired
-  private GroupChatService groupChatService;
+
+  private MailAgentGroupChatParams params = new MailAgentGroupChatParams();
+  private Gson gson = new Gson();
+
+  @Value("spring.rocketmq.topics.mailAgent.groupChat")
+  private String topic;
+  @Value("mock")
+  private String mock;
+
   @Autowired
   private RocketMqProducer rocketMqProducer;
-  private Gson gson = new Gson();
+  @Autowired
+  private RedisService redisService;
+  @Autowired
+  private EventMapper eventMapper;
+  @Autowired
+  private MemberMapper memberMapper;
+  @Autowired
+  private JsonService jsonService;
+  @Autowired
+  private RocketMqProducerMock rocketMqProducerMock;
+
+  private GroupChatService groupChatService;
 
   @Before
   public void setUp() {
-    params.setHeader("notification-header");
+    if (ConstantMock.IS_MOCK.equals(mock)) {
+      groupChatService = new GroupChatService(rocketMqProducerMock, redisService, eventMapper, memberMapper, jsonService);
+    } else {
+      groupChatService = new GroupChatService(rocketMqProducer, redisService, eventMapper, memberMapper, jsonService);
+    }
+
+    params.setHeader(ConstantMock.HEADER);
     params.setGroupTemail(TEST_GROUP);
-//    params.setGroupName("测试组名");
-//    params.setName("测试当事人名");
-//    params.setAdminName("测试触发人名");
-//    params.setTimestamp(System.currentTimeMillis());
-    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
+    params.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
   }
 
   /**
@@ -101,7 +124,7 @@ public class GroupChatServiceTest {
     params.setTemail("d");
     params.setName("dd");
     this.sendMessage(params);
-    params.setxPacketId(PREFIX + UUID.randomUUID().toString());
+    params.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     this.sendMessage(params);
     params.setTemail("e");
     params.setName("ee");
@@ -495,10 +518,10 @@ public class GroupChatServiceTest {
 
   private void sendMessage(MailAgentGroupChatParams param, boolean isSamePacket) throws Exception {
     if (!isSamePacket) {
-      param.setxPacketId(PREFIX + UUID.randomUUID().toString());
+      param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
     if (useMQ) {
-      rocketMqProducer.sendMessage(gson.toJson(param), TOPIC, "", "");
+      rocketMqProducer.sendMessage(gson.toJson(param), topic, "", "");
       Thread.sleep(2000);
     } else {
       groupChatService.handleMqMessage(gson.toJson(param));

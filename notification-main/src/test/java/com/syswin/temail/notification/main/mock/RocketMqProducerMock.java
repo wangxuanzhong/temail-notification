@@ -1,0 +1,32 @@
+package com.syswin.temail.notification.main.mock;
+
+import com.syswin.temail.notification.main.application.RocketMqProducer;
+import java.lang.invoke.MethodHandles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+
+@Component
+public class RocketMqProducerMock extends RocketMqProducer {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+  @Autowired
+  public RocketMqProducerMock(@Value("${spring.rocketmq.host}") String host,
+      @Value("${spring.rocketmq.topics.notify}") String topic) {
+    super(host, topic);
+  }
+
+  @Override
+  public void sendMessage(String body, String topic, String tags, String keys) {
+    LOGGER.info("MQ: send message: {}", body);
+  }
+
+  @Override
+  public void sendMessage(String body) {
+    sendMessage(body, null, "", "");
+  }
+}

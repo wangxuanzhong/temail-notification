@@ -6,6 +6,7 @@ import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
+import com.syswin.temail.notification.main.mock.ConstantMock;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
@@ -17,16 +18,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("h2")
+@ActiveProfiles("test")
 public class EventServiceTest {
 
-  private final String header = "notification-header";
-
-  GsonService gsonService = new GsonService();
-
+  @Autowired
+  private GsonService gsonService;
   @Autowired
   private EventService eventService;
-
   @Autowired
   private EventMapper eventMapper;
 
@@ -110,7 +108,7 @@ public class EventServiceTest {
     event.setFrom("reset_from");
     event.setTo("reset_to");
     event.setxPacketId(UUID.randomUUID().toString());
-    eventService.reset(event, header);
+    eventService.reset(event, ConstantMock.HEADER);
 
     result = eventService.getUnread("reset_to");
     assertThat(result).size().isEqualTo(1);
@@ -126,7 +124,7 @@ public class EventServiceTest {
     event.setTo("reset_to");
     event.setGroupTemail("reset_group_temail");
     event.setxPacketId(UUID.randomUUID().toString());
-    eventService.reset(event, header);
+    eventService.reset(event, ConstantMock.HEADER);
     result = eventService.getUnread("reset_to");
     assertThat(result).isEmpty();
   }
