@@ -2,11 +2,16 @@ package com.syswin.temail.notification.main.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.foundation.application.SequenceService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
+import com.syswin.temail.notification.main.infrastructure.MemberMapper;
+import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
+import com.syswin.temail.notification.main.mock.RocketMqProducerMock;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
@@ -21,14 +26,32 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("test")
 public class EventServiceTest {
 
+  private final boolean isMock = true;
+
   @Autowired
-  private GsonService gsonService;
-  @Autowired
-  private EventService eventService;
+  private SequenceService sequenceService;
   @Autowired
   private EventMapper eventMapper;
+  @Autowired
+  private UnreadMapper unreadMapper;
+  @Autowired
+  private MemberMapper memberMapper;
+  @Autowired
+  private JsonService jsonService;
+  @Autowired
+  private RocketMqProducer rocketMqProducer;
+  @Autowired
+  private RocketMqProducerMock rocketMqProducerMock;
+
+  private EventService eventService;
 
   public Event setUp() {
+    if (isMock) {
+      eventService = new EventService(sequenceService, eventMapper, unreadMapper, memberMapper, jsonService, rocketMqProducerMock);
+    } else {
+      eventService = new EventService(sequenceService, eventMapper, unreadMapper, memberMapper, jsonService, rocketMqProducer);
+    }
+
     Event event = new Event();
     event.setEventType(EventType.RECEIVE.getValue());
     event.setSeqId(1L);
@@ -53,7 +76,7 @@ public class EventServiceTest {
     event.setTo("get_unread_to");
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(gsonService);
+    event.autoWriteExtendParam(jsonService);
     eventMapper.insert(event);
 
     List<UnreadResponse> result = eventService.getUnread("get_unread_to");
@@ -83,7 +106,7 @@ public class EventServiceTest {
     event.setTo("reset_to");
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(gsonService);
+    event.autoWriteExtendParam(jsonService);
     eventMapper.insert(event);
 
     List<UnreadResponse> result = eventService.getUnread("reset_to");

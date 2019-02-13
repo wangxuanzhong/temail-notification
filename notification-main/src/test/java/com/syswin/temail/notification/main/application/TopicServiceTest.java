@@ -36,15 +36,15 @@ public class TopicServiceTest {
 
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
+
   private final boolean useMQ = false;
+  private final boolean isMock = true;
 
   private MailAgentTopicParams params = new MailAgentTopicParams();
   private Gson gson = new Gson();
 
-  @Value("spring.rocketmq.topics.mailAgent.topicChat")
+  @Value("${spring.rocketmq.topics.mailAgent.topicChat}")
   private String topic;
-  @Value("mock")
-  private String mock;
 
   @Autowired
   private RocketMqProducer rocketMqProducer;
@@ -63,7 +63,7 @@ public class TopicServiceTest {
 
   @Before
   public void setUp() {
-    if (ConstantMock.IS_MOCK.equals(mock)) {
+    if (isMock) {
       topicService = new TopicService(rocketMqProducerMock, redisService, topicMapper, jsonService);
     } else {
       topicService = new TopicService(rocketMqProducer, redisService, topicMapper, jsonService);

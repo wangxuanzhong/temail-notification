@@ -27,15 +27,15 @@ public class GroupChatServiceTest {
 
   private final String TEST_GROUP = "g";
   private final String TEST_GROUP_MSG_ID = "g_";
+
   private final boolean useMQ = false;
+  private final boolean isMock = true;
 
   private MailAgentGroupChatParams params = new MailAgentGroupChatParams();
   private Gson gson = new Gson();
 
-  @Value("spring.rocketmq.topics.mailAgent.groupChat")
+  @Value("${spring.rocketmq.topics.mailAgent.groupChat}")
   private String topic;
-  @Value("mock")
-  private String mock;
 
   @Autowired
   private RocketMqProducer rocketMqProducer;
@@ -54,7 +54,7 @@ public class GroupChatServiceTest {
 
   @Before
   public void setUp() {
-    if (ConstantMock.IS_MOCK.equals(mock)) {
+    if (isMock) {
       groupChatService = new GroupChatService(rocketMqProducerMock, redisService, eventMapper, memberMapper, jsonService);
     } else {
       groupChatService = new GroupChatService(rocketMqProducer, redisService, eventMapper, memberMapper, jsonService);

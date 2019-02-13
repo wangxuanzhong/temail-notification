@@ -28,14 +28,15 @@ public class SingleChatServiceTest {
 
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
+
   private final boolean useMQ = false;
+  private final boolean isMock = true;
+
   private MailAgentSingleChatParams params = new MailAgentSingleChatParams();
   private Gson gson = new Gson();
 
-  @Value("spring.rocketmq.topics.mailAgent.singleChat")
+  @Value("${spring.rocketmq.topics.mailAgent.singleChat}")
   private String topic;
-  @Value("mock")
-  private String mock;
 
   @Autowired
   private RocketMqProducer rocketMqProducer;
@@ -52,7 +53,7 @@ public class SingleChatServiceTest {
 
   @Before
   public void setUp() {
-    if (ConstantMock.IS_MOCK.equals(mock)) {
+    if (isMock) {
       singleChatService = new SingleChatService(rocketMqProducerMock, redisService, eventMapper, jsonService);
     } else {
       singleChatService = new SingleChatService(rocketMqProducer, redisService, eventMapper, jsonService);
