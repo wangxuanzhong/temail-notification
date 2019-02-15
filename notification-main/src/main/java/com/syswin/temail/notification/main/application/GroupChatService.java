@@ -212,11 +212,9 @@ public class GroupChatService {
           this.sendGroupMessageToAll(event, header);
         }
         break;
-      case RECEIVE_AT:
-        List<String> ats = jsonService.fromJson(event.getAt(), new TypeToken<List<String>>() {
-        }.getType());
-        ats.add(event.getTemail());
-        this.sendGroupMessage(event, ats, event.getEventType(), header);
+      case RECEIVE_AT:  // @消息下发时为多条，temail为发送者，to为接收者
+        event.setFrom(params.getGroupTemail()); // 群消息统一from是群
+        this.sendSingleMessageDirectly(event, header);
         break;
       case DELETE_AT:
         // 查询父消息，如果是@消息则只发送给@的人，否则发送给所有人
@@ -282,6 +280,16 @@ public class GroupChatService {
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
     rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, jsonService.toJson(event))));
+  }
+
+  /**
+   * 发送单人消息，不进行赋值操作
+   */
+  private void sendSingleMessageDirectly(Event event, String header)
+      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+    this.insert(event);
+    LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
+    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, jsonService.toJson(event))));
   }
 
   /**

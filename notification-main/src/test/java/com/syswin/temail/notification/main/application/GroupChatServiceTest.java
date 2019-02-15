@@ -340,6 +340,8 @@ public class GroupChatServiceTest {
     params.setSessionMessageType(EventType.RECEIVE_AT.getValue());
     params.setMsgid("at1");
     params.setTemail("a");
+    params.setTo("e");
+    params.setGroupTemail(this.TEST_GROUP);
     params.setSeqNo(1L);
     params.setToMsg("这是一条群聊测试@消息！");
     params.setAt(gson.toJson(Arrays.asList("e", "f")));
@@ -354,6 +356,7 @@ public class GroupChatServiceTest {
     params.setSessionMessageType(EventType.DELETE_AT.getValue());
     params.setMsgid("at1");
     params.setTemail("a");
+    params.setGroupTemail(this.TEST_GROUP);
     this.sendMessage(params);
   }
 
