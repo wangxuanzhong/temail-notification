@@ -58,7 +58,7 @@ public class RocketMqProducerTest {
   @Test
   public void testSendMessage() throws Exception {
     for (int i = 0; i < 10; i++) {
-      producerContainer.sendMessage("" + i);
+      producerContainer.sendMessage("" + i, String.valueOf(i));
     }
   }
 }

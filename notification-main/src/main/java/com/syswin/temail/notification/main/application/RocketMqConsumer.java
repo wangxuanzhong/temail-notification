@@ -94,7 +94,7 @@ public class RocketMqConsumer {
         try {
           for (MessageExt msg : list) {
             LOGGER.info("MQ: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
-            handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), type);
+            handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), msg.getTags(), type);
           }
         } catch (DuplicateKeyException e) {
           LOGGER.warn("duplicate key exception: ", e);
@@ -114,17 +114,17 @@ public class RocketMqConsumer {
   }
 
 
-  private void handleMqMessage(String body, int type)
+  private void handleMqMessage(String body, String tags, int type)
       throws InterruptedException, RemotingException, UnsupportedEncodingException, MQClientException, MQBrokerException {
     switch (type) {
       case TYPE_0_SINGLE_CHAT:
-        singleChatService.handleMqMessage(body);
+        singleChatService.handleMqMessage(body, tags);
         break;
       case TYPE_1_GROUP_CHAT:
-        groupChatService.handleMqMessage(body);
+        groupChatService.handleMqMessage(body, tags);
         break;
       case TYPE_2_TOPIC:
-        topicService.handleMqMessage(body);
+        topicService.handleMqMessage(body, tags);
         break;
       case TYPE_3_OSS:
         ossService.handleMqMessage(body);

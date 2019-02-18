@@ -23,10 +23,11 @@ public class RocketMqProducerMock extends RocketMqProducer {
   @Override
   public void sendMessage(String body, String topic, String tags, String keys) {
     LOGGER.info("MQ: send message: {}", body);
+    LOGGER.info("MQ: queue id when queue size is 4: {}", Math.abs(tags.hashCode() % 4));
   }
 
   @Override
-  public void sendMessage(String body) {
-    sendMessage(body, null, "", "");
+  public void sendMessage(String body, String tags) {
+    sendMessage(body, null, tags, "");
   }
 }

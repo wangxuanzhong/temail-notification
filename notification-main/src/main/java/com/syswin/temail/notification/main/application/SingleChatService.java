@@ -45,7 +45,7 @@ public class SingleChatService {
    * 处理从MQ收到的信息
    */
   @Transactional(rollbackFor = Exception.class)
-  public void handleMqMessage(String body)
+  public void handleMqMessage(String body, String tags)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentSingleChatParams params = jsonService.fromJson(body, MailAgentSingleChatParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
@@ -71,14 +71,14 @@ public class SingleChatService {
         if (event.getFrom().equals(params.getOwner())) {
           event.initEventSeqId(redisService);
           event.autoWriteExtendParam(jsonService);
-          sendMessageToSender(event, header);
+          sendMessageToSender(event, header, tags);
           // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
           event.setTo(params.getOwner());
           event.setOwner(params.getTo());
           event.autoWriteExtendParam(jsonService);
           eventMapper.insert(event);
         } else {
-          sendMessage(event, header);
+          sendMessage(event, header, tags);
         }
         break;
       case RETRACT:
@@ -87,12 +87,12 @@ public class SingleChatService {
       case REPLY_DESTROYED:
         // 多端同步功能消息同时发给双方
         event.setOwner(params.getTo());
-        sendMessage(event, header);
+        sendMessage(event, header, tags);
         // 发送给发送方
         event.setOwner(params.getFrom());
         event.initEventSeqId(redisService);
         event.autoWriteExtendParam(jsonService);
-        sendMessageToSender(event, header);
+        sendMessageToSender(event, header, tags);
         // 插入数据库，使用owner保存原消息的to，to字段保存接收者
         event.setTo(params.getFrom());
         event.setOwner(params.getTo());
@@ -106,7 +106,7 @@ public class SingleChatService {
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
           if (eventMapper.selectEventsByMsgId(event).size() == 0) {
-            sendMessage(event, header);
+            sendMessage(event, header, tags);
           } else {
             LOGGER.info("message {} is pulled, do nothing!", msgId);
           }
@@ -122,14 +122,14 @@ public class SingleChatService {
         // from是操作人，to是会话另一方
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
-        sendMessage(event, header);
+        sendMessage(event, header, tags);
         break;
       case ARCHIVE:
       case ARCHIVE_CANCEL:
         // from是操作人，to是会话的另一方
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
-        sendMessage(event, header);
+        sendMessage(event, header, tags);
         break;
       case TRASH_CANCEL:
       case TRASH_DELETE:
@@ -137,11 +137,11 @@ public class SingleChatService {
         event.setTrashMsgInfo(params.getTrashMsgInfo());
         event.setFrom(params.getOwner());
         event.setTo(params.getOwner());
-        sendMessage(event, header);
+        sendMessage(event, header, tags);
         break;
       case DO_NOT_DISTURB:
       case DO_NOT_DISTURB_CANCEL:
-        this.sendMessage(event, header);
+        this.sendMessage(event, header, tags);
         break;
       default:
         LOGGER.warn("unsupport event type!");
@@ -160,27 +160,28 @@ public class SingleChatService {
   /**
    * 发送消息
    */
-  private void sendMessage(Event event, String header)
+  private void sendMessage(Event event, String header, String tags)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    this.sendMessage(event, event.getTo(), header);
+    this.sendMessage(event, event.getTo(), header, tags);
   }
 
   /**
    * 发送消息
    */
-  private void sendMessage(Event event, String to, String header)
+  private void sendMessage(Event event, String to, String header, String tags)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     this.insert(event);
-    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, event.getEventType(), header, jsonService.toJson(event))));
+    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, event.getEventType(), header, jsonService.toJson(event))), tags);
   }
 
   /**
    * 发送消息，提供多端同步功能
    */
-  private void sendMessageToSender(Event event, String header)
+  private void sendMessageToSender(Event event, String header, String tags)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(), EventType.getByValue(event.getEventType()));
-    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, jsonService.toJson(event))));
+    rocketMqProducer
+        .sendMessage(jsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, jsonService.toJson(event))), tags);
   }
 }

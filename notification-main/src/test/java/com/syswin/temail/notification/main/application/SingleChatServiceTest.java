@@ -76,10 +76,10 @@ public class SingleChatServiceTest {
     params.setToMsg("这是一条单聊测试消息！");
 
     params.setOwner(TEST_TO);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
 
     params.setOwner(TEST_FROM);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -89,7 +89,7 @@ public class SingleChatServiceTest {
   public void testEventTypePulled() throws Exception {
     params.setSessionMessageType(EventType.PULLED.getValue());
     params.setMsgid("1,2,3");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -99,7 +99,7 @@ public class SingleChatServiceTest {
   public void testEventTypeRetract() throws Exception {
     params.setSessionMessageType(EventType.RETRACT.getValue());
     params.setMsgid("2");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -109,7 +109,7 @@ public class SingleChatServiceTest {
   public void testEventTypeDestroyed() throws Exception {
     params.setSessionMessageType(EventType.DESTROYED.getValue());
     params.setMsgid("2");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -124,7 +124,7 @@ public class SingleChatServiceTest {
 
     // 批量删除消息
     params.setMsgid(gson.toJson(Arrays.asList("2", "3", "4")));
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
 
     // 删除会话
     params.setMsgid(null);
@@ -147,10 +147,10 @@ public class SingleChatServiceTest {
     params.setToMsg("这是一条单聊阅后即焚测试消息！");
 
     params.setOwner(TEST_TO);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
 
     params.setOwner(TEST_FROM);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -165,10 +165,10 @@ public class SingleChatServiceTest {
     params.setToMsg("这是一条单聊回复测试消息！");
 
     params.setOwner(TEST_TO);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
 
     params.setOwner(TEST_FROM);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -179,7 +179,7 @@ public class SingleChatServiceTest {
     params.setSessionMessageType(EventType.REPLY_RETRACT.getValue());
     params.setMsgid("reply_1");
     params.setParentMsgId("1");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -190,7 +190,7 @@ public class SingleChatServiceTest {
     params.setSessionMessageType(EventType.REPLY_DELETE.getValue());
     params.setMsgid(gson.toJson(Arrays.asList("reply_5", "reply_3", "reply_4")));
     params.setParentMsgId("1");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -199,7 +199,7 @@ public class SingleChatServiceTest {
   @Test
   public void testEventTypeArchive() throws Exception {
     params.setSessionMessageType(EventType.ARCHIVE.getValue());
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -208,7 +208,7 @@ public class SingleChatServiceTest {
   @Test
   public void testEventTypeArchiveCancel() throws Exception {
     params.setSessionMessageType(EventType.ARCHIVE_CANCEL.getValue());
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -218,7 +218,7 @@ public class SingleChatServiceTest {
   public void testEventTypeTrash() throws Exception {
     params.setSessionMessageType(EventType.TRASH.getValue());
     params.setMsgid(gson.toJson(Arrays.asList("2", "3", "4")));
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -235,7 +235,7 @@ public class SingleChatServiceTest {
       infos.add(new TrashMsgInfo("a", "b", String.valueOf(i)));
     }
     params.setTrashMsgInfo(gson.toJson(infos));
-    this.sendMessage(params);
+    this.sendMessage(params, params.getOwner());
   }
 
   /**
@@ -252,23 +252,23 @@ public class SingleChatServiceTest {
       infos.add(new TrashMsgInfo("a", "b", String.valueOf(i)));
     }
     params.setTrashMsgInfo(gson.toJson(infos));
-    this.sendMessage(params);
+    this.sendMessage(params, params.getOwner());
   }
 
 
-  private void sendMessage(MailAgentSingleChatParams param) throws Exception {
-    sendMessage(param, false);
+  private void sendMessage(MailAgentSingleChatParams param, String tags) throws Exception {
+    sendMessage(param, false, tags);
   }
 
-  private void sendMessage(MailAgentSingleChatParams param, boolean isSamePacket) throws Exception {
+  private void sendMessage(MailAgentSingleChatParams param, boolean isSamePacket, String tags) throws Exception {
     if (!isSamePacket) {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
-    if (useMQ) {
+    if (!isMock && useMQ) {
       rocketMqProducer.sendMessage(gson.toJson(param), topic, "", "");
       Thread.sleep(2000);
     } else {
-      singleChatService.handleMqMessage(gson.toJson(param));
+      singleChatService.handleMqMessage(gson.toJson(param), tags);
     }
   }
 }

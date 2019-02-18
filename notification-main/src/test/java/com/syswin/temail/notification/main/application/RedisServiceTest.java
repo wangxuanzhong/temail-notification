@@ -3,6 +3,7 @@ package com.syswin.temail.notification.main.application;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.UUID;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,8 @@ public class RedisServiceTest {
     assertThat(redisService.checkUnique(key)).isFalse();
   }
 
-  //  @Test
+  @Test
+  @Ignore
   public void testDeleteSeq() {
     redisService.deleteSeq("jack@t.email");
     redisService.deleteSeq("sean@t.email");

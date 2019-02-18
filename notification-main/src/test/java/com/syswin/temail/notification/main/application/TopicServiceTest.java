@@ -91,14 +91,14 @@ public class TopicServiceTest {
     params.setReceivers(Arrays.asList("b", "c", "d"));
     params.setCc(Arrays.asList("J", "Q", "K"));
     params.setTo("b");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
     params.setTo("c");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
     params.setTo("d");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
 
     params.setTo("a");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
   }
 
   /**
@@ -112,11 +112,11 @@ public class TopicServiceTest {
     params.setSeqNo(2L);
     params.setToMsg("这是一条话题回复测试消息！");
     params.setTo("b");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
     params.setTo("c");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
     params.setTo("d");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
   }
 
   /**
@@ -127,7 +127,7 @@ public class TopicServiceTest {
     params.setSessionMessageType(EventType.TOPIC_REPLY_RETRACT.getValue());
     params.setTopicId("topic_1");
     params.setMsgid("1");
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
   }
 
   /**
@@ -140,7 +140,7 @@ public class TopicServiceTest {
     params.setMsgid(gson.toJson(Arrays.asList("22", "3", "43")));
     params.setFrom(TEST_TO);
     params.setTo(TEST_FROM);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
   }
 
   /**
@@ -151,7 +151,7 @@ public class TopicServiceTest {
     params.setSessionMessageType(EventType.TOPIC_DELETE.getValue());
     params.setTopicId("topic_1");
     params.setTo(TEST_FROM);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
   }
 
   /**
@@ -162,7 +162,7 @@ public class TopicServiceTest {
     params.setSessionMessageType(EventType.TOPIC_ARCHIVE.getValue());
     params.setTopicId("topic_1");
     params.setTo(null);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**
@@ -173,22 +173,22 @@ public class TopicServiceTest {
     params.setSessionMessageType(EventType.TOPIC_ARCHIVE_CANCEL.getValue());
     params.setTopicId("topic_1");
     params.setTo(null);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
-  private void sendMessage(MailAgentTopicParams param) throws Exception {
-    sendMessage(param, false);
+  private void sendMessage(MailAgentTopicParams param, String tags) throws Exception {
+    sendMessage(param, false, tags);
   }
 
-  private void sendMessage(MailAgentTopicParams param, boolean isSamePacket) throws Exception {
+  private void sendMessage(MailAgentTopicParams param, boolean isSamePacket, String tags) throws Exception {
     if (!isSamePacket) {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
-    if (useMQ) {
+    if (!isMock && useMQ) {
       rocketMqProducer.sendMessage(gson.toJson(param), topic, "", "");
       Thread.sleep(2000);
     } else {
-      topicService.handleMqMessage(gson.toJson(param));
+      topicService.handleMqMessage(gson.toJson(param), tags);
     }
   }
 
@@ -261,7 +261,7 @@ public class TopicServiceTest {
     params.setFrom("b");
     params.setTo(null);
     params.setDeleteAllMsg(true);
-    this.sendMessage(params);
+    this.sendMessage(params, params.getTopicId());
   }
 
 }

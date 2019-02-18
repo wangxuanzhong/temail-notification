@@ -1,5 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.JsonService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
@@ -46,7 +47,7 @@ public class TopicService {
    * 处理从MQ收到的信息
    */
   @Transactional(rollbackFor = Exception.class)
-  public void handleMqMessage(String body)
+  public void handleMqMessage(String body, String tags)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     MailAgentTopicParams params = jsonService.fromJson(body, MailAgentTopicParams.class);
     TopicEvent topicEvent = new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(), params.getMsgid(),
@@ -65,43 +66,44 @@ public class TopicService {
         topicEvent.setReceivers(params.getReceivers());
         topicEvent.setCc(params.getCc());
         topicEvent.setTopicSeqId(params.getTopicSeqId()); // 话题单独的序列号
-        sendMessage(topicEvent, header);
+        sendMessage(topicEvent, header, tags);
         break;
       case TOPIC_REPLY:
-        sendMessage(topicEvent, header);
+        sendMessage(topicEvent, header, tags);
         break;
       case TOPIC_REPLY_RETRACT:
         // 向撤回的消息的所有收件人发送通知
         for (TopicEvent event : topicMapper.selectEventsByMsgId(topicEvent.getMsgId())) {
           topicEvent.setTo(event.getTo());
-          sendMessage(topicEvent, header);
+          sendMessage(topicEvent, header, tags);
         }
         break;
       case TOPIC_REPLY_DELETE:
         // 删除操作msgId是多条，存入msgIds字段，from为操作人
-        topicEvent.setMsgIds(jsonService.fromJson(topicEvent.getMsgId(), List.class));
+        topicEvent.setMsgIds(jsonService.fromJson(topicEvent.getMsgId(), new TypeToken<List<String>>() {
+        }.getType()));
         topicEvent.setMsgId(null);
         topicEvent.setTo(topicEvent.getFrom());
-        sendMessage(topicEvent, header);
+        sendMessage(topicEvent, header, tags);
         break;
       case TOPIC_DELETE:
         // 向话题接收的所有人发送通知
         for (TopicEvent event : topicMapper.selectEventsByTopicId(topicEvent.getTopicId())) {
           topicEvent.setTo(event.getTo());
-          sendMessage(topicEvent, header);
+          sendMessage(topicEvent, header, tags);
         }
         break;
       case TOPIC_ARCHIVE:
       case TOPIC_ARCHIVE_CANCEL:
         // from是操作人，to为空
         topicEvent.setTo(params.getFrom());
-        sendMessage(topicEvent, header);
+        sendMessage(topicEvent, header, tags);
         break;
       case TOPIC_SESSION_DELETE:
         // from是操作人，to为空
         topicEvent.setTo(params.getFrom());
         topicEvent.setDeleteAllMsg(params.getDeleteAllMsg());
-        sendMessage(topicEvent, header);
+        sendMessage(topicEvent, header, tags);
         break;
     }
   }
@@ -118,12 +120,12 @@ public class TopicService {
   /**
    * 发送消息
    */
-  private void sendMessage(TopicEvent topicEvent, String header)
+  private void sendMessage(TopicEvent topicEvent, String header, String tags)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
     rocketMqProducer.sendMessage(
-        jsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, jsonService.toJson(topicEvent))));
+        jsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, jsonService.toJson(topicEvent))), tags);
 
   }
 
