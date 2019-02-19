@@ -3,8 +3,8 @@ package com.syswin.temail.notification.main.domains;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.syswin.temail.notification.foundation.application.JsonService;
-import com.syswin.temail.notification.foundation.application.SequenceService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.foundation.application.ISequenceService;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import java.util.List;
 import java.util.Objects;
@@ -153,9 +153,9 @@ public class Event {
   /**
    * 自动解析扩展字段
    */
-  public Event autoReadExtendParam(JsonService jsonService) {
+  public Event autoReadExtendParam(IJsonService iJsonService) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
-      EventExtendParam extendParam = jsonService.fromJson(this.extendParam, EventExtendParam.class);
+      EventExtendParam extendParam = iJsonService.fromJson(this.extendParam, EventExtendParam.class);
       this.name = extendParam.getName();
       this.adminName = extendParam.getAdminName();
       this.groupName = extendParam.getGroupName();
@@ -171,8 +171,8 @@ public class Event {
   /**
    * 自动配置扩展字段
    */
-  public Event autoWriteExtendParam(JsonService jsonService) {
-    this.extendParam = jsonService.toJson(
+  public Event autoWriteExtendParam(IJsonService iJsonService) {
+    this.extendParam = iJsonService.toJson(
         new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner, this.trashMsgInfo));
     return this;
   }
@@ -180,7 +180,7 @@ public class Event {
   /**
    * 根据不同事件类型按照不同的key生成seqId
    */
-  public void initEventSeqId(SequenceService sequenceService) {
+  public void initEventSeqId(ISequenceService iSequenceService) {
     switch (Objects.requireNonNull(EventType.getByValue(this.eventType))) {
       case RECEIVE:
       case RETRACT:
@@ -190,10 +190,10 @@ public class Event {
       case REPLY_RETRACT:
       case REPLY_DELETE:
       case REPLY_DESTROYED:
-        this.eventSeqId = sequenceService.getNextSeq(this.owner == null ? this.to : this.owner);
+        this.eventSeqId = iSequenceService.getNextSeq(this.owner == null ? this.to : this.owner);
         break;
       default:
-        this.eventSeqId = sequenceService.getNextSeq(this.to);
+        this.eventSeqId = iSequenceService.getNextSeq(this.to);
         break;
     }
   }

@@ -1,7 +1,8 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
@@ -33,14 +34,14 @@ public class TopicService {
   private final RocketMqProducer rocketMqProducer;
   private final RedisService redisService;
   private final TopicMapper topicMapper;
-  private final JsonService jsonService;
+  private final IJsonService iJsonService;
 
   @Autowired
-  public TopicService(RocketMqProducer rocketMqProducer, RedisService redisService, TopicMapper topicMapper, JsonService jsonService) {
+  public TopicService(RocketMqProducer rocketMqProducer, RedisService redisService, TopicMapper topicMapper, IJsonService iJsonService) {
     this.rocketMqProducer = rocketMqProducer;
     this.redisService = redisService;
     this.topicMapper = topicMapper;
-    this.jsonService = jsonService;
+    this.iJsonService = iJsonService;
   }
 
   /**
@@ -49,7 +50,7 @@ public class TopicService {
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body, String tags)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    MailAgentTopicParams params = jsonService.fromJson(body, MailAgentTopicParams.class);
+    MailAgentTopicParams params = iJsonService.fromJson(body, MailAgentTopicParams.class);
     TopicEvent topicEvent = new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(), params.getMsgid(),
         params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp());
 
@@ -80,7 +81,7 @@ public class TopicService {
         break;
       case TOPIC_REPLY_DELETE:
         // 删除操作msgId是多条，存入msgIds字段，from为操作人
-        topicEvent.setMsgIds(jsonService.fromJson(topicEvent.getMsgId(), new TypeToken<List<String>>() {
+        topicEvent.setMsgIds(iJsonService.fromJson(topicEvent.getMsgId(), new TypeToken<List<String>>() {
         }.getType()));
         topicEvent.setMsgId(null);
         topicEvent.setTo(topicEvent.getFrom());
@@ -113,7 +114,7 @@ public class TopicService {
    */
   private void insert(TopicEvent topicEvent) {
     topicEvent.initTopicEventSeqId(redisService);
-    topicEvent.autoWriteExtendParam(jsonService);
+    topicEvent.autoWriteExtendParam(iJsonService);
     topicMapper.insert(topicEvent);
   }
 
@@ -125,7 +126,7 @@ public class TopicService {
     LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
     rocketMqProducer.sendMessage(
-        jsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, jsonService.toJson(topicEvent))), tags);
+        iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, iJsonService.toJson(topicEvent))), tags);
 
   }
 
@@ -154,7 +155,7 @@ public class TopicService {
     Map<String, Map<String, TopicEvent>> allReplyMap = new HashMap<>();
     List<TopicEvent> notifyEvents = new ArrayList<>();
     events.forEach(event -> {
-      event.autoReadExtendParam(jsonService);
+      event.autoReadExtendParam(iJsonService);
 
       // 按照话题统计事件
       if (!allTopicMap.containsKey(event.getTopicId())) {

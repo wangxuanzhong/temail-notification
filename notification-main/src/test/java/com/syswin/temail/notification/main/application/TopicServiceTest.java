@@ -8,7 +8,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
@@ -53,7 +54,7 @@ public class TopicServiceTest {
   @Autowired
   private TopicMapper topicMapper;
   @Autowired
-  private JsonService jsonService;
+  private IJsonService iJsonService;
   @Autowired
   private RocketMqProducerMock rocketMqProducerMock;
   private TopicMapper TopicMapperMock = mock(TopicMapper.class);
@@ -64,11 +65,11 @@ public class TopicServiceTest {
   @Before
   public void setUp() {
     if (isMock) {
-      topicService = new TopicService(rocketMqProducerMock, redisService, topicMapper, jsonService);
+      topicService = new TopicService(rocketMqProducerMock, redisService, topicMapper, iJsonService);
     } else {
-      topicService = new TopicService(rocketMqProducer, redisService, topicMapper, jsonService);
+      topicService = new TopicService(rocketMqProducer, redisService, topicMapper, iJsonService);
     }
-    topicServiceMock = new TopicService(rocketMqProducer, redisService, TopicMapperMock, jsonService);
+    topicServiceMock = new TopicService(rocketMqProducer, redisService, TopicMapperMock, iJsonService);
 
     params.setHeader(ConstantMock.HEADER);
     params.setFrom(TEST_FROM);

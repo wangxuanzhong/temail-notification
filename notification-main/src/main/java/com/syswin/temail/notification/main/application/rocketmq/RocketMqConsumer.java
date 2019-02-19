@@ -1,5 +1,9 @@
-package com.syswin.temail.notification.main.application;
+package com.syswin.temail.notification.main.application.rocketmq;
 
+import com.syswin.temail.notification.main.application.GroupChatService;
+import com.syswin.temail.notification.main.application.OssService;
+import com.syswin.temail.notification.main.application.SingleChatService;
+import com.syswin.temail.notification.main.application.TopicService;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;

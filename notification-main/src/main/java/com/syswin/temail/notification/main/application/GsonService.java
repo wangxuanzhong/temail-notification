@@ -1,12 +1,12 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
 import java.lang.reflect.Type;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GsonService implements JsonService {
+public class GsonService implements IJsonService {
 
   private final Gson gson = new Gson();
 

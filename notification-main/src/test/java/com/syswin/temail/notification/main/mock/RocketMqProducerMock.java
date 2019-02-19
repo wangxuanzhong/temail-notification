@@ -1,6 +1,6 @@
 package com.syswin.temail.notification.main.mock;
 
-import com.syswin.temail.notification.main.application.RocketMqProducer;
+import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
 import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

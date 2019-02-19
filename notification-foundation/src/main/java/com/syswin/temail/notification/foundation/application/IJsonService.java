@@ -2,7 +2,7 @@ package com.syswin.temail.notification.foundation.application;
 
 import java.lang.reflect.Type;
 
-public interface JsonService {
+public interface IJsonService {
 
   String toJson(Object src);
 

@@ -1,7 +1,8 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentParams;
@@ -30,15 +31,15 @@ public class SingleChatService {
   private final RocketMqProducer rocketMqProducer;
   private final RedisService redisService;
   private final EventMapper eventMapper;
-  private final JsonService jsonService;
+  private final IJsonService iJsonService;
 
   @Autowired
   public SingleChatService(RocketMqProducer rocketMqProducer, RedisService redisService,
-      EventMapper eventMapper, JsonService jsonService) {
+      EventMapper eventMapper, IJsonService iJsonService) {
     this.rocketMqProducer = rocketMqProducer;
     this.redisService = redisService;
     this.eventMapper = eventMapper;
-    this.jsonService = jsonService;
+    this.iJsonService = iJsonService;
   }
 
   /**
@@ -47,7 +48,7 @@ public class SingleChatService {
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body, String tags)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    MailAgentSingleChatParams params = jsonService.fromJson(body, MailAgentSingleChatParams.class);
+    MailAgentSingleChatParams params = iJsonService.fromJson(body, MailAgentSingleChatParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
         params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId(), params.getOwner(), params.getDeleteAllMsg());
 
@@ -70,12 +71,12 @@ public class SingleChatService {
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
           event.initEventSeqId(redisService);
-          event.autoWriteExtendParam(jsonService);
+          event.autoWriteExtendParam(iJsonService);
           sendMessageToSender(event, header, tags);
           // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
           event.setTo(params.getOwner());
           event.setOwner(params.getTo());
-          event.autoWriteExtendParam(jsonService);
+          event.autoWriteExtendParam(iJsonService);
           eventMapper.insert(event);
         } else {
           sendMessage(event, header, tags);
@@ -91,12 +92,12 @@ public class SingleChatService {
         // 发送给发送方
         event.setOwner(params.getFrom());
         event.initEventSeqId(redisService);
-        event.autoWriteExtendParam(jsonService);
+        event.autoWriteExtendParam(iJsonService);
         sendMessageToSender(event, header, tags);
         // 插入数据库，使用owner保存原消息的to，to字段保存接收者
         event.setTo(params.getFrom());
         event.setOwner(params.getTo());
-        event.autoWriteExtendParam(jsonService);
+        event.autoWriteExtendParam(iJsonService);
         eventMapper.insert(event);
         break;
       case PULLED:
@@ -116,7 +117,7 @@ public class SingleChatService {
       case REPLY_DELETE:
       case TRASH:
         // 删除操作msgId是多条，存入msgIds字段
-        event.setMsgIds(jsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
+        event.setMsgIds(iJsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
         }.getType()));
         event.setMsgId(null);
         // from是操作人，to是会话另一方
@@ -153,7 +154,7 @@ public class SingleChatService {
    */
   private void insert(Event event) {
     event.initEventSeqId(redisService);
-    event.autoWriteExtendParam(jsonService);
+    event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
   }
 
@@ -172,7 +173,7 @@ public class SingleChatService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     this.insert(event);
-    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, event.getEventType(), header, jsonService.toJson(event))), tags);
+    rocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, event.getEventType(), header, iJsonService.toJson(event))), tags);
   }
 
   /**
@@ -182,6 +183,6 @@ public class SingleChatService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(), EventType.getByValue(event.getEventType()));
     rocketMqProducer
-        .sendMessage(jsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, jsonService.toJson(event))), tags);
+        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, iJsonService.toJson(event))), tags);
   }
 }

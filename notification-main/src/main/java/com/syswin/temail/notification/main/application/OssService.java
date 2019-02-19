@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.application;
 
 
-import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.main.domains.OssType;
 import com.syswin.temail.notification.main.domains.params.OssParams;
 import com.syswin.temail.notification.main.infrastructure.OssMapper;
@@ -20,19 +20,19 @@ public class OssService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final OssMapper ossMapper;
-  private final JsonService jsonService;
+  private final IJsonService iJsonService;
 
   @Autowired
-  public OssService(OssMapper ossMapper, JsonService jsonService) {
+  public OssService(OssMapper ossMapper, IJsonService iJsonService) {
     this.ossMapper = ossMapper;
-    this.jsonService = jsonService;
+    this.iJsonService = iJsonService;
   }
 
 
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body) {
 
-    OssParams params = jsonService.fromJson(body, OssParams.class);
+    OssParams params = iJsonService.fromJson(body, OssParams.class);
 
     LOGGER.info("temail-oss params: {}", params);
     LOGGER.info("temail-oss type: {}", OssType.getByValue(params.getType()));

@@ -1,7 +1,8 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
@@ -33,16 +34,16 @@ public class GroupChatService {
   private final RedisService redisService;
   private final EventMapper eventMapper;
   private final MemberMapper memberMapper;
-  private final JsonService jsonService;
+  private final IJsonService iJsonService;
 
   @Autowired
   public GroupChatService(RocketMqProducer rocketMqProducer, RedisService redisService, EventMapper eventMapper,
-      MemberMapper memberMapper, JsonService jsonService) {
+      MemberMapper memberMapper, IJsonService iJsonService) {
     this.rocketMqProducer = rocketMqProducer;
     this.redisService = redisService;
     this.eventMapper = eventMapper;
     this.memberMapper = memberMapper;
-    this.jsonService = jsonService;
+    this.iJsonService = iJsonService;
   }
 
   /**
@@ -51,7 +52,7 @@ public class GroupChatService {
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body, String tags)
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
-    MailAgentGroupChatParams params = jsonService.fromJson(body, MailAgentGroupChatParams.class);
+    MailAgentGroupChatParams params = iJsonService.fromJson(body, MailAgentGroupChatParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
         params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(), params.getType(), params.getName(),
         params.getAdminName(), params.getGroupName(), params.getAt(), params.getxPacketId());
@@ -89,7 +90,7 @@ public class GroupChatService {
         break;
       case DELETE:
         // 删除操作msgId是多条，存入msgIds字段
-        event.setMsgIds(jsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
+        event.setMsgIds(iJsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
         }.getType()));
         event.setMsgId(null);
         event.notifyToAll();
@@ -123,9 +124,9 @@ public class GroupChatService {
         }
         break;
       case DELETE_MEMBER: // 只通知被删除的人
-        List<String> temails = jsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
+        List<String> temails = iJsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
         }.getType());
-        List<String> names = jsonService.fromJson(event.getName(), new TypeToken<List<String>>() {
+        List<String> names = iJsonService.fromJson(event.getName(), new TypeToken<List<String>>() {
         }.getType());
 
         if (temails.size() != names.size()) {
@@ -184,7 +185,7 @@ public class GroupChatService {
         break;
       case REPLY_DELETE:
         // 删除操作msgId是多条，存入msgIds字段
-        event.setMsgIds(jsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
+        event.setMsgIds(iJsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
         }.getType()));
         event.setMsgId(null);
         event.notifyToAll();
@@ -205,15 +206,16 @@ public class GroupChatService {
       case BLACKLIST:
       case BLACKLIST_CANCEL:
         event.notifyToAdmin();
-        temails = jsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
+        temails = iJsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
         }.getType());
         for (String temail : temails) {
           event.setTemail(temail);
           this.sendGroupMessageToAll(event, header, tags);
         }
         break;
-      case RECEIVE_AT:  // @消息下发时为多条，temail为发送者，to为接收者
+      case RECEIVE_AT:  // @消息下发时为多条，from为发送者，to和temail为接收者
         event.setFrom(params.getGroupTemail()); // 群消息统一from是群
+        event.setTemail(params.getFrom());  // 当事人为发件人
         this.sendSingleMessageDirectly(event, header, tags);
         break;
       case DELETE_AT:
@@ -227,8 +229,8 @@ public class GroupChatService {
           LOGGER.warn("do not found source message!");
           break;
         } else {
-          Event parentEvent = events.get(0).autoReadExtendParam(jsonService);
-          List<String> tos = jsonService.fromJson(parentEvent.getAt(), new TypeToken<List<String>>() {
+          Event parentEvent = events.get(0).autoReadExtendParam(iJsonService);
+          List<String> tos = iJsonService.fromJson(parentEvent.getAt(), new TypeToken<List<String>>() {
           }.getType());
           // 添加原消息发送者
           tos.add(parentEvent.getTemail());
@@ -258,7 +260,7 @@ public class GroupChatService {
    */
   private void insert(Event event) {
     event.initEventSeqId(redisService);
-    event.autoWriteExtendParam(jsonService);
+    event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
   }
 
@@ -279,7 +281,7 @@ public class GroupChatService {
     event.setTo(event.getTemail());
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, jsonService.toJson(event))), tags);
+    rocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))), tags);
   }
 
   /**
@@ -289,7 +291,8 @@ public class GroupChatService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, jsonService.toJson(event))), tags);
+    rocketMqProducer
+        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))), tags);
   }
 
   /**
@@ -318,7 +321,7 @@ public class GroupChatService {
     for (String to : tos) {
       event.setTo(to);
       this.insert(event);
-      rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(to, CDTPEventType, header, jsonService.toJson(event))), tags);
+      rocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, CDTPEventType, header, iJsonService.toJson(event))), tags);
     }
   }
 
@@ -337,8 +340,8 @@ public class GroupChatService {
     if (events.isEmpty()) {
       tos = memberMapper.selectMember(event);
     } else {
-      Event parentEvent = events.get(0).autoReadExtendParam(jsonService);
-      tos = jsonService.fromJson(parentEvent.getAt(), new TypeToken<List<String>>() {
+      Event parentEvent = events.get(0).autoReadExtendParam(iJsonService);
+      tos = iJsonService.fromJson(parentEvent.getAt(), new TypeToken<List<String>>() {
       }.getType());
       // 添加原消息发送者
       tos.add(parentEvent.getTemail());

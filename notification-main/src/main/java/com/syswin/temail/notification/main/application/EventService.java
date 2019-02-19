@@ -1,8 +1,9 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.foundation.application.JsonService;
-import com.syswin.temail.notification.foundation.application.SequenceService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.foundation.application.ISequenceService;
+import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member;
@@ -36,21 +37,21 @@ public class EventService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final SequenceService sequenceService;
+  private final ISequenceService iSequenceService;
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
   private final MemberMapper memberMapper;
-  private final JsonService jsonService;
+  private final IJsonService iJsonService;
   private final RocketMqProducer rocketMqProducer;
 
   @Autowired
-  public EventService(SequenceService sequenceService, EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
-      JsonService jsonService, RocketMqProducer rocketMqProducer) {
-    this.sequenceService = sequenceService;
+  public EventService(ISequenceService iSequenceService, EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
+      IJsonService iJsonService, RocketMqProducer rocketMqProducer) {
+    this.iSequenceService = iSequenceService;
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
-    this.jsonService = jsonService;
+    this.iJsonService = iJsonService;
     this.rocketMqProducer = rocketMqProducer;
   }
 
@@ -79,7 +80,7 @@ public class EventService {
     List<String> messages = new ArrayList<>();  // 存放普通消息，以便抵消操作处理
     List<String> trashMsgIds = new ArrayList<>();  // 存放废纸篓消息，以便还原操作处理
     events.forEach(event -> {
-      event.autoReadExtendParam(jsonService);
+      event.autoReadExtendParam(iJsonService);
 
       // 按照会话统计事件，方便对单个会话多事件进行处理
       String key = event.getFrom();
@@ -135,7 +136,7 @@ public class EventService {
           break;
         case TRASH_CANCEL:
           List<TrashMsgInfo> newInfos = new ArrayList<>();
-          List<TrashMsgInfo> infos = jsonService.fromJson(event.getTrashMsgInfo(), new TypeToken<List<TrashMsgInfo>>() {
+          List<TrashMsgInfo> infos = iJsonService.fromJson(event.getTrashMsgInfo(), new TypeToken<List<TrashMsgInfo>>() {
           }.getType());
           // 如果查询到的事件中，有移入移出的操作则对于msgId不需要返回给前端
           infos.forEach(info -> {
@@ -144,7 +145,7 @@ public class EventService {
             }
           });
           if (!newInfos.isEmpty()) {
-            event.setTrashMsgInfo(jsonService.toJson(newInfos));
+            event.setTrashMsgInfo(iJsonService.toJson(newInfos));
             sessionEventMap.put(UUID.randomUUID().toString(), event);
           }
           break;
@@ -286,7 +287,7 @@ public class EventService {
   public Map<String, List<String>> calculateUnread(List<Event> events, Map<String, Integer> unreadMap) {
     Map<String, List<String>> eventMap = new HashMap<>();
     events.forEach(event -> {
-      event.autoReadExtendParam(jsonService);
+      event.autoReadExtendParam(iJsonService);
       // 为了区分单聊和群聊，给群聊添加后缀
       String key = event.getFrom();
       if (event.getGroupTemail() != null && !event.getGroupTemail().equals("")) {
@@ -342,7 +343,7 @@ public class EventService {
       CDTPEventType = EventType.GROUP_RESET.getValue();
     }
     event.setTimestamp(System.currentTimeMillis());
-    event.initEventSeqId(sequenceService);
+    event.initEventSeqId(iSequenceService);
     eventMapper.insert(event);
 
     // 删除历史重置事件
@@ -353,7 +354,7 @@ public class EventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, jsonService.toJson(event))));
+    rocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))));
   }
 
   /**
@@ -382,7 +383,7 @@ public class EventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    rocketMqProducer.sendMessage(jsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, jsonService.toJson(event))));
+    rocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
   }
 
   /**

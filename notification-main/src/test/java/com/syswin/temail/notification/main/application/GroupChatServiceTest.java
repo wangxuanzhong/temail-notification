@@ -1,7 +1,8 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
@@ -17,12 +18,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("test")
+//@ActiveProfiles("test")
 public class GroupChatServiceTest {
 
   private final String TEST_GROUP = "g";
@@ -46,7 +46,7 @@ public class GroupChatServiceTest {
   @Autowired
   private MemberMapper memberMapper;
   @Autowired
-  private JsonService jsonService;
+  private IJsonService iJsonService;
   @Autowired
   private RocketMqProducerMock rocketMqProducerMock;
 
@@ -55,9 +55,9 @@ public class GroupChatServiceTest {
   @Before
   public void setUp() {
     if (isMock) {
-      groupChatService = new GroupChatService(rocketMqProducerMock, redisService, eventMapper, memberMapper, jsonService);
+      groupChatService = new GroupChatService(rocketMqProducerMock, redisService, eventMapper, memberMapper, iJsonService);
     } else {
-      groupChatService = new GroupChatService(rocketMqProducer, redisService, eventMapper, memberMapper, jsonService);
+      groupChatService = new GroupChatService(rocketMqProducer, redisService, eventMapper, memberMapper, iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -339,7 +339,8 @@ public class GroupChatServiceTest {
   public void testEventTypeReceiveAt() throws Exception {
     params.setSessionMessageType(EventType.RECEIVE_AT.getValue());
     params.setMsgid("at1");
-    params.setTemail("a");
+    params.setFrom("a");
+    params.setTemail("e");
     params.setTo("e");
     params.setGroupTemail(this.TEST_GROUP);
     params.setSeqNo(1L);

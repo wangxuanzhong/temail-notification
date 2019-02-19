@@ -1,4 +1,4 @@
-package com.syswin.temail.notification.main.application;
+package com.syswin.temail.notification.main.application.rocketmq;
 
 import com.syswin.temail.notification.main.containers.RocketMqBrokerContainer;
 import com.syswin.temail.notification.main.containers.RocketMqNameServerContainer;

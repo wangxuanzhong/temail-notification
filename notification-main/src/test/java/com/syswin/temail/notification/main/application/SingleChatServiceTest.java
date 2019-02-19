@@ -1,7 +1,8 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.foundation.application.JsonService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams.TrashMsgInfo;
@@ -45,7 +46,7 @@ public class SingleChatServiceTest {
   @Autowired
   private EventMapper eventMapper;
   @Autowired
-  private JsonService jsonService;
+  private IJsonService iJsonService;
   @Autowired
   private RocketMqProducerMock rocketMqProducerMock;
 
@@ -54,9 +55,9 @@ public class SingleChatServiceTest {
   @Before
   public void setUp() {
     if (isMock) {
-      singleChatService = new SingleChatService(rocketMqProducerMock, redisService, eventMapper, jsonService);
+      singleChatService = new SingleChatService(rocketMqProducerMock, redisService, eventMapper, iJsonService);
     } else {
-      singleChatService = new SingleChatService(rocketMqProducer, redisService, eventMapper, jsonService);
+      singleChatService = new SingleChatService(rocketMqProducer, redisService, eventMapper, iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);

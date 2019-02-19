@@ -3,8 +3,8 @@ package com.syswin.temail.notification.main.domains;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.syswin.temail.notification.foundation.application.JsonService;
-import com.syswin.temail.notification.foundation.application.SequenceService;
+import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.foundation.application.ISequenceService;
 import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
@@ -76,16 +76,16 @@ public class TopicEvent {
   /**
    * 生成seqId
    */
-  public void initTopicEventSeqId(SequenceService sequenceService) {
-    this.eventSeqId = sequenceService.getNextSeq("topic_" + this.to);
+  public void initTopicEventSeqId(ISequenceService ISequenceService) {
+    this.eventSeqId = ISequenceService.getNextSeq("topic_" + this.to);
   }
 
   /**
    * 自动解析扩展字段
    */
-  public TopicEvent autoReadExtendParam(JsonService jsonService) {
+  public TopicEvent autoReadExtendParam(IJsonService iJsonService) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
-      TopicExtendParam extendParam = jsonService.fromJson(this.extendParam, TopicExtendParam.class);
+      TopicExtendParam extendParam = iJsonService.fromJson(this.extendParam, TopicExtendParam.class);
       this.title = extendParam.getTitle();
       this.receivers = extendParam.getReceivers();
       this.cc = extendParam.getCc();
@@ -98,8 +98,8 @@ public class TopicEvent {
   /**
    * 自动配置扩展字段
    */
-  public TopicEvent autoWriteExtendParam(JsonService jsonService) {
-    this.extendParam = jsonService.toJson(new TopicExtendParam(this.title, this.receivers, this.cc, this.msgIds, this.deleteAllMsg));
+  public TopicEvent autoWriteExtendParam(IJsonService iJsonService) {
+    this.extendParam = iJsonService.toJson(new TopicExtendParam(this.title, this.receivers, this.cc, this.msgIds, this.deleteAllMsg));
     return this;
   }
 

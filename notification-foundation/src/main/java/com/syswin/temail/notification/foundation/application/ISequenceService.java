@@ -1,6 +1,6 @@
 package com.syswin.temail.notification.foundation.application;
 
-public interface SequenceService {
+public interface ISequenceService {
 
   long STEP = 1L;
 

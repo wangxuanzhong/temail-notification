@@ -1,13 +1,13 @@
 package com.syswin.temail.notification.main.application;
 
-import com.syswin.temail.notification.foundation.application.SequenceService;
+import com.syswin.temail.notification.foundation.application.ISequenceService;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RedisService implements SequenceService {
+public class RedisService implements ISequenceService {
 
   private final RedisTemplate<String, String> redisTemplate;
 
