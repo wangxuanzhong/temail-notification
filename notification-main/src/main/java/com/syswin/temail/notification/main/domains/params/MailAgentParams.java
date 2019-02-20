@@ -6,7 +6,9 @@ public class MailAgentParams {
 
   // eventType 事件类型
   private Integer sessionMessageType;
+  // 发起方
   private String from;
+  // 接收方
   private String to;
   private String msgid;
   // 父消息ID

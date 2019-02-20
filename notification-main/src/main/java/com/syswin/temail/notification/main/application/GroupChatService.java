@@ -214,7 +214,6 @@ public class GroupChatService {
         }
         break;
       case RECEIVE_AT:  // @消息下发时为多条，from为发送者，to和temail为接收者
-        event.setFrom(params.getGroupTemail()); // 群消息统一from是群
         event.setTemail(params.getFrom());  // 当事人为发件人
         this.sendSingleMessageDirectly(event, header, tags);
         break;
@@ -317,7 +316,9 @@ public class GroupChatService {
   private void sendGroupMessage(Event event, List<String> tos, Integer CDTPEventType, String header, String tags)
       throws UnsupportedEncodingException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
     LOGGER.info("send message to --->> {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
-    event.setFrom(event.getGroupTemail());
+    if (event.getFrom() == null) {
+      event.setFrom(event.getGroupTemail());
+    }
     for (String to : tos) {
       event.setTo(to);
       this.insert(event);
