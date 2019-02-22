@@ -161,8 +161,8 @@ public class GroupChatService {
         // 通知所有管理员，提供多端同步功能
         event.notifyToAdmin();
         this.sendGroupMessageToAll(event, header, tags);
-        // 通知申请人，此通知当跨域时有可能申请人接收不到，因此修改为通过单聊发送，通知服务不单独通知申请人
-        // this.sendSingleMessage(event, header, tags);
+        // 通知申请人，此通知当跨域时有可能申请人接收不到，因此修改为通过单聊发送，通知服务不单独通知申请人(向前兼容)
+        this.sendSingleMessage(event, header, tags);
         break;
       case INVITATION:
         this.sendSingleMessage(event, header, tags);
