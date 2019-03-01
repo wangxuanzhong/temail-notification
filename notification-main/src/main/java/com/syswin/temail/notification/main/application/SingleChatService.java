@@ -68,6 +68,7 @@ public class SingleChatService {
       case RECEIVE:
       case DESTROY:
       case REPLY:
+      case CROSS_DOMAIN:
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
           event.initEventSeqId(redisService);

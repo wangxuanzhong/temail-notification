@@ -18,6 +18,7 @@ public enum EventType {
   TRASH_DELETE(37, "废纸篓消息删除"),
   DO_NOT_DISTURB(48, "设置免打扰"),
   DO_NOT_DISTURB_CANCEL(49, "设置免打扰取消"),
+  CROSS_DOMAIN(51, "跨域事件消息"),
 
   // 群管理部分
   GROUP_RESET(-101, "重置群聊消息未读数"),

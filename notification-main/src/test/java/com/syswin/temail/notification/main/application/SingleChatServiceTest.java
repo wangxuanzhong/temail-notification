@@ -256,6 +256,20 @@ public class SingleChatServiceTest {
     this.sendMessage(params, params.getOwner());
   }
 
+  /**
+   * EventType CROSS_DOMAIN 51 跨域事件消息
+   */
+  @Test
+  public void testEventTypeCrossDomain() throws Exception {
+    params.setSessionMessageType(EventType.CROSS_DOMAIN.getValue());
+    params.setMsgid("1");
+    params.setSeqNo(1L);
+    params.setToMsg("这是一条跨域事件消息！");
+    params.setFrom("g");
+    params.setOwner(TEST_TO);
+    this.sendMessage(params, params.getFrom());
+  }
+
 
   private void sendMessage(MailAgentSingleChatParams param, String tags) throws Exception {
     sendMessage(param, false, tags);
