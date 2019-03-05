@@ -198,11 +198,8 @@ public class EventService {
           break;
         case REPLY_DELETE:
           if (event.getMsgIds() != null) {
-            event.getMsgIds().forEach(msgId -> {
-              if (sessionEventMap.containsKey(msgId)) {
-                sessionEventMap.remove(msgId); // 删除已出现的msgId
-              }
-            });
+            // 删除已出现的msgId
+            event.getMsgIds().forEach(sessionEventMap::remove);
           }
           break;
         case ADD_ADMIN:
@@ -227,7 +224,7 @@ public class EventService {
     List<Event> notifyEvents = new ArrayList<>();
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
 
-    notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
+    notifyEvents.sort(Comparator.comparing(Event::getEventSeqId).reversed());
     Map<String, Object> result = new HashMap<>();
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
 
