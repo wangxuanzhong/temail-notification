@@ -3,7 +3,7 @@ package com.syswin.temail.notification.main.application;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
-import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
+import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member;
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class EventService {
+public class NotificationEventService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -42,17 +42,17 @@ public class EventService {
   private final UnreadMapper unreadMapper;
   private final MemberMapper memberMapper;
   private final IJsonService iJsonService;
-  private final RocketMqProducer rocketMqProducer;
+  private final NotificationRocketMqProducer notificationRocketMqProducer;
 
   @Autowired
-  public EventService(ISequenceService iSequenceService, EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
-      IJsonService iJsonService, RocketMqProducer rocketMqProducer) {
+  public NotificationEventService(ISequenceService iSequenceService, EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
+      IJsonService iJsonService, NotificationRocketMqProducer notificationRocketMqProducer) {
     this.iSequenceService = iSequenceService;
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
     this.iJsonService = iJsonService;
-    this.rocketMqProducer = rocketMqProducer;
+    this.notificationRocketMqProducer = notificationRocketMqProducer;
   }
 
   /**
@@ -351,7 +351,7 @@ public class EventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    rocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))));
+    notificationRocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))));
   }
 
   /**
@@ -380,7 +380,8 @@ public class EventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    rocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
+    notificationRocketMqProducer
+        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
   }
 
   /**

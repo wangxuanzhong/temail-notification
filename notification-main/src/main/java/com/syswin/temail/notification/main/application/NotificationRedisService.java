@@ -7,12 +7,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RedisService implements ISequenceService {
+public class NotificationRedisService implements ISequenceService {
 
   private final RedisTemplate<String, String> redisTemplate;
 
   @Autowired
-  public RedisService(RedisTemplate<String, String> redisTemplate) {
+  public NotificationRedisService(RedisTemplate<String, String> redisTemplate) {
     this.redisTemplate = redisTemplate;
   }
 

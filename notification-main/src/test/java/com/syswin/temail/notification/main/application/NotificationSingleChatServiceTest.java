@@ -2,13 +2,13 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
+import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
 import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
-import com.syswin.temail.notification.main.mock.RocketMqProducerMock;
+import com.syswin.temail.notification.main.mock.NotificationRocketMqProducerMock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class SingleChatServiceTest {
+public class NotificationSingleChatServiceTest {
 
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
@@ -40,24 +40,25 @@ public class SingleChatServiceTest {
   private String topic;
 
   @Autowired
-  private RocketMqProducer rocketMqProducer;
+  private NotificationRocketMqProducer notificationRocketMqProducer;
   @Autowired
-  private RedisService redisService;
+  private NotificationRedisService notificationRedisService;
   @Autowired
   private EventMapper eventMapper;
   @Autowired
   private IJsonService iJsonService;
   @Autowired
-  private RocketMqProducerMock rocketMqProducerMock;
+  private NotificationRocketMqProducerMock rocketMqProducerMock;
 
-  private SingleChatService singleChatService;
+  private NotificationSingleChatService notificationSingleChatService;
 
   @Before
   public void setUp() {
     if (isMock) {
-      singleChatService = new SingleChatService(rocketMqProducerMock, redisService, eventMapper, iJsonService);
+      notificationSingleChatService = new NotificationSingleChatService(rocketMqProducerMock, notificationRedisService, eventMapper, iJsonService);
     } else {
-      singleChatService = new SingleChatService(rocketMqProducer, redisService, eventMapper, iJsonService);
+      notificationSingleChatService = new NotificationSingleChatService(notificationRocketMqProducer, notificationRedisService, eventMapper,
+          iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -280,10 +281,10 @@ public class SingleChatServiceTest {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
     if (!isMock && useMQ) {
-      rocketMqProducer.sendMessage(gson.toJson(param), topic, "", "");
+      notificationRocketMqProducer.sendMessage(gson.toJson(param), topic, "", "");
       Thread.sleep(2000);
     } else {
-      singleChatService.handleMqMessage(gson.toJson(param), tags);
+      notificationSingleChatService.handleMqMessage(gson.toJson(param), tags);
     }
   }
 }

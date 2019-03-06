@@ -4,7 +4,7 @@ package com.syswin.temail.notification.main.application;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.main.domains.OssType;
 import com.syswin.temail.notification.main.domains.params.OssParams;
-import com.syswin.temail.notification.main.infrastructure.OssMapper;
+import com.syswin.temail.notification.main.infrastructure.NotificationOssMapper;
 import java.lang.invoke.MethodHandles;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -15,16 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @Service
-public class OssService {
+public class NotificationOssService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final OssMapper ossMapper;
+  private final NotificationOssMapper notificationOssMapper;
   private final IJsonService iJsonService;
 
   @Autowired
-  public OssService(OssMapper ossMapper, IJsonService iJsonService) {
-    this.ossMapper = ossMapper;
+  public NotificationOssService(NotificationOssMapper notificationOssMapper, IJsonService iJsonService) {
+    this.notificationOssMapper = notificationOssMapper;
     this.iJsonService = iJsonService;
   }
 
@@ -40,7 +40,7 @@ public class OssService {
     switch (Objects.requireNonNull(OssType.getByValue(params.getType()))) {
       case USER_TEMAIL_DELETED:
         if (!CollectionUtils.isEmpty(params.getTemails())) {
-          params.getTemails().forEach(ossMapper::deleteTemail);
+          params.getTemails().forEach(notificationOssMapper::deleteTemail);
         }
         break;
     }

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
-import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
+import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
@@ -12,7 +12,7 @@ import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
-import com.syswin.temail.notification.main.mock.RocketMqProducerMock;
+import com.syswin.temail.notification.main.mock.NotificationRocketMqProducerMock;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class EventServiceTest {
+public class NotificationEventServiceTest {
 
   private final boolean isMock = true;
 
@@ -40,17 +40,19 @@ public class EventServiceTest {
   @Autowired
   private IJsonService iJsonService;
   @Autowired
-  private RocketMqProducer rocketMqProducer;
+  private NotificationRocketMqProducer notificationRocketMqProducer;
   @Autowired
-  private RocketMqProducerMock rocketMqProducerMock;
+  private NotificationRocketMqProducerMock rocketMqProducerMock;
 
-  private EventService eventService;
+  private NotificationEventService notificationEventService;
 
   public Event setUp() {
     if (isMock) {
-      eventService = new EventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService, rocketMqProducerMock);
+      notificationEventService = new NotificationEventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService,
+          rocketMqProducerMock);
     } else {
-      eventService = new EventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService, rocketMqProducer);
+      notificationEventService = new NotificationEventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService,
+          notificationRocketMqProducer);
     }
 
     Event event = new Event();
@@ -80,7 +82,7 @@ public class EventServiceTest {
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
 
-    List<UnreadResponse> result = eventService.getUnread("get_unread_to");
+    List<UnreadResponse> result = notificationEventService.getUnread("get_unread_to");
     assertThat(result).size().isEqualTo(1);
     assertThat(result.get(0).getFrom()).isEqualTo("get_unread_from");
     assertThat(result.get(0).getTo()).isEqualTo("get_unread_to");
@@ -93,7 +95,7 @@ public class EventServiceTest {
     event.setEventSeqId(2L);
     eventMapper.insert(event);
 
-    result = eventService.getUnread("get_unread_to");
+    result = notificationEventService.getUnread("get_unread_to");
     assertThat(result).size().isEqualTo(2);
   }
 
@@ -110,7 +112,7 @@ public class EventServiceTest {
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
 
-    List<UnreadResponse> result = eventService.getUnread("reset_to");
+    List<UnreadResponse> result = notificationEventService.getUnread("reset_to");
     assertThat(result).size().isEqualTo(1);
     assertThat(result.get(0).getFrom()).isEqualTo("reset_from");
     assertThat(result.get(0).getTo()).isEqualTo("reset_to");
@@ -123,7 +125,7 @@ public class EventServiceTest {
     event.setEventSeqId(2L);
     eventMapper.insert(event);
 
-    result = eventService.getUnread("reset_to");
+    result = notificationEventService.getUnread("reset_to");
     assertThat(result).size().isEqualTo(2);
 
     // 重置单聊消息
@@ -132,9 +134,9 @@ public class EventServiceTest {
     event.setFrom("reset_from");
     event.setTo("reset_to");
     event.setxPacketId(UUID.randomUUID().toString());
-    eventService.reset(event, ConstantMock.HEADER);
+    notificationEventService.reset(event, ConstantMock.HEADER);
 
-    result = eventService.getUnread("reset_to");
+    result = notificationEventService.getUnread("reset_to");
     assertThat(result).size().isEqualTo(1);
     assertThat(result.get(0).getFrom()).isEqualTo("reset_group_temail");
     assertThat(result.get(0).getTo()).isEqualTo("reset_to");
@@ -148,8 +150,8 @@ public class EventServiceTest {
     event.setTo("reset_to");
     event.setGroupTemail("reset_group_temail");
     event.setxPacketId(UUID.randomUUID().toString());
-    eventService.reset(event, ConstantMock.HEADER);
-    result = eventService.getUnread("reset_to");
+    notificationEventService.reset(event, ConstantMock.HEADER);
+    result = notificationEventService.getUnread("reset_to");
     assertThat(result).isEmpty();
   }
 

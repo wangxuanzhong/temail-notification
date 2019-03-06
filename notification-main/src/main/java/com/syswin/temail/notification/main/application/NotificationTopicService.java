@@ -2,7 +2,7 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
+import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
@@ -27,19 +27,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class TopicService {
+public class NotificationTopicService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final RocketMqProducer rocketMqProducer;
-  private final RedisService redisService;
+  private final NotificationRocketMqProducer notificationRocketMqProducer;
+  private final NotificationRedisService notificationRedisService;
   private final TopicMapper topicMapper;
   private final IJsonService iJsonService;
 
   @Autowired
-  public TopicService(RocketMqProducer rocketMqProducer, RedisService redisService, TopicMapper topicMapper, IJsonService iJsonService) {
-    this.rocketMqProducer = rocketMqProducer;
-    this.redisService = redisService;
+  public NotificationTopicService(NotificationRocketMqProducer notificationRocketMqProducer, NotificationRedisService notificationRedisService,
+      TopicMapper topicMapper, IJsonService iJsonService) {
+    this.notificationRocketMqProducer = notificationRocketMqProducer;
+    this.notificationRedisService = notificationRedisService;
     this.topicMapper = topicMapper;
     this.iJsonService = iJsonService;
   }
@@ -113,7 +114,7 @@ public class TopicService {
    * 插入数据库
    */
   private void insert(TopicEvent topicEvent) {
-    topicEvent.initTopicEventSeqId(redisService);
+    topicEvent.initTopicEventSeqId(notificationRedisService);
     topicEvent.autoWriteExtendParam(iJsonService);
     topicMapper.insert(topicEvent);
   }
@@ -125,7 +126,7 @@ public class TopicService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
-    rocketMqProducer.sendMessage(
+    notificationRocketMqProducer.sendMessage(
         iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, iJsonService.toJson(topicEvent))), tags);
 
   }

@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class RocketMqProducer {
+public class NotificationRocketMqProducer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -30,7 +30,7 @@ public class RocketMqProducer {
   private String host;
   private String topic;
 
-  public RocketMqProducer(@Value("${spring.rocketmq.host}") String host,
+  public NotificationRocketMqProducer(@Value("${spring.rocketmq.host}") String host,
       @Value("${spring.rocketmq.topics.notify}") String topic) {
     this.host = host;
     this.topic = topic;

@@ -6,14 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 @DisallowConcurrentExecution
-public class DeleteOldEventJob extends QuartzJobBean {
+public class NotificationDeleteOldEventJob extends QuartzJobBean {
 
   @Autowired
-  private EventSchedule eventSchedule;
+  private NotificationEventSchedule notificationEventSchedule;
 
   @Override
   protected void executeInternal(JobExecutionContext jobExecutionContext) {
-    eventSchedule.deleteOldEvent();
+    notificationEventSchedule.deleteOldEvent();
   }
 
 }

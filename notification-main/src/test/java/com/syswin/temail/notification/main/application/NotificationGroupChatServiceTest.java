@@ -2,14 +2,14 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
+import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
-import com.syswin.temail.notification.main.mock.RocketMqProducerMock;
+import com.syswin.temail.notification.main.mock.NotificationRocketMqProducerMock;
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Before;
@@ -24,7 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class GroupChatServiceTest {
+public class NotificationGroupChatServiceTest {
 
   private final String TEST_GROUP = "g";
   private final String TEST_GROUP_MSG_ID = "g_";
@@ -39,9 +39,9 @@ public class GroupChatServiceTest {
   private String topic;
 
   @Autowired
-  private RocketMqProducer rocketMqProducer;
+  private NotificationRocketMqProducer notificationRocketMqProducer;
   @Autowired
-  private RedisService redisService;
+  private NotificationRedisService notificationRedisService;
   @Autowired
   private EventMapper eventMapper;
   @Autowired
@@ -49,16 +49,18 @@ public class GroupChatServiceTest {
   @Autowired
   private IJsonService iJsonService;
   @Autowired
-  private RocketMqProducerMock rocketMqProducerMock;
+  private NotificationRocketMqProducerMock rocketMqProducerMock;
 
-  private GroupChatService groupChatService;
+  private NotificationGroupChatService notificationGroupChatService;
 
   @Before
   public void setUp() {
     if (isMock) {
-      groupChatService = new GroupChatService(rocketMqProducerMock, redisService, eventMapper, memberMapper, iJsonService);
+      notificationGroupChatService = new NotificationGroupChatService(rocketMqProducerMock, notificationRedisService, eventMapper, memberMapper,
+          iJsonService);
     } else {
-      groupChatService = new GroupChatService(rocketMqProducer, redisService, eventMapper, memberMapper, iJsonService);
+      notificationGroupChatService = new NotificationGroupChatService(notificationRocketMqProducer, notificationRedisService, eventMapper,
+          memberMapper, iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -526,10 +528,10 @@ public class GroupChatServiceTest {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
     if (!isMock && useMQ) {
-      rocketMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
+      notificationRocketMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
       Thread.sleep(2000);
     } else {
-      groupChatService.handleMqMessage(gson.toJson(param), tags);
+      notificationGroupChatService.handleMqMessage(gson.toJson(param), tags);
     }
   }
 }

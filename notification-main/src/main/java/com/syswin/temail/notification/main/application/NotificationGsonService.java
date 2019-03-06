@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GsonService implements IJsonService {
+public class NotificationGsonService implements IJsonService {
 
   private final Gson gson = new Gson();
 

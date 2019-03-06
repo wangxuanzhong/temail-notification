@@ -1,8 +1,8 @@
 package com.syswin.temail.notification.main.interfaces.controller;
 
 import com.syswin.temail.notification.foundation.domains.Response;
-import com.syswin.temail.notification.main.application.EventService;
-import com.syswin.temail.notification.main.application.TopicService;
+import com.syswin.temail.notification.main.application.NotificationEventService;
+import com.syswin.temail.notification.main.application.NotificationTopicService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
@@ -41,13 +41,13 @@ public class NotificationController {
 
   private final String CDTP_HEADER = "CDTP-header";
 
-  private final EventService eventService;
-  private final TopicService topicService;
+  private final NotificationEventService notificationEventService;
+  private final NotificationTopicService notificationTopicService;
 
   @Autowired
-  public NotificationController(EventService eventService, TopicService topicService) {
-    this.eventService = eventService;
-    this.topicService = topicService;
+  public NotificationController(NotificationEventService notificationEventService, NotificationTopicService notificationTopicService) {
+    this.notificationEventService = notificationEventService;
+    this.notificationTopicService = notificationTopicService;
   }
 
   @ApiOperation(value = "pull event 3 0001", consumes = "application/json")
@@ -56,7 +56,7 @@ public class NotificationController {
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    Map<String, Object> result = eventService.getEvents(to, eventSeqId, pageSize);
+    Map<String, Object> result = notificationEventService.getEvents(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
@@ -66,7 +66,7 @@ public class NotificationController {
       @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    List<UnreadResponse> result = eventService.getUnread(to);
+    List<UnreadResponse> result = notificationEventService.getUnread(to);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
@@ -89,7 +89,7 @@ public class NotificationController {
           HttpStatus.BAD_REQUEST);
     }
 
-    eventService.reset(event, header);
+    notificationEventService.reset(event, header);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 
@@ -114,7 +114,7 @@ public class NotificationController {
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    Map<String, Object> result = topicService.getTopicEvents(to, eventSeqId, pageSize);
+    Map<String, Object> result = notificationTopicService.getTopicEvents(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
@@ -132,7 +132,7 @@ public class NotificationController {
       return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "status is illegal!"), headers, HttpStatus.BAD_REQUEST);
     }
 
-    eventService.updateGroupChatUserStatus(member, userStatus, header);
+    notificationEventService.updateGroupChatUserStatus(member, userStatus, header);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 
@@ -143,7 +143,7 @@ public class NotificationController {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
-    Map<String, Integer> result = eventService.getGroupChatUserStatus(temail, groupTemail);
+    Map<String, Integer> result = notificationEventService.getGroupChatUserStatus(temail, groupTemail);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 }

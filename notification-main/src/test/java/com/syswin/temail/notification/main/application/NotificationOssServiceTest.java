@@ -17,10 +17,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 @ActiveProfiles("test")
 @Ignore
-public class OssServiceTest {
+public class NotificationOssServiceTest {
 
   @Autowired
-  private OssService service;
+  private NotificationOssService service;
   private Gson gson = new Gson();
   private OssParams params;
 

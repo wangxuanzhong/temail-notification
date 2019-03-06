@@ -2,7 +2,7 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
+import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
@@ -26,21 +26,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class GroupChatService {
+public class NotificationGroupChatService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final RocketMqProducer rocketMqProducer;
-  private final RedisService redisService;
+  private final NotificationRocketMqProducer notificationRocketMqProducer;
+  private final NotificationRedisService notificationRedisService;
   private final EventMapper eventMapper;
   private final MemberMapper memberMapper;
   private final IJsonService iJsonService;
 
   @Autowired
-  public GroupChatService(RocketMqProducer rocketMqProducer, RedisService redisService, EventMapper eventMapper,
+  public NotificationGroupChatService(NotificationRocketMqProducer notificationRocketMqProducer, NotificationRedisService notificationRedisService,
+      EventMapper eventMapper,
       MemberMapper memberMapper, IJsonService iJsonService) {
-    this.rocketMqProducer = rocketMqProducer;
-    this.redisService = redisService;
+    this.notificationRocketMqProducer = notificationRocketMqProducer;
+    this.notificationRedisService = notificationRedisService;
     this.eventMapper = eventMapper;
     this.memberMapper = memberMapper;
     this.iJsonService = iJsonService;
@@ -65,7 +66,7 @@ public class GroupChatService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, redisService)) {
+    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisService)) {
       return;
     }
 
@@ -258,7 +259,7 @@ public class GroupChatService {
    * 插入数据库
    */
   private void insert(Event event) {
-    event.initEventSeqId(redisService);
+    event.initEventSeqId(notificationRedisService);
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
   }
@@ -280,7 +281,8 @@ public class GroupChatService {
     event.setTo(event.getTemail());
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    rocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))), tags);
+    notificationRocketMqProducer
+        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))), tags);
   }
 
   /**
@@ -290,7 +292,7 @@ public class GroupChatService {
       throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    rocketMqProducer
+    notificationRocketMqProducer
         .sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))), tags);
   }
 
@@ -322,7 +324,7 @@ public class GroupChatService {
     for (String to : tos) {
       event.setTo(to);
       this.insert(event);
-      rocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, CDTPEventType, header, iJsonService.toJson(event))), tags);
+      notificationRocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, CDTPEventType, header, iJsonService.toJson(event))), tags);
     }
   }
 

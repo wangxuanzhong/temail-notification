@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class NotificationGlobalExceptionHandler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NotificationGlobalExceptionHandler.class);
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Response> handleException(Exception e) {

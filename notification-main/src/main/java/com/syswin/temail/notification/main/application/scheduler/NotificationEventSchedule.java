@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.application.scheduler;
 
-import com.syswin.temail.notification.main.application.EventService;
-import com.syswin.temail.notification.main.application.RedisService;
+import com.syswin.temail.notification.main.application.NotificationEventService;
+import com.syswin.temail.notification.main.application.NotificationRedisService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
@@ -22,14 +22,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class EventSchedule {
+public class NotificationEventSchedule {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
-  private final EventService eventService;
-  private final RedisService redisService;
+  private final NotificationEventService notificationEventService;
+  private final NotificationRedisService notificationRedisService;
   private final TopicMapper topicMapper;
   private final int deadline;
 
@@ -37,13 +37,14 @@ public class EventSchedule {
   private final int PAGE_SIZE = 100000; // 分页删除，每次删除10W条
 
   @Autowired
-  public EventSchedule(EventMapper eventMapper, UnreadMapper unreadMapper, EventService eventService, RedisService redisService,
+  public NotificationEventSchedule(EventMapper eventMapper, UnreadMapper unreadMapper, NotificationEventService notificationEventService,
+      NotificationRedisService notificationRedisService,
       TopicMapper topicMapper, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
     this.eventMapper = eventMapper;
-    this.eventService = eventService;
+    this.notificationEventService = notificationEventService;
     this.topicMapper = topicMapper;
     this.unreadMapper = unreadMapper;
-    this.redisService = redisService;
+    this.notificationRedisService = notificationRedisService;
     this.deadline = deadline;
   }
 
@@ -55,7 +56,7 @@ public class EventSchedule {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old event before {}", createTime);
 
-    if (!redisService.checkLock(DELETE_OLD_EVENT_KEY, 10, TimeUnit.MINUTES)) {
+    if (!notificationRedisService.checkLock(DELETE_OLD_EVENT_KEY, 10, TimeUnit.MINUTES)) {
       LOGGER.warn("check lock from redis failed!");
       return;
     }
@@ -73,7 +74,7 @@ public class EventSchedule {
 
       // 统计未读数
       LOGGER.info("calculate [{}]'s event, size : {}", to, events.size());
-      Map<String, List<String>> eventMap = eventService.calculateUnread(events, unreadMap);
+      Map<String, List<String>> eventMap = notificationEventService.calculateUnread(events, unreadMap);
 
       // 统计各个会话的未读数量，并插入数据库
       eventMap.forEach((key, msgIds) -> {

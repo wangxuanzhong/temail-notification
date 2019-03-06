@@ -1,6 +1,6 @@
 package com.syswin.temail.notification.main.mock;
 
-import com.syswin.temail.notification.main.application.rocketmq.RocketMqProducer;
+import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
 import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class RocketMqProducerMock extends RocketMqProducer {
+public class NotificationRocketMqProducerMock extends NotificationRocketMqProducer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Autowired
-  public RocketMqProducerMock(@Value("${spring.rocketmq.host}") String host,
+  public NotificationRocketMqProducerMock(@Value("${spring.rocketmq.host}") String host,
       @Value("${spring.rocketmq.topics.notify}") String topic) {
     super(host, topic);
   }

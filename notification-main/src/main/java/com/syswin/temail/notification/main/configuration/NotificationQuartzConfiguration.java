@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.configuration;
 
-import com.syswin.temail.notification.main.application.scheduler.DeleteOldEventJob;
-import com.syswin.temail.notification.main.application.scheduler.DeleteOldTopicJob;
+import com.syswin.temail.notification.main.application.scheduler.NotificationDeleteOldEventJob;
+import com.syswin.temail.notification.main.application.scheduler.NotificationDeleteOldTopicJob;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class QuartzConfiguration {
+public class NotificationQuartzConfiguration {
 
   private static final String deleteOldEventCron = "0 0 4 * * ?";
   private static final String deleteOldTopicCron = "0 0 3 * * ?";
@@ -19,7 +19,7 @@ public class QuartzConfiguration {
   // 定时清理历史单群聊事件
   @Bean
   public JobDetail deleteOldEventTaskDetail() {
-    return JobBuilder.newJob(DeleteOldEventJob.class).withIdentity("deleteOldEventTaskTrigger").storeDurably().build();
+    return JobBuilder.newJob(NotificationDeleteOldEventJob.class).withIdentity("deleteOldEventTaskTrigger").storeDurably().build();
   }
 
   @Bean
@@ -34,7 +34,7 @@ public class QuartzConfiguration {
   // 定时清理历史话题事件
   @Bean
   public JobDetail deleteOldTopicTaskDetail() {
-    return JobBuilder.newJob(DeleteOldTopicJob.class).withIdentity("deleteOldTopicTaskTrigger").storeDurably().build();
+    return JobBuilder.newJob(NotificationDeleteOldTopicJob.class).withIdentity("deleteOldTopicTaskTrigger").storeDurably().build();
   }
 
   @Bean

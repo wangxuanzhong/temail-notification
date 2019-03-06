@@ -1,9 +1,9 @@
 package com.syswin.temail.notification.main.application.rocketmq;
 
-import com.syswin.temail.notification.main.application.GroupChatService;
-import com.syswin.temail.notification.main.application.OssService;
-import com.syswin.temail.notification.main.application.SingleChatService;
-import com.syswin.temail.notification.main.application.TopicService;
+import com.syswin.temail.notification.main.application.NotificationGroupChatService;
+import com.syswin.temail.notification.main.application.NotificationOssService;
+import com.syswin.temail.notification.main.application.NotificationSingleChatService;
+import com.syswin.temail.notification.main.application.NotificationTopicService;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
@@ -28,7 +28,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RocketMqConsumer {
+public class NotificationRocketMqConsumer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -42,27 +42,28 @@ public class RocketMqConsumer {
   private final int TYPE_2_TOPIC = 2;
   private final int TYPE_3_OSS = 3;
 
-  private SingleChatService singleChatService;
-  private GroupChatService groupChatService;
-  private TopicService topicService;
-  private OssService ossService;
+  private NotificationSingleChatService notificationSingleChatService;
+  private NotificationGroupChatService notificationGroupChatService;
+  private NotificationTopicService notificationTopicService;
+  private NotificationOssService notificationOssService;
   private String host;
   private String singleChatTopic;
   private String groupChatTopic;
   private String topicChatTopic;
   private String ossTopic;
 
-  public RocketMqConsumer(SingleChatService singleChatService, GroupChatService groupChatService,
-      TopicService topicService, OssService ossService,
+  public NotificationRocketMqConsumer(NotificationSingleChatService notificationSingleChatService,
+      NotificationGroupChatService notificationGroupChatService,
+      NotificationTopicService notificationTopicService, NotificationOssService notificationOssService,
       @Value("${spring.rocketmq.host}") String host,
       @Value("${spring.rocketmq.topics.mailAgent.singleChat}") String singleChatTopic,
       @Value("${spring.rocketmq.topics.mailAgent.groupChat}") String groupChatTopic,
       @Value("${spring.rocketmq.topics.mailAgent.topicChat}") String topicChatTopic,
       @Value("${spring.rocketmq.topics.oss}") String ossTopic) {
-    this.singleChatService = singleChatService;
-    this.groupChatService = groupChatService;
-    this.topicService = topicService;
-    this.ossService = ossService;
+    this.notificationSingleChatService = notificationSingleChatService;
+    this.notificationGroupChatService = notificationGroupChatService;
+    this.notificationTopicService = notificationTopicService;
+    this.notificationOssService = notificationOssService;
     this.host = host;
     this.singleChatTopic = singleChatTopic;
     this.groupChatTopic = groupChatTopic;
@@ -122,16 +123,16 @@ public class RocketMqConsumer {
       throws InterruptedException, RemotingException, UnsupportedEncodingException, MQClientException, MQBrokerException {
     switch (type) {
       case TYPE_0_SINGLE_CHAT:
-        singleChatService.handleMqMessage(body, tags);
+        notificationSingleChatService.handleMqMessage(body, tags);
         break;
       case TYPE_1_GROUP_CHAT:
-        groupChatService.handleMqMessage(body, tags);
+        notificationGroupChatService.handleMqMessage(body, tags);
         break;
       case TYPE_2_TOPIC:
-        topicService.handleMqMessage(body, tags);
+        notificationTopicService.handleMqMessage(body, tags);
         break;
       case TYPE_3_OSS:
-        ossService.handleMqMessage(body);
+        notificationOssService.handleMqMessage(body);
         break;
     }
   }
