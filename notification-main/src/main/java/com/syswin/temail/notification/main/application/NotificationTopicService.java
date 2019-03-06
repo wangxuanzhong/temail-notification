@@ -107,6 +107,8 @@ public class NotificationTopicService {
         topicEvent.setDeleteAllMsg(params.getDeleteAllMsg());
         sendMessage(topicEvent, header, tags);
         break;
+      default:
+        LOGGER.warn("unsupport event type!");
     }
   }
 
