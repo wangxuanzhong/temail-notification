@@ -55,4 +55,22 @@ public class OssParams {
         '}';
   }
 
+  public enum OssType {
+    UserTemailDeleted("删除Temail数据");
+
+    private final String description;
+
+    OssType(String description) {
+      this.description = description;
+    }
+
+    public static OssType getByName(String name) {
+      for (OssType ossType : values()) {
+        if (ossType.name().equals(name)) {
+          return ossType;
+        }
+      }
+      return null;
+    }
+  }
 }

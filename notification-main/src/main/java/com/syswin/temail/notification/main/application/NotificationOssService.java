@@ -2,11 +2,10 @@ package com.syswin.temail.notification.main.application;
 
 
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.main.domains.OssType;
 import com.syswin.temail.notification.main.domains.params.OssParams;
+import com.syswin.temail.notification.main.domains.params.OssParams.OssType;
 import com.syswin.temail.notification.main.infrastructure.NotificationOssMapper;
 import java.lang.invoke.MethodHandles;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,21 +27,26 @@ public class NotificationOssService {
     this.iJsonService = iJsonService;
   }
 
-
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body) {
-
     OssParams params = iJsonService.fromJson(body, OssParams.class);
 
-    LOGGER.info("temail-oss params: {}", params);
-    LOGGER.info("temail-oss type: {}", OssType.getByValue(params.getType()));
+    LOGGER.info("oss service params: {}", params);
+    OssType ossType = OssType.getByName(params.getType());
+    if (ossType == null) {
+      LOGGER.warn("type is illegal!");
+      return;
+    }
+    LOGGER.info("oss type: {}", ossType);
 
-    switch (Objects.requireNonNull(OssType.getByValue(params.getType()))) {
-      case USER_TEMAIL_DELETED:
+    switch (ossType) {
+      case UserTemailDeleted:
         if (!CollectionUtils.isEmpty(params.getTemails())) {
           params.getTemails().forEach(notificationOssMapper::deleteTemail);
         }
         break;
+      default:
+        LOGGER.warn("unsupport type!");
     }
 
   }
