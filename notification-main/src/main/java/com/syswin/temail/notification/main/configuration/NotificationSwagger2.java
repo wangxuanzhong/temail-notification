@@ -18,6 +18,7 @@ public class NotificationSwagger2 {
   public Docket NotificationApi() {
     return new Docket(DocumentationType.SWAGGER_2)
         .apiInfo(apiInfo())
+        .groupName("notification")
         .select()
         .apis(RequestHandlerSelectors.basePackage("com.syswin.temail.notification"))
         .paths(PathSelectors.any())
