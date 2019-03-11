@@ -1,10 +1,9 @@
-package com.syswin.temail.notification.main.instructure;
+package com.syswin.temail.notification.main.infrastructure;
 
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.main.Application;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
