@@ -2,8 +2,8 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
-import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member;
@@ -14,7 +14,6 @@ import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
-import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,9 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import org.apache.rocketmq.client.exception.MQBrokerException;
-import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,17 +38,17 @@ public class NotificationEventService {
   private final UnreadMapper unreadMapper;
   private final MemberMapper memberMapper;
   private final IJsonService iJsonService;
-  private final NotificationRocketMqProducer notificationRocketMqProducer;
+  private final IMqProducer iMqProducer;
 
   @Autowired
   public NotificationEventService(ISequenceService iSequenceService, EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
-      IJsonService iJsonService, NotificationRocketMqProducer notificationRocketMqProducer) {
+      IJsonService iJsonService, IMqProducer iMqProducer) {
     this.iSequenceService = iSequenceService;
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
     this.iJsonService = iJsonService;
-    this.notificationRocketMqProducer = notificationRocketMqProducer;
+    this.iMqProducer = iMqProducer;
   }
 
   /**
@@ -329,8 +325,7 @@ public class NotificationEventService {
   /**
    * 重置消息未读数
    */
-  public void reset(Event event, String header)
-      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+  public void reset(Event event, String header) {
     LOGGER.info("reset to: {}, param: {}", event.getTo(), event);
     event.setEventType(EventType.RESET.getValue());
     Integer CDTPEventType = event.getEventType();
@@ -351,15 +346,14 @@ public class NotificationEventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    notificationRocketMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))));
+    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))));
   }
 
   /**
    * 修改群成员个人状态
    */
   @Transactional(rollbackFor = Exception.class)
-  public void updateGroupChatUserStatus(Member member, UserStatus userStatus, String header)
-      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+  public void updateGroupChatUserStatus(Member member, UserStatus userStatus, String header) {
     LOGGER.info("update user status, param: {}", member);
     Event event = new Event(null, null, null, null, null,
         member.getGroupTemail(), member.getTemail(), System.currentTimeMillis(), member.getGroupTemail(), member.getTemail(),
@@ -380,8 +374,7 @@ public class NotificationEventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    notificationRocketMqProducer
-        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
+    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
   }
 
   /**

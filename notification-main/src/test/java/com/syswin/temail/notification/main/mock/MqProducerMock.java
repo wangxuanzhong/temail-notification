@@ -1,23 +1,17 @@
 package com.syswin.temail.notification.main.mock;
 
-import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
+import com.syswin.temail.notification.foundation.application.IMqProducer;
 import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-
-@Component
-public class NotificationRocketMqProducerMock extends NotificationRocketMqProducer {
+public class MqProducerMock implements IMqProducer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  @Autowired
-  public NotificationRocketMqProducerMock(@Value("${spring.rocketmq.host}") String host,
-      @Value("${spring.rocketmq.topics.notify}") String topic) {
-    super(host, topic);
+  @Override
+  public void start() {
+
   }
 
   @Override
@@ -34,5 +28,14 @@ public class NotificationRocketMqProducerMock extends NotificationRocketMqProduc
   @Override
   public void sendMessage(String body, String tags) {
     sendMessage(body, null, tags, "");
+  }
+
+  @Override
+  public void sendMessage(String body) {
+
+  }
+
+  @Override
+  public void stop() {
   }
 }

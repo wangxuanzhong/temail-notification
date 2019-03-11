@@ -18,7 +18,7 @@ import org.testcontainers.containers.Network;
 @SpringBootTest
 @ActiveProfiles("test")
 @Ignore
-public class NotificationRocketMqProducerTest {
+public class RocketMqProducerTest {
 
   // init mq container
   private static final int MQ_SERVER_PORT = 9876;
@@ -35,15 +35,15 @@ public class NotificationRocketMqProducerTest {
       .withFixedExposedPort(10911, 10911);
   @ClassRule
   public static RuleChain rules = RuleChain.outerRule(rocketMqNameSrv).around(rocketMqBroker);
-  public NotificationRocketMqProducer producerContainer;
+  public RocketMqProducer producerContainer;
 
   @Value("${spring.rocketmq.topics.notify}")
   private String topic;
 
-  public NotificationRocketMqProducerTest() {
+  public RocketMqProducerTest() {
   }
 
-  public NotificationRocketMqProducer getProducerContainer(String topic) throws Exception {
+  public RocketMqProducer getProducerContainer(String topic) throws Exception {
     this.topic = topic;
     this.setUp();
     return producerContainer;
@@ -51,7 +51,7 @@ public class NotificationRocketMqProducerTest {
 
   @Before
   public void setUp() throws Exception {
-    producerContainer = new NotificationRocketMqProducer(rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT, topic);
+    producerContainer = new RocketMqProducer(rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT, topic);
     producerContainer.start();
   }
 

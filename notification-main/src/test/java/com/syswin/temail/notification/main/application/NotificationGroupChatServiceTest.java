@@ -2,14 +2,14 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
+import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
-import com.syswin.temail.notification.main.mock.NotificationRocketMqProducerMock;
+import com.syswin.temail.notification.main.mock.MqProducerMock;
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Before;
@@ -39,7 +39,7 @@ public class NotificationGroupChatServiceTest {
   private String topic;
 
   @Autowired
-  private NotificationRocketMqProducer notificationRocketMqProducer;
+  private IMqProducer iMqProducer;
   @Autowired
   private NotificationRedisService notificationRedisService;
   @Autowired
@@ -48,18 +48,19 @@ public class NotificationGroupChatServiceTest {
   private MemberMapper memberMapper;
   @Autowired
   private IJsonService iJsonService;
-  @Autowired
-  private NotificationRocketMqProducerMock rocketMqProducerMock;
+
+  private MqProducerMock mqProducerMock = new MqProducerMock();
+  ;
 
   private NotificationGroupChatService notificationGroupChatService;
 
   @Before
   public void setUp() {
     if (isMock) {
-      notificationGroupChatService = new NotificationGroupChatService(rocketMqProducerMock, notificationRedisService, eventMapper, memberMapper,
+      notificationGroupChatService = new NotificationGroupChatService(mqProducerMock, notificationRedisService, eventMapper, memberMapper,
           iJsonService);
     } else {
-      notificationGroupChatService = new NotificationGroupChatService(notificationRocketMqProducer, notificationRedisService, eventMapper,
+      notificationGroupChatService = new NotificationGroupChatService(iMqProducer, notificationRedisService, eventMapper,
           memberMapper, iJsonService);
     }
 
@@ -528,7 +529,7 @@ public class NotificationGroupChatServiceTest {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
     if (!isMock && useMQ) {
-      notificationRocketMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
+      iMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
       Thread.sleep(2000);
     } else {
       notificationGroupChatService.handleMqMessage(gson.toJson(param), tags);

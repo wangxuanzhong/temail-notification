@@ -3,8 +3,8 @@ package com.syswin.temail.notification.main.application;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
-import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
@@ -12,7 +12,7 @@ import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
-import com.syswin.temail.notification.main.mock.NotificationRocketMqProducerMock;
+import com.syswin.temail.notification.main.mock.MqProducerMock;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
@@ -40,19 +40,19 @@ public class NotificationEventServiceTest {
   @Autowired
   private IJsonService iJsonService;
   @Autowired
-  private NotificationRocketMqProducer notificationRocketMqProducer;
-  @Autowired
-  private NotificationRocketMqProducerMock rocketMqProducerMock;
+  private IMqProducer iMqProducer;
+
+  private MqProducerMock mqProducerMock = new MqProducerMock();
 
   private NotificationEventService notificationEventService;
 
   public Event setUp() {
     if (isMock) {
       notificationEventService = new NotificationEventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService,
-          rocketMqProducerMock);
+          mqProducerMock);
     } else {
       notificationEventService = new NotificationEventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService,
-          notificationRocketMqProducer);
+          iMqProducer);
     }
 
     Event event = new Event();

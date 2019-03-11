@@ -2,13 +2,12 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
+import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
-import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,9 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.rocketmq.client.exception.MQBrokerException;
-import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +27,15 @@ public class NotificationTopicService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final NotificationRocketMqProducer notificationRocketMqProducer;
+  private final IMqProducer iMqProducer;
   private final NotificationRedisService notificationRedisService;
   private final TopicMapper topicMapper;
   private final IJsonService iJsonService;
 
   @Autowired
-  public NotificationTopicService(NotificationRocketMqProducer notificationRocketMqProducer, NotificationRedisService notificationRedisService,
+  public NotificationTopicService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
       TopicMapper topicMapper, IJsonService iJsonService) {
-    this.notificationRocketMqProducer = notificationRocketMqProducer;
+    this.iMqProducer = iMqProducer;
     this.notificationRedisService = notificationRedisService;
     this.topicMapper = topicMapper;
     this.iJsonService = iJsonService;
@@ -49,8 +45,7 @@ public class NotificationTopicService {
    * 处理从MQ收到的信息
    */
   @Transactional(rollbackFor = Exception.class)
-  public void handleMqMessage(String body, String tags)
-      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+  public void handleMqMessage(String body, String tags) {
     MailAgentTopicParams params = iJsonService.fromJson(body, MailAgentTopicParams.class);
     TopicEvent topicEvent = new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(), params.getMsgid(),
         params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp());
@@ -124,12 +119,12 @@ public class NotificationTopicService {
   /**
    * 发送消息
    */
-  private void sendMessage(TopicEvent topicEvent, String header, String tags)
-      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+  private void sendMessage(TopicEvent topicEvent, String header, String tags) {
     LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
-    notificationRocketMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, iJsonService.toJson(topicEvent))), tags);
+    iMqProducer
+        .sendMessage(iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, iJsonService.toJson(topicEvent))),
+            tags);
 
   }
 

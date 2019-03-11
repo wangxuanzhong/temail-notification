@@ -2,7 +2,7 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
+import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentParams;
@@ -10,13 +10,9 @@ import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatPar
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.NotificationUtil;
-import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Objects;
-import org.apache.rocketmq.client.exception.MQBrokerException;
-import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +24,15 @@ public class NotificationSingleChatService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final NotificationRocketMqProducer notificationRocketMqProducer;
+  private final IMqProducer iMqProducer;
   private final NotificationRedisService notificationRedisService;
   private final EventMapper eventMapper;
   private final IJsonService iJsonService;
 
   @Autowired
-  public NotificationSingleChatService(NotificationRocketMqProducer notificationRocketMqProducer, NotificationRedisService notificationRedisService,
+  public NotificationSingleChatService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
       EventMapper eventMapper, IJsonService iJsonService) {
-    this.notificationRocketMqProducer = notificationRocketMqProducer;
+    this.iMqProducer = iMqProducer;
     this.notificationRedisService = notificationRedisService;
     this.eventMapper = eventMapper;
     this.iJsonService = iJsonService;
@@ -46,8 +42,7 @@ public class NotificationSingleChatService {
    * 处理从MQ收到的信息
    */
   @Transactional(rollbackFor = Exception.class)
-  public void handleMqMessage(String body, String tags)
-      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+  public void handleMqMessage(String body, String tags) {
     MailAgentSingleChatParams params = iJsonService.fromJson(body, MailAgentSingleChatParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
         params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId(), params.getOwner(), params.getDeleteAllMsg());
@@ -162,29 +157,26 @@ public class NotificationSingleChatService {
   /**
    * 发送消息
    */
-  private void sendMessage(Event event, String header, String tags)
-      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+  private void sendMessage(Event event, String header, String tags) {
     this.sendMessage(event, event.getTo(), header, tags);
   }
 
   /**
    * 发送消息
    */
-  private void sendMessage(Event event, String to, String header, String tags)
-      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+  private void sendMessage(Event event, String to, String header, String tags) {
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     this.insert(event);
-    notificationRocketMqProducer
+    iMqProducer
         .sendMessage(iJsonService.toJson(new CDTPResponse(to, event.getEventType(), header, iJsonService.toJson(event))), tags);
   }
 
   /**
    * 发送消息，提供多端同步功能
    */
-  private void sendMessageToSender(Event event, String header, String tags)
-      throws InterruptedException, RemotingException, MQClientException, MQBrokerException, UnsupportedEncodingException {
+  private void sendMessageToSender(Event event, String header, String tags) {
     LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(), EventType.getByValue(event.getEventType()));
-    notificationRocketMqProducer
+    iMqProducer
         .sendMessage(iJsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, iJsonService.toJson(event))), tags);
   }
 }

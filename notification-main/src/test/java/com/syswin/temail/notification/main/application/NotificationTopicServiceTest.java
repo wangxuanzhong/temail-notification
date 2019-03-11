@@ -9,13 +9,13 @@ import static org.mockito.Mockito.when;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.main.application.rocketmq.NotificationRocketMqProducer;
+import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
-import com.syswin.temail.notification.main.mock.NotificationRocketMqProducerMock;
+import com.syswin.temail.notification.main.mock.MqProducerMock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,15 +48,15 @@ public class NotificationTopicServiceTest {
   private String topic;
 
   @Autowired
-  private NotificationRocketMqProducer notificationRocketMqProducer;
+  private IMqProducer iMqProducer;
   @Autowired
   private NotificationRedisService notificationRedisService;
   @Autowired
   private TopicMapper topicMapper;
   @Autowired
   private IJsonService iJsonService;
-  @Autowired
-  private NotificationRocketMqProducerMock rocketMqProducerMock;
+
+  private MqProducerMock mqProducerMock = new MqProducerMock();
   private TopicMapper TopicMapperMock = mock(TopicMapper.class);
 
   private NotificationTopicService notificationTopicService;
@@ -65,11 +65,11 @@ public class NotificationTopicServiceTest {
   @Before
   public void setUp() {
     if (isMock) {
-      notificationTopicService = new NotificationTopicService(rocketMqProducerMock, notificationRedisService, topicMapper, iJsonService);
+      notificationTopicService = new NotificationTopicService(mqProducerMock, notificationRedisService, topicMapper, iJsonService);
     } else {
-      notificationTopicService = new NotificationTopicService(notificationRocketMqProducer, notificationRedisService, topicMapper, iJsonService);
+      notificationTopicService = new NotificationTopicService(iMqProducer, notificationRedisService, topicMapper, iJsonService);
     }
-    notificationTopicServiceMock = new NotificationTopicService(notificationRocketMqProducer, notificationRedisService, TopicMapperMock,
+    notificationTopicServiceMock = new NotificationTopicService(iMqProducer, notificationRedisService, TopicMapperMock,
         iJsonService);
 
     params.setHeader(ConstantMock.HEADER);
@@ -187,7 +187,7 @@ public class NotificationTopicServiceTest {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
     if (!isMock && useMQ) {
-      notificationRocketMqProducer.sendMessage(gson.toJson(param), topic, "", "");
+      iMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
       Thread.sleep(2000);
     } else {
       notificationTopicService.handleMqMessage(gson.toJson(param), tags);
