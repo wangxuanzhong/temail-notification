@@ -220,7 +220,7 @@ public class NotificationEventService {
     List<Event> notifyEvents = new ArrayList<>();
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
 
-    notifyEvents.sort(Comparator.comparing(Event::getEventSeqId).reversed());
+    notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
     Map<String, Object> result = new HashMap<>();
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
 
