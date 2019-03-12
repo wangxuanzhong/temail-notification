@@ -10,7 +10,7 @@
         pattern="[${project_name}] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %highlight{%-5p} => %cyan{%c.%M(%F:%L)} - %m%n"/>
     </Console>
     <!--当日志内容达到指定范围后，以某种定义规则打包日志文件 -->
-    <RollingFile fileName="/opt/logs/${project_name}.log" filePattern="/opt/logs/@project.parent.artifactId@-logs-%d{yyyy-MM-dd}-%i.log.gz"
+    <RollingFile fileName="/opt/logs/${project_name}.log" filePattern="/opt/logs/${project_name}-logs-%d{yyyy-MM-dd}-%i.log.gz"
       name="RollingFile">
       <PatternLayout pattern="[${project_name}] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p => %c - %m%n"/>
       <Policies>
