@@ -15,12 +15,12 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class NotificationSwagger2 {
 
   @Bean
-  public Docket NotificationApi() {
+  public Docket docket() {
     return new Docket(DocumentationType.SWAGGER_2)
         .apiInfo(apiInfo())
-        .groupName("notification")
+        .groupName("temail-notification")
         .select()
-        .apis(RequestHandlerSelectors.basePackage("com.syswin.temail.notification"))
+        .apis(RequestHandlerSelectors.basePackage("com.syswin"))
         .paths(PathSelectors.any())
         .build();
   }
