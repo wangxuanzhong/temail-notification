@@ -10,7 +10,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>notification-main</artifactId>
-  <packaging>jar</packaging>
+  <packaging>${packaging.type}</packaging>
 
   <dependencyManagement>
     <dependencies>
@@ -218,4 +218,54 @@
       </testResource>
     </testResources>
   </build>
+  <profiles>
+    <profile>
+      <id>jar</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <packaging.type>jar</packaging.type>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>war</id>
+      <properties>
+        <packaging.type>war</packaging.type>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-tomcat</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-tomcat</artifactId>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-war-plugin</artifactId>
+            <configuration>
+              <failOnMissingWebXml>false</failOnMissingWebXml>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
