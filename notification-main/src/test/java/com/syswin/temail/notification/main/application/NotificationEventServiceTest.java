@@ -41,8 +41,6 @@ public class NotificationEventServiceTest {
   private IJsonService iJsonService;
   @Autowired
   private IMqProducer iMqProducer;
-  @Autowired
-  private NotificationRedisService notificationRedisService;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
 
@@ -51,10 +49,10 @@ public class NotificationEventServiceTest {
   public Event setUp() {
     if (isMock) {
       notificationEventService = new NotificationEventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService,
-          mqProducerMock, notificationRedisService);
+          mqProducerMock);
     } else {
       notificationEventService = new NotificationEventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService,
-          iMqProducer, notificationRedisService);
+          iMqProducer);
     }
 
     Event event = new Event();
