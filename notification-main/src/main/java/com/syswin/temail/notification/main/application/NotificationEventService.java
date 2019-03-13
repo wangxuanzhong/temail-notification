@@ -403,7 +403,6 @@ public class NotificationEventService {
    */
   public void insertEvent(Event event, String header, String xPacketId) {
     String redisKey = xPacketId + "_" + event.getEventType();
-    event.setxPacketId(xPacketId);
     if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisService)) {
       return;
     }
@@ -412,7 +411,7 @@ public class NotificationEventService {
     event.setTo(map.get(TO).toString());
     event.setxPacketId(xPacketId);
     event.initEventSeqId(notificationRedisService);
-    event.fillExtendParamWithPacket(iJsonService);
+    event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
     iMqProducer.sendMessage(
         iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));

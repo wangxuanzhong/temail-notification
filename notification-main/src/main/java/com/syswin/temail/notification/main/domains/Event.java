@@ -55,8 +55,6 @@ public class Event {
   // 废纸篓删除的消息明细
   private String trashMsgInfo;
 
-  private String packet;
-
   @JsonIgnore
   private String extendParam;
 
@@ -176,15 +174,6 @@ public class Event {
   public Event autoWriteExtendParam(IJsonService iJsonService) {
     this.extendParam = iJsonService.toJson(
         new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner, this.trashMsgInfo));
-    return this;
-  }
-
-  /**
-   * 添加packet的ExtendParam
-   */
-  public Event fillExtendParamWithPacket(IJsonService iJsonService) {
-    this.extendParam = iJsonService.toJson(
-        new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner, this.trashMsgInfo, this.packet));
     return this;
   }
 
@@ -391,14 +380,6 @@ public class Event {
 
   public void setTrashMsgInfo(String trashMsgInfo) {
     this.trashMsgInfo = trashMsgInfo;
-  }
-
-  public String getPacket() {
-    return packet;
-  }
-
-  public void setPacket(String packet) {
-    this.packet = packet;
   }
 
   @Override
