@@ -20,7 +20,7 @@ public class NotificationSwagger2 {
         .apiInfo(apiInfo())
         .groupName("temail-notification")
         .select()
-        .apis(RequestHandlerSelectors.basePackage("com.syswin.temail.notification.main"))
+        .apis(RequestHandlerSelectors.basePackage("com.syswin"))
         .paths(PathSelectors.any())
         .build();
   }
