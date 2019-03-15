@@ -50,7 +50,6 @@ public enum EventType {
   ADD_ADMIN(46, "添加群管理员"),
   DELETE_ADMIN(47, "移除群管理员"),
   ABANDON_ADMIN(50, "放弃群管理员"),
-  GROUP_CHAT(52, "新群聊"),
 
   // @部分
   RECEIVE_AT(44, "@消息发送"),
@@ -70,7 +69,10 @@ public enum EventType {
   TOPIC_DELETE(25, "话题已删除"),
   TOPIC_ARCHIVE(29, "话题归档"),
   TOPIC_ARCHIVE_CANCEL(30, "话题归档取消"),
-  TOPIC_SESSION_DELETE(39, "话题会话删除");
+  TOPIC_SESSION_DELETE(39, "话题会话删除"),
+
+  // 其他
+  PACKET(52, "报文事件");
 
 
   private final int value;

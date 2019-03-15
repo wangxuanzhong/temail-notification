@@ -41,13 +41,10 @@ public class NotificationEventService {
   private final IJsonService iJsonService;
   private final IMqProducer iMqProducer;
   private final NotificationRedisService notificationRedisService;
-  private final String FROM = "sender";
-  private final String TO = "receiver";
 
   @Autowired
   public NotificationEventService(ISequenceService iSequenceService, EventMapper eventMapper, UnreadMapper unreadMapper,
-      MemberMapper memberMapper,
-      IJsonService iJsonService, IMqProducer iMqProducer, NotificationRedisService notificationRedisService) {
+      MemberMapper memberMapper, IJsonService iJsonService, IMqProducer iMqProducer, NotificationRedisService notificationRedisService) {
     this.iSequenceService = iSequenceService;
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
@@ -131,7 +128,7 @@ public class NotificationEventService {
         case GROUP_STICK:
         case GROUP_DO_NOT_DISTURB:
         case DO_NOT_DISTURB:
-//        case GROUP_CHAT:
+          // 只返回最后一条事件
           sessionEventMap.put(event.getMsgId(eventType), event);
           break;
         case TRASH: // 移动到废纸篓不需要查询返回，只需要记录移动的消息id
@@ -222,7 +219,8 @@ public class NotificationEventService {
               sessionEventMap.put(event.getMsgId(eventType), event);
             }
           }
-        case GROUP_CHAT:
+          break;
+        case PACKET:
           sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
       }
@@ -403,19 +401,23 @@ public class NotificationEventService {
   }
 
   /**
-   * 保存事件
+   * 保存报文事件
    */
-  public void saveGroupChatEvent(Event event, String header, String xPacketId) {
-    String redisKey = xPacketId + "_" + EventType.GROUP_CHAT.getValue();
+  public void savePacketEvent(Event event, String header, String xPacketId) {
+    event.setEventType(EventType.PACKET.getValue());
     event.setxPacketId(xPacketId);
-    event.setEventType(EventType.GROUP_CHAT.getValue());
+
+    // 校验收到的数据是否重复
+    String redisKey = event.getxPacketId() + "_" + event.getEventType();
     if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisService)) {
       return;
     }
-    Map map = iJsonService.fromJson(header, Map.class);
-    event.setFrom(map.get(FROM).toString());
-    event.setTo(map.get(TO).toString());
-    event.setxPacketId(xPacketId);
+
+    Map<String, Object> headerMap = iJsonService.fromJson(header, new TypeToken<Map<String, Object>>() {
+    }.getType());
+
+    event.setFrom(headerMap.get("sender").toString());
+    event.setTo(headerMap.get("receiver").toString());
     event.initEventSeqId(notificationRedisService);
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);

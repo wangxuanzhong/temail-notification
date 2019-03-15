@@ -158,15 +158,13 @@ public class NotificationController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
-  @ApiOperation(value = "insert packet event 1 3000", consumes = "application/json")
+  @ApiOperation(value = "save packet event 1 3000", consumes = "application/json")
   @PostMapping("/packet")
-  public ResponseEntity<Response> saveGroupChatEvent(@RequestBody Event event,
-      @RequestHeader(name = CDTP_HEADER, required = false) String header,
-      @RequestHeader(name = X_PACKET_ID, required = false) String xPacketId) {
+  public ResponseEntity<Response> savePacketEvent(@RequestBody Event event, @RequestHeader(name = CDTP_HEADER) String header,
+      @RequestHeader(name = X_PACKET_ID) String xPacketId) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    headers.add(X_PACKET_ID, xPacketId);
-    notificationEventService.saveGroupChatEvent(event, header, xPacketId);
+    notificationEventService.savePacketEvent(event, header, xPacketId);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 }

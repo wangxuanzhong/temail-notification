@@ -9,6 +9,8 @@ public class MqProducerMock implements IMqProducer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private final String topic = "test";
+
   @Override
   public void start() {
 
@@ -27,12 +29,12 @@ public class MqProducerMock implements IMqProducer {
 
   @Override
   public void sendMessage(String body, String tags) {
-    sendMessage(body, null, tags, "");
+    sendMessage(body, topic, tags, "");
   }
 
   @Override
   public void sendMessage(String body) {
-
+    sendMessage(body, topic, "", "");
   }
 
   @Override

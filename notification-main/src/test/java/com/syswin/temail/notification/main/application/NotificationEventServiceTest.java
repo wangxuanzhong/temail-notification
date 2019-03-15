@@ -2,6 +2,7 @@ package com.syswin.temail.notification.main.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
@@ -13,8 +14,11 @@ import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class NotificationEventServiceTest {
 
   private final boolean isMock = true;
+  private Gson gson = new Gson();
 
   @Autowired
   private ISequenceService iSequenceService;
@@ -48,7 +53,8 @@ public class NotificationEventServiceTest {
 
   private NotificationEventService notificationEventService;
 
-  public Event setUp() {
+  @Before
+  public void setUp() {
     if (isMock) {
       notificationEventService = new NotificationEventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService,
           mqProducerMock, notificationRedisService);
@@ -56,7 +62,9 @@ public class NotificationEventServiceTest {
       notificationEventService = new NotificationEventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService,
           iMqProducer, notificationRedisService);
     }
+  }
 
+  private Event initEvent() {
     Event event = new Event();
     event.setEventType(EventType.RECEIVE.getValue());
     event.setSeqId(1L);
@@ -74,7 +82,7 @@ public class NotificationEventServiceTest {
   @Test
   public void testGetUnread() {
     // 单聊消息
-    Event event = setUp();
+    Event event = initEvent();
     event.setMsgId("get_unread_1");
     event.setMessage("get_unread_aaaa");
     event.setFrom("get_unread_from");
@@ -104,7 +112,7 @@ public class NotificationEventServiceTest {
   @Test
   public void testReset() throws Exception {
     // 单聊消息
-    Event event = setUp();
+    Event event = initEvent();
     event.setMsgId("reset_1");
     event.setMessage("reset_aaaa");
     event.setFrom("reset_from");
@@ -157,4 +165,16 @@ public class NotificationEventServiceTest {
     assertThat(result).isEmpty();
   }
 
+
+  @Test
+  public void testSavePacketEvent() {
+    Event event = new Event();
+    event.setPacket("test packet");
+
+    Map<String, Object> header = new HashMap<>();
+    header.put("sender", "a");
+    header.put("receiver", "b");
+
+    notificationEventService.savePacketEvent(event, gson.toJson(header), UUID.randomUUID().toString());
+  }
 }

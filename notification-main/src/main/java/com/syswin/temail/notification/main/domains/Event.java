@@ -81,10 +81,8 @@ public class Event {
   }
 
   // 群聊
-  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to,
-      Long timestamp,
-      String groupTemail, String temail, Integer role, String name, String adminName, String groupName, String at,
-      String xPacketId) {
+  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp,
+      String groupTemail, String temail, Integer role, String name, String adminName, String groupName, String at, String xPacketId) {
     this.eventType = eventType;
     this.msgId = msgId;
     this.parentMsgId = parentMsgId;
@@ -410,7 +408,6 @@ public class Event {
         ", message length='" + (message == null ? 0 : message.length()) + '\'' +
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
-        ", owner='" + owner + '\'' +
         ", timestamp=" + timestamp +
         ", groupTemail='" + groupTemail + '\'' +
         ", temail='" + temail + '\'' +
@@ -421,6 +418,9 @@ public class Event {
         ", at='" + at + '\'' +
         ", msgIds=" + msgIds +
         ", deleteAllMsg=" + deleteAllMsg +
+        ", owner='" + owner + '\'' +
+        ", trashMsgInfo='" + trashMsgInfo + '\'' +
+        ", packet='" + packet + '\'' +
         ", extendParam='" + extendParam + '\'' +
         '}';
   }
