@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -40,19 +41,22 @@ public class NotificationController {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final String CDTP_HEADER = "CDTP-header";
+  private final String X_PACKET_ID = "X-PACKET-ID";
 
   private final NotificationEventService notificationEventService;
   private final NotificationTopicService notificationTopicService;
 
   @Autowired
-  public NotificationController(NotificationEventService notificationEventService, NotificationTopicService notificationTopicService) {
+  public NotificationController(NotificationEventService notificationEventService,
+      NotificationTopicService notificationTopicService) {
     this.notificationEventService = notificationEventService;
     this.notificationTopicService = notificationTopicService;
   }
 
   @ApiOperation(value = "pull event 3 0001", consumes = "application/json")
   @GetMapping("/events")
-  public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
+  public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from") String to,
+      @RequestParam Long eventSeqId,
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -80,12 +84,15 @@ public class NotificationController {
 
     if (event.getTo() == null || event.getTo().equals("")) {
       LOGGER.warn("reset 3 0004 : to mast not null!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "to mast not null!"), headers, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "to mast not null!"), headers,
+          HttpStatus.BAD_REQUEST);
     }
 
-    if ((event.getFrom() == null || event.getFrom().equals("")) && (event.getGroupTemail() == null || event.getGroupTemail().equals(""))) {
+    if ((event.getFrom() == null || event.getFrom().equals("")) && (event.getGroupTemail() == null || event
+        .getGroupTemail().equals(""))) {
       LOGGER.warn("reset 3 0004 : from and groupTemail mast not null at the same time!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from and groupTemail mast not null at the same time!"), headers,
+      return new ResponseEntity<>(
+          new Response<>(HttpStatus.BAD_REQUEST, "from and groupTemail mast not null at the same time!"), headers,
           HttpStatus.BAD_REQUEST);
     }
 
@@ -101,7 +108,8 @@ public class NotificationController {
   @ApiOperation(value = "pull reply event 3 0005 (deprecated)", consumes = "application/json")
   @ApiIgnore
   @GetMapping("/reply/events")
-  public ResponseEntity<Response<Map<String, Object>>> getReplyEvents(@RequestParam Long eventSeqId, @RequestParam String parentMsgId,
+  public ResponseEntity<Response<Map<String, Object>>> getReplyEvents(@RequestParam Long eventSeqId,
+      @RequestParam String parentMsgId,
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -110,7 +118,8 @@ public class NotificationController {
 
   @ApiOperation(value = "pull topic event 3 0006", consumes = "application/json")
   @GetMapping("/topic/events")
-  public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
+  public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from") String to,
+      @RequestParam Long eventSeqId,
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -129,7 +138,8 @@ public class NotificationController {
     UserStatus userStatus = UserStatus.getByValue(member.getUserStatus());
     if (userStatus == null) {
       LOGGER.warn("update group chat user status 3 0007 : status is illegal!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "status is illegal!"), headers, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "status is illegal!"), headers,
+          HttpStatus.BAD_REQUEST);
     }
 
     notificationEventService.updateGroupChatUserStatus(member, userStatus, header);
@@ -138,12 +148,25 @@ public class NotificationController {
 
   @ApiOperation(value = "get do not disturb group 3 0008", consumes = "application/json")
   @GetMapping("/groupchat/user/status")
-  public ResponseEntity<Response<Map<String, Integer>>> getUserDoNotDisturbGroups(@RequestParam String temail, @RequestParam String groupTemail,
+  public ResponseEntity<Response<Map<String, Integer>>> getUserDoNotDisturbGroups(@RequestParam String temail,
+      @RequestParam String groupTemail,
       @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
     Map<String, Integer> result = notificationEventService.getGroupChatUserStatus(temail, groupTemail);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "insert packet event 1 3000", consumes = "application/json")
+  @PostMapping("/packet")
+  public ResponseEntity<Response> saveGroupChatEvent(@RequestBody Event event,
+      @RequestHeader(name = CDTP_HEADER, required = false) String header,
+      @RequestHeader(name = X_PACKET_ID, required = false) String xPacketId) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+    headers.add(X_PACKET_ID, xPacketId);
+    notificationEventService.saveGroupChatEvent(event, header, xPacketId);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 }

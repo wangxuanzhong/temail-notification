@@ -50,6 +50,7 @@ public enum EventType {
   ADD_ADMIN(46, "添加群管理员"),
   DELETE_ADMIN(47, "移除群管理员"),
   ABANDON_ADMIN(50, "放弃群管理员"),
+  GROUP_CHAT(52, "新群聊"),
 
   // @部分
   RECEIVE_AT(44, "@消息发送"),

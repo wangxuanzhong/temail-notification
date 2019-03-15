@@ -55,6 +55,8 @@ public class Event {
   // 废纸篓删除的消息明细
   private String trashMsgInfo;
 
+  private String packet;
+
   @JsonIgnore
   private String extendParam;
 
@@ -62,7 +64,8 @@ public class Event {
   }
 
   // 单聊
-  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp,
+  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to,
+      Long timestamp,
       String xPacketId, String owner, Boolean deleteAllMsg) {
     this.eventType = eventType;
     this.msgId = msgId;
@@ -78,8 +81,10 @@ public class Event {
   }
 
   // 群聊
-  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp,
-      String groupTemail, String temail, Integer role, String name, String adminName, String groupName, String at, String xPacketId) {
+  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to,
+      Long timestamp,
+      String groupTemail, String temail, Integer role, String name, String adminName, String groupName, String at,
+      String xPacketId) {
     this.eventType = eventType;
     this.msgId = msgId;
     this.parentMsgId = parentMsgId;
@@ -164,6 +169,7 @@ public class Event {
       this.deleteAllMsg = extendParam.getDeleteAllMsg();
       this.owner = extendParam.getOwner();
       this.trashMsgInfo = extendParam.getTrashMsgInfo();
+      this.packet = extendParam.getPacket();
     }
     return this;
   }
@@ -173,7 +179,8 @@ public class Event {
    */
   public Event autoWriteExtendParam(IJsonService iJsonService) {
     this.extendParam = iJsonService.toJson(
-        new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner, this.trashMsgInfo));
+        new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg,
+            this.owner, this.trashMsgInfo, this.packet));
     return this;
   }
 
@@ -380,6 +387,14 @@ public class Event {
 
   public void setTrashMsgInfo(String trashMsgInfo) {
     this.trashMsgInfo = trashMsgInfo;
+  }
+
+  public String getPacket() {
+    return packet;
+  }
+
+  public void setPacket(String packet) {
+    this.packet = packet;
   }
 
   @Override

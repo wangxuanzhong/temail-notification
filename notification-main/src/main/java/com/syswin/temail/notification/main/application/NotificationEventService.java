@@ -14,6 +14,7 @@ import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
+import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,16 +40,21 @@ public class NotificationEventService {
   private final MemberMapper memberMapper;
   private final IJsonService iJsonService;
   private final IMqProducer iMqProducer;
+  private final NotificationRedisService notificationRedisService;
+  private final String FROM = "sender";
+  private final String TO = "receiver";
 
   @Autowired
-  public NotificationEventService(ISequenceService iSequenceService, EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
-      IJsonService iJsonService, IMqProducer iMqProducer) {
+  public NotificationEventService(ISequenceService iSequenceService, EventMapper eventMapper, UnreadMapper unreadMapper,
+      MemberMapper memberMapper,
+      IJsonService iJsonService, IMqProducer iMqProducer, NotificationRedisService notificationRedisService) {
     this.iSequenceService = iSequenceService;
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
     this.iJsonService = iJsonService;
     this.iMqProducer = iMqProducer;
+    this.notificationRedisService = notificationRedisService;
   }
 
   /**
@@ -125,6 +131,7 @@ public class NotificationEventService {
         case GROUP_STICK:
         case GROUP_DO_NOT_DISTURB:
         case DO_NOT_DISTURB:
+//        case GROUP_CHAT:
           sessionEventMap.put(event.getMsgId(eventType), event);
           break;
         case TRASH: // 移动到废纸篓不需要查询返回，只需要记录移动的消息id
@@ -132,8 +139,9 @@ public class NotificationEventService {
           break;
         case TRASH_CANCEL:
           List<TrashMsgInfo> newInfos = new ArrayList<>();
-          List<TrashMsgInfo> infos = iJsonService.fromJson(event.getTrashMsgInfo(), new TypeToken<List<TrashMsgInfo>>() {
-          }.getType());
+          List<TrashMsgInfo> infos = iJsonService
+              .fromJson(event.getTrashMsgInfo(), new TypeToken<List<TrashMsgInfo>>() {
+              }.getType());
           // 如果查询到的事件中，有移入移出的操作则对于msgId不需要返回给前端
           infos.forEach(info -> {
             if (!trashMsgIds.contains(info.getMsgId())) {
@@ -214,6 +222,9 @@ public class NotificationEventService {
               sessionEventMap.put(event.getMsgId(eventType), event);
             }
           }
+        case GROUP_CHAT:
+          sessionEventMap.put(UUID.randomUUID().toString(), event);
+          break;
       }
     });
 
@@ -262,7 +273,8 @@ public class NotificationEventService {
           unread = unreadMap.get(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0]);
         }
 
-        UnreadResponse unreadResponse = new UnreadResponse(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds.size() + unread);
+        UnreadResponse unreadResponse = new UnreadResponse(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to,
+            msgIds.size() + unread);
         if (key.endsWith(Event.GROUP_CHAT_KEY_POSTFIX)) {
           unreadResponse.setGroupTemail(unreadResponse.getFrom());
         }
@@ -346,7 +358,8 @@ public class NotificationEventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))));
+    iMqProducer.sendMessage(
+        iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))));
   }
 
   /**
@@ -356,7 +369,8 @@ public class NotificationEventService {
   public void updateGroupChatUserStatus(Member member, UserStatus userStatus, String header) {
     LOGGER.info("update user status, param: {}", member);
     Event event = new Event(null, null, null, null, null,
-        member.getGroupTemail(), member.getTemail(), System.currentTimeMillis(), member.getGroupTemail(), member.getTemail(),
+        member.getGroupTemail(), member.getTemail(), System.currentTimeMillis(), member.getGroupTemail(),
+        member.getTemail(),
         null, null, null, null, null, null);
 
     switch (userStatus) {
@@ -374,7 +388,8 @@ public class NotificationEventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
+    iMqProducer.sendMessage(
+        iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
   }
 
   /**
@@ -385,5 +400,26 @@ public class NotificationEventService {
     Map<String, Integer> result = new HashMap<>();
     result.put("userStatus", memberMapper.selectUserStatus(temail, groupTemail));
     return result;
+  }
+
+  /**
+   * 保存事件
+   */
+  public void saveGroupChatEvent(Event event, String header, String xPacketId) {
+    String redisKey = xPacketId + "_" + EventType.GROUP_CHAT.getValue();
+    event.setxPacketId(xPacketId);
+    event.setEventType(EventType.GROUP_CHAT.getValue());
+    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisService)) {
+      return;
+    }
+    Map map = iJsonService.fromJson(header, Map.class);
+    event.setFrom(map.get(FROM).toString());
+    event.setTo(map.get(TO).toString());
+    event.setxPacketId(xPacketId);
+    event.initEventSeqId(notificationRedisService);
+    event.autoWriteExtendParam(iJsonService);
+    eventMapper.insert(event);
+    iMqProducer.sendMessage(
+        iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
   }
 }
