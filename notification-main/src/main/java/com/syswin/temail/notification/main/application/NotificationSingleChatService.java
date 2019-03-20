@@ -129,14 +129,14 @@ public class NotificationSingleChatService {
         this.sendMessage(event, header, tags);
         break;
       case NG_DELETE_MEMBER:
-        // 移除群成员有群成员列表字段
+      case NG_INVITATION:
+        // 批量操作添加members字段
         event.setMembers(params.getMembers());
         this.sendMessage(event, header, tags);
         break;
       case DO_NOT_DISTURB:
       case DO_NOT_DISTURB_CANCEL:
       case NG_APPLY:
-      case NG_INVITATION:
       case NG_DELETE_GROUP:
       case NG_LEAVE_GROUP:
         this.sendMessage(event, header, tags);

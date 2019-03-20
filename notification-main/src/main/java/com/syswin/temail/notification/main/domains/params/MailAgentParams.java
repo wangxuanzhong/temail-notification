@@ -22,7 +22,7 @@ public class MailAgentParams {
   private String toMsg;
   // 时间戳
   private Long timestamp;
-  // 单聊删除会话是否同时删除消息
+  // 删除会话是否同时删除消息
   private Boolean deleteAllMsg;
   // 单聊消息拥有人
   private String owner;
