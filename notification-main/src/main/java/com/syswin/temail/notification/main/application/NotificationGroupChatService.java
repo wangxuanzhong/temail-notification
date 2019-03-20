@@ -6,7 +6,7 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
-import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
+import com.syswin.temail.notification.main.domains.params.MailAgentParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
@@ -47,7 +47,7 @@ public class NotificationGroupChatService {
    */
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body, String tags) {
-    MailAgentGroupChatParams params = iJsonService.fromJson(body, MailAgentGroupChatParams.class);
+    MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
         params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(), params.getType(), params.getName(),
         params.getAdminName(), params.getGroupName(), params.getAt(), params.getxPacketId());
@@ -74,7 +74,7 @@ public class NotificationGroupChatService {
         this.sendGroupMessageToAll(event, EventType.GROUP_RETRACT.getValue(), header, tags);
         break;
       case PULLED:
-        for (String msgId : event.getMsgId().split(MailAgentGroupChatParams.MSG_ID_SPLIT)) {
+        for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
           if (eventMapper.selectEventsByMsgId(event).size() == 0) {
             this.sendSingleMessage(event, EventType.GROUP_PULLED.getValue(), header, tags);

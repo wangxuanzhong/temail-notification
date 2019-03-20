@@ -6,7 +6,6 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentParams;
-import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.NotificationUtil;
@@ -43,9 +42,10 @@ public class NotificationSingleChatService {
    */
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body, String tags) {
-    MailAgentSingleChatParams params = iJsonService.fromJson(body, MailAgentSingleChatParams.class);
+    MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getTimestamp(), params.getxPacketId(), params.getOwner(), params.getDeleteAllMsg());
+        params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(), params.getxPacketId(),
+        params.getOwner(), params.getDeleteAllMsg());
 
     // 前端需要的头信息
     String header = params.getHeader();
@@ -64,6 +64,12 @@ public class NotificationSingleChatService {
       case DESTROY:
       case REPLY:
       case CROSS_DOMAIN:
+      case RETRACT:
+      case DESTROYED:
+      case REPLY_RETRACT:
+      case REPLY_DESTROYED:
+        // 新群聊消息字段
+        event.setFilter(params.getFilter());
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
           event.initEventSeqId(notificationRedisService);
@@ -77,24 +83,6 @@ public class NotificationSingleChatService {
         } else {
           sendMessage(event, header, tags);
         }
-        break;
-      case RETRACT:
-      case DESTROYED:
-      case REPLY_RETRACT:
-      case REPLY_DESTROYED:
-        // 多端同步功能消息同时发给双方
-        event.setOwner(params.getTo());
-        sendMessage(event, header, tags);
-        // 发送给发送方
-        event.setOwner(params.getFrom());
-        event.initEventSeqId(notificationRedisService);
-        event.autoWriteExtendParam(iJsonService);
-        sendMessageToSender(event, header, tags);
-        // 插入数据库，使用owner保存原消息的to，to字段保存接收者
-        event.setTo(params.getFrom());
-        event.setOwner(params.getTo());
-        event.autoWriteExtendParam(iJsonService);
-        eventMapper.insert(event);
         break;
       case PULLED:
         // from是消息拉取人
@@ -136,8 +124,21 @@ public class NotificationSingleChatService {
         event.setTo(params.getOwner());
         sendMessage(event, header, tags);
         break;
+      case NG_ADD_GROUP:
+        event.setGroupName(params.getGroupName());
+        this.sendMessage(event, header, tags);
+        break;
+      case NG_DELETE_MEMBER:
+        // 移除群成员有群成员列表字段
+        event.setMembers(params.getMembers());
+        this.sendMessage(event, header, tags);
+        break;
       case DO_NOT_DISTURB:
       case DO_NOT_DISTURB_CANCEL:
+      case NG_APPLY:
+      case NG_INVITATION:
+      case NG_DELETE_GROUP:
+      case NG_LEAVE_GROUP:
         this.sendMessage(event, header, tags);
         break;
       default:

@@ -9,13 +9,9 @@ import com.syswin.temail.notification.main.domains.Member.UserStatus;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
-import org.apache.rocketmq.client.exception.MQBrokerException;
-import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,9 +72,7 @@ public class NotificationController {
 
   @ApiOperation(value = "reset 3 0004", consumes = "application/json")
   @PutMapping("/reset")
-  public ResponseEntity<Response> reset(@RequestBody Event event,
-      @RequestHeader(name = CDTP_HEADER) String header)
-      throws InterruptedException, RemotingException, UnsupportedEncodingException, MQClientException, MQBrokerException {
+  public ResponseEntity<Response> reset(@RequestBody Event event, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
@@ -129,9 +123,7 @@ public class NotificationController {
 
   @ApiOperation(value = "update group chat user status 3 0007", consumes = "application/json")
   @PutMapping("/groupchat/user/status")
-  public ResponseEntity<Response> updateGroupChatUserStatus(@RequestBody Member member,
-      @RequestHeader(name = CDTP_HEADER) String header)
-      throws InterruptedException, RemotingException, UnsupportedEncodingException, MQClientException, MQBrokerException {
+  public ResponseEntity<Response> updateGroupChatUserStatus(@RequestBody Member member, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
@@ -149,8 +141,7 @@ public class NotificationController {
   @ApiOperation(value = "get do not disturb group 3 0008", consumes = "application/json")
   @GetMapping("/groupchat/user/status")
   public ResponseEntity<Response<Map<String, Integer>>> getUserDoNotDisturbGroups(@RequestParam String temail,
-      @RequestParam String groupTemail,
-      @RequestHeader(name = CDTP_HEADER, required = false) String header) {
+      @RequestParam String groupTemail, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 

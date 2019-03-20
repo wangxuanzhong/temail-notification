@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
+@Ignore
 public class NotificationRedisServiceTest {
 
   @Autowired

@@ -5,7 +5,7 @@ import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
-import com.syswin.temail.notification.main.domains.params.MailAgentTopicParams;
+import com.syswin.temail.notification.main.domains.params.MailAgentParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import java.lang.invoke.MethodHandles;
@@ -46,7 +46,7 @@ public class NotificationTopicService {
    */
   @Transactional(rollbackFor = Exception.class)
   public void handleMqMessage(String body, String tags) {
-    MailAgentTopicParams params = iJsonService.fromJson(body, MailAgentTopicParams.class);
+    MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
     TopicEvent topicEvent = new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(), params.getMsgid(),
         params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp());
 

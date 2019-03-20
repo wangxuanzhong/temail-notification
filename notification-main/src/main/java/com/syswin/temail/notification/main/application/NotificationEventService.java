@@ -3,12 +3,11 @@ package com.syswin.temail.notification.main.application;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
-import com.syswin.temail.notification.foundation.application.ISequenceService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
-import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams.TrashMsgInfo;
+import com.syswin.temail.notification.main.domains.params.MailAgentParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
@@ -34,7 +33,6 @@ public class NotificationEventService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final ISequenceService iSequenceService;
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
   private final MemberMapper memberMapper;
@@ -43,9 +41,8 @@ public class NotificationEventService {
   private final NotificationRedisService notificationRedisService;
 
   @Autowired
-  public NotificationEventService(ISequenceService iSequenceService, EventMapper eventMapper, UnreadMapper unreadMapper,
-      MemberMapper memberMapper, IJsonService iJsonService, IMqProducer iMqProducer, NotificationRedisService notificationRedisService) {
-    this.iSequenceService = iSequenceService;
+  public NotificationEventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper, IJsonService iJsonService,
+      IMqProducer iMqProducer, NotificationRedisService notificationRedisService) {
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
@@ -83,6 +80,10 @@ public class NotificationEventService {
 
       // 按照会话统计事件，方便对单个会话多事件进行处理
       String key = event.getFrom();
+
+      if (event.getGroupTemail() != null && !event.getGroupTemail().equals("")) {
+        key = event.getGroupTemail();
+      }
 
       // 单聊逻辑: 当from和to相同时，数据库中存储的owner为会话的另一方，to为通知者，查询结果恢复原结构
       if (event.getFrom().equals(event.getTo()) && event.getOwner() != null) {
@@ -128,6 +129,9 @@ public class NotificationEventService {
         case GROUP_STICK:
         case GROUP_DO_NOT_DISTURB:
         case DO_NOT_DISTURB:
+        case NG_ADD_GROUP:
+        case NG_APPLY:
+        case NG_INVITATION:
           // 只返回最后一条事件
           sessionEventMap.put(event.getMsgId(eventType), event);
           break;
@@ -151,14 +155,23 @@ public class NotificationEventService {
           }
           break;
         case DELETE_GROUP:
+        case NG_DELETE_GROUP:
           // 清除所有人的事件，并添加此事件
           sessionEventMap.clear();
           sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
         case DELETE_MEMBER:
         case LEAVE_GROUP:
+        case NG_LEAVE_GROUP:
           // 只清除当事人的事件，并添加此事件
           if (to.equals(event.getTemail())) {
+            sessionEventMap.clear();
+          }
+          sessionEventMap.put(UUID.randomUUID().toString(), event);
+          break;
+        case NG_DELETE_MEMBER:
+          // 只清除当事人的事件，并添加此事件
+          if (event.getMembers().contains(to)) {
             sessionEventMap.clear();
           }
           sessionEventMap.put(UUID.randomUUID().toString(), event);
@@ -345,7 +358,7 @@ public class NotificationEventService {
       CDTPEventType = EventType.GROUP_RESET.getValue();
     }
     event.setTimestamp(System.currentTimeMillis());
-    event.initEventSeqId(iSequenceService);
+    event.initEventSeqId(notificationRedisService);
     eventMapper.insert(event);
 
     // 删除历史重置事件

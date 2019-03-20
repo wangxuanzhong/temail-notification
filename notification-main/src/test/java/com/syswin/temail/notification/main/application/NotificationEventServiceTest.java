@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
-import com.syswin.temail.notification.foundation.application.ISequenceService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
@@ -14,6 +13,7 @@ import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
+import com.syswin.temail.notification.main.mock.RedisServiceMock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +35,6 @@ public class NotificationEventServiceTest {
   private Gson gson = new Gson();
 
   @Autowired
-  private ISequenceService iSequenceService;
-  @Autowired
   private EventMapper eventMapper;
   @Autowired
   private UnreadMapper unreadMapper;
@@ -50,16 +48,17 @@ public class NotificationEventServiceTest {
   private NotificationRedisService notificationRedisService;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
+  private RedisServiceMock redisServiceMock = new RedisServiceMock();
 
   private NotificationEventService notificationEventService;
 
   @Before
   public void setUp() {
     if (isMock) {
-      notificationEventService = new NotificationEventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService,
-          mqProducerMock, notificationRedisService);
+      notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService,
+          mqProducerMock, redisServiceMock);
     } else {
-      notificationEventService = new NotificationEventService(iSequenceService, eventMapper, unreadMapper, memberMapper, iJsonService,
+      notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService,
           iMqProducer, notificationRedisService);
     }
   }

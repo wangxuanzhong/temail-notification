@@ -5,11 +5,12 @@ import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
-import com.syswin.temail.notification.main.domains.params.MailAgentGroupChatParams;
+import com.syswin.temail.notification.main.domains.params.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
+import com.syswin.temail.notification.main.mock.RedisServiceMock;
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Before;
@@ -32,7 +33,7 @@ public class NotificationGroupChatServiceTest {
   private final boolean useMQ = false;
   private final boolean isMock = true;
 
-  private MailAgentGroupChatParams params = new MailAgentGroupChatParams();
+  private MailAgentParams params = new MailAgentParams();
   private Gson gson = new Gson();
 
   @Value("${spring.rocketmq.topics.mailAgent.groupChat}")
@@ -50,14 +51,14 @@ public class NotificationGroupChatServiceTest {
   private IJsonService iJsonService;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
-  ;
+  private RedisServiceMock redisServiceMock = new RedisServiceMock();
 
   private NotificationGroupChatService notificationGroupChatService;
 
   @Before
   public void setUp() {
     if (isMock) {
-      notificationGroupChatService = new NotificationGroupChatService(mqProducerMock, notificationRedisService, eventMapper, memberMapper,
+      notificationGroupChatService = new NotificationGroupChatService(mqProducerMock, redisServiceMock, eventMapper, memberMapper,
           iJsonService);
     } else {
       notificationGroupChatService = new NotificationGroupChatService(iMqProducer, notificationRedisService, eventMapper,
@@ -393,7 +394,7 @@ public class NotificationGroupChatServiceTest {
    */
   @Test
   public void testAll() throws Exception {
-    MailAgentGroupChatParams param = null;
+    MailAgentParams param = null;
     String groupTemail = "g_all_" + UUID.randomUUID().toString();
 
     // 创建群 13
@@ -513,18 +514,18 @@ public class NotificationGroupChatServiceTest {
     this.sendMessage(param, param.getTemail());
   }
 
-  private MailAgentGroupChatParams init(String groupTemail) {
-    MailAgentGroupChatParams param = new MailAgentGroupChatParams();
+  private MailAgentParams init(String groupTemail) {
+    MailAgentParams param = new MailAgentParams();
     param.setHeader("header");
     param.setGroupTemail(groupTemail);
     return param;
   }
 
-  private void sendMessage(MailAgentGroupChatParams param, String tags) throws Exception {
+  private void sendMessage(MailAgentParams param, String tags) throws Exception {
     sendMessage(param, false, tags);
   }
 
-  private void sendMessage(MailAgentGroupChatParams param, boolean isSamePacket, String tags) throws Exception {
+  private void sendMessage(MailAgentParams param, boolean isSamePacket, String tags) throws Exception {
     if (!isSamePacket) {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }

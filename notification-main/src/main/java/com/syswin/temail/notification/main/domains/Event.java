@@ -17,7 +17,6 @@ public class Event {
   // 事件参数
   @JsonIgnore
   private Long id;
-  @JsonIgnore
   private String xPacketId;
   private Long eventSeqId;
   private Integer eventType;
@@ -54,8 +53,12 @@ public class Event {
   private String owner;
   // 废纸篓删除的消息明细
   private String trashMsgInfo;
-
+  // 全报文信息
   private String packet;
+  // 成员列表
+  private List<String> members;
+  // 被通知人员
+  private List<String> filter;
 
   @JsonIgnore
   private String extendParam;
@@ -65,8 +68,7 @@ public class Event {
 
   // 单聊
   public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to,
-      Long timestamp,
-      String xPacketId, String owner, Boolean deleteAllMsg) {
+      Long timestamp, String groupTemail, String temail, String xPacketId, String owner, Boolean deleteAllMsg) {
     this.eventType = eventType;
     this.msgId = msgId;
     this.parentMsgId = parentMsgId;
@@ -75,6 +77,8 @@ public class Event {
     this.from = from;
     this.to = to;
     this.timestamp = timestamp;
+    this.groupTemail = groupTemail;
+    this.temail = temail;
     this.xPacketId = xPacketId;
     this.owner = owner;
     this.deleteAllMsg = deleteAllMsg;
@@ -168,6 +172,8 @@ public class Event {
       this.owner = extendParam.getOwner();
       this.trashMsgInfo = extendParam.getTrashMsgInfo();
       this.packet = extendParam.getPacket();
+      this.members = extendParam.getMembers();
+      this.filter = extendParam.getFilter();
     }
     return this;
   }
@@ -177,8 +183,8 @@ public class Event {
    */
   public Event autoWriteExtendParam(IJsonService iJsonService) {
     this.extendParam = iJsonService.toJson(
-        new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg,
-            this.owner, this.trashMsgInfo, this.packet));
+        new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner, this.trashMsgInfo,
+            this.packet, this.members, this.filter));
     return this;
   }
 
@@ -395,6 +401,22 @@ public class Event {
     this.packet = packet;
   }
 
+  public List<String> getMembers() {
+    return members;
+  }
+
+  public void setMembers(List<String> members) {
+    this.members = members;
+  }
+
+  public List<String> getFilter() {
+    return filter;
+  }
+
+  public void setFilter(List<String> filter) {
+    this.filter = filter;
+  }
+
   @Override
   public String toString() {
     return "Event{" +
@@ -421,6 +443,8 @@ public class Event {
         ", owner='" + owner + '\'' +
         ", trashMsgInfo='" + trashMsgInfo + '\'' +
         ", packet='" + packet + '\'' +
+        ", members='" + members + '\'' +
+        ", filter='" + filter + '\'' +
         ", extendParam='" + extendParam + '\'' +
         '}';
   }

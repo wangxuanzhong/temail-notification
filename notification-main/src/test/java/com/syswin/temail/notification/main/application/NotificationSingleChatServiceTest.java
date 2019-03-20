@@ -4,11 +4,12 @@ import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams;
-import com.syswin.temail.notification.main.domains.params.MailAgentSingleChatParams.TrashMsgInfo;
+import com.syswin.temail.notification.main.domains.params.MailAgentParams;
+import com.syswin.temail.notification.main.domains.params.MailAgentParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
+import com.syswin.temail.notification.main.mock.RedisServiceMock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +34,7 @@ public class NotificationSingleChatServiceTest {
   private final boolean useMQ = false;
   private final boolean isMock = true;
 
-  private MailAgentSingleChatParams params = new MailAgentSingleChatParams();
+  private MailAgentParams params = new MailAgentParams();
   private Gson gson = new Gson();
 
   @Value("${spring.rocketmq.topics.mailAgent.singleChat}")
@@ -49,16 +50,16 @@ public class NotificationSingleChatServiceTest {
   private IJsonService iJsonService;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
+  private RedisServiceMock redisServiceMock = new RedisServiceMock();
 
   private NotificationSingleChatService notificationSingleChatService;
 
   @Before
   public void setUp() {
     if (isMock) {
-      notificationSingleChatService = new NotificationSingleChatService(mqProducerMock, notificationRedisService, eventMapper, iJsonService);
+      notificationSingleChatService = new NotificationSingleChatService(mqProducerMock, redisServiceMock, eventMapper, iJsonService);
     } else {
-      notificationSingleChatService = new NotificationSingleChatService(iMqProducer, notificationRedisService, eventMapper,
-          iJsonService);
+      notificationSingleChatService = new NotificationSingleChatService(iMqProducer, notificationRedisService, eventMapper, iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -101,6 +102,10 @@ public class NotificationSingleChatServiceTest {
   public void testEventTypeRetract() throws Exception {
     params.setSessionMessageType(EventType.RETRACT.getValue());
     params.setMsgid("2");
+    params.setOwner(TEST_TO);
+    this.sendMessage(params, params.getFrom());
+
+    params.setOwner(TEST_FROM);
     this.sendMessage(params, params.getFrom());
   }
 
@@ -181,6 +186,10 @@ public class NotificationSingleChatServiceTest {
     params.setSessionMessageType(EventType.REPLY_RETRACT.getValue());
     params.setMsgid("reply_1");
     params.setParentMsgId("1");
+    params.setOwner(TEST_TO);
+    this.sendMessage(params, params.getFrom());
+
+    params.setOwner(TEST_FROM);
     this.sendMessage(params, params.getFrom());
   }
 
@@ -271,12 +280,90 @@ public class NotificationSingleChatServiceTest {
     this.sendMessage(params, params.getFrom());
   }
 
+  /**
+   * EventType NG_ADD_GROUP 53 新群聊新建群
+   */
+  @Test
+  public void testEventTypeNgAddGroup() throws Exception {
+    params.setSessionMessageType(EventType.NG_ADD_GROUP.getValue());
+    params.setFrom("g");
+    params.setTo("a");
+    params.setGroupTemail("g");
+    params.setGroupName("新群");
+    this.sendMessage(params, params.getFrom());
+  }
 
-  private void sendMessage(MailAgentSingleChatParams param, String tags) throws Exception {
+  /**
+   * EventType NG_APPLY 54 新群聊入群申请
+   */
+  @Test
+  public void testEventTypeNgApply() throws Exception {
+    params.setSessionMessageType(EventType.NG_APPLY.getValue());
+    params.setFrom("g");
+    params.setTo("b");
+    params.setGroupTemail("g");
+    params.setTemail("a");
+    this.sendMessage(params, params.getFrom());
+  }
+
+  /**
+   * EventType NG_INVITATION 55 新群聊入群邀请
+   */
+  @Test
+  public void testEventTypeNgInvitation() throws Exception {
+    params.setSessionMessageType(EventType.NG_INVITATION.getValue());
+    params.setFrom("a");
+    params.setTo("b");
+    params.setGroupTemail("g");
+    params.setTemail("b");
+    this.sendMessage(params, params.getFrom());
+  }
+
+  /**
+   * EventType NG_DELETE_GROUP 56 新群聊解散群
+   */
+  @Test
+  public void testEventTypeNgDeleteGroup() throws Exception {
+    params.setSessionMessageType(EventType.NG_DELETE_GROUP.getValue());
+    params.setFrom("g");
+    params.setTo("b");
+    params.setGroupTemail("g");
+    params.setTemail("a");
+    this.sendMessage(params, params.getFrom());
+  }
+
+  /**
+   * EventType NG_LEAVE_GROUP 57 新群聊退出群聊
+   */
+  @Test
+  public void testEventTypeNgLeaveGroup() throws Exception {
+    params.setSessionMessageType(EventType.NG_LEAVE_GROUP.getValue());
+    params.setFrom("g");
+    params.setTo("b");
+    params.setGroupTemail("g");
+    params.setTemail("b");
+    this.sendMessage(params, params.getFrom());
+  }
+
+  /**
+   * EventType NG_DELETE_MEMBER 58 新群聊移除群成员
+   */
+  @Test
+  public void testEventTypeNgDeleteMember() throws Exception {
+    params.setSessionMessageType(EventType.NG_DELETE_MEMBER.getValue());
+    params.setFrom("g");
+    params.setTo("b");
+    params.setGroupTemail("g");
+    params.setTemail("a");
+    params.setMembers(Arrays.asList("b", "c", "d"));
+    this.sendMessage(params, params.getFrom());
+  }
+
+  private void sendMessage(MailAgentParams param, String tags) throws Exception {
     sendMessage(param, false, tags);
   }
 
-  private void sendMessage(MailAgentSingleChatParams param, boolean isSamePacket, String tags) throws Exception {
+  private void sendMessage(MailAgentParams param, boolean isSamePacket, String tags) throws Exception {
     if (!isSamePacket) {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }

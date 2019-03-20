@@ -26,15 +26,19 @@ class EventExtendParam {
   private String owner;
   // 废纸篓删除的消息明细
   private String trashMsgInfo;
-
+  // 全报文信息
   private String packet;
+  // 成员列表
+  private List<String> members;
+  // 被通知人员
+  private List<String> filter;
 
 
   public EventExtendParam() {
   }
 
   public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds, Boolean deleteAllMsg, String owner,
-      String trashMsgInfo, String packet) {
+      String trashMsgInfo, String packet, List<String> members, List<String> filter) {
     this.name = name;
     this.adminName = adminName;
     this.groupName = groupName;
@@ -44,6 +48,8 @@ class EventExtendParam {
     this.owner = owner;
     this.trashMsgInfo = trashMsgInfo;
     this.packet = packet;
+    this.members = members;
+    this.filter = filter;
   }
 
   public String getName() {
@@ -116,5 +122,21 @@ class EventExtendParam {
 
   public void setPacket(String packet) {
     this.packet = packet;
+  }
+
+  public List<String> getMembers() {
+    return members;
+  }
+
+  public void setMembers(List<String> members) {
+    this.members = members;
+  }
+
+  public List<String> getFilter() {
+    return filter;
+  }
+
+  public void setFilter(List<String> filter) {
+    this.filter = filter;
   }
 }
