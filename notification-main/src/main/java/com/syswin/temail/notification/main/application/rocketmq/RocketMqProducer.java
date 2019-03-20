@@ -27,6 +27,10 @@ public class RocketMqProducer implements IMqProducer {
     this.topic = topic;
   }
 
+  public DefaultMQProducer getProducer() {
+    return producer;
+  }
+
   /**
    * 初始化
    */
@@ -57,6 +61,8 @@ public class RocketMqProducer implements IMqProducer {
       } else {
         sendResult = producer.send(mqMsg, (mqs, msg, arg) -> {
           int index = Math.abs(arg.hashCode() % mqs.size());
+          System.out.println(mqs.size());
+          System.out.println(index);
           return mqs.get(index);
         }, tags);
       }
