@@ -1,7 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
 import static com.syswin.temail.notification.main.domains.EventType.TOPIC_REPLY;
-import static org.mockito.Mockito.mock;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
@@ -51,7 +50,6 @@ public class NotificationTopicServiceTest {
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceMock redisServiceMock = new RedisServiceMock();
-  private TopicMapper TopicMapperMock = mock(TopicMapper.class);
 
   private NotificationTopicService notificationTopicService;
 
@@ -66,7 +64,6 @@ public class NotificationTopicServiceTest {
     params.setHeader(ConstantMock.HEADER);
     params.setFrom(TEST_FROM);
     params.setTo(TEST_TO);
-    params.setTimestamp(System.currentTimeMillis());
   }
 
   /**

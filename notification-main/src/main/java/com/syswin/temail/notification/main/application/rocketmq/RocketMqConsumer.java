@@ -6,6 +6,7 @@ import com.syswin.temail.notification.main.application.NotificationOssService;
 import com.syswin.temail.notification.main.application.NotificationSingleChatService;
 import com.syswin.temail.notification.main.application.NotificationTopicService;
 import com.syswin.temail.notification.main.exceptions.MqException;
+import com.syswin.temail.notification.main.util.Constant;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
@@ -27,10 +28,10 @@ public class RocketMqConsumer implements IMqConsumer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final DefaultMQPushConsumer singleChatConsumer = new DefaultMQPushConsumer("notificationSingleChatConsumer");
-  private final DefaultMQPushConsumer groupChatConsumer = new DefaultMQPushConsumer("notificationGroupChatConsumer");
-  private final DefaultMQPushConsumer topicConsumer = new DefaultMQPushConsumer("notificationTopicConsumer");
-  private final DefaultMQPushConsumer ossConsumer = new DefaultMQPushConsumer("temail_oss_notification_consumer");
+  private final DefaultMQPushConsumer singleChatConsumer = new DefaultMQPushConsumer(Constant.SINGLE_CHAT_CONSUMER_GROUP);
+  private final DefaultMQPushConsumer groupChatConsumer = new DefaultMQPushConsumer(Constant.GROUP_CHAT_CONSUMER_GROUP);
+  private final DefaultMQPushConsumer topicConsumer = new DefaultMQPushConsumer(Constant.TOPIC_CONSUMER_GROUP);
+  private final DefaultMQPushConsumer ossConsumer = new DefaultMQPushConsumer(Constant.OSS_CONSUMER_GROUP);
 
   private final int TYPE_0_SINGLE_CHAT = 0;
   private final int TYPE_1_GROUP_CHAT = 1;

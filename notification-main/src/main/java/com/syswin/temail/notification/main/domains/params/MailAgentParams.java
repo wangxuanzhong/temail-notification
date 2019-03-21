@@ -121,6 +121,9 @@ public class MailAgentParams {
   }
 
   public Long getTimestamp() {
+    if (this.timestamp == null) {
+      this.timestamp = System.currentTimeMillis();
+    }
     return timestamp;
   }
 

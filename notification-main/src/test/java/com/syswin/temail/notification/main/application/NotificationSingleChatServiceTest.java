@@ -65,7 +65,6 @@ public class NotificationSingleChatServiceTest {
     params.setHeader(ConstantMock.HEADER);
     params.setFrom(TEST_FROM);
     params.setTo(TEST_TO);
-    params.setTimestamp(System.currentTimeMillis());
   }
 
   /**

@@ -2,6 +2,7 @@ package com.syswin.temail.notification.main.application.rocketmq;
 
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.exceptions.MqException;
+import com.syswin.temail.notification.main.util.Constant;
 import java.lang.invoke.MethodHandles;
 import java.util.UUID;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -17,7 +18,7 @@ public class RocketMqProducer implements IMqProducer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final DefaultMQProducer producer = new DefaultMQProducer("notificationProducer");
+  private final DefaultMQProducer producer = new DefaultMQProducer(Constant.PRODUCER_GROUP);
 
   private String host;
   private String topic;
