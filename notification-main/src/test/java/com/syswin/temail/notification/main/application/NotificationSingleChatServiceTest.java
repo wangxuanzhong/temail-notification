@@ -77,6 +77,8 @@ public class NotificationSingleChatServiceTest {
     params.setMsgid("1");
     params.setSeqNo(1L);
     params.setToMsg("这是一条单聊测试消息！");
+    params.setAuthor("a");
+    params.setFilter(Arrays.asList("b", "c", "d"));
 
     params.setOwner(TEST_TO);
     this.sendMessage(params, params.getFrom());
@@ -280,84 +282,6 @@ public class NotificationSingleChatServiceTest {
     this.sendMessage(params, params.getFrom());
   }
 
-  /**
-   * EventType NG_ADD_GROUP 53 新群聊新建群
-   */
-  @Test
-  public void testEventTypeNgAddGroup() throws Exception {
-    params.setSessionMessageType(EventType.NG_ADD_GROUP.getValue());
-    params.setFrom("g");
-    params.setTo("a");
-    params.setGroupTemail("g");
-    params.setGroupName("新群");
-    this.sendMessage(params, params.getFrom());
-  }
-
-  /**
-   * EventType NG_APPLY 54 新群聊入群申请
-   */
-  @Test
-  public void testEventTypeNgApply() throws Exception {
-    params.setSessionMessageType(EventType.NG_APPLY.getValue());
-    params.setFrom("g");
-    params.setTo("b");
-    params.setGroupTemail("g");
-    params.setTemail("a");
-    this.sendMessage(params, params.getFrom());
-  }
-
-  /**
-   * EventType NG_INVITATION 55 新群聊入群邀请
-   */
-  @Test
-  public void testEventTypeNgInvitation() throws Exception {
-    params.setSessionMessageType(EventType.NG_INVITATION.getValue());
-    params.setFrom("a");
-    params.setTo("b");
-    params.setGroupTemail("g");
-    params.setTemail("b");
-    this.sendMessage(params, params.getFrom());
-  }
-
-  /**
-   * EventType NG_DELETE_GROUP 56 新群聊解散群
-   */
-  @Test
-  public void testEventTypeNgDeleteGroup() throws Exception {
-    params.setSessionMessageType(EventType.NG_DELETE_GROUP.getValue());
-    params.setFrom("g");
-    params.setTo("b");
-    params.setGroupTemail("g");
-    params.setTemail("a");
-    this.sendMessage(params, params.getFrom());
-  }
-
-  /**
-   * EventType NG_LEAVE_GROUP 57 新群聊退出群聊
-   */
-  @Test
-  public void testEventTypeNgLeaveGroup() throws Exception {
-    params.setSessionMessageType(EventType.NG_LEAVE_GROUP.getValue());
-    params.setFrom("g");
-    params.setTo("b");
-    params.setGroupTemail("g");
-    params.setTemail("b");
-    this.sendMessage(params, params.getFrom());
-  }
-
-  /**
-   * EventType NG_DELETE_MEMBER 58 新群聊移除群成员
-   */
-  @Test
-  public void testEventTypeNgDeleteMember() throws Exception {
-    params.setSessionMessageType(EventType.NG_DELETE_MEMBER.getValue());
-    params.setFrom("g");
-    params.setTo("b");
-    params.setGroupTemail("g");
-    params.setTemail("a");
-    params.setMembers(Arrays.asList("b", "c", "d"));
-    this.sendMessage(params, params.getFrom());
-  }
 
   private void sendMessage(MailAgentParams param, String tags) throws Exception {
     sendMessage(param, false, tags);

@@ -28,6 +28,10 @@ public class MailAgentParams {
   private String owner;
   // 废纸篓删除的消息明细
   private String trashMsgInfo;
+  // 新群聊发起方
+  private String author;
+  // 新群聊被通知人员
+  private List<String> filter;
 
   // 群邮件
   private String groupTemail;
@@ -43,10 +47,6 @@ public class MailAgentParams {
   private Integer type;
   // @对象
   private String at;
-  // 成员列表
-  private List<String> members;
-  // 被通知人员
-  private List<String> filter;
 
   // 话题id
   private String topicId;
@@ -152,6 +152,22 @@ public class MailAgentParams {
     this.trashMsgInfo = trashMsgInfo;
   }
 
+  public String getAuthor() {
+    return author;
+  }
+
+  public void setAuthor(String author) {
+    this.author = author;
+  }
+
+  public List<String> getFilter() {
+    return filter;
+  }
+
+  public void setFilter(List<String> filter) {
+    this.filter = filter;
+  }
+
   public String getGroupTemail() {
     return groupTemail;
   }
@@ -206,22 +222,6 @@ public class MailAgentParams {
 
   public void setAt(String at) {
     this.at = at;
-  }
-
-  public List<String> getMembers() {
-    return members;
-  }
-
-  public void setMembers(List<String> members) {
-    this.members = members;
-  }
-
-  public List<String> getFilter() {
-    return filter;
-  }
-
-  public void setFilter(List<String> filter) {
-    this.filter = filter;
   }
 
   public String getTopicId() {
@@ -294,6 +294,8 @@ public class MailAgentParams {
         ", deleteAllMsg=" + deleteAllMsg +
         ", owner='" + owner + '\'' +
         ", trashMsgInfo='" + trashMsgInfo + '\'' +
+        ", author='" + author + '\'' +
+        ", filter=" + filter +
         ", groupTemail='" + groupTemail + '\'' +
         ", groupName='" + groupName + '\'' +
         ", temail='" + temail + '\'' +
@@ -301,8 +303,6 @@ public class MailAgentParams {
         ", adminName='" + adminName + '\'' +
         ", type=" + type +
         ", at='" + at + '\'' +
-        ", members=" + members +
-        ", filter=" + filter +
         ", topicId='" + topicId + '\'' +
         ", topicSeqId=" + topicSeqId +
         ", title='" + title + '\'' +

@@ -129,9 +129,6 @@ public class NotificationEventService {
         case GROUP_STICK:
         case GROUP_DO_NOT_DISTURB:
         case DO_NOT_DISTURB:
-        case NG_ADD_GROUP:
-        case NG_APPLY:
-        case NG_INVITATION:
           // 只返回最后一条事件
           sessionEventMap.put(event.getMsgId(eventType), event);
           break;
@@ -155,23 +152,14 @@ public class NotificationEventService {
           }
           break;
         case DELETE_GROUP:
-        case NG_DELETE_GROUP:
           // 清除所有人的事件，并添加此事件
           sessionEventMap.clear();
           sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
         case DELETE_MEMBER:
         case LEAVE_GROUP:
-        case NG_LEAVE_GROUP:
           // 只清除当事人的事件，并添加此事件
           if (to.equals(event.getTemail())) {
-            sessionEventMap.clear();
-          }
-          sessionEventMap.put(UUID.randomUUID().toString(), event);
-          break;
-        case NG_DELETE_MEMBER:
-          // 只清除当事人的事件，并添加此事件
-          if (event.getMembers().contains(to)) {
             sessionEventMap.clear();
           }
           sessionEventMap.put(UUID.randomUUID().toString(), event);

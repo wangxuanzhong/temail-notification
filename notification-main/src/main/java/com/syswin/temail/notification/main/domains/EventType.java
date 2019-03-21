@@ -19,12 +19,6 @@ public enum EventType {
   DO_NOT_DISTURB(48, "设置免打扰"),
   DO_NOT_DISTURB_CANCEL(49, "设置免打扰取消"),
   CROSS_DOMAIN(51, "跨域事件消息"),
-  NG_ADD_GROUP(53, "新群聊新建群"),
-  NG_APPLY(54, "新群聊入群申请"),
-  NG_INVITATION(55, "新群聊入群邀请"),
-  NG_DELETE_GROUP(56, "新群聊解散群"),
-  NG_LEAVE_GROUP(57, "新群聊退出群聊"),
-  NG_DELETE_MEMBER(58, "新群聊移除群成员"),
 
   // 群管理部分
   GROUP_RESET(-101, "重置群聊消息未读数"),

@@ -70,6 +70,7 @@ public class NotificationSingleChatService {
       case REPLY_DESTROYED:
         // 新群聊消息字段
         event.setFilter(params.getFilter());
+        event.setAuthor(params.getAuthor());
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
           event.initEventSeqId(notificationRedisService);
@@ -124,21 +125,8 @@ public class NotificationSingleChatService {
         event.setTo(params.getOwner());
         sendMessage(event, header, tags);
         break;
-      case NG_ADD_GROUP:
-        event.setGroupName(params.getGroupName());
-        this.sendMessage(event, header, tags);
-        break;
-      case NG_DELETE_MEMBER:
-      case NG_INVITATION:
-        // 批量操作添加members字段
-        event.setMembers(params.getMembers());
-        this.sendMessage(event, header, tags);
-        break;
       case DO_NOT_DISTURB:
       case DO_NOT_DISTURB_CANCEL:
-      case NG_APPLY:
-      case NG_DELETE_GROUP:
-      case NG_LEAVE_GROUP:
         this.sendMessage(event, header, tags);
         break;
       default:

@@ -55,8 +55,8 @@ public class Event {
   private String trashMsgInfo;
   // 全报文信息
   private String packet;
-  // 成员列表
-  private List<String> members;
+  // 消息发送者
+  private String author;
   // 被通知人员
   private List<String> filter;
 
@@ -172,7 +172,7 @@ public class Event {
       this.owner = extendParam.getOwner();
       this.trashMsgInfo = extendParam.getTrashMsgInfo();
       this.packet = extendParam.getPacket();
-      this.members = extendParam.getMembers();
+      this.author = extendParam.getAuthor();
       this.filter = extendParam.getFilter();
     }
     return this;
@@ -184,7 +184,7 @@ public class Event {
   public Event autoWriteExtendParam(IJsonService iJsonService) {
     this.extendParam = iJsonService.toJson(
         new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner, this.trashMsgInfo,
-            this.packet, this.members, this.filter));
+            this.packet, this.author, this.filter));
     return this;
   }
 
@@ -401,12 +401,12 @@ public class Event {
     this.packet = packet;
   }
 
-  public List<String> getMembers() {
-    return members;
+  public String getAuthor() {
+    return author;
   }
 
-  public void setMembers(List<String> members) {
-    this.members = members;
+  public void setAuthor(String author) {
+    this.author = author;
   }
 
   public List<String> getFilter() {
@@ -443,7 +443,7 @@ public class Event {
         ", owner='" + owner + '\'' +
         ", trashMsgInfo='" + trashMsgInfo + '\'' +
         ", packet='" + packet + '\'' +
-        ", members='" + members + '\'' +
+        ", author='" + author + '\'' +
         ", filter='" + filter + '\'' +
         ", extendParam='" + extendParam + '\'' +
         '}';
