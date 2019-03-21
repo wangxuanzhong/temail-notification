@@ -405,6 +405,7 @@ public class NotificationEventService {
    * 保存报文事件
    */
   public void savePacketEvent(Event event, String header, String xPacketId) {
+    LOGGER.info("save packet event: {}", xPacketId);
     event.setEventType(EventType.PACKET.getValue());
     event.setxPacketId(xPacketId);
 
@@ -416,12 +417,13 @@ public class NotificationEventService {
 
     Map<String, Object> headerMap = iJsonService.fromJson(header, new TypeToken<Map<String, Object>>() {
     }.getType());
-
     event.setFrom(headerMap.get("sender").toString());
     event.setTo(headerMap.get("receiver").toString());
     event.initEventSeqId(notificationRedisService);
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
+
+    LOGGER.info("send packet event to {}", event.getTo());
     iMqProducer.sendMessage(
         iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
   }
