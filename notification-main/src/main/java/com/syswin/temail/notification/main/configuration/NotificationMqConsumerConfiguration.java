@@ -1,13 +1,13 @@
 package com.syswin.temail.notification.main.configuration;
 
 import com.syswin.library.messaging.all.spring.MqConsumerConfig;
-import com.syswin.library.messaging.all.spring.MqConsumerType;
+import com.syswin.library.messaging.all.spring.MqImplementation;
 import com.syswin.temail.notification.foundation.application.IMqConsumer;
 import com.syswin.temail.notification.main.application.NotificationGroupChatService;
 import com.syswin.temail.notification.main.application.NotificationOssService;
 import com.syswin.temail.notification.main.application.NotificationSingleChatService;
 import com.syswin.temail.notification.main.application.NotificationTopicService;
-import com.syswin.temail.notification.main.application.rocketmq.RocketMqConsumer;
+import com.syswin.temail.notification.main.application.mq.RocketMqConsumer;
 import com.syswin.temail.notification.main.util.Constant;
 import java.lang.invoke.MethodHandles;
 import java.util.function.Consumer;
@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
 public class NotificationMqConsumerConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
+  private final MqImplementation mqImplementation;
   @Autowired
   private NotificationSingleChatService notificationSingleChatService;
   @Autowired
@@ -35,7 +35,6 @@ public class NotificationMqConsumerConfiguration {
   private NotificationTopicService notificationTopicService;
   @Autowired
   private NotificationOssService notificationOssService;
-
   @Value("${spring.rocketmq.host}")
   private String host;
   @Value("${spring.rocketmq.topics.mailAgent.singleChat}")
@@ -46,6 +45,11 @@ public class NotificationMqConsumerConfiguration {
   private String topicTopic;
   @Value("${spring.rocketmq.topics.oss}")
   private String ossTopic;
+
+  @Autowired
+  public NotificationMqConsumerConfiguration(@Value("${app.temail.notification.mq.consumerType:}") String consumerType) {
+    mqImplementation = consumerType.isEmpty() ? MqImplementation.ROCKET_MQ : MqImplementation.valueOf(consumerType);
+  }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
@@ -63,10 +67,8 @@ public class NotificationMqConsumerConfiguration {
     return MqConsumerConfig.create()
         .group(Constant.SINGLE_CHAT_CONSUMER_GROUP)
         .topic(singleChatTopic)
-        .tag("")
-        .type(MqConsumerType.CLUSTER)
         .listener(listener)
-        .concurrent()
+        .implementation(mqImplementation)
         .build();
   }
 
@@ -78,10 +80,8 @@ public class NotificationMqConsumerConfiguration {
     return MqConsumerConfig.create()
         .group(Constant.GROUP_CHAT_CONSUMER_GROUP)
         .topic(groupChatTopic)
-        .tag("")
-        .type(MqConsumerType.CLUSTER)
         .listener(listener)
-        .concurrent()
+        .implementation(mqImplementation)
         .build();
   }
 
@@ -93,10 +93,8 @@ public class NotificationMqConsumerConfiguration {
     return MqConsumerConfig.create()
         .group(Constant.TOPIC_CONSUMER_GROUP)
         .topic(topicTopic)
-        .tag("")
-        .type(MqConsumerType.CLUSTER)
         .listener(listener)
-        .concurrent()
+        .implementation(mqImplementation)
         .build();
   }
 
@@ -108,10 +106,8 @@ public class NotificationMqConsumerConfiguration {
     return MqConsumerConfig.create()
         .group(Constant.OSS_CONSUMER_GROUP)
         .topic(ossTopic)
-        .tag("")
-        .type(MqConsumerType.CLUSTER)
         .listener(listener)
-        .concurrent()
+        .implementation(mqImplementation)
         .build();
   }
 

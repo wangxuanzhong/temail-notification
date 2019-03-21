@@ -3,17 +3,17 @@ package com.syswin.temail.notification.main.application;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class NotificationRedisService implements ISequenceService {
 
-  private final RedisTemplate<String, String> redisTemplate;
+  private final StringRedisTemplate redisTemplate;
 
   @Autowired
-  public NotificationRedisService(RedisTemplate<String, String> redisTemplate) {
-    this.redisTemplate = redisTemplate;
+  public NotificationRedisService(StringRedisTemplate stringRedisTemplate) {
+    this.redisTemplate = stringRedisTemplate;
   }
 
   private String getKey(String body) {

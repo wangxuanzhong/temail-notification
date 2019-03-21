@@ -1,4 +1,4 @@
-package com.syswin.temail.notification.main.application.rocketmq;
+package com.syswin.temail.notification.main.application.mq;
 
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import org.junit.Ignore;

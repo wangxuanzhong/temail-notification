@@ -1,4 +1,4 @@
-package com.syswin.temail.notification.main.application.rocketmq;
+package com.syswin.temail.notification.main.application.mq;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.waitAtMost;

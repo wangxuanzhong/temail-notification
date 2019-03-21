@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.mockito.Mockito;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 public class RedisServiceMock extends NotificationRedisService {
 
@@ -14,7 +14,7 @@ public class RedisServiceMock extends NotificationRedisService {
   private static Map<String, Long> seqMap = new HashMap<>();
 
   public RedisServiceMock() {
-    super(Mockito.mock(RedisTemplate.class));
+    super(Mockito.mock(StringRedisTemplate.class));
   }
 
 
