@@ -2,9 +2,7 @@ package com.syswin.temail.notification.main.configuration;
 
 import com.syswin.library.messaging.all.spring.MqConsumerConfig;
 import com.syswin.library.messaging.all.spring.MqImplementation;
-import com.syswin.temail.notification.foundation.application.IMqConsumer;
 import com.syswin.temail.notification.main.application.NotificationGroupChatService;
-import com.syswin.temail.notification.main.application.NotificationOssService;
 import com.syswin.temail.notification.main.application.NotificationSingleChatService;
 import com.syswin.temail.notification.main.application.NotificationTopicService;
 import com.syswin.temail.notification.main.application.mq.RocketMqConsumer;
@@ -26,15 +24,9 @@ import org.springframework.context.annotation.Configuration;
 public class NotificationMqConsumerConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   private final MqImplementation mqImplementation;
-  @Autowired
-  private NotificationSingleChatService notificationSingleChatService;
-  @Autowired
-  private NotificationGroupChatService notificationGroupChatService;
-  @Autowired
-  private NotificationTopicService notificationTopicService;
-  @Autowired
-  private NotificationOssService notificationOssService;
+
   @Value("${spring.rocketmq.host}")
   private String host;
   @Value("${spring.rocketmq.topics.mailAgent.singleChat}")
@@ -51,19 +43,35 @@ public class NotificationMqConsumerConfiguration {
     mqImplementation = consumerType.isEmpty() ? MqImplementation.ROCKET_MQ : MqImplementation.valueOf(consumerType);
   }
 
+  /* init rocket mq consumer beans */
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
-  public IMqConsumer notificationRocketMqConsumer() {
-    LOGGER.info("IMqConsumer [rocketmq] started!");
-    return new RocketMqConsumer(notificationSingleChatService, notificationGroupChatService, notificationTopicService, notificationOssService, host,
-        singleChatTopic, groupChatTopic, topicTopic, ossTopic);
+  public RocketMqConsumer notificationSingleChatMqConsumer(NotificationSingleChatService singleChatService) {
+    LOGGER.info("IMqConsumer [rocketmq singleChat] started!");
+    return new RocketMqConsumer(singleChatService, host, singleChatTopic, Constant.SINGLE_CHAT_CONSUMER_GROUP);
   }
 
+  @Bean(initMethod = "start", destroyMethod = "stop")
+  @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
+  public RocketMqConsumer notificationGroupChatServiceMqConsumer(NotificationGroupChatService groupChatService) {
+    LOGGER.info("IMqConsumer [rocketmq singleChat] started!");
+    return new RocketMqConsumer(groupChatService, host, groupChatTopic, Constant.GROUP_CHAT_CONSUMER_GROUP);
+  }
+
+  @Bean(initMethod = "start", destroyMethod = "stop")
+  @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
+  public RocketMqConsumer notificationRocketMqConsumer(NotificationTopicService topicService) {
+    LOGGER.info("IMqConsumer [rocketmq singleChat] started!");
+    return new RocketMqConsumer(topicService, host, topicTopic, Constant.TOPIC_CONSUMER_GROUP);
+  }
+
+
+  /* init rocket library message beans */
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "libraryMessage")
-  MqConsumerConfig notificationSingleChatConsumerConfig() {
+  MqConsumerConfig notificationSingleChatConsumerConfig(NotificationSingleChatService singleChatService) {
     LOGGER.info("IMqConsumer [libraryMessage singleChat] started!");
-    Consumer<String> listener = body -> notificationSingleChatService.handleMqMessage(body, null);
+    Consumer<String> listener = body -> singleChatService.handleMqMessage(body, null);
     return MqConsumerConfig.create()
         .group(Constant.SINGLE_CHAT_CONSUMER_GROUP)
         .topic(singleChatTopic)
@@ -74,9 +82,9 @@ public class NotificationMqConsumerConfiguration {
 
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "libraryMessage")
-  MqConsumerConfig notificationGroupChatConsumerConfig() {
+  MqConsumerConfig notificationGroupChatConsumerConfig(NotificationGroupChatService groupChatService) {
     LOGGER.info("IMqConsumer [libraryMessage groupChat] started!");
-    Consumer<String> listener = body -> notificationGroupChatService.handleMqMessage(body, null);
+    Consumer<String> listener = body -> groupChatService.handleMqMessage(body, null);
     return MqConsumerConfig.create()
         .group(Constant.GROUP_CHAT_CONSUMER_GROUP)
         .topic(groupChatTopic)
@@ -87,9 +95,9 @@ public class NotificationMqConsumerConfiguration {
 
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "libraryMessage")
-  MqConsumerConfig notificationTopicChatConsumerConfig() {
+  MqConsumerConfig notificationTopicChatConsumerConfig(NotificationTopicService topicService) {
     LOGGER.info("IMqConsumer [libraryMessage topicChat] started!");
-    Consumer<String> listener = body -> notificationTopicService.handleMqMessage(body, null);
+    Consumer<String> listener = body -> topicService.handleMqMessage(body, null);
     return MqConsumerConfig.create()
         .group(Constant.TOPIC_CONSUMER_GROUP)
         .topic(topicTopic)
@@ -97,18 +105,4 @@ public class NotificationMqConsumerConfiguration {
         .implementation(mqImplementation)
         .build();
   }
-
-  @Bean
-  @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "libraryMessage")
-  MqConsumerConfig notificationOssConsumerConfig() {
-    LOGGER.info("IMqConsumer [libraryMessage oss] started!");
-    Consumer<String> listener = body -> notificationOssService.handleMqMessage(body);
-    return MqConsumerConfig.create()
-        .group(Constant.OSS_CONSUMER_GROUP)
-        .topic(ossTopic)
-        .listener(listener)
-        .implementation(mqImplementation)
-        .build();
-  }
-
 }

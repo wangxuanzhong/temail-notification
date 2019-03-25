@@ -3,6 +3,7 @@ package com.syswin.temail.notification.main.application;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
+import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class NotificationGroupChatService {
+public class NotificationGroupChatService implements IMqConsumerService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -46,6 +47,7 @@ public class NotificationGroupChatService {
    * 处理从MQ收到的信息
    */
   @Transactional(rollbackFor = Exception.class)
+  @Override
   public void handleMqMessage(String body, String tags) {
     MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),

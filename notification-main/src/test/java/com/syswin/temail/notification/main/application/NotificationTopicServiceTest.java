@@ -55,7 +55,7 @@ public class NotificationTopicServiceTest {
 
   @Before
   public void setUp() {
-    if (isMock) {
+    if (!useMQ && isMock) {
       notificationTopicService = new NotificationTopicService(mqProducerMock, redisServiceMock, topicMapper, iJsonService);
     } else {
       notificationTopicService = new NotificationTopicService(iMqProducer, notificationRedisService, topicMapper, iJsonService);
@@ -187,7 +187,7 @@ public class NotificationTopicServiceTest {
     if (!isSamePacket) {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
-    if (!isMock && useMQ) {
+    if (useMQ) {
       iMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
       Thread.sleep(2000);
     } else {

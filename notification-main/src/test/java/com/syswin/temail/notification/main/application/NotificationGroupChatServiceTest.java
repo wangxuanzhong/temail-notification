@@ -57,7 +57,7 @@ public class NotificationGroupChatServiceTest {
 
   @Before
   public void setUp() {
-    if (isMock) {
+    if (!useMQ && isMock) {
       notificationGroupChatService = new NotificationGroupChatService(mqProducerMock, redisServiceMock, eventMapper, memberMapper,
           iJsonService);
     } else {
@@ -529,7 +529,7 @@ public class NotificationGroupChatServiceTest {
     if (!isSamePacket) {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
-    if (!isMock && useMQ) {
+    if (useMQ) {
       iMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
       Thread.sleep(2000);
     } else {
