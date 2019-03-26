@@ -39,44 +39,40 @@ public class RocketMqConsumer {
   /**
    * 初始化
    */
-  public void start() {
+  public void start() throws MQClientException {
     LOGGER.info("MQ: start consumer: {}", consumerGroup);
-    try {
-      consumer = new DefaultMQPushConsumer(consumerGroup);
-      consumer.setNamesrvAddr(host);
-      // 从消息队列头开始消费
-      consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
-      // 集群消费模式
-      consumer.setMessageModel(MessageModel.CLUSTERING);
-      // 订阅主题
-      consumer.subscribe(topic, "");
-      // 注册消息监听器
-      consumer.registerMessageListener(new MessageListenerConcurrently() {
-        @Override
-        public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
-          try {
-            for (MessageExt msg : list) {
-              LOGGER.info("MQ: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
-              iMqConsumerService.handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), msg.getTags());
-            }
-          } catch (DuplicateKeyException e) {
-            LOGGER.warn("duplicate key exception: ", e);
-          } catch (MqException | UnsupportedEncodingException e) {
-            LOGGER.error(e.getMessage(), e);
-            return ConsumeConcurrentlyStatus.RECONSUME_LATER;
-          } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+    consumer = new DefaultMQPushConsumer(consumerGroup);
+    consumer.setNamesrvAddr(host);
+    // 从消息队列头开始消费
+    consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
+    // 集群消费模式
+    consumer.setMessageModel(MessageModel.CLUSTERING);
+    // 订阅主题
+    consumer.subscribe(topic, "");
+    // 注册消息监听器
+    consumer.registerMessageListener(new MessageListenerConcurrently() {
+      @Override
+      public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
+        try {
+          for (MessageExt msg : list) {
+            LOGGER.info("MQ: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
+            iMqConsumerService.handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), msg.getTags());
           }
-          return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+        } catch (DuplicateKeyException e) {
+          LOGGER.warn("duplicate key exception: ", e);
+        } catch (MqException | UnsupportedEncodingException e) {
+          LOGGER.error(e.getMessage(), e);
+          return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+        } catch (Exception e) {
+          LOGGER.error(e.getMessage(), e);
+          return ConsumeConcurrentlyStatus.RECONSUME_LATER;
         }
-      });
-      consumer.setInstanceName(UUID.randomUUID().toString());
-      // 启动消费端
-      consumer.start();
-    } catch (MQClientException e) {
-      throw new MqException("start mq consumer exception: ", e);
-    }
+        return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+      }
+    });
+    consumer.setInstanceName(UUID.randomUUID().toString());
+    // 启动消费端
+    consumer.start();
   }
 
 
