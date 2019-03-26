@@ -215,7 +215,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
         this.sendSingleMessageDirectly(event, header, tags);
         break;
       case DELETE_AT:
-        // 查询父消息，如果是@消息则只发送给@的人，否则发送给所有人
+        // 查询父消息中的at字段，通知所有at的人
         Event condition = new Event();
         condition.setEventType(EventType.RECEIVE_AT.getValue());
         condition.setMsgId(event.getMsgId());
