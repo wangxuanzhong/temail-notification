@@ -290,6 +290,9 @@ public class Event {
   }
 
   public Long getTimestamp() {
+    if (this.timestamp == null) {
+      this.timestamp = System.currentTimeMillis();
+    }
     return timestamp;
   }
 
