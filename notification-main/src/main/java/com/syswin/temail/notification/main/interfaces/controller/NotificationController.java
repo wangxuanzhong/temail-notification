@@ -43,16 +43,14 @@ public class NotificationController {
   private final NotificationTopicService notificationTopicService;
 
   @Autowired
-  public NotificationController(NotificationEventService notificationEventService,
-      NotificationTopicService notificationTopicService) {
+  public NotificationController(NotificationEventService notificationEventService, NotificationTopicService notificationTopicService) {
     this.notificationEventService = notificationEventService;
     this.notificationTopicService = notificationTopicService;
   }
 
   @ApiOperation(value = "pull event 3 0001", consumes = "application/json")
   @GetMapping("/events")
-  public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from") String to,
-      @RequestParam Long eventSeqId,
+  public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -95,15 +93,13 @@ public class NotificationController {
   }
 
   /**
-   * 接口功能合并到单群聊拉取接口中，此接口已废弃
-   *
-   * @deprecated
+   * @deprecated 接口功能合并到单群聊拉取接口中，此接口已废弃
    */
   @ApiOperation(value = "pull reply event 3 0005 (deprecated)", consumes = "application/json")
   @ApiIgnore
   @GetMapping("/reply/events")
-  public ResponseEntity<Response<Map<String, Object>>> getReplyEvents(@RequestParam Long eventSeqId,
-      @RequestParam String parentMsgId,
+  @Deprecated
+  public ResponseEntity<Response<Map<String, Object>>> getReplyEvents(@RequestParam Long eventSeqId, @RequestParam String parentMsgId,
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -140,8 +136,8 @@ public class NotificationController {
 
   @ApiOperation(value = "get do not disturb group 3 0008", consumes = "application/json")
   @GetMapping("/groupchat/user/status")
-  public ResponseEntity<Response<Map<String, Integer>>> getUserDoNotDisturbGroups(@RequestParam String temail,
-      @RequestParam String groupTemail, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
+  public ResponseEntity<Response<Map<String, Integer>>> getUserDoNotDisturbGroups(@RequestParam String temail, @RequestParam String groupTemail,
+      @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
