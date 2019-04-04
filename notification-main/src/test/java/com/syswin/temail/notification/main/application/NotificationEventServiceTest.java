@@ -174,6 +174,6 @@ public class NotificationEventServiceTest {
     header.put("sender", "a");
     header.put("receiver", "b");
 
-    notificationEventService.savePacketEvent(event, gson.toJson(header), UUID.randomUUID().toString());
+    notificationEventService.savePacketEvent(event, gson.toJson(header), UUID.randomUUID().toString(), "B000");
   }
 }
