@@ -209,6 +209,14 @@ public class Event {
     }
   }
 
+  /**
+   * 转换成json，清空extendParam
+   */
+  public String toJson(IJsonService iJsonService) {
+    this.extendParam = null;
+    return iJsonService.toJson(this);
+  }
+
   public Long getId() {
     return id;
   }

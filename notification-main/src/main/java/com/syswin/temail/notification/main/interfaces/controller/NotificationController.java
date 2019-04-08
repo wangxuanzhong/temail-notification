@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -37,8 +36,6 @@ public class NotificationController {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final String CDTP_HEADER = "CDTP-header";
-  private final String X_PACKET_ID = "X-PACKET-ID";
-  private final String TYPE = "type";
 
   private final NotificationEventService notificationEventService;
   private final NotificationTopicService notificationTopicService;
@@ -144,15 +141,5 @@ public class NotificationController {
 
     Map<String, Integer> result = notificationEventService.getGroupChatUserStatus(temail, groupTemail);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
-  }
-
-  @ApiOperation(value = "save packet event 1 3000", consumes = "application/json")
-  @PostMapping("/packet")
-  public ResponseEntity<Response> savePacketEvent(@RequestBody Event event, @RequestHeader(name = CDTP_HEADER) String header,
-      @RequestHeader(name = X_PACKET_ID) String xPacketId, @RequestHeader(name = TYPE) String type) {
-    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-    headers.add(CDTP_HEADER, header);
-    notificationEventService.savePacketEvent(event, header, xPacketId, type);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 }

@@ -13,7 +13,6 @@ import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
-import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,7 +24,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,13 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationEventService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-  @Value("${app.temail.notification.saas.enabled}")
-  private String isSaasEnabled;
-  @Value("${spring.rocketmq.topics.notification.groupChat}")
-  private String groupChatTopic;
-  @Value("${spring.rocketmq.topics.notification.appTemail}")
-  private String appTemailTopic;
 
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
@@ -408,44 +399,4 @@ public class NotificationEventService {
     result.put("userStatus", memberMapper.selectUserStatus(temail, groupTemail));
     return result;
   }
-
-  /**
-   * 保存报文事件
-   */
-  public void savePacketEvent(Event event, String header, String xPacketId, String type) {
-    LOGGER.info("save packet event: {}", xPacketId);
-    event.setEventType(EventType.PACKET.getValue());
-    event.setxPacketId(xPacketId);
-
-    // 校验收到的数据是否重复
-    String redisKey = event.getxPacketId() + "_" + event.getEventType();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisService)) {
-      return;
-    }
-
-    Map<String, Object> headerMap = iJsonService.fromJson(header, new TypeToken<Map<String, Object>>() {
-    }.getType());
-    event.setFrom(headerMap.get("sender").toString());
-    event.setTo(headerMap.get("receiver").toString());
-    event.initEventSeqId(notificationRedisService);
-    event.autoWriteExtendParam(iJsonService);
-    eventMapper.insert(event);
-    LOGGER.info("send packet event to {}", event.getTo());
-    if ("true".equals(isSaasEnabled)) {
-      if (type.startsWith("A") || type.startsWith("RA")) { // 新群聊mq
-        iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))),
-            groupChatTopic, "", "");
-      } else if (type.startsWith("B") || type.startsWith("RB")) { // 协同应用mq
-        iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))),
-            appTemailTopic, "", "");
-      } else {
-        iMqProducer.sendMessage(  //dispatcher mq
-            iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
-      }
-    } else {
-      iMqProducer.sendMessage( //dispatcher mq
-          iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
-    }
-  }
-
 }

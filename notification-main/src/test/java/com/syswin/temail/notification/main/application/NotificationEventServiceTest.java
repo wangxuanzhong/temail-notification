@@ -14,9 +14,7 @@ import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceMock;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,11 +53,11 @@ public class NotificationEventServiceTest {
   @Before
   public void setUp() {
     if (isMock) {
-      notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService,
-          mqProducerMock, redisServiceMock);
+      notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService, mqProducerMock,
+          redisServiceMock);
     } else {
-      notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService,
-          iMqProducer, notificationRedisService);
+      notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService, iMqProducer,
+          notificationRedisService);
     }
   }
 
@@ -162,18 +160,5 @@ public class NotificationEventServiceTest {
     notificationEventService.reset(event, ConstantMock.HEADER);
     result = notificationEventService.getUnread("reset_to");
     assertThat(result).isEmpty();
-  }
-
-
-  @Test
-  public void testSavePacketEvent() {
-    Event event = new Event();
-    event.setPacket("test packet");
-
-    Map<String, Object> header = new HashMap<>();
-    header.put("sender", "a");
-    header.put("receiver", "b");
-
-    notificationEventService.savePacketEvent(event, gson.toJson(header), UUID.randomUUID().toString(), "B000");
   }
 }
