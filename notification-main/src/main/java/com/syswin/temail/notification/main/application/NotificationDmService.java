@@ -104,6 +104,9 @@ public class NotificationDmService implements IMqConsumerService {
 
     CDTPPacket cdtpPacket = CDTPDispatcher.MessageToCDTPPacket(params.getGroupchatMessage());
 
+    // 如果接收人不是本域的账号，则不需要发送通知
+
+
     Event event = new Event();
     event.setPacket(NotificationPacketUtil.encodeData(NotificationPacketUtil.pack(cdtpPacket)));
 
