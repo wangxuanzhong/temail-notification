@@ -2,6 +2,7 @@ package com.syswin.temail.notification.main.configuration;
 
 import com.syswin.library.messaging.all.spring.MqConsumerConfig;
 import com.syswin.library.messaging.all.spring.MqImplementation;
+import com.syswin.temail.notification.main.application.NotificationDmService;
 import com.syswin.temail.notification.main.application.NotificationGroupChatService;
 import com.syswin.temail.notification.main.application.NotificationSingleChatService;
 import com.syswin.temail.notification.main.application.NotificationTopicService;
@@ -35,6 +36,10 @@ public class NotificationMqConsumerConfiguration {
   private String groupChatTopic;
   @Value("${spring.rocketmq.topics.mailAgent.topicChat}")
   private String topicTopic;
+  @Value("${spring.rocketmq.topics.saas.newGroupChat}")
+  private String saasNewGroupChatTopic;
+  @Value("${spring.rocketmq.topics.saas.application}")
+  private String saasApplicationTopic;
 
   @Autowired
   public NotificationMqConsumerConfiguration(@Value("${app.temail.notification.mq.consumerType:}") String consumerType) {
@@ -61,6 +66,20 @@ public class NotificationMqConsumerConfiguration {
   public RocketMqConsumer notificationTopicRocketMqConsumer(NotificationTopicService topicService) {
     LOGGER.info("IMqConsumer [rocketmq topic] started!");
     return new RocketMqConsumer(topicService, host, topicTopic, Constant.TOPIC_CONSUMER_GROUP);
+  }
+
+  @Bean(initMethod = "start", destroyMethod = "stop")
+  @ConditionalOnProperty(name = "app.temail.notification.saas.enabled", havingValue = "true")
+  public RocketMqConsumer notificationSaasNewGroupChatRocketMqConsumer(NotificationDmService dmService) {
+    LOGGER.info("IMqConsumer [rocketmq saas newGroupChat topic] started!");
+    return new RocketMqConsumer(dmService, host, saasNewGroupChatTopic, Constant.SAAS_NEW_GROUP_CHAT_CONSUMER_GROUP);
+  }
+
+  @Bean(initMethod = "start", destroyMethod = "stop")
+  @ConditionalOnProperty(name = "app.temail.notification.saas.enabled", havingValue = "true")
+  public RocketMqConsumer notificationSaasApplicationRocketMqConsumer(NotificationDmService dmService) {
+    LOGGER.info("IMqConsumer [rocketmq saas application topic] started!");
+    return new RocketMqConsumer(dmService, host, saasApplicationTopic, Constant.SAAS_APPLICATION_CHAT_CONSUMER_GROUP);
   }
 
 
