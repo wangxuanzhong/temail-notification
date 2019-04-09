@@ -13,7 +13,7 @@ public class Constant {
 
   public static final String OSS_CONSUMER_GROUP = "temail_oss_notification_consumer";
 
-  public static final String SAAS_NEW_GROUP_CHAT_CONSUMER_GROUP = "notificationSaasConsumer";
+  public static final String SAAS_CONSUMER_GROUP = "notificationGroupEventPushConsumer";
 
   /**
    * MQ生产组

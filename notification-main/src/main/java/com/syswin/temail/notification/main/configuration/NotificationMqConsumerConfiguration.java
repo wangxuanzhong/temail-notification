@@ -36,7 +36,7 @@ public class NotificationMqConsumerConfiguration {
   private String groupChatTopic;
   @Value("${spring.rocketmq.topics.mailAgent.topicChat}")
   private String topicTopic;
-  @Value("${spring.rocketmq.topics.saas}")
+  @Value("${spring.rocketmq.topics.saas:saasTopic}")
   private String saasTopic;
 
   @Autowired
@@ -69,8 +69,8 @@ public class NotificationMqConsumerConfiguration {
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.saas.enabled", havingValue = "true")
   public RocketMqConsumer notificationSaasRocketMqConsumer(NotificationDmService dmService) {
-    LOGGER.info("IMqConsumer [rocketmq saas topic] started!");
-    return new RocketMqConsumer(dmService, host, saasTopic, Constant.SAAS_NEW_GROUP_CHAT_CONSUMER_GROUP);
+    LOGGER.info("IMqConsumer [rocketmq saas] started!");
+    return new RocketMqConsumer(dmService, host, saasTopic, Constant.SAAS_CONSUMER_GROUP);
   }
 
   /* init library message consumer beans */
