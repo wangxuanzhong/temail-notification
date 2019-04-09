@@ -16,17 +16,19 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 public class NotificationDmServiceTest {
 
-  private final boolean isMock = true;
+  private final boolean isMock = false;
   private NotificationPacketUtil notificationPacketUtil = new NotificationPacketUtil();
   private Gson gson = new Gson();
 
@@ -38,7 +40,10 @@ public class NotificationDmServiceTest {
   private IMqProducer iMqProducer;
   @Autowired
   private NotificationRedisService notificationRedisService;
+  @Autowired
+  private RestTemplate notificationRestTemplate;
 
+  private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceMock redisServiceMock = new RedisServiceMock();
 
@@ -47,9 +52,10 @@ public class NotificationDmServiceTest {
   @Before
   public void setUp() {
     if (isMock) {
-      notificationDmService = new NotificationDmService(mqProducerMock, redisServiceMock, eventMapper, iJsonService);
+      notificationDmService = new NotificationDmService(mqProducerMock, redisServiceMock, eventMapper, iJsonService, restTemplateMock);
+      Mockito.when(notificationDmService.checkSameDomain(Mockito.anyString())).thenReturn(true);
     } else {
-      notificationDmService = new NotificationDmService(iMqProducer, notificationRedisService, eventMapper, iJsonService);
+      notificationDmService = new NotificationDmService(iMqProducer, notificationRedisService, eventMapper, iJsonService, notificationRestTemplate);
     }
   }
 
@@ -63,6 +69,13 @@ public class NotificationDmServiceTest {
     header.put("receiver", "b");
 
     notificationDmService.savePacketEvent(event, gson.toJson(header), UUID.randomUUID().toString(), false);
+  }
+
+
+  @Test
+  @Ignore
+  public void testCheckSameDomain() {
+    notificationDmService.checkSameDomain("a");
   }
 
   @Test

@@ -275,7 +275,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
     event.setTo(event.getTemail());
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))), tags);
+    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, Event.toJson(iJsonService, event))), tags);
   }
 
   /**
@@ -284,7 +284,8 @@ public class NotificationGroupChatService implements IMqConsumerService {
   private void sendSingleMessageDirectly(Event event, String header, String tags) {
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))), tags);
+    iMqProducer
+        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event))), tags);
   }
 
   /**
@@ -312,7 +313,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
     for (String to : tos) {
       event.setTo(to);
       this.insert(event);
-      iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, CDTPEventType, header, iJsonService.toJson(event))), tags);
+      iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, CDTPEventType, header, Event.toJson(iJsonService, event))), tags);
     }
   }
 

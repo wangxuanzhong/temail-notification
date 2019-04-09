@@ -40,4 +40,13 @@ public class Response<T> {
   public T getData() {
     return data;
   }
+
+  @Override
+  public String toString() {
+    return "Response{" +
+        "code=" + code +
+        ", message='" + message + '\'' +
+        ", data=" + data +
+        '}';
+  }
 }

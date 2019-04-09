@@ -106,6 +106,14 @@ public class Event {
   }
 
   /**
+   * 转换成json，清空extendParam
+   */
+  public static String toJson(IJsonService iJsonService, Event event) {
+    event.setExtendParam(null);
+    return iJsonService.toJson(event);
+  }
+
+  /**
    * 去除角色条件，即通知所有人
    */
   public void notifyToAll() {
@@ -118,7 +126,6 @@ public class Event {
   public void notifyToAdmin() {
     this.role = MemberRole.ADMIN.getValue();
   }
-
 
   /**
    * 获取msgId，如果msgId为空则临时生成，反向业务使用对立事件类型生成
@@ -207,14 +214,6 @@ public class Event {
         this.eventSeqId = iSequenceService.getNextSeq(this.to);
         break;
     }
-  }
-
-  /**
-   * 转换成json，清空extendParam
-   */
-  public String toJson(IJsonService iJsonService) {
-    this.extendParam = null;
-    return iJsonService.toJson(this);
   }
 
   public Long getId() {

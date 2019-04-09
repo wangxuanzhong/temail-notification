@@ -159,7 +159,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     this.insert(event);
     iMqProducer
-        .sendMessage(iJsonService.toJson(new CDTPResponse(to, event.getEventType(), header, iJsonService.toJson(event))), tags);
+        .sendMessage(iJsonService.toJson(new CDTPResponse(to, event.getEventType(), header, Event.toJson(iJsonService, event))), tags);
   }
 
   /**
@@ -168,6 +168,6 @@ public class NotificationSingleChatService implements IMqConsumerService {
   private void sendMessageToSender(Event event, String header, String tags) {
     LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(), EventType.getByValue(event.getEventType()));
     iMqProducer
-        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, iJsonService.toJson(event))), tags);
+        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, Event.toJson(iJsonService, event))), tags);
   }
 }

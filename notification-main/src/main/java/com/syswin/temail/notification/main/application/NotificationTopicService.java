@@ -124,9 +124,9 @@ public class NotificationTopicService implements IMqConsumerService {
   private void sendMessage(TopicEvent topicEvent, String header, String tags) {
     LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
-    iMqProducer
-        .sendMessage(iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, iJsonService.toJson(topicEvent))),
-            tags);
+    iMqProducer.sendMessage(
+        iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, TopicEvent.toJson(iJsonService, topicEvent))),
+        tags);
 
   }
 

@@ -74,6 +74,14 @@ public class TopicEvent {
   }
 
   /**
+   * 转换成json，清空extendParam
+   */
+  public static String toJson(IJsonService iJsonService, TopicEvent topicEvent) {
+    topicEvent.setExtendParam(null);
+    return iJsonService.toJson(topicEvent);
+  }
+
+  /**
    * 生成seqId
    */
   public void initTopicEventSeqId(ISequenceService ISequenceService) {

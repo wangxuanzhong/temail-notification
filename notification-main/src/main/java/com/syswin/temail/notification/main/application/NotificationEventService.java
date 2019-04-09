@@ -357,7 +357,7 @@ public class NotificationEventService {
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, iJsonService.toJson(event))));
+        iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, Event.toJson(iJsonService, event))));
   }
 
   /**
@@ -387,7 +387,7 @@ public class NotificationEventService {
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, iJsonService.toJson(event))));
+        iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event))));
   }
 
   /**
