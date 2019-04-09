@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -28,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
 @ActiveProfiles("test")
 public class NotificationDmServiceTest {
 
-  private final boolean isMock = false;
+  private final boolean isMock = true;
   private NotificationPacketUtil notificationPacketUtil = new NotificationPacketUtil();
   private Gson gson = new Gson();
 
@@ -42,6 +43,14 @@ public class NotificationDmServiceTest {
   private NotificationRedisService notificationRedisService;
   @Autowired
   private RestTemplate notificationRestTemplate;
+  @Value("${app.temail.notification.saas.enabled}")
+  private String saasEnabled;
+  @Value("${spring.rocketmq.topics.notify.groupChat}")
+  private String groupChatTopic;
+  @Value("${spring.rocketmq.topics.notify.application}")
+  private String applicationTopic;
+  @Value("${url.temail.auth}")
+  private String authUrl;
 
   private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
   private MqProducerMock mqProducerMock = new MqProducerMock();
@@ -52,10 +61,12 @@ public class NotificationDmServiceTest {
   @Before
   public void setUp() {
     if (isMock) {
-      notificationDmService = new NotificationDmService(mqProducerMock, redisServiceMock, eventMapper, iJsonService, restTemplateMock);
-      Mockito.when(notificationDmService.checkSameDomain(Mockito.anyString())).thenReturn(true);
+      notificationDmService = new NotificationDmService(mqProducerMock, redisServiceMock, eventMapper, iJsonService, restTemplateMock, saasEnabled,
+          groupChatTopic, applicationTopic, authUrl);
+//      Mockito.when(notificationDmService.checkSameDomain(Mockito.anyString())).thenReturn(true);
     } else {
-      notificationDmService = new NotificationDmService(iMqProducer, notificationRedisService, eventMapper, iJsonService, notificationRestTemplate);
+      notificationDmService = new NotificationDmService(iMqProducer, notificationRedisService, eventMapper, iJsonService, notificationRestTemplate,
+          saasEnabled, groupChatTopic, applicationTopic, authUrl);
     }
   }
 
@@ -64,9 +75,13 @@ public class NotificationDmServiceTest {
     Event event = new Event();
     event.setPacket("test packet");
 
+    Map<String, Object> extraData = new HashMap<>();
+    extraData.put("type", "A00");
+
     Map<String, Object> header = new HashMap<>();
     header.put("sender", "a");
     header.put("receiver", "b");
+    header.put("extraData", gson.toJson(extraData));
 
     notificationDmService.savePacketEvent(event, gson.toJson(header), UUID.randomUUID().toString(), false);
   }

@@ -38,23 +38,27 @@ public class NotificationDmService implements IMqConsumerService {
   private final IJsonService iJsonService;
   private final RestTemplate restTemplate;
 
-  @Value("${app.temail.notification.saas.enabled}")
-  private String saasEnabled;
-  @Value("${spring.rocketmq.topics.notify.groupChat}")
-  private String groupChatTopic;
-  @Value("${spring.rocketmq.topics.notify.application}")
-  private String applicationTopic;
-  @Value("${url.temail.auth}")
-  private String authUrl;
+  private final String saasEnabled;
+  private final String groupChatTopic;
+  private final String applicationTopic;
+  private final String authUrl;
 
   @Autowired
-  public NotificationDmService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
-      EventMapper eventMapper, IJsonService iJsonService, RestTemplate notificationRestTemplate) {
+  public NotificationDmService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService, EventMapper eventMapper,
+      IJsonService iJsonService, RestTemplate notificationRestTemplate,
+      @Value("${app.temail.notification.saas.enabled}") String saasEnabled,
+      @Value("${spring.rocketmq.topics.notify.groupChat}") String groupChatTopic,
+      @Value("${spring.rocketmq.topics.notify.application}") String applicationTopic,
+      @Value("${url.temail.auth}") String authUrl) {
     this.iMqProducer = iMqProducer;
     this.notificationRedisService = notificationRedisService;
     this.eventMapper = eventMapper;
     this.iJsonService = iJsonService;
     this.restTemplate = notificationRestTemplate;
+    this.saasEnabled = saasEnabled;
+    this.groupChatTopic = groupChatTopic;
+    this.applicationTopic = applicationTopic;
+    this.authUrl = authUrl;
   }
 
   /**
@@ -80,12 +84,13 @@ public class NotificationDmService implements IMqConsumerService {
 
     LOGGER.info("send packet event to {}", event.getTo());
     CDTPResponse response = new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event));
-    if (Boolean.valueOf(saasEnabled) && !isMq) {
-      Map<String, Object> extraDataMap = iJsonService.fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
-      }.getType());
+    Map<String, Object> extraDataMap = iJsonService.fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
+    }.getType());
+    if (Boolean.valueOf(saasEnabled) && !isMq && extraDataMap != null) {
       String type = extraDataMap.get("type").toString();
-
-      if (type.startsWith("A")) { // 新群聊 topic
+      if (type == null) {
+        iMqProducer.sendMessage(iJsonService.toJson(response));
+      } else if (type.startsWith("A")) { // 新群聊 topic
         iMqProducer.sendMessage(Event.toJson(iJsonService, event), groupChatTopic, "", "");
       } else if (type.startsWith("B")) { // 协同应用 topic
         iMqProducer.sendMessage(Event.toJson(iJsonService, event), applicationTopic, "", "");
@@ -132,6 +137,7 @@ public class NotificationDmService implements IMqConsumerService {
     headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 
     try {
+      // TODO
 //      String url = authUrl + CHECK_DOMAIN_PATH;
       String url = "http://temail-notification.service.innertools.com/notification/unread?from=b";
       ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
