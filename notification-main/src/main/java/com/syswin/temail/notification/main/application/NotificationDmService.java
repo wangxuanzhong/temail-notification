@@ -46,10 +46,10 @@ public class NotificationDmService implements IMqConsumerService {
   @Autowired
   public NotificationDmService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService, EventMapper eventMapper,
       IJsonService iJsonService, RestTemplate notificationRestTemplate,
-      @Value("${app.temail.notification.saas.enabled}") String saasEnabled,
-      @Value("${spring.rocketmq.topics.notify.groupChat}") String groupChatTopic,
-      @Value("${spring.rocketmq.topics.notify.application}") String applicationTopic,
-      @Value("${url.temail.auth}") String authUrl) {
+      @Value("${app.temail.notification.saas.enabled:false}") String saasEnabled,
+      @Value("${spring.rocketmq.topics.notify.groupChat:topic}") String groupChatTopic,
+      @Value("${spring.rocketmq.topics.notify.application:topic}") String applicationTopic,
+      @Value("${url.temail.auth:authUrl}") String authUrl) {
     this.iMqProducer = iMqProducer;
     this.notificationRedisService = notificationRedisService;
     this.eventMapper = eventMapper;
