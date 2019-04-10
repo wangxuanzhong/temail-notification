@@ -10,8 +10,10 @@ import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
+import com.syswin.temail.notification.main.util.NotificationPacketUtil;
 import com.syswin.temail.notification.main.util.NotificationUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
+import com.syswin.temail.ps.common.entity.CDTPPacket;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -37,6 +40,7 @@ public class NotificationDmService implements IMqConsumerService {
   private final EventMapper eventMapper;
   private final IJsonService iJsonService;
   private final RestTemplate restTemplate;
+  private final NotificationPacketUtil notificationPacketUtil = new NotificationPacketUtil();
 
   private final String saasEnabled;
   private final String groupChatTopic;
@@ -112,8 +116,8 @@ public class NotificationDmService implements IMqConsumerService {
     event.setEventType(EventType.PACKET.getValue());
 
     // 如果接收人不是本域的账号，则不需要发送通知
-    if (!checkSameDomain(event.getTo())) {
-      LOGGER.info("[{}] is different domain", event.getTo());
+    if (!checkIsSameDomain(event.getTo())) {
+      LOGGER.info("[{}] belong to another domain.", event.getTo());
       return;
     }
 
@@ -126,11 +130,16 @@ public class NotificationDmService implements IMqConsumerService {
     event.initEventSeqId(notificationRedisService);
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
-    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), "to do", Event.toJson(iJsonService, event))));
+
+    // 解析packet取出cdtpheader推送给dispatcher
+    CDTPPacket cdtpPacket = notificationPacketUtil.unpack(notificationPacketUtil.decodeData(event.getPacket()));
+    String header = iJsonService.toJson(cdtpPacket.getHeader());
+
+    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event))));
   }
 
 
-  public boolean checkSameDomain(String temail) {
+  public boolean checkIsSameDomain(String temail) {
     LOGGER.info("check temail: [{}] is same domain or not.", temail);
 
     HttpHeaders headers = new HttpHeaders();
@@ -146,7 +155,7 @@ public class NotificationDmService implements IMqConsumerService {
       }.getType());
       System.out.println(response);
       return responseEntity.getStatusCode().is2xxSuccessful();
-    } catch (Exception e) {
+    } catch (RestClientException e) {
       LOGGER.warn("check domain exception: ", e);
       throw new BaseException("check domain exception: ", e);
     }

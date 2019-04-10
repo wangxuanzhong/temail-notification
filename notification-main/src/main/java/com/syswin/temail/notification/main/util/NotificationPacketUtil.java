@@ -19,14 +19,14 @@ public class NotificationPacketUtil extends PacketUtil {
   /**
    * base64加密
    */
-  public static String encodeData(byte[] data) {
+  public String encodeData(byte[] data) {
     return Base64.getUrlEncoder().encodeToString(data);
   }
 
   /**
    * base64解密
    */
-  public static byte[] decodeData(String message) {
+  public byte[] decodeData(String message) {
     return Base64.getUrlDecoder().decode(message);
   }
 
