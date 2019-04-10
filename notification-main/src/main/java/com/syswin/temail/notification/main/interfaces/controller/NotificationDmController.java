@@ -42,7 +42,7 @@ public class NotificationDmController {
       @RequestHeader(name = X_PACKET_ID) String xPacketId) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    notificationDmService.savePacketEvent(event, header, xPacketId, true);
+    notificationDmService.savePacketEvent(event, header, xPacketId);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 }

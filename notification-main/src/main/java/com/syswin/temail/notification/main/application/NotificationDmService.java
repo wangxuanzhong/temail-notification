@@ -68,8 +68,8 @@ public class NotificationDmService implements IMqConsumerService {
   /**
    * 保存报文事件
    */
-  public void savePacketEvent(Event event, String header, String xPacketId, boolean isMq) {
-    LOGGER.info("save packet event: {}, from mq: {}", xPacketId, isMq);
+  public void savePacketEvent(Event event, String header, String xPacketId) {
+    LOGGER.info("save packet event: {}", xPacketId);
     event.setEventType(EventType.PACKET.getValue());
     event.setxPacketId(xPacketId);
 
@@ -90,7 +90,7 @@ public class NotificationDmService implements IMqConsumerService {
     CDTPResponse response = new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event));
     Map<String, Object> extraDataMap = iJsonService.fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
     }.getType());
-    if (Boolean.valueOf(saasEnabled) && !isMq && extraDataMap != null) {
+    if (Boolean.valueOf(saasEnabled) && extraDataMap != null) {
       String type = extraDataMap.get("type").toString();
       if (type == null) {
         iMqProducer.sendMessage(iJsonService.toJson(response));

@@ -76,14 +76,14 @@ public class NotificationDmServiceTest {
     event.setPacket("test packet");
 
     Map<String, Object> extraData = new HashMap<>();
-    extraData.put("type", "A00");
+    extraData.put("type", "A000");
 
     Map<String, Object> header = new HashMap<>();
-    header.put("sender", "a");
-    header.put("receiver", "b");
+    header.put("sender", "a@test.com");
+    header.put("receiver", "b@test.com");
     header.put("extraData", gson.toJson(extraData));
 
-    notificationDmService.savePacketEvent(event, gson.toJson(header), UUID.randomUUID().toString(), false);
+    notificationDmService.savePacketEvent(event, gson.toJson(header), UUID.randomUUID().toString());
   }
 
 
