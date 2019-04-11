@@ -90,7 +90,7 @@ public class NotificationDmServiceTest {
   @Test
   @Ignore
   public void testCheckIsSameDomain() {
-    notificationDmService.checkIsSameDomain("a");
+    System.out.println(notificationDmService.checkIsSameDomain("ctt40@systoontest.com"));
   }
 
   @Test

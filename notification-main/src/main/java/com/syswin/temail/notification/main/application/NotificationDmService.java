@@ -3,7 +3,6 @@ package com.syswin.temail.notification.main.application;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
-import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.foundation.exceptions.BaseException;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
@@ -20,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -33,7 +30,7 @@ public class NotificationDmService implements IMqConsumerService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final String CHECK_DOMAIN_PATH = "/xxxxxxxx";
+  private static final String GET_PUBLIC_KEY = "/temails/%s";
 
   private final IMqProducer iMqProducer;
   private final NotificationRedisService notificationRedisService;
@@ -131,7 +128,7 @@ public class NotificationDmService implements IMqConsumerService {
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
 
-    // 解析packet取出cdtpheader推送给dispatcher
+    // 解析packet取出CDTPHeader推送给dispatcher
     CDTPPacket cdtpPacket = notificationPacketUtil.unpack(notificationPacketUtil.decodeData(event.getPacket()));
     String header = iJsonService.toJson(cdtpPacket.getHeader());
 
@@ -141,19 +138,10 @@ public class NotificationDmService implements IMqConsumerService {
 
   public boolean checkIsSameDomain(String temail) {
     LOGGER.info("check temail: [{}] is same domain or not.", temail);
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-
+    String url = authUrl + String.format(GET_PUBLIC_KEY, temail);
     try {
-      // TODO
-//      String url = authUrl + CHECK_DOMAIN_PATH;
-      String url = "http://temail-notification.service.innertools.com/notification/unread?from=b";
+      // 调用auth获取公钥接口，接口返回404则表示用户不存在或是不在本域。
       ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-      System.out.println(responseEntity);
-      Response<Map<String, Object>> response = iJsonService.fromJson(responseEntity.getBody(), new TypeToken<Response<Map<String, Object>>>() {
-      }.getType());
-      System.out.println(response);
       return responseEntity.getStatusCode().is2xxSuccessful();
     } catch (RestClientException e) {
       LOGGER.warn("check domain exception: ", e);
