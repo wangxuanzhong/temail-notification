@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -65,6 +66,7 @@ public class NotificationDmService implements IMqConsumerService {
   /**
    * 保存报文事件
    */
+  @Transactional(rollbackFor = Exception.class)
   public void savePacketEvent(Event event, String header, String xPacketId) {
     LOGGER.info("save packet event: {}", xPacketId);
     event.setEventType(EventType.PACKET.getValue());
@@ -106,6 +108,7 @@ public class NotificationDmService implements IMqConsumerService {
   /**
    * 处理从MQ收到的信息
    */
+  @Transactional(rollbackFor = Exception.class)
   @Override
   public void handleMqMessage(String body, String tags) {
     Event event = iJsonService.fromJson(body, Event.class);
