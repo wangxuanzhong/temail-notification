@@ -32,6 +32,8 @@ public class NotificationDmService implements IMqConsumerService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String GET_PUBLIC_KEY = "/temails/%s";
+  public static final int EVENT_COMMAND_SPACE = 0x1;
+  public static final int EVENT_COMMAND = 0x3000;
 
   private final IMqProducer iMqProducer;
   private final NotificationRedisService notificationRedisService;
@@ -46,7 +48,8 @@ public class NotificationDmService implements IMqConsumerService {
   private final String authUrl;
 
   @Autowired
-  public NotificationDmService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService, EventMapper eventMapper,
+  public NotificationDmService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
+      EventMapper eventMapper,
       IJsonService iJsonService, RestTemplate notificationRestTemplate,
       @Value("${app.temail.notification.saas.enabled:false}") String saasEnabled,
       @Value("${spring.rocketmq.topics.notify.groupChat:notify}") String groupChatTopic,
@@ -86,9 +89,11 @@ public class NotificationDmService implements IMqConsumerService {
     eventMapper.insert(event);
 
     LOGGER.info("send packet event to {}", event.getTo());
-    CDTPResponse response = new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event));
-    Map<String, Object> extraDataMap = iJsonService.fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
-    }.getType());
+    CDTPResponse response = new CDTPResponse(event.getTo(), event.getEventType(), header,
+        Event.toJson(iJsonService, event));
+    Map<String, Object> extraDataMap = iJsonService
+        .fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
+        }.getType());
     if (Boolean.valueOf(saasEnabled) && extraDataMap != null) {
       String type = extraDataMap.get("type").toString();
       if (type == null) {
@@ -120,6 +125,13 @@ public class NotificationDmService implements IMqConsumerService {
       LOGGER.info("[{}] belong to another domain.", event.getTo());
       return;
     }
+    CDTPPacket cdtpPacket = notificationPacketUtil.unpack(notificationPacketUtil.decodeData(event.getPacket()));
+    short commandSpace = cdtpPacket.getCommandSpace();
+    short command = cdtpPacket.getCommand();
+    if (commandSpace == EVENT_COMMAND_SPACE && command == EVENT_COMMAND) {
+      LOGGER.info("packet is not event packet,packetId={},packet={}", event.getxPacketId(), body);
+      return;
+    }
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
@@ -132,10 +144,10 @@ public class NotificationDmService implements IMqConsumerService {
     eventMapper.insert(event);
 
     // 解析packet取出CDTPHeader推送给dispatcher
-    CDTPPacket cdtpPacket = notificationPacketUtil.unpack(notificationPacketUtil.decodeData(event.getPacket()));
     String header = iJsonService.toJson(cdtpPacket.getHeader());
 
-    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event))));
+    iMqProducer.sendMessage(iJsonService
+        .toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event))));
   }
 
 
