@@ -128,7 +128,7 @@ public class NotificationDmService implements IMqConsumerService {
     CDTPPacket cdtpPacket = notificationPacketUtil.unpack(notificationPacketUtil.decodeData(event.getPacket()));
     short commandSpace = cdtpPacket.getCommandSpace();
     short command = cdtpPacket.getCommand();
-    if (commandSpace == EVENT_COMMAND_SPACE && command == EVENT_COMMAND) {
+    if (!(commandSpace == EVENT_COMMAND_SPACE && command == EVENT_COMMAND)) {
       LOGGER.info("packet is not event packet,packetId={},packet={}", event.getxPacketId(), body);
       return;
     }
