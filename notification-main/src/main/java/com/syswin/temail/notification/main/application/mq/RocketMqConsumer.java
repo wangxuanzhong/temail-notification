@@ -1,7 +1,5 @@
 package com.syswin.temail.notification.main.application.mq;
 
-import com.syswin.temail.notification.main.exceptions.MqException;
-import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.UUID;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
@@ -56,9 +54,9 @@ public class RocketMqConsumer {
         }
       } catch (DuplicateKeyException e) {
         LOGGER.warn("duplicate key exception: ", e);
-      } catch (MqException | UnsupportedEncodingException e) {
-        LOGGER.error(e.getMessage(), e);
-        return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+//      } catch (MqException | UnsupportedEncodingException e) {
+//        LOGGER.error(e.getMessage(), e);
+//        return ConsumeConcurrentlyStatus.RECONSUME_LATER;
       } catch (Exception e) {
         LOGGER.error(e.getMessage(), e);
         return ConsumeConcurrentlyStatus.RECONSUME_LATER;
