@@ -26,8 +26,8 @@ public class NotificationDmController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final String CDTP_HEADER = "CDTP-header";
-  private final String X_PACKET_ID = "X-PACKET-ID";
+  private static final String CDTP_HEADER = "CDTP-header";
+  private static final String X_PACKET_ID = "X-PACKET-ID";
 
   private final NotificationDmService notificationDmService;
 

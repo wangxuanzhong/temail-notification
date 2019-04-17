@@ -78,7 +78,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
-          if (eventMapper.selectEventsByMsgId(event).size() == 0) {
+          if (eventMapper.selectEventsByMsgId(event).isEmpty()) {
             this.sendSingleMessage(event, EventType.GROUP_PULLED.getValue(), header, tags);
           } else {
             LOGGER.warn("message {} is pulled, do nothing!", msgId);
@@ -153,22 +153,17 @@ public class NotificationGroupChatService implements IMqConsumerService {
         event.notifyToAdmin();
         this.sendGroupMessageToAll(event, header, tags);
         break;
+      case INVITATION:
+        this.sendSingleMessage(event, header, tags);
+        break;
       case APPLY_ADOPT:
       case APPLY_REFUSE:
+      case INVITATION_ADOPT:
+      case INVITATION_REFUSE:
         // 通知所有管理员，提供多端同步功能
         event.notifyToAdmin();
         this.sendGroupMessageToAll(event, header, tags);
         // 通知申请人，此通知当跨域时有可能申请人接收不到，因此修改为通过单聊发送，通知服务不单独通知申请人(向前兼容)
-        this.sendSingleMessage(event, header, tags);
-        break;
-      case INVITATION:
-        this.sendSingleMessage(event, header, tags);
-        break;
-      case INVITATION_ADOPT:
-      case INVITATION_REFUSE:
-        event.notifyToAdmin();
-        this.sendGroupMessageToAll(event, header, tags);
-        // 通知自己，提供多端同步功能
         this.sendSingleMessage(event, header, tags);
         break;
       case UPDATE_GROUP_CARD:
@@ -270,12 +265,12 @@ public class NotificationGroupChatService implements IMqConsumerService {
   /**
    * 发送单人消息
    */
-  private void sendSingleMessage(Event event, Integer CDTPEventType, String header, String tags) {
+  private void sendSingleMessage(Event event, Integer cdtpEventType, String header, String tags) {
     event.setFrom(event.getGroupTemail());
     event.setTo(event.getTemail());
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, Event.toJson(iJsonService, event))), tags);
+    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, Event.toJson(iJsonService, event))), tags);
   }
 
   /**
@@ -298,14 +293,14 @@ public class NotificationGroupChatService implements IMqConsumerService {
   /**
    * 向所有群成员发送群消息
    */
-  private void sendGroupMessageToAll(Event event, Integer CDTPEventType, String header, String tags) {
-    this.sendGroupMessage(event, memberMapper.selectMember(event), CDTPEventType, header, tags);
+  private void sendGroupMessageToAll(Event event, Integer cdtpEventType, String header, String tags) {
+    this.sendGroupMessage(event, memberMapper.selectMember(event), cdtpEventType, header, tags);
   }
 
   /**
    * 发送群聊消息
    */
-  private void sendGroupMessage(Event event, List<String> tos, Integer CDTPEventType, String header, String tags) {
+  private void sendGroupMessage(Event event, List<String> tos, Integer cdtpEventType, String header, String tags) {
     LOGGER.info("send message to --->> {}, event type: {}", tos, EventType.getByValue(event.getEventType()));
     if (event.getFrom() == null) {
       event.setFrom(event.getGroupTemail());
@@ -313,7 +308,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
     for (String to : tos) {
       event.setTo(to);
       this.insert(event);
-      iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, CDTPEventType, header, Event.toJson(iJsonService, event))), tags);
+      iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, cdtpEventType, header, Event.toJson(iJsonService, event))), tags);
     }
   }
 

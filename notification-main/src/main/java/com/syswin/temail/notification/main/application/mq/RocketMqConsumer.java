@@ -3,10 +3,8 @@ package com.syswin.temail.notification.main.application.mq;
 import com.syswin.temail.notification.main.exceptions.MqException;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
-import java.util.List;
 import java.util.UUID;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
-import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -50,25 +48,22 @@ public class RocketMqConsumer {
     // 订阅主题
     consumer.subscribe(topic, "");
     // 注册消息监听器
-    consumer.registerMessageListener(new MessageListenerConcurrently() {
-      @Override
-      public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
-        try {
-          for (MessageExt msg : list) {
-            LOGGER.info("MQ: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
-            iMqConsumerService.handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), msg.getTags());
-          }
-        } catch (DuplicateKeyException e) {
-          LOGGER.warn("duplicate key exception: ", e);
-        } catch (MqException | UnsupportedEncodingException e) {
-          LOGGER.error(e.getMessage(), e);
-          return ConsumeConcurrentlyStatus.RECONSUME_LATER;
-        } catch (Exception e) {
-          LOGGER.error(e.getMessage(), e);
-          return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+    consumer.registerMessageListener((MessageListenerConcurrently) (list, consumeConcurrentlyContext) -> {
+      try {
+        for (MessageExt msg : list) {
+          LOGGER.info("MQ: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
+          iMqConsumerService.handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), msg.getTags());
         }
-        return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+      } catch (DuplicateKeyException e) {
+        LOGGER.warn("duplicate key exception: ", e);
+      } catch (MqException | UnsupportedEncodingException e) {
+        LOGGER.error(e.getMessage(), e);
+        return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+      } catch (Exception e) {
+        LOGGER.error(e.getMessage(), e);
+        return ConsumeConcurrentlyStatus.RECONSUME_LATER;
       }
+      return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
     });
     consumer.setInstanceName(UUID.randomUUID().toString());
     // 启动消费端

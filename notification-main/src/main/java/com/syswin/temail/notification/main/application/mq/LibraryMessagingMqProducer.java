@@ -25,6 +25,7 @@ public class LibraryMessagingMqProducer implements IMqProducer {
 
   @Override
   public void start() {
+    // 启动不在此处实现
   }
 
   /**
@@ -64,6 +65,7 @@ public class LibraryMessagingMqProducer implements IMqProducer {
 
   @Override
   public void stop() {
+    // 停止不在此处实现
   }
 
 }

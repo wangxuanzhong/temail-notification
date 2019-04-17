@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class NotificationQuartzConfiguration {
 
-  private static final String deleteOldEventCron = "0 0 4 * * ?";
-  private static final String deleteOldTopicCron = "0 0 3 * * ?";
+  private static final String DELETE_OLD_EVENT_CRON = "0 0 4 * * ?";
+  private static final String DELETE_OLD_TOPIC_CRON = "0 0 3 * * ?";
 
   // 定时清理历史单群聊事件
   @Bean
@@ -24,7 +24,7 @@ public class NotificationQuartzConfiguration {
 
   @Bean
   public Trigger deleteOldEventTaskTrigger() {
-    CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(deleteOldEventCron);
+    CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(DELETE_OLD_EVENT_CRON);
     return TriggerBuilder.newTrigger().forJob(deleteOldEventTaskDetail())
         .withIdentity("deleteOldEventTaskTrigger")
         .withSchedule(scheduleBuilder)
@@ -39,7 +39,7 @@ public class NotificationQuartzConfiguration {
 
   @Bean
   public Trigger deleteOldTopicTaskTrigger() {
-    CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(deleteOldTopicCron);
+    CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(DELETE_OLD_TOPIC_CRON);
     return TriggerBuilder.newTrigger().forJob(deleteOldTopicTaskDetail())
         .withIdentity("deleteOldTopicTaskTrigger")
         .withSchedule(scheduleBuilder)

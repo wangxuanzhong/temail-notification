@@ -13,6 +13,10 @@ public class NotificationUtil {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private NotificationUtil() {
+    throw new IllegalStateException("Utility class");
+  }
+
   /**
    * 幂等校验
    */

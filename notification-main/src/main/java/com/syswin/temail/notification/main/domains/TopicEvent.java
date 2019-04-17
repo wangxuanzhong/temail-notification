@@ -84,8 +84,8 @@ public class TopicEvent {
   /**
    * 生成seqId
    */
-  public void initTopicEventSeqId(ISequenceService ISequenceService) {
-    this.eventSeqId = ISequenceService.getNextSeq("topic_" + this.to);
+  public void initTopicEventSeqId(ISequenceService iSequenceService) {
+    this.eventSeqId = iSequenceService.getNextSeq("topic_" + this.to);
   }
 
   /**
@@ -93,12 +93,12 @@ public class TopicEvent {
    */
   public TopicEvent autoReadExtendParam(IJsonService iJsonService) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
-      TopicExtendParam extendParam = iJsonService.fromJson(this.extendParam, TopicExtendParam.class);
-      this.title = extendParam.getTitle();
-      this.receivers = extendParam.getReceivers();
-      this.cc = extendParam.getCc();
-      this.msgIds = extendParam.getMsgIds();
-      this.deleteAllMsg = extendParam.getDeleteAllMsg();
+      TopicExtendParam topicExtendParam = iJsonService.fromJson(this.extendParam, TopicExtendParam.class);
+      this.title = topicExtendParam.getTitle();
+      this.receivers = topicExtendParam.getReceivers();
+      this.cc = topicExtendParam.getCc();
+      this.msgIds = topicExtendParam.getMsgIds();
+      this.deleteAllMsg = topicExtendParam.getDeleteAllMsg();
     }
     return this;
   }

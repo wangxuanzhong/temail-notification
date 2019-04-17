@@ -26,15 +26,15 @@ public class NotificationEventSchedule {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private static final String DELETE_OLD_EVENT_KEY = "notification_deleteOldEvent";
+  private static final int PAGE_SIZE = 100000; // 分页删除，每次删除10W条
+
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
   private final NotificationEventService notificationEventService;
   private final NotificationRedisService notificationRedisService;
   private final TopicMapper topicMapper;
   private final int deadline;
-
-  private final String DELETE_OLD_EVENT_KEY = "notification_deleteOldEvent";
-  private final int PAGE_SIZE = 100000; // 分页删除，每次删除10W条
 
   @Autowired
   public NotificationEventSchedule(EventMapper eventMapper, UnreadMapper unreadMapper, NotificationEventService notificationEventService,

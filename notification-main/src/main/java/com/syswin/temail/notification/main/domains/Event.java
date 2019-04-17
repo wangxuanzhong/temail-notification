@@ -169,18 +169,18 @@ public class Event {
    */
   public Event autoReadExtendParam(IJsonService iJsonService) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
-      EventExtendParam extendParam = iJsonService.fromJson(this.extendParam, EventExtendParam.class);
-      this.name = extendParam.getName();
-      this.adminName = extendParam.getAdminName();
-      this.groupName = extendParam.getGroupName();
-      this.at = extendParam.getAt();
-      this.msgIds = extendParam.getMsgIds();
-      this.deleteAllMsg = extendParam.getDeleteAllMsg();
-      this.owner = extendParam.getOwner();
-      this.trashMsgInfo = extendParam.getTrashMsgInfo();
-      this.packet = extendParam.getPacket();
-      this.author = extendParam.getAuthor();
-      this.filter = extendParam.getFilter();
+      EventExtendParam eventExtendParam = iJsonService.fromJson(this.extendParam, EventExtendParam.class);
+      this.name = eventExtendParam.getName();
+      this.adminName = eventExtendParam.getAdminName();
+      this.groupName = eventExtendParam.getGroupName();
+      this.at = eventExtendParam.getAt();
+      this.msgIds = eventExtendParam.getMsgIds();
+      this.deleteAllMsg = eventExtendParam.getDeleteAllMsg();
+      this.owner = eventExtendParam.getOwner();
+      this.trashMsgInfo = eventExtendParam.getTrashMsgInfo();
+      this.packet = eventExtendParam.getPacket();
+      this.author = eventExtendParam.getAuthor();
+      this.filter = eventExtendParam.getFilter();
     }
     return this;
   }

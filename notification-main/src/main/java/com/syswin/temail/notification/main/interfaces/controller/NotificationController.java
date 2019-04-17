@@ -35,7 +35,7 @@ public class NotificationController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final String CDTP_HEADER = "CDTP-header";
+  private static final String CDTP_HEADER = "CDTP-header";
 
   private final NotificationEventService notificationEventService;
   private final NotificationTopicService notificationTopicService;

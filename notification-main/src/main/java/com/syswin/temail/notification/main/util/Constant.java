@@ -19,4 +19,8 @@ public class Constant {
    * MQ生产组
    */
   public static final String PRODUCER_GROUP = "notificationProducer";
+
+  private Constant() {
+    throw new IllegalStateException("Utility class");
+  }
 }

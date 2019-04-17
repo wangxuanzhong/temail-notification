@@ -338,11 +338,11 @@ public class NotificationEventService {
   public void reset(Event event, String header) {
     LOGGER.info("reset to: {}, param: {}", event.getTo(), event);
     event.setEventType(EventType.RESET.getValue());
-    Integer CDTPEventType = event.getEventType();
+    Integer cdtpEventType = event.getEventType();
     // groupTemail不为空则为群聊
     if (event.getGroupTemail() != null && !event.getGroupTemail().isEmpty()) {
       event.setFrom(event.getGroupTemail());
-      CDTPEventType = EventType.GROUP_RESET.getValue();
+      cdtpEventType = EventType.GROUP_RESET.getValue();
     }
     event.setTimestamp(System.currentTimeMillis());
     event.initEventSeqId(notificationRedisService);
@@ -357,7 +357,7 @@ public class NotificationEventService {
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(event.getTo(), CDTPEventType, header, Event.toJson(iJsonService, event))));
+        iJsonService.toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, Event.toJson(iJsonService, event))));
   }
 
   /**

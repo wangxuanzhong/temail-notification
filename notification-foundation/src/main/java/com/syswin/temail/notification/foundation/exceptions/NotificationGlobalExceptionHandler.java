@@ -31,9 +31,8 @@ public class NotificationGlobalExceptionHandler {
 
   private String getExceptionStack(Exception e) {
     StringBuilder stack = new StringBuilder(e.toString() + "\n");
-    System.out.println(e.getLocalizedMessage());
     for (StackTraceElement s : e.getStackTrace()) {
-      stack.append(s + "\n");
+      stack.append(s).append("\n");
     }
     return stack.toString();
   }

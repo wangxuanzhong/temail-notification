@@ -93,7 +93,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
         event.setTo(params.getFrom());
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
-          if (eventMapper.selectEventsByMsgId(event).size() == 0) {
+          if (eventMapper.selectEventsByMsgId(event).isEmpty()) {
             sendMessage(event, header, tags);
           } else {
             LOGGER.info("message {} is pulled, do nothing!", msgId);
