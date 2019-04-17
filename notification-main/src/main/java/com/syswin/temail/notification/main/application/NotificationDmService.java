@@ -32,8 +32,8 @@ public class NotificationDmService implements IMqConsumerService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String GET_PUBLIC_KEY = "/temails/%s";
-  public static final int EVENT_COMMAND_SPACE = 0x1;
-  public static final int EVENT_COMMAND = 0x3000;
+  private static final int EVENT_COMMAND_SPACE = 0x1;
+  private static final int EVENT_COMMAND = 0x3000;
 
   private final IMqProducer iMqProducer;
   private final NotificationRedisService notificationRedisService;
@@ -89,11 +89,9 @@ public class NotificationDmService implements IMqConsumerService {
     eventMapper.insert(event);
 
     LOGGER.info("send packet event to {}", event.getTo());
-    CDTPResponse response = new CDTPResponse(event.getTo(), event.getEventType(), header,
-        Event.toJson(iJsonService, event));
-    Map<String, Object> extraDataMap = iJsonService
-        .fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
-        }.getType());
+    CDTPResponse response = new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event));
+    Map<String, Object> extraDataMap = iJsonService.fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
+    }.getType());
     if (Boolean.valueOf(saasEnabled) && extraDataMap != null) {
       String type = extraDataMap.get("type").toString();
       if (type == null) {
@@ -120,16 +118,18 @@ public class NotificationDmService implements IMqConsumerService {
     LOGGER.info("dm params: {}", event);
     event.setEventType(EventType.PACKET.getValue());
 
-    // 如果接收人不是本域的账号，则不需要发送通知
-    if (!checkIsSameDomain(event.getTo())) {
-      LOGGER.info("[{}] belong to another domain.", event.getTo());
-      return;
-    }
+    // 校验收到的消息通道是否是1x3000
     CDTPPacket cdtpPacket = notificationPacketUtil.unpack(notificationPacketUtil.decodeData(event.getPacket()));
     short commandSpace = cdtpPacket.getCommandSpace();
     short command = cdtpPacket.getCommand();
     if (!(commandSpace == EVENT_COMMAND_SPACE && command == EVENT_COMMAND)) {
-      LOGGER.info("packet is not event packet,packetId={},packet={}", event.getxPacketId(), body);
+      LOGGER.info("packet is not event packet, packetId={}, packet={}", event.getxPacketId(), cdtpPacket);
+      return;
+    }
+
+    // 如果接收人不是本域的账号，则不需要发送通知
+    if (!checkIsSameDomain(event.getTo())) {
+      LOGGER.info("[{}] belong to another domain.", event.getTo());
       return;
     }
 
@@ -145,14 +145,11 @@ public class NotificationDmService implements IMqConsumerService {
 
     // 解析packet取出CDTPHeader推送给dispatcher
     String header = iJsonService.toJson(cdtpPacket.getHeader());
-
-    iMqProducer.sendMessage(iJsonService
-        .toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event))));
+    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event))));
   }
 
 
   public boolean checkIsSameDomain(String temail) {
-    LOGGER.info("check temail: [{}] is same domain or not.", temail);
     String url = authUrl + String.format(GET_PUBLIC_KEY, temail);
     try {
       // 调用auth获取公钥接口，接口返回404则表示用户不存在或是不在本域。
