@@ -8,6 +8,7 @@ import com.syswin.temail.notification.main.containers.RocketMqNameServerContaine
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.runner.RunWith;
@@ -19,6 +20,7 @@ import org.testcontainers.containers.Network;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
+@Ignore
 public class RocketMqProducerDockerTest {
 
   // init mq container
