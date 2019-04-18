@@ -71,7 +71,7 @@ public class NotificationDmService implements IMqConsumerService {
    */
   @Transactional(rollbackFor = Exception.class)
   public void savePacketEvent(Event event, String header, String xPacketId) {
-    LOGGER.info("save packet event: {}", xPacketId);
+    LOGGER.info("save packet event: event={}, header={}, xPacketId={}", event, header, xPacketId);
     event.setEventType(EventType.PACKET.getValue());
     event.setxPacketId(xPacketId);
 
