@@ -12,7 +12,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -26,8 +25,6 @@ public class NotificationMqConsumerConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final MqImplementation mqImplementation;
-
   @Value("${spring.rocketmq.host}")
   private String host;
   @Value("${spring.rocketmq.topics.mailAgent.singleChat}")
@@ -38,11 +35,8 @@ public class NotificationMqConsumerConfiguration {
   private String topicTopic;
   @Value("${spring.rocketmq.topics.saas:saasTopic}")
   private String saasTopic;
-
-  @Autowired
-  public NotificationMqConsumerConfiguration(@Value("${app.temail.notification.mq.consumerType:}") String consumerType) {
-    mqImplementation = consumerType.isEmpty() ? MqImplementation.ROCKET_MQ : MqImplementation.valueOf(consumerType);
-  }
+  @Value("${app.temail.notification.mq.consumerType:REDIS}")
+  private String consumerType;
 
   /* init rocket mq consumer beans */
   @Bean(initMethod = "start", destroyMethod = "stop")
@@ -83,7 +77,7 @@ public class NotificationMqConsumerConfiguration {
         .group(Constant.SINGLE_CHAT_CONSUMER_GROUP)
         .topic(singleChatTopic)
         .listener(listener)
-        .implementation(mqImplementation)
+        .implementation(MqImplementation.valueOf(consumerType))
         .build();
   }
 
@@ -96,7 +90,7 @@ public class NotificationMqConsumerConfiguration {
         .group(Constant.GROUP_CHAT_CONSUMER_GROUP)
         .topic(groupChatTopic)
         .listener(listener)
-        .implementation(mqImplementation)
+        .implementation(MqImplementation.valueOf(consumerType))
         .build();
   }
 
@@ -109,7 +103,7 @@ public class NotificationMqConsumerConfiguration {
         .group(Constant.TOPIC_CONSUMER_GROUP)
         .topic(topicTopic)
         .listener(listener)
-        .implementation(mqImplementation)
+        .implementation(MqImplementation.valueOf(consumerType))
         .build();
   }
 }

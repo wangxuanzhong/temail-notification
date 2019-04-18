@@ -11,7 +11,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -25,18 +24,12 @@ public class NotificationMqProducerConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final MqImplementation mqImplementation;
   @Value("${spring.rocketmq.host}")
   private String host;
   @Value("${spring.rocketmq.topics.notify}")
   private String notifyTopic;
-  @Value("${app.temail.notification.mq.producerType:ROCKET_MQ}")
+  @Value("${app.temail.notification.mq.producerType:REDIS}")
   private String producerType;
-
-  @Autowired
-  public NotificationMqProducerConfiguration(@Value("${app.temail.notification.mq.producerType:}") String producerType) {
-    mqImplementation = producerType.isEmpty() ? MqImplementation.ROCKET_MQ : MqImplementation.valueOf(producerType);
-  }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.producer", havingValue = "rocketmq", matchIfMissing = true)
@@ -55,6 +48,6 @@ public class NotificationMqProducerConfiguration {
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.producer", havingValue = "libraryMessage")
   MqProducerConfig groupmailagentTopicProducerConfig() {
-    return new MqProducerConfig(Constant.PRODUCER_GROUP, mqImplementation);
+    return new MqProducerConfig(Constant.PRODUCER_GROUP, MqImplementation.valueOf(producerType));
   }
 }
