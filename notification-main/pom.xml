@@ -148,11 +148,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.4</version>
-        <configuration>
-          <excludes>
-            <exclude>**/application.*</exclude>
-          </excludes>
-        </configuration>
+        <!--<configuration>-->
+          <!--<excludes>-->
+            <!--<exclude>**/application.*</exclude>-->
+          <!--</excludes>-->
+        <!--</configuration>-->
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -230,8 +230,8 @@
       </properties>
       <dependencies>
         <dependency>
-          <groupId>com.systoon.integration</groupId>
-          <artifactId>disconf-spring-boot-starter</artifactId>
+          <groupId>com.syswin.framework</groupId>
+          <artifactId>syswin-apollo-client</artifactId>
           <version>1.0.0</version>
         </dependency>
       </dependencies>
@@ -310,7 +310,7 @@
             <version>2.4</version>
             <configuration>
               <excludes>
-                <exclude>**/application.*</exclude>
+                <!--<exclude>**/application.*</exclude>-->
                 <exclude>**/log4j2.*</exclude>
               </excludes>
             </configuration>
