@@ -310,7 +310,7 @@
             <version>2.4</version>
             <configuration>
               <excludes>
-                <!--<exclude>**/application.*</exclude>-->
+                <exclude>**/application.*</exclude>
                 <exclude>**/log4j2.*</exclude>
               </excludes>
             </configuration>
