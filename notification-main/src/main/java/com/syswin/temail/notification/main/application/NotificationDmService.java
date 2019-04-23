@@ -93,12 +93,12 @@ public class NotificationDmService implements IMqConsumerService {
     Map<String, Object> extraDataMap = iJsonService.fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
     }.getType());
     if (Boolean.valueOf(saasEnabled) && extraDataMap != null) {
-      String type = extraDataMap.get("type").toString();
+      Object type = extraDataMap.get("type");
       if (type == null) {
         iMqProducer.sendMessage(iJsonService.toJson(response));
-      } else if (type.startsWith("A")) { // 新群聊 topic
+      } else if (type instanceof String && type.toString().startsWith("A")) { // 新群聊 topic
         iMqProducer.sendMessage(Event.toJson(iJsonService, event), groupChatTopic, "", "");
-      } else if (type.startsWith("B")) { // 协同应用 topic
+      } else if (type instanceof String && type.toString().startsWith("B")) { // 协同应用 topic
         iMqProducer.sendMessage(Event.toJson(iJsonService, event), applicationTopic, "", "");
       } else {  // dispatcher topic
         iMqProducer.sendMessage(iJsonService.toJson(response));

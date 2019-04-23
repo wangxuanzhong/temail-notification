@@ -18,7 +18,10 @@ public class MqProducerMock implements IMqProducer {
 
   @Override
   public void sendMessage(String body, String topic, String tags, String keys) {
-    LOGGER.info("MQ: send message: {}", body);
+    LOGGER.info("MQ: body: {}", body);
+    LOGGER.info("MQ: topic: {}", topic);
+    LOGGER.info("MQ: tags: {}", tags);
+    LOGGER.info("MQ: keys: {}", keys);
     if (tags == null) {
       LOGGER.info("MQ: queue id is random");
     } else {
