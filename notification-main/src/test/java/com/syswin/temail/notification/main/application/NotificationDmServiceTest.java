@@ -44,13 +44,13 @@ public class NotificationDmServiceTest {
   private NotificationRedisService notificationRedisService;
   @Autowired
   private RestTemplate notificationRestTemplate;
-  @Value("${app.temail.notification.saas.enabled}")
+  @Value("${app.temail.notification.saas.enabled:false}")
   private String saasEnabled;
-  @Value("${spring.rocketmq.topics.notify.groupChat}")
+  @Value("${spring.rocketmq.topics.notify.groupChat:notify}")
   private String groupChatTopic;
-  @Value("${spring.rocketmq.topics.notify.application}")
+  @Value("${spring.rocketmq.topics.notify.application:notify}")
   private String applicationTopic;
-  @Value("${url.temail.auth}")
+  @Value("${url.temail.auth:authUrl}")
   private String authUrl;
 
   private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
