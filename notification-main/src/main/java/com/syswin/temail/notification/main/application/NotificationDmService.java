@@ -23,7 +23,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -156,7 +155,7 @@ public class NotificationDmService implements IMqConsumerService {
       ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
       LOGGER.info("check domain result: {}", responseEntity);
       return responseEntity.getStatusCode().is2xxSuccessful();
-    } catch (RestClientException e) {
+    } catch (Exception e) {
       LOGGER.warn("check domain exception: ", e);
       throw new BaseException("check domain exception: ", e);
     }
