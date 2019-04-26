@@ -49,8 +49,7 @@ public class NotificationDmService implements IMqConsumerService {
 
   @Autowired
   public NotificationDmService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
-      EventMapper eventMapper,
-      IJsonService iJsonService, RestTemplate notificationRestTemplate,
+      EventMapper eventMapper, IJsonService iJsonService, RestTemplate notificationRestTemplate,
       @Value("${app.temail.notification.saas.enabled:false}") String saasEnabled,
       @Value("${spring.rocketmq.topics.notify.groupChat:notify}") String groupChatTopic,
       @Value("${spring.rocketmq.topics.notify.application:notify}") String applicationTopic,
