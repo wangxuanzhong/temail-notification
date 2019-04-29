@@ -13,6 +13,8 @@ public interface EventMapper {
 
   List<Event> selectEvents(@Param("to") String to, @Param("begin") Long begin, @Param("end") Long end);
 
+  List<Event> selectPartEvents(@Param("to") String to, @Param("eventTypes") List<Integer> eventTypes);
+
   Long selectLastEventSeqId(String to);
 
   List<Event> selectEventsByMsgId(Event event);
