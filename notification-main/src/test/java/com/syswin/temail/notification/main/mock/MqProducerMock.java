@@ -22,7 +22,7 @@ public class MqProducerMock implements IMqProducer {
     LOGGER.info("MQ: topic: {}", topic);
     LOGGER.info("MQ: tags: {}", tags);
     LOGGER.info("MQ: keys: {}", keys);
-    if (tags == null) {
+    if (tags == null || tags.isEmpty()) {
       LOGGER.info("MQ: queue id is random");
     } else {
       LOGGER.info("MQ: queue id when queue size is 4: {}", Math.abs(tags.hashCode() % 4));

@@ -87,22 +87,23 @@ public class NotificationDmService implements IMqConsumerService {
     eventMapper.insert(event);
 
     LOGGER.info("send packet event to {}", event.getTo());
+    String tag = event.getFrom() + "_" + event.getTo();
     CDTPResponse response = new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event));
     Map<String, Object> extraDataMap = iJsonService.fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
     }.getType());
     if (Boolean.valueOf(saasEnabled) && extraDataMap != null) {
       Object type = extraDataMap.get("type");
       if (type == null) {
-        iMqProducer.sendMessage(iJsonService.toJson(response));
+        iMqProducer.sendMessage(iJsonService.toJson(response), tag);
       } else if (type instanceof String && type.toString().startsWith("A")) { // 新群聊 topic
-        iMqProducer.sendMessage(Event.toJson(iJsonService, event), groupChatTopic, "", "");
+        iMqProducer.sendMessage(Event.toJson(iJsonService, event), groupChatTopic, tag, "");
       } else if (type instanceof String && type.toString().startsWith("B")) { // 协同应用 topic
-        iMqProducer.sendMessage(Event.toJson(iJsonService, event), applicationTopic, "", "");
+        iMqProducer.sendMessage(Event.toJson(iJsonService, event), applicationTopic, tag, "");
       } else {  // dispatcher topic
-        iMqProducer.sendMessage(iJsonService.toJson(response));
+        iMqProducer.sendMessage(iJsonService.toJson(response), tag);
       }
     } else { // dispatcher tpoic
-      iMqProducer.sendMessage(iJsonService.toJson(response));
+      iMqProducer.sendMessage(iJsonService.toJson(response), tag);
     }
   }
 
@@ -143,7 +144,9 @@ public class NotificationDmService implements IMqConsumerService {
 
     // 解析packet取出CDTPHeader推送给dispatcher
     String header = iJsonService.toJson(cdtpPacket.getHeader());
-    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event))));
+    CDTPResponse cdtpResponse = new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event));
+    String tag = event.getFrom() + "_" + event.getTo();
+    iMqProducer.sendMessage(iJsonService.toJson(cdtpResponse), tag);
   }
 
 

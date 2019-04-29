@@ -57,7 +57,7 @@ public class RocketMqProducer implements IMqProducer {
       Message mqMsg = new Message(topic, tags, keys, body.getBytes(RemotingHelper.DEFAULT_CHARSET));
       LOGGER.info("MQ: send message: {}", body);
 
-      if (tags == null) {
+      if (tags == null || tags.isEmpty()) {
         sendResult = producer.send(mqMsg);
       } else {
         sendResult = producer.send(mqMsg, (mqs, msg, arg) -> {
