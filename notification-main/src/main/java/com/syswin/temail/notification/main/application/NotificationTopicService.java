@@ -20,6 +20,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,9 @@ public class NotificationTopicService implements IMqConsumerService {
   private final NotificationRedisService notificationRedisService;
   private final TopicMapper topicMapper;
   private final IJsonService iJsonService;
+
+  @Value("${app.temail.notification.getEvents.defaultPageSize:100}")
+  private int defaultPageSize;
 
   @Autowired
   public NotificationTopicService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
@@ -140,13 +144,17 @@ public class NotificationTopicService implements IMqConsumerService {
   public Map<String, Object> getTopicEvents(String to, Long eventSeqId, Integer pageSize) {
     LOGGER.info("pull topic events called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
 
-    // 如果pageSize为空则不限制查询条数
-    List<TopicEvent> events = topicMapper.selectEvents(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    // pageSize默认为100条
+    pageSize = pageSize == null || pageSize > defaultPageSize ? defaultPageSize : pageSize;
+    List<TopicEvent> events = topicMapper.selectEvents(to, eventSeqId, eventSeqId + pageSize);
+
+    // 查询数据库中eventSeqId的最大值
+    Long maxEventSeqId = topicMapper.selectLastEventSeqId(to);
 
     // 获取当前最新eventSeqId
-    Long lastEventSeqId = 0L;
+    Long lastEventSeqId;
     if (events.isEmpty()) {
-      lastEventSeqId = topicMapper.selectLastEventSeqId(to);
+      lastEventSeqId = maxEventSeqId;
     } else {
       lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
@@ -226,6 +234,7 @@ public class NotificationTopicService implements IMqConsumerService {
 
     Map<String, Object> result = new HashMap<>();
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
+    result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
     result.put("events", notifyEvents);
     return result;
   }

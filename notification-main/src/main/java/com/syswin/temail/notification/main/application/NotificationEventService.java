@@ -25,6 +25,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,9 @@ public class NotificationEventService {
   private final IJsonService iJsonService;
   private final IMqProducer iMqProducer;
   private final NotificationRedisService notificationRedisService;
+
+  @Value("${app.temail.notification.getEvents.defaultPageSize:100}")
+  private int defaultPageSize;
 
   @Autowired
   public NotificationEventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper, IJsonService iJsonService,
@@ -61,13 +65,17 @@ public class NotificationEventService {
   public Map<String, Object> getEvents(String to, Long eventSeqId, Integer pageSize) {
     LOGGER.info("pull events called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
 
-    // 如果pageSize为空则不限制查询条数
-    List<Event> events = eventMapper.selectEvents(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    // pageSize默认为100条
+    pageSize = pageSize == null || pageSize > defaultPageSize ? defaultPageSize : pageSize;
+    List<Event> events = eventMapper.selectEvents(to, eventSeqId, eventSeqId + pageSize);
+
+    // 查询数据库中eventSeqId的最大值
+    Long maxEventSeqId = eventMapper.selectLastEventSeqId(to);
 
     // 获取当前最新eventSeqId
-    Long lastEventSeqId = 0L;
+    Long lastEventSeqId;
     if (events.isEmpty()) {
-      lastEventSeqId = eventMapper.selectLastEventSeqId(to);
+      lastEventSeqId = maxEventSeqId;
     } else {
       lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
@@ -233,6 +241,7 @@ public class NotificationEventService {
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
     Map<String, Object> result = new HashMap<>();
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
+    result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
 
     // 返回结果最多1000条
     if (notifyEvents.size() > 1000) {
