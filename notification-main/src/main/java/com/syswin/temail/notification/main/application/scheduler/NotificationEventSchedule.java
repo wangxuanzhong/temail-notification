@@ -7,6 +7,7 @@ import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
+import com.syswin.temail.notification.main.util.Constant;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -70,7 +71,7 @@ public class NotificationEventSchedule {
       Map<String, Integer> unreadMap = new HashMap<>();
       unreadMapper.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
 
-      List<Event> events = eventMapper.selectOldEvent(to, createTime);
+      List<Event> events = eventMapper.selectOldEvent(to, createTime, Constant.UNREAD_EVENT_TYPES);
 
       // 统计未读数
       LOGGER.info("calculate [{}]'s event, size : {}", to, events.size());

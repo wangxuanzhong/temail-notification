@@ -98,7 +98,12 @@
     SELECT
     <include refid="baseField"/>
     FROM `event`
-    WHERE `to` = #{to} AND `create_timestamp` <![CDATA[<]]> #{createTime}
+    WHERE `to` = #{to} AND `create_timestamp` <![CDATA[<]]> #{createTime} AND
+    `event_type` IN (
+    <foreach collection="eventTypes" index="index" item="item" separator=",">
+      #{item}
+    </foreach>
+    )
     ORDER BY `event_seq_id`
   </select>
 
