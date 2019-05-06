@@ -145,7 +145,7 @@ public class NotificationTopicService implements IMqConsumerService {
     LOGGER.info("pull topic events called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
 
     // 如果pageSize为空则不限制查询条数
-    List<TopicEvent> events = topicMapper.selectEvents(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    List<TopicEvent> events = topicMapper.selectEvents(to, eventSeqId, pageSize);
 
     // 查询数据库中eventSeqId的最大值
     Long maxEventSeqId = topicMapper.selectLastEventSeqId(to);

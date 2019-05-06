@@ -11,7 +11,7 @@ public interface EventMapper {
 
   int insert(Event event);
 
-  List<Event> selectEvents(@Param("to") String to, @Param("begin") Long begin, @Param("end") Long end);
+  List<Event> selectEvents(@Param("to") String to, @Param("begin") Long begin, @Param("pageSize") Integer pageSize);
 
   List<Event> selectPartEvents(@Param("to") String to, @Param("eventTypes") List<Integer> eventTypes);
 

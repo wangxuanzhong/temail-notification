@@ -66,7 +66,7 @@ public class NotificationEventService {
     LOGGER.info("pull events called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
 
     // 如果pageSize为空则不限制查询条数
-    List<Event> events = eventMapper.selectEvents(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
+    List<Event> events = eventMapper.selectEvents(to, eventSeqId, pageSize);
 
     // 查询数据库中eventSeqId的最大值
     Long maxEventSeqId = eventMapper.selectLastEventSeqId(to);

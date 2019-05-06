@@ -31,8 +31,8 @@
     FROM `topic_event`
     WHERE `to` = #{to}
     <if test="begin != null">AND event_seq_id > #{begin}</if>
-    <if test="end != null">AND event_seq_id <![CDATA[<=]]> #{end}</if>
     ORDER BY `event_seq_id`
+    <if test="pageSize != null">LIMIT #{pageSize}</if>
   </select>
 
   <select id="selectLastEventSeqId" resultType="java.lang.Long">
