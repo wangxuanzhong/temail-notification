@@ -106,8 +106,7 @@ public class NotificationController {
 
   @ApiOperation(value = "pull topic event 3 0006", consumes = "application/json")
   @GetMapping("/topic/events")
-  public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from") String to,
-      @RequestParam Long eventSeqId,
+  public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -140,6 +139,26 @@ public class NotificationController {
     headers.add(CDTP_HEADER, header);
 
     Map<String, Integer> result = notificationEventService.getGroupChatUserStatus(temail, groupTemail);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "pull event limited 3 0009", consumes = "application/json")
+  @GetMapping("/limit/events")
+  public ResponseEntity<Response<Map<String, Object>>> getEventsLimited(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
+      Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+    Map<String, Object> result = notificationEventService.getEventsLimited(to, eventSeqId, pageSize);
+    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "pull topic event limited 3 000A", consumes = "application/json")
+  @GetMapping("/limit/topic/events")
+  public ResponseEntity<Response<Map<String, Object>>> getTopicEventsLimited(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
+      Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    headers.add(CDTP_HEADER, header);
+    Map<String, Object> result = notificationTopicService.getTopicEventsLimited(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 }

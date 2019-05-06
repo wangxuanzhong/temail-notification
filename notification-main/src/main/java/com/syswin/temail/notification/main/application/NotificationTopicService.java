@@ -34,7 +34,7 @@ public class NotificationTopicService implements IMqConsumerService {
   private final TopicMapper topicMapper;
   private final IJsonService iJsonService;
 
-  @Value("${app.temail.notification.getEvents.defaultPageSize:100}")
+  @Value("${app.temail.notification.getEvents.defaultPageSize}")
   private int defaultPageSize;
 
   @Autowired
@@ -144,9 +144,8 @@ public class NotificationTopicService implements IMqConsumerService {
   public Map<String, Object> getTopicEvents(String to, Long eventSeqId, Integer pageSize) {
     LOGGER.info("pull topic events called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
 
-    // pageSize默认为100条
-    pageSize = pageSize == null || pageSize > defaultPageSize ? defaultPageSize : pageSize;
-    List<TopicEvent> events = topicMapper.selectEvents(to, eventSeqId, eventSeqId + pageSize);
+    // 如果pageSize为空则不限制查询条数
+    List<TopicEvent> events = topicMapper.selectEvents(to, eventSeqId, pageSize == null ? null : eventSeqId + pageSize);
 
     // 查询数据库中eventSeqId的最大值
     Long maxEventSeqId = topicMapper.selectLastEventSeqId(to);
@@ -237,5 +236,15 @@ public class NotificationTopicService implements IMqConsumerService {
     result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
     result.put("events", notifyEvents);
     return result;
+  }
+
+  /**
+   * 事件拉取，限制最大条数
+   */
+  public Map<String, Object> getTopicEventsLimited(String to, Long eventSeqId, Integer pageSize) {
+    LOGGER.info("pull topic events limited called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
+    // 为pageSize配置默认值和最大值
+    pageSize = pageSize == null || pageSize > defaultPageSize ? defaultPageSize : pageSize;
+    return this.getTopicEvents(to, eventSeqId, pageSize);
   }
 }
