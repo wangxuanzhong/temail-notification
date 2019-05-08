@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
+import com.syswin.temail.notification.main.util.GzipUtil;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,6 +37,13 @@ public class Event {
   @JsonIgnore
   private Integer role;
 
+  // dm参数
+  // 全报文信息
+  private String packet;
+  // 压缩后报文
+  @JsonIgnore
+  private byte[] zipPacket;
+
   // 以下参数均存入扩展参数字段
   // 当事人名称
   private String name;
@@ -53,8 +61,6 @@ public class Event {
   private String owner;
   // 废纸篓删除的消息明细
   private String trashMsgInfo;
-  // 全报文信息
-  private String packet;
   // 消息发送者
   private String author;
   // 被通知人员
@@ -191,7 +197,27 @@ public class Event {
   public Event autoWriteExtendParam(IJsonService iJsonService) {
     this.extendParam = iJsonService.toJson(
         new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner, this.trashMsgInfo,
-            this.packet, this.author, this.filter));
+            null, this.author, this.filter));
+    return this;
+  }
+
+  /**
+   * 自动配置扩展字段
+   */
+  public Event zip() {
+    if (this.packet != null) {
+      this.zipPacket = GzipUtil.zip(this.packet.getBytes());
+    }
+    return this;
+  }
+
+  /**
+   * 自动配置扩展字段
+   */
+  public Event unzip() {
+    if (this.zipPacket != null) {
+      this.packet = new String(GzipUtil.unzip(this.zipPacket));
+    }
     return this;
   }
 
@@ -425,6 +451,14 @@ public class Event {
 
   public void setFilter(List<String> filter) {
     this.filter = filter;
+  }
+
+  public byte[] getZipPacket() {
+    return zipPacket;
+  }
+
+  public void setZipPacket(byte[] zipPacket) {
+    this.zipPacket = zipPacket;
   }
 
   @Override

@@ -84,6 +84,7 @@ public class NotificationDmService implements IMqConsumerService {
     event.setTo(cdtpHeader.getReceiver());
     event.initEventSeqId(notificationRedisService);
     event.autoWriteExtendParam(iJsonService);
+    event.zip();
     eventMapper.insert(event);
 
     LOGGER.info("send packet event to {}", event.getTo());
@@ -140,6 +141,7 @@ public class NotificationDmService implements IMqConsumerService {
 
     event.initEventSeqId(notificationRedisService);
     event.autoWriteExtendParam(iJsonService);
+    event.zip();
     eventMapper.insert(event);
 
     // 解析packet取出CDTPHeader推送给dispatcher

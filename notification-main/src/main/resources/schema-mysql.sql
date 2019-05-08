@@ -12,6 +12,7 @@ CREATE TABLE `event` (
   `extend_param` mediumtext COMMENT '扩展字段',
   `timestamp` bigint(20) DEFAULT '0' COMMENT '客户端消息发送时间',
   `create_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `zip_packet` blob COMMENT '全报文信息',
   PRIMARY KEY (`id`),
   KEY `event_to` (`to`),
   KEY `event_xPacketId` (`x_packet_id`),
