@@ -3,6 +3,7 @@ package com.syswin.temail.notification.main.application;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.gson.Gson;
+import com.syswin.temail.notification.cassandra.application.INosqlMsgTemplate;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
@@ -50,14 +51,16 @@ public class NotificationEventServiceTest {
 
   private NotificationEventService notificationEventService;
 
+  private INosqlMsgTemplate nosqlMsgTemplate;
+
   @Before
   public void setUp() {
     if (isMock) {
       notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService, mqProducerMock,
-          redisServiceMock);
+          redisServiceMock, nosqlMsgTemplate);
     } else {
       notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService, iMqProducer,
-          notificationRedisService);
+          notificationRedisService, nosqlMsgTemplate);
     }
   }
 

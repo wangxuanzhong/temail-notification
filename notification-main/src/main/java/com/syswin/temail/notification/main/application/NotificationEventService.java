@@ -1,6 +1,8 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.reflect.TypeToken;
+import com.syswin.temail.notification.cassandra.application.INosqlMsgTemplate;
+import com.syswin.temail.notification.cassandra.domains.EventRow;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
@@ -14,6 +16,7 @@ import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.util.Constant;
+import com.syswin.temail.notification.main.util.GzipUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,19 +43,21 @@ public class NotificationEventService {
   private final IJsonService iJsonService;
   private final IMqProducer iMqProducer;
   private final NotificationRedisService notificationRedisService;
+  private final INosqlMsgTemplate nosqlMsgTemplate;
 
   @Value("${app.temail.notification.getEvents.defaultPageSize}")
   private int defaultPageSize;
 
   @Autowired
   public NotificationEventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper, IJsonService iJsonService,
-      IMqProducer iMqProducer, NotificationRedisService notificationRedisService) {
+      IMqProducer iMqProducer, NotificationRedisService notificationRedisService, INosqlMsgTemplate nosqlMsgTemplate) {
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
     this.iJsonService = iJsonService;
     this.iMqProducer = iMqProducer;
     this.notificationRedisService = notificationRedisService;
+    this.nosqlMsgTemplate = nosqlMsgTemplate;
   }
 
   /**
@@ -231,7 +236,11 @@ public class NotificationEventService {
         case PACKET:
           // 兼容旧数据
           if (event.getPacket() == null) {
-            event.unzip();
+            EventRow eventRow = nosqlMsgTemplate.getById("notification", "event", event.getId());
+            if (eventRow != null && eventRow.getZipPacket() != null) {
+              event.setPacket(new String(GzipUtil.unzip(eventRow.getZipPacket())));
+            }
+//            event.unzip();
           }
           sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
