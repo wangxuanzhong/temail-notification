@@ -1,5 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
+import static com.syswin.temail.notification.main.domains.EventType.PACKET;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.cassandra.application.INosqlMsgTemplate;
 import com.syswin.temail.notification.cassandra.domains.EventRow;
@@ -83,6 +84,14 @@ public class NotificationEventService {
     } else {
       lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
+
+    List<Long> packetEventIds = new ArrayList<>();
+    events.forEach(event -> {
+      if (event.getEventType().equals(PACKET.getValue())) {
+        packetEventIds.add(event.getId());
+      }
+    });
+    Map<Long, EventRow> eventRowMap = nosqlMsgTemplate.getByIds("notification", "event", packetEventIds.toArray());
 
     Map<String, Map<String, Event>> eventMap = new HashMap<>();
     List<String> messages = new ArrayList<>();  // 存放普通消息，以便抵消操作处理
@@ -236,11 +245,8 @@ public class NotificationEventService {
         case PACKET:
           // 兼容旧数据
           if (event.getPacket() == null) {
-            EventRow eventRow = nosqlMsgTemplate.getById("notification", "event", event.getId());
-            if (eventRow != null && eventRow.getZipPacket() != null) {
-              event.setPacket(new String(GzipUtil.unzip(eventRow.getZipPacket())));
-            }
-//            event.unzip();
+            event.setPacket(
+                new String(GzipUtil.unzip(event.getZipPacket() == null ? eventRowMap.get(event.getId()).getZipPacket() : event.getZipPacket())));
           }
           sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
