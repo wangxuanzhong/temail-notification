@@ -1,9 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
-import static com.syswin.temail.notification.main.domains.EventType.PACKET;
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.cassandra.application.INosqlMsgTemplate;
-import com.syswin.temail.notification.cassandra.domains.EventRow;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
@@ -17,7 +14,6 @@ import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.util.Constant;
-import com.syswin.temail.notification.main.util.GzipUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,21 +40,19 @@ public class NotificationEventService {
   private final IJsonService iJsonService;
   private final IMqProducer iMqProducer;
   private final NotificationRedisService notificationRedisService;
-  private final INosqlMsgTemplate nosqlMsgTemplate;
 
   @Value("${app.temail.notification.getEvents.defaultPageSize}")
   private int defaultPageSize;
 
   @Autowired
   public NotificationEventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper, IJsonService iJsonService,
-      IMqProducer iMqProducer, NotificationRedisService notificationRedisService, INosqlMsgTemplate nosqlMsgTemplate) {
+      IMqProducer iMqProducer, NotificationRedisService notificationRedisService) {
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
     this.iJsonService = iJsonService;
     this.iMqProducer = iMqProducer;
     this.notificationRedisService = notificationRedisService;
-    this.nosqlMsgTemplate = nosqlMsgTemplate;
   }
 
   /**
@@ -85,13 +79,13 @@ public class NotificationEventService {
       lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
 
-    List<Long> packetEventIds = new ArrayList<>();
-    events.forEach(event -> {
-      if (event.getEventType().equals(PACKET.getValue())) {
-        packetEventIds.add(event.getId());
-      }
-    });
-    Map<Long, EventRow> eventRowMap = nosqlMsgTemplate.getByIds("notification", "event", packetEventIds.toArray());
+//    List<Long> packetEventIds = new ArrayList<>();
+//    events.forEach(event -> {
+//      if (event.getEventType().equals(PACKET.getValue())) {
+//        packetEventIds.add(event.getId());
+//      }
+//    });
+//    Map<Long, EventRow> eventRowMap = nosqlMsgTemplate.getByIds("notification", "event", packetEventIds.toArray());
 
     Map<String, Map<String, Event>> eventMap = new HashMap<>();
     List<String> messages = new ArrayList<>();  // 存放普通消息，以便抵消操作处理
@@ -245,8 +239,7 @@ public class NotificationEventService {
         case PACKET:
           // 兼容旧数据
           if (event.getPacket() == null) {
-            event.setPacket(
-                new String(GzipUtil.unzip(event.getZipPacket() == null ? eventRowMap.get(event.getId()).getZipPacket() : event.getZipPacket())));
+            event.unzip();
           }
           sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
