@@ -129,10 +129,10 @@
       <artifactId>awaitility</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>com.syswin.temail</groupId>
-      <artifactId>notification-cassandra</artifactId>
-    </dependency>
+    <!--<dependency>-->
+    <!--<groupId>com.syswin.temail</groupId>-->
+    <!--<artifactId>notification-cassandra</artifactId>-->
+    <!--</dependency>-->
 
   </dependencies>
 
@@ -267,10 +267,10 @@
                   <groupId>com.syswin.temail</groupId>
                   <artifactId>ps-packet</artifactId>
                 </include>
-                <include>
-                  <groupId>com.syswin.temail</groupId>
-                  <artifactId>notification-cassandra</artifactId>
-                </include>
+                <!--<include>-->
+                <!--<groupId>com.syswin.temail</groupId>-->
+                <!--<artifactId>notification-cassandra</artifactId>-->
+                <!--</include>-->
               </includes>
             </configuration>
             <executions>
