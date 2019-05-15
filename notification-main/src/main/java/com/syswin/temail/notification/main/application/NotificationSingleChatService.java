@@ -128,8 +128,8 @@ public class NotificationSingleChatService implements IMqConsumerService {
         sendMessage(event, header, tags);
         break;
       case DO_NOT_DISTURB:
-      case DO_NOT_DISTURB_CANCEL:
-        this.sendMessage(event, header, tags);
+      case DO_NOT_DISTURB_CANCEL: // 只提供多端同步
+        this.sendMessage(event, event.getFrom(), header, tags);
         break;
       default:
         LOGGER.warn("unsupport event type!");

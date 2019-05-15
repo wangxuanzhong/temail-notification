@@ -414,6 +414,7 @@ public class NotificationEventService {
   /**
    * 查询群成员个人状态
    */
+  @Deprecated
   public Map<String, Integer> getGroupChatUserStatus(String temail, String groupTemail) {
     LOGGER.info("get do not disturb group, temail: {}", temail);
     Map<String, Integer> result = new HashMap<>();
@@ -424,6 +425,7 @@ public class NotificationEventService {
   /**
    * 事件拉取，限制最大条数
    */
+  @Deprecated
   public Map<String, Object> getEventsLimited(String to, Long eventSeqId, Integer pageSize) {
     LOGGER.info("pull events limited called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
     // 为pageSize配置默认值和最大值
