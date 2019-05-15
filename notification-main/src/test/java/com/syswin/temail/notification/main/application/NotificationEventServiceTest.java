@@ -75,7 +75,7 @@ public class NotificationEventServiceTest {
 
   @Test
   public void testGetEvents() {
-
+    notificationEventService.getEvents("b", 0L, null);
   }
 
   @Test

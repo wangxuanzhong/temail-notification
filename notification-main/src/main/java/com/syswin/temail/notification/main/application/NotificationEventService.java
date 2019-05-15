@@ -384,6 +384,7 @@ public class NotificationEventService {
   /**
    * 修改群成员个人状态
    */
+  @Deprecated
   @Transactional(rollbackFor = Exception.class)
   public void updateGroupChatUserStatus(Member member, UserStatus userStatus, String header) {
     LOGGER.info("update user status, param: {}", member);
@@ -425,7 +426,6 @@ public class NotificationEventService {
   /**
    * 事件拉取，限制最大条数
    */
-  @Deprecated
   public Map<String, Object> getEventsLimited(String to, Long eventSeqId, Integer pageSize) {
     LOGGER.info("pull events limited called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
     // 为pageSize配置默认值和最大值
