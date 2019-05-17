@@ -74,7 +74,7 @@ public class NotificationDmServiceTest {
   @Test
   public void testSavePacketEvent() {
     Event event = new Event();
-    event.setPacket("test packet");
+    event.setPacket(notificationPacketUtil.encodeData("test packet".getBytes()));
 
     Map<String, Object> extraData = new HashMap<>();
     extraData.put("type", "A000");
