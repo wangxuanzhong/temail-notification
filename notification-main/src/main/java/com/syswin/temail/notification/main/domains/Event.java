@@ -206,7 +206,7 @@ public class Event {
    */
   public Event zip() {
     if (this.packet != null) {
-      this.zipPacket = GzipUtil.zip(this.packet.getBytes());
+      this.zipPacket = GzipUtil.zipWithDecode(this.packet);
     }
     return this;
   }
@@ -216,7 +216,7 @@ public class Event {
    */
   public Event unzip() {
     if (this.zipPacket != null) {
-      this.packet = new String(GzipUtil.unzip(this.zipPacket));
+      this.packet = GzipUtil.unzipWithEncode(this.zipPacket);
     }
     return this;
   }

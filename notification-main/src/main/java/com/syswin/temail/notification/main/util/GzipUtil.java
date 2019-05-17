@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 public class GzipUtil {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final NotificationPacketUtil notificationPacketUtil = new NotificationPacketUtil();
 
   private GzipUtil() {
     throw new IllegalStateException("Utility class");
@@ -29,6 +30,10 @@ public class GzipUtil {
       throw new BaseException("zip data error: ", e);
     }
     return bos.toByteArray();
+  }
+
+  public static byte[] zipWithDecode(final String data) {
+    return zip(notificationPacketUtil.decodeData(data));
   }
 
   public static byte[] unzip(final byte[] data) {
@@ -50,5 +55,9 @@ public class GzipUtil {
       bos.write(buf, 0, num);
     }
     return bos;
+  }
+
+  public static String unzipWithEncode(final byte[] data) {
+    return notificationPacketUtil.encodeData(unzip(data));
   }
 }
