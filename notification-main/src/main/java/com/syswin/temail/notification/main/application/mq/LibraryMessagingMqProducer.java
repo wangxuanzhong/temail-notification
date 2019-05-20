@@ -35,8 +35,8 @@ public class LibraryMessagingMqProducer implements IMqProducer {
   public void sendMessage(String body, String topic, String tags, String keys) {
     MqProducer mqProducer = rocketMqProducers.get(Constant.PRODUCER_GROUP);
     if (mqProducer == null) {
-      LOGGER.debug("no mq producer");
-      return;
+      LOGGER.warn("mq producer is empty!");
+      throw new MqException("mq producer is empty!");
     }
 
     try {

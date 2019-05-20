@@ -114,6 +114,8 @@ public class NotificationSingleChatService implements IMqConsumerService {
         break;
       case ARCHIVE:
       case ARCHIVE_CANCEL:
+      case DO_NOT_DISTURB:
+      case DO_NOT_DISTURB_CANCEL: // 只提供多端同步
         // from是操作人，to是会话的另一方
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
@@ -126,10 +128,6 @@ public class NotificationSingleChatService implements IMqConsumerService {
         event.setFrom(params.getOwner());
         event.setTo(params.getOwner());
         sendMessage(event, header, tags);
-        break;
-      case DO_NOT_DISTURB:
-      case DO_NOT_DISTURB_CANCEL: // 只提供多端同步
-        this.sendMessage(event, event.getFrom(), header, tags);
         break;
       default:
         LOGGER.warn("unsupport event type!");

@@ -268,6 +268,15 @@ public class NotificationSingleChatServiceTest {
   }
 
   /**
+   * EventType DO_NOT_DISTURB 33 设置免打扰
+   */
+  @Test
+  public void testEventDoNotDisturb() throws Exception {
+    params.setSessionMessageType(EventType.DO_NOT_DISTURB.getValue());
+    this.sendMessage(params, params.getFrom());
+  }
+
+  /**
    * EventType CROSS_DOMAIN 51 跨域事件消息
    */
   @Test
