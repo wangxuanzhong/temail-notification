@@ -114,8 +114,13 @@ public class NotificationController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
+  /**
+   * 接口功能已废弃
+   */
   @ApiOperation(value = "update group chat user status 3 0007", consumes = "application/json")
+  @ApiIgnore
   @PutMapping("/groupchat/user/status")
+  @Deprecated
   public ResponseEntity<Response> updateGroupChatUserStatus(@RequestBody Member member, @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
@@ -135,6 +140,7 @@ public class NotificationController {
    * 接口功能已废弃
    */
   @ApiOperation(value = "get do not disturb group 3 0008", consumes = "application/json")
+  @ApiIgnore
   @GetMapping("/groupchat/user/status")
   @Deprecated
   public ResponseEntity<Response<Map<String, Integer>>> getUserDoNotDisturbGroups(@RequestParam String temail, @RequestParam String groupTemail,
@@ -146,12 +152,8 @@ public class NotificationController {
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
-  /**
-   * 接口功能已废弃
-   */
   @ApiOperation(value = "pull event limited 3 0009", consumes = "application/json")
   @GetMapping("/limit/events")
-  @Deprecated
   public ResponseEntity<Response<Map<String, Object>>> getEventsLimited(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
