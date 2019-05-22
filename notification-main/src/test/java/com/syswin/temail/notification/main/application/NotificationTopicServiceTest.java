@@ -170,7 +170,7 @@ public class NotificationTopicServiceTest {
    * EventType TOPIC_SESSION_DELETE 39 话题会话删除
    */
   @Test
-  public void topicSessionDeleteEventTest() throws Exception {
+  public void testEventTypeTopicSessionDelete() throws Exception {
     params.setSessionMessageType(EventType.TOPIC_SESSION_DELETE.getValue());
     params.setTopicId("topic_1");
     params.setFrom("b");
@@ -196,4 +196,8 @@ public class NotificationTopicServiceTest {
   }
 
 
+  @Test
+  public void TestGetTopicEventsLimited() {
+    notificationTopicService.getTopicEventsLimited("b", 0L, 10);
+  }
 }

@@ -59,20 +59,6 @@ public class TopicEvent {
     this.timestamp = timestamp;
   }
 
-  //话题事件测试用例使用
-  public TopicEvent(Long id, String xPacketId, Integer eventType, String topicId, String msgId, String from, String to,
-      String extentParam, Long timestamp) {
-    this.id = id;
-    this.xPacketId = xPacketId;
-    this.eventType = eventType;
-    this.topicId = topicId;
-    this.msgId = msgId;
-    this.from = from;
-    this.to = to;
-    this.extendParam = extentParam;
-    this.timestamp = timestamp;
-  }
-
   /**
    * 转换成json，清空extendParam
    */

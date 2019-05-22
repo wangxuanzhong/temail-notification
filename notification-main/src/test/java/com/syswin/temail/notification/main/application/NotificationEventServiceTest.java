@@ -74,8 +74,8 @@ public class NotificationEventServiceTest {
 
 
   @Test
-  public void testGetEvents() {
-    notificationEventService.getEvents("b", 0L, null);
+  public void testGetEventsLimited() {
+    notificationEventService.getEventsLimited("b", 0L, null);
   }
 
   @Test
@@ -109,7 +109,7 @@ public class NotificationEventServiceTest {
   }
 
   @Test
-  public void testReset() throws Exception {
+  public void testReset() {
     // 单聊消息
     Event event = initEvent();
     event.setMsgId("reset_1");
