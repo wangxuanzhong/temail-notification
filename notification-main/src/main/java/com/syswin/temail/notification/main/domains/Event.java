@@ -112,10 +112,11 @@ public class Event {
   }
 
   /**
-   * 转换成json，清空extendParam
+   * 转换成json，清空后端使用参数
    */
   public static String toJson(IJsonService iJsonService, Event event) {
     event.setExtendParam(null);
+    event.setZipPacket(null);
     return iJsonService.toJson(event);
   }
 
