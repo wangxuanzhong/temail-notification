@@ -36,39 +36,19 @@ class TopicExtendParam {
     return title;
   }
 
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
   public List<String> getReceivers() {
     return receivers;
-  }
-
-  public void setReceivers(List<String> receivers) {
-    this.receivers = receivers;
   }
 
   public List<String> getCc() {
     return cc;
   }
 
-  public void setCc(List<String> cc) {
-    this.cc = cc;
-  }
-
   public List<String> getMsgIds() {
     return msgIds;
   }
 
-  public void setMsgIds(List<String> msgIds) {
-    this.msgIds = msgIds;
-  }
-
   public Boolean getDeleteAllMsg() {
     return deleteAllMsg;
-  }
-
-  public void setDeleteAllMsg(Boolean deleteAllMsg) {
-    this.deleteAllMsg = deleteAllMsg;
   }
 }

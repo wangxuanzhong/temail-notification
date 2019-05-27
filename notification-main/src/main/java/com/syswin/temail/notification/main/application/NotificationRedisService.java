@@ -36,13 +36,6 @@ public class NotificationRedisService implements ISequenceService {
   }
 
   /**
-   * 删除数据
-   */
-  public void deleteKey(String key) {
-    System.out.println(redisTemplate.delete(key));
-  }
-
-  /**
    * 检查唯一性
    */
   public boolean checkUnique(String key) {

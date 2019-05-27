@@ -70,7 +70,7 @@ public class NotificationTopicServiceTest {
    * EventType TOPIC 21 话题消息发送
    */
   @Test
-  public void testEventTypeTopic() throws Exception {
+  public void testEventTypeTopic() {
     params.setSessionMessageType(EventType.TOPIC.getValue());
     params.setTopicId("topic_1");
     params.setMsgid("1");
@@ -95,7 +95,7 @@ public class NotificationTopicServiceTest {
    * EventType TOPIC_REPLY 22 话题回复消息发送
    */
   @Test
-  public void testEventTypeTopicReply() throws Exception {
+  public void testEventTypeTopicReply() {
     params.setSessionMessageType(TOPIC_REPLY.getValue());
     params.setTopicId("topic_1");
     params.setMsgid("2");
@@ -113,7 +113,7 @@ public class NotificationTopicServiceTest {
    * EventType TOPIC_REPLY_RETRACT 23 话题回复消息撤回
    */
   @Test
-  public void testEventTypeTopicRetract() throws Exception {
+  public void testEventTypeTopicRetract() {
     params.setSessionMessageType(EventType.TOPIC_REPLY_RETRACT.getValue());
     params.setTopicId("topic_1");
     params.setMsgid("1");
@@ -124,7 +124,7 @@ public class NotificationTopicServiceTest {
    * EventType TOPIC_REPLY_DELETE 24 话题回复消息删除
    */
   @Test
-  public void testEventTypeTopicReplyDelete() throws Exception {
+  public void testEventTypeTopicReplyDelete() {
     params.setSessionMessageType(EventType.TOPIC_REPLY_DELETE.getValue());
     params.setTopicId("topic_1");
     params.setMsgid(gson.toJson(Arrays.asList("22", "3", "43")));
@@ -137,7 +137,7 @@ public class NotificationTopicServiceTest {
    * EventType TOPIC_DELETE 25 话题删除
    */
   @Test
-  public void testEventTypeTopicDelete() throws Exception {
+  public void testEventTypeTopicDelete() {
     params.setSessionMessageType(EventType.TOPIC_DELETE.getValue());
     params.setTopicId("topic_1");
     params.setTo(TEST_FROM);
@@ -148,7 +148,7 @@ public class NotificationTopicServiceTest {
    * EventType TOPIC_ARCHIVE 29 话题归档
    */
   @Test
-  public void testEventTypeTopicArchive() throws Exception {
+  public void testEventTypeTopicArchive() {
     params.setSessionMessageType(EventType.TOPIC_ARCHIVE.getValue());
     params.setTopicId("topic_1");
     params.setTo(null);
@@ -159,7 +159,7 @@ public class NotificationTopicServiceTest {
    * EventType TOPIC_ARCHIVE_CANCEL 30 话题归档取消
    */
   @Test
-  public void testEventTypeTopicArchiveCancel() throws Exception {
+  public void testEventTypeTopicArchiveCancel() {
     params.setSessionMessageType(EventType.TOPIC_ARCHIVE_CANCEL.getValue());
     params.setTopicId("topic_1");
     params.setTo(null);
@@ -170,7 +170,7 @@ public class NotificationTopicServiceTest {
    * EventType TOPIC_SESSION_DELETE 39 话题会话删除
    */
   @Test
-  public void testEventTypeTopicSessionDelete() throws Exception {
+  public void testEventTypeTopicSessionDelete() {
     params.setSessionMessageType(EventType.TOPIC_SESSION_DELETE.getValue());
     params.setTopicId("topic_1");
     params.setFrom("b");
@@ -179,17 +179,21 @@ public class NotificationTopicServiceTest {
     this.sendMessage(params, params.getTopicId());
   }
 
-  private void sendMessage(MailAgentParams param, String tags) throws Exception {
+  private void sendMessage(MailAgentParams param, String tags) {
     sendMessage(param, false, tags);
   }
 
-  private void sendMessage(MailAgentParams param, boolean isSamePacket, String tags) throws Exception {
+  private void sendMessage(MailAgentParams param, boolean isSamePacket, String tags) {
     if (!isSamePacket) {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }
     if (useMQ) {
       iMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
-      Thread.sleep(2000);
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     } else {
       notificationTopicService.handleMqMessage(gson.toJson(param), tags);
     }

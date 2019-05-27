@@ -56,87 +56,43 @@ class EventExtendParam {
     return name;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public String getAdminName() {
     return adminName;
-  }
-
-  public void setAdminName(String adminName) {
-    this.adminName = adminName;
   }
 
   public String getGroupName() {
     return groupName;
   }
 
-  public void setGroupName(String groupName) {
-    this.groupName = groupName;
-  }
-
   public String getAt() {
     return at;
-  }
-
-  public void setAt(String at) {
-    this.at = at;
   }
 
   public List<String> getMsgIds() {
     return msgIds;
   }
 
-  public void setMsgIds(List<String> msgIds) {
-    this.msgIds = msgIds;
-  }
-
   public Boolean getDeleteAllMsg() {
     return deleteAllMsg;
-  }
-
-  public void setDeleteAllMsg(Boolean deleteAllMsg) {
-    this.deleteAllMsg = deleteAllMsg;
   }
 
   public String getOwner() {
     return owner;
   }
 
-  public void setOwner(String owner) {
-    this.owner = owner;
-  }
-
   public String getTrashMsgInfo() {
     return trashMsgInfo;
-  }
-
-  public void setTrashMsgInfo(String trashMsgInfo) {
-    this.trashMsgInfo = trashMsgInfo;
   }
 
   public String getPacket() {
     return packet;
   }
 
-  public void setPacket(String packet) {
-    this.packet = packet;
-  }
-
   public String getAuthor() {
     return author;
   }
 
-  public void setAuthor(String author) {
-    this.author = author;
-  }
-
   public List<String> getFilter() {
     return filter;
-  }
-
-  public void setFilter(List<String> filter) {
-    this.filter = filter;
   }
 }
