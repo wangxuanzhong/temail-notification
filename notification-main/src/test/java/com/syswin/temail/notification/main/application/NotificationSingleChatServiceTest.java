@@ -137,11 +137,11 @@ public class NotificationSingleChatServiceTest {
     // 删除会话
     params.setMsgid(null);
     params.setDeleteAllMsg(false);
-//    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
 
     // 删除会话和消息
     params.setDeleteAllMsg(true);
-//    this.sendMessage(params);
+    this.sendMessage(params, params.getFrom());
   }
 
   /**

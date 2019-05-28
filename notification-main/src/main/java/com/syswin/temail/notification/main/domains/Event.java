@@ -154,6 +154,7 @@ public class Event {
         againstEventType = EventType.INVITATION;
         break;
       case DELETE_ADMIN:
+      case ABANDON_ADMIN:
         againstEventType = EventType.ADD_ADMIN;
         break;
       case GROUP_DO_NOT_DISTURB_CANCEL:

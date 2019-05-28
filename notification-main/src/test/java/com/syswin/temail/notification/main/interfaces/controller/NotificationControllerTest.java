@@ -92,7 +92,7 @@ public class NotificationControllerTest {
         .content(new ObjectMapper().writeValueAsString(event))
     ).andExpect(MockMvcResultMatchers.status().isBadRequest());
 
-    event.setFrom("a");
+    event.setGroupTemail("g");
     mvc.perform(MockMvcRequestBuilders.put("/notification/reset")
         .contentType(MediaType.APPLICATION_JSON_UTF8)
         .header("CDTP-header", "header")

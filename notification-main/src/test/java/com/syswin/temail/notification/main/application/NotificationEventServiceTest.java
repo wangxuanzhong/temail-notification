@@ -1,166 +1,511 @@
 package com.syswin.temail.notification.main.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.domains.response.UnreadResponse;
+import com.syswin.temail.notification.main.domains.params.MailAgentParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
-import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceMock;
+import com.syswin.temail.notification.main.util.GzipUtil;
+import com.syswin.temail.notification.main.util.NotificationPacketUtil;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("test") // mast be profile test
 public class NotificationEventServiceTest {
 
-  private final boolean isMock = true;
+  private static final String message = "aaa";
+  private static final String from = "a";
+  private static final String to = "b";
+  private static final String groupTemail = "g";
   private Gson gson = new Gson();
 
-  @Autowired
+  @MockBean
   private EventMapper eventMapper;
-  @Autowired
+  @MockBean
   private UnreadMapper unreadMapper;
-  @Autowired
+  @MockBean
   private MemberMapper memberMapper;
   @Autowired
   private IJsonService iJsonService;
-  @Autowired
-  private IMqProducer iMqProducer;
-  @Autowired
-  private NotificationRedisService notificationRedisService;
-
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceMock redisServiceMock = new RedisServiceMock();
-
   private NotificationEventService notificationEventService;
+  private NotificationPacketUtil notificationPacketUtil = new NotificationPacketUtil();
 
 //  private INosqlMsgTemplate nosqlMsgTemplate;
 
   @Before
   public void setUp() {
-    if (isMock) {
-      notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService, mqProducerMock,
-          redisServiceMock);
-    } else {
-      notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService, iMqProducer,
-          notificationRedisService);
-    }
+    notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService, mqProducerMock,
+        redisServiceMock);
   }
 
   private Event initEvent() {
     Event event = new Event();
-    event.setEventType(EventType.RECEIVE.getValue());
-    event.setSeqId(1L);
     event.setTimestamp(System.currentTimeMillis());
     event.setxPacketId(UUID.randomUUID().toString());
     return event;
   }
 
-
+  /**
+   * 查询结果为空
+   */
   @Test
-  public void testGetEventsLimited() {
-    notificationEventService.getEventsLimited("b", 0L, null);
+  public void TestGetEventsBranchEmpty() {
+    List<Event> events = new ArrayList<>();
+    Mockito.when(eventMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(events);
+    List<Event> result = (List<Event>) notificationEventService.getEventsLimited(to, 0L, null).get("events");
+    Assertions.assertThat(result).isEmpty();
   }
 
+  /**
+   * 消息类事件，不返回
+   */
   @Test
-  public void testGetUnread() {
-    // 单聊消息
+  public void TestGetEventsBranchMessage() {
+    List<Event> events = new ArrayList<>();
+
     Event event = initEvent();
-    event.setMsgId("get_unread_1");
-    event.setMessage("get_unread_aaaa");
-    event.setFrom("get_unread_from");
-    event.setTo("get_unread_to");
+    event.setEventType(EventType.RECEIVE.getValue());
+    event.setMsgId("1");
+    event.setMessage(message);
+    event.setFrom(from);
+    event.setTo(to);
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
     event.autoWriteExtendParam(iJsonService);
-    eventMapper.insert(event);
+    events.add(event);
 
-    List<UnreadResponse> result = notificationEventService.getUnread("get_unread_to");
-    assertThat(result).size().isEqualTo(1);
-    assertThat(result.get(0).getFrom()).isEqualTo("get_unread_from");
-    assertThat(result.get(0).getTo()).isEqualTo("get_unread_to");
-    assertThat(result.get(0).getUnread()).isEqualTo(1);
-
-    // 群聊消息
-    event.setFrom("get_unread_group_temail");
-    event.setGroupTemail("get_unread_group_temail");
-    event.setTemail("get_unread_from");
+    event = initEvent();
+    event.setEventType(EventType.RECEIVE.getValue());
+    event.setMsgId("2");
+    event.setMessage(message);
+    event.setFrom(to);
+    event.setTo(to);
+    event.setOwner(from);
     event.setEventSeqId(2L);
-    eventMapper.insert(event);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
 
-    result = notificationEventService.getUnread("get_unread_to");
-    assertThat(result).size().isEqualTo(2);
+    Assertions.assertThat(this.getEvents(events)).isEmpty();
   }
 
+  /**
+   * 包含msgId事件，直接返回
+   */
   @Test
-  public void testReset() {
-    // 单聊消息
+  public void TestGetEventsBranchWithMsgId() {
+    List<Event> events = new ArrayList<>();
+
     Event event = initEvent();
-    event.setMsgId("reset_1");
-    event.setMessage("reset_aaaa");
-    event.setFrom("reset_from");
-    event.setTo("reset_to");
+    event.setEventType(EventType.REPLY.getValue());
+    event.setMsgId("2");
+    event.setParentMsgId("1");
+    event.setMessage(message);
+    event.setFrom(from);
+    event.setTo(to);
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
     event.autoWriteExtendParam(iJsonService);
-    eventMapper.insert(event);
+    events.add(event);
 
-    List<UnreadResponse> result = notificationEventService.getUnread("reset_to");
-    assertThat(result).size().isEqualTo(1);
-    assertThat(result.get(0).getFrom()).isEqualTo("reset_from");
-    assertThat(result.get(0).getTo()).isEqualTo("reset_to");
-    assertThat(result.get(0).getUnread()).isEqualTo(1);
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+  }
 
-    // 群聊消息
-    event.setFrom("reset_group_temail");
-    event.setGroupTemail("reset_group_temail");
-    event.setTemail("reset_from");
+  /**
+   * 撤回类事件，只有源消息不存在时才返回
+   */
+  @Test
+  public void TestGetEventsBranchRetract() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.RETRACT.getValue());
+    event.setMsgId("1");
+    event.setFrom(from);
+    event.setTo(to);
+    event.setOwner(event.getTo());
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+  }
+
+  /**
+   * 回复撤回类事件，源消息存在时抵消，不存在时返回
+   */
+  @Test
+  public void TestGetEventsBranchReplyRetract() {
+    List<Event> events = new ArrayList<>();
+
+    // 源消息不存在
+    Event event = initEvent();
+    event.setEventType(EventType.REPLY_RETRACT.getValue());
+    event.setMsgId("2");
+    event.setParentMsgId("1");
+    event.setFrom(from);
+    event.setTo(to);
+    event.setOwner(event.getTo());
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+
+    // 源消息存在
+    events.clear();
+    event.setEventType(EventType.REPLY.getValue());
+    event.setMsgId("2");
+    event.setParentMsgId("1");
+    event.setMessage(message);
+    event.setFrom(from);
+    event.setTo(to);
+    event.setOwner(event.getTo());
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    event.setEventType(EventType.REPLY_RETRACT.getValue());
+    event.setMsgId("2");
+    event.setParentMsgId("1");
+    event.setFrom(from);
+    event.setTo(to);
+    event.setOwner(event.getTo());
     event.setEventSeqId(2L);
-    eventMapper.insert(event);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
 
-    result = notificationEventService.getUnread("reset_to");
-    assertThat(result).size().isEqualTo(2);
+    Assertions.assertThat(this.getEvents(events)).isEmpty();
+  }
 
-    // 重置单聊消息
-    event = new Event();
+  /**
+   * 不包含msgId事件，需要生成
+   */
+  @Test
+  public void TestGetEventsBranchWithoutMsgId() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.APPLY.getValue());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(from);
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+  }
+
+  /**
+   * 移动到废纸篓
+   */
+  @Test
+  public void TestGetEventsBranchTrash() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.TRASH.getValue());
+    event.setFrom(from);
+    event.setTo(to);
+    event.setEventSeqId(1L);
+    event.setMsgIds(Arrays.asList("1", "2", "3"));
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isEmpty();
+  }
+
+  /**
+   * 移出废纸篓
+   */
+  @Test
+  public void TestGetEventsBranchTrashCancel() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.TRASH.getValue());
+    event.setFrom(from);
+    event.setTo(to);
+    event.setEventSeqId(1L);
+    event.setMsgIds(Arrays.asList("1", "2", "3"));
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    event = initEvent();
+    event.setEventType(EventType.TRASH_CANCEL.getValue());
+    event.setFrom(from);
+    event.setTo(to);
+    event.setEventSeqId(2L);
+
+    List<TrashMsgInfo> infos = new ArrayList<>();
+    for (int i = 0; i < 5; i++) {
+      infos.add(new TrashMsgInfo(from, to, String.valueOf(i)));
+    }
+    event.setTrashMsgInfo(gson.toJson(infos));
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+  }
+
+  /**
+   * 解散群
+   */
+  @Test
+  public void TestGetEventsBranchDeleteGroup() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.DELETE_GROUP.getValue());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(to);
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+  }
+
+  /**
+   * 离开群
+   */
+  @Test
+  public void TestGetEventsBranchLeaveGroup() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.LEAVE_GROUP.getValue());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(to);
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+  }
+
+  /**
+   * 有对立事件，需要做合并处理
+   */
+  @Test
+  public void TestGetEventsBranchAgainst() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.APPLY_ADOPT.getValue());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(from);
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+
+    events.clear();
+
+    event = initEvent();
+    event.setEventType(EventType.APPLY.getValue());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(to);
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    event = initEvent();
+    event.setEventType(EventType.APPLY_ADOPT.getValue());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(to);
+    event.setEventSeqId(2L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isEmpty();
+  }
+
+
+  /**
+   * 删除消息
+   */
+  @Test
+  public void TestGetEventsBranchDelete() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.RECEIVE.getValue());
+    event.setMsgId("1");
+    event.setMessage(message);
+    event.setFrom(from);
+    event.setTo(to);
+    event.setOwner(event.getTo());
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    event = initEvent();
+    event.setEventType(EventType.DELETE.getValue());
+    event.setFrom(from);
+    event.setTo(to);
+    event.setMsgIds(Arrays.asList("1", "2", "3"));
+    event.setEventSeqId(2L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    event = initEvent();
+    event.setEventType(EventType.DELETE.getValue());
+    event.setFrom(from);
+    event.setTo(to);
+    event.setDeleteAllMsg(true);
     event.setEventSeqId(3L);
-    event.setFrom("reset_from");
-    event.setTo("reset_to");
-    event.setxPacketId(UUID.randomUUID().toString());
-    notificationEventService.reset(event, ConstantMock.HEADER);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
 
-    result = notificationEventService.getUnread("reset_to");
-    assertThat(result).size().isEqualTo(1);
-    assertThat(result.get(0).getFrom()).isEqualTo("reset_group_temail");
-    assertThat(result.get(0).getTo()).isEqualTo("reset_to");
-    assertThat(result.get(0).getGroupTemail()).isEqualTo("reset_group_temail");
-    assertThat(result.get(0).getUnread()).isEqualTo(1);
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+  }
 
-    // 重置群聊消息
-    event = new Event();
-    event.setEventSeqId(4L);
-    event.setFrom("reset_from");
-    event.setTo("reset_to");
-    event.setGroupTemail("reset_group_temail");
-    event.setxPacketId(UUID.randomUUID().toString());
-    notificationEventService.reset(event, ConstantMock.HEADER);
-    result = notificationEventService.getUnread("reset_to");
-    assertThat(result).isEmpty();
+  /**
+   * 删除回复消息
+   */
+  @Test
+  public void TestGetEventsBranchReplyDelete() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.REPLY_DELETE.getValue());
+    event.setFrom(from);
+    event.setTo(to);
+    event.setMsgIds(Arrays.asList("1", "2", "3"));
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isEmpty();
+  }
+
+  /**
+   * 添加管理员
+   */
+  @Test
+  public void TestGetEventsBranchAddAdmin() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.ADD_ADMIN.getValue());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(to);
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+  }
+
+  /**
+   * 移除管理员
+   */
+  @Test
+  public void TestGetEventsBranchDeleteAdmin() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.ADD_ADMIN.getValue());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(to);
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    event = initEvent();
+    event.setEventType(EventType.DELETE_ADMIN.getValue());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(to);
+    event.setEventSeqId(2L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isEmpty();
+
+    event = initEvent();
+    event.setEventType(EventType.DELETE_ADMIN.getValue());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(to);
+    event.setEventSeqId(3L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+  }
+
+  /**
+   * 报文事件
+   */
+  @Test
+  public void TestGetEventsBranchPacket() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.PACKET.getValue());
+    event.setFrom(from);
+    event.setTo(to);
+    event.setEventSeqId(1L);
+    event.setZipPacket(GzipUtil.zipWithDecode(notificationPacketUtil.encodeData("test packet".getBytes())));
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Assertions.assertThat(this.getEvents(events)).isNotEmpty();
+  }
+
+
+  /**
+   * 拉取事件功能测试方法
+   *
+   * @param events 模拟数据库返回结果
+   * @return 合并后的结果
+   */
+  private List<Event> getEvents(List<Event> events) {
+    Mockito.when(eventMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(events);
+    Mockito.when(eventMapper.selectLastEventSeqId(Mockito.anyString())).thenReturn(events.get(events.size() - 1).getEventSeqId());
+    List<Event> result = (List<Event>) notificationEventService.getEventsLimited(to, 0L, null).get("events");
+    System.out.println(result);
+    return result;
   }
 }

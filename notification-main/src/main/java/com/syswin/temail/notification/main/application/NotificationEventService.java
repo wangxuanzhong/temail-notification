@@ -155,7 +155,7 @@ public class NotificationEventService {
           List<TrashMsgInfo> infos = iJsonService
               .fromJson(event.getTrashMsgInfo(), new TypeToken<List<TrashMsgInfo>>() {
               }.getType());
-          // 如果查询到的事件中，有移入移出的操作则对于msgId不需要返回给前端
+          // 如果查询到的事件中，有移入移出的操作，则对应msgId不需要返回给前端
           infos.forEach(info -> {
             if (!trashMsgIds.contains(info.getMsgId())) {
               newInfos.add(info);
@@ -222,7 +222,7 @@ public class NotificationEventService {
         case ADD_ADMIN:
           // 只有当事人添加此事件
           if (to.equals(event.getTemail())) {
-            sessionEventMap.put(event.getMsgId(), event);
+            sessionEventMap.put(event.getMsgId(eventType), event);
           }
           break;
         case DELETE_ADMIN:
