@@ -1,4 +1,4 @@
-package com.syswin.temail.notification.main.test;
+package com.syswin.temail.notification.main.interfaces.controller;
 
 import com.syswin.temail.notification.main.application.scheduler.NotificationEventSchedule;
 import org.junit.Test;
@@ -25,14 +25,14 @@ public class NotificationScheduleControllerTest {
   private MockMvc mvc;
 
   @Test
-  public void TestDeleteEvent() throws Exception {
+  public void testDeleteEvent() throws Exception {
     Mockito.doNothing().when(schedule).deleteOldEvent();
     mvc.perform(MockMvcRequestBuilders.delete("/notification/schedule/delete/event"))
         .andExpect(MockMvcResultMatchers.status().isOk());
   }
 
   @Test
-  public void TestDeleteTopic() throws Exception {
+  public void testDeleteTopic() throws Exception {
     Mockito.doNothing().when(schedule).deleteOldTopic();
     mvc.perform(MockMvcRequestBuilders.delete("/notification/schedule/delete/topic"))
         .andExpect(MockMvcResultMatchers.status().isOk());

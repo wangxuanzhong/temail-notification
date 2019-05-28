@@ -125,12 +125,12 @@ public class NotificationController {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
-    UserStatus userStatus = UserStatus.getByValue(member.getUserStatus());
-    if (userStatus == null) {
+    if (member.getUserStatus() == null) {
       LOGGER.warn("update group chat user status 3 0007 : status is illegal!");
       return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "status is illegal!"), headers,
           HttpStatus.BAD_REQUEST);
     }
+    UserStatus userStatus = UserStatus.getByValue(member.getUserStatus());
 
     notificationEventService.updateGroupChatUserStatus(member, userStatus, header);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
