@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
+import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.domains.params.MailAgentParams.TrashMsgInfo;
+import com.syswin.temail.notification.main.domains.response.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
@@ -14,6 +16,7 @@ import com.syswin.temail.notification.main.util.GzipUtil;
 import com.syswin.temail.notification.main.util.NotificationPacketUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.assertj.core.api.Assertions;
@@ -507,5 +510,46 @@ public class NotificationEventServiceTest {
     List<Event> result = (List<Event>) notificationEventService.getEventsLimited(to, 0L, null).get("events");
     System.out.println(result);
     return result;
+  }
+
+
+  @Test
+  public void testReset() {
+    String header = "header";
+    Event event = new Event();
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+
+    Mockito.when(eventMapper.insert(Mockito.any(Event.class))).thenReturn(1);
+    Mockito.when(eventMapper.selectResetEvents(Mockito.any(Event.class))).thenReturn(Arrays.asList(1L, 2L, 3l));
+    Mockito.doNothing().when(eventMapper).delete(Mockito.anyList());
+
+    notificationEventService.reset(event, header);
+  }
+
+
+  @Test
+  public void testGetUnread() {
+    List<Event> events = new ArrayList<>();
+
+    Event event = initEvent();
+    event.setEventType(EventType.RECEIVE.getValue());
+    event.setMsgId("1");
+    event.setMessage(message);
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    event.setTemail(from);
+    event.setEventSeqId(1L);
+    event.autoWriteExtendParam(iJsonService);
+    events.add(event);
+
+    Mockito.when(unreadMapper.selectCount(Mockito.anyString())).thenReturn(Collections.singletonList(new Unread(groupTemail, to, 2)));
+    Mockito.when(eventMapper.selectPartEvents(Mockito.anyString(), Mockito.anyList())).thenReturn(events);
+
+    List<UnreadResponse> result = notificationEventService.getUnread(to);
+
+    Assertions.assertThat(result).hasSize(1);
+    Assertions.assertThat(result.get(0).getUnread()).isEqualTo(3);
   }
 }
