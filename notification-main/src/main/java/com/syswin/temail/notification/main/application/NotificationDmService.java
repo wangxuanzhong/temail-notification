@@ -129,7 +129,7 @@ public class NotificationDmService implements IMqConsumerService {
 
     // 如果接收人不是本域的账号，则不需要发送通知
     if (!checkIsSameDomain(event.getTo())) {
-      LOGGER.info("[{}] belong to another domain.", event.getTo());
+      LOGGER.info("[{}] belong to another domain, packetId={}", event.getTo(), event.getxPacketId());
       return;
     }
 
@@ -156,12 +156,11 @@ public class NotificationDmService implements IMqConsumerService {
     String url = authUrl + String.format(GET_PUBLIC_KEY, temail);
     try {
       // 调用auth获取公钥接口，接口返回404则表示用户不存在或是不在本域。
-      LOGGER.info("check domain url: {}", url);
+      LOGGER.debug("check domain url: {}", url);
       ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-      LOGGER.info("check domain result: {}", responseEntity);
+      LOGGER.debug("check domain result: {}", responseEntity);
       return responseEntity.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
-      LOGGER.warn("check domain exception: ", e);
       throw new BaseException("check domain exception: ", e);
     }
   }

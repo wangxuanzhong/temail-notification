@@ -26,7 +26,6 @@ public class GzipUtil {
       gzip.write(data);
       gzip.finish();
     } catch (IOException e) {
-      LOGGER.error("zip data error: ", e);
       throw new BaseException("zip data error: ", e);
     }
     return bos.toByteArray();
@@ -43,7 +42,6 @@ public class GzipUtil {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       return unzipByteArrayOutputStream(gzip, bos).toByteArray();
     } catch (IOException e) {
-      LOGGER.error("unzip data error: ", e);
       throw new BaseException("unzip data error: ", e);
     }
   }
