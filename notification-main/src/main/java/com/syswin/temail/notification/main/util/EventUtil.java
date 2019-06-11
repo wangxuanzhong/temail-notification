@@ -7,6 +7,9 @@ import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import java.util.Objects;
 
+/**
+ * @author liusen
+ */
 public class EventUtil {
 
   private EventUtil() {
