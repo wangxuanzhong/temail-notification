@@ -6,7 +6,7 @@ import com.syswin.library.messaging.all.spring.MqProducerConfig;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.LibraryMessagingMqProducer;
 import com.syswin.temail.notification.main.application.mq.RocketMqProducer;
-import com.syswin.temail.notification.main.util.Constant;
+import com.syswin.temail.notification.main.util.Constant.ProducerGroup;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -48,6 +48,6 @@ public class NotificationMqProducerConfiguration {
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.producer", havingValue = "libraryMessage")
   MqProducerConfig groupmailagentTopicProducerConfig() {
-    return new MqProducerConfig(Constant.PRODUCER_GROUP, MqImplementation.valueOf(producerType));
+    return new MqProducerConfig(ProducerGroup.PRODUCER_GROUP, MqImplementation.valueOf(producerType));
   }
 }

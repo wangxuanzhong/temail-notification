@@ -4,7 +4,7 @@ import com.syswin.library.messaging.MessagingException;
 import com.syswin.library.messaging.MqProducer;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.exceptions.MqException;
-import com.syswin.temail.notification.main.util.Constant;
+import com.syswin.temail.notification.main.util.Constant.ProducerGroup;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class LibraryMessagingMqProducer implements IMqProducer {
    */
   @Override
   public void sendMessage(String body, String topic, String tags, String keys) {
-    MqProducer mqProducer = rocketMqProducers.get(Constant.PRODUCER_GROUP);
+    MqProducer mqProducer = rocketMqProducers.get(ProducerGroup.PRODUCER_GROUP);
     if (mqProducer == null) {
       throw new MqException("mq producer is empty!");
     }

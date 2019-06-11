@@ -13,7 +13,7 @@ import com.syswin.temail.notification.main.dto.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
-import com.syswin.temail.notification.main.util.Constant;
+import com.syswin.temail.notification.main.util.Constant.EventCondition;
 import com.syswin.temail.notification.main.util.EventUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -278,7 +278,7 @@ public class NotificationEventService {
     unreadMapper.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
 
     // 查询所有事件
-    List<Event> events = eventMapper.selectPartEvents(to, Constant.UNREAD_EVENT_TYPES);
+    List<Event> events = eventMapper.selectPartEvents(to, EventCondition.UNREAD_EVENT_TYPES);
 
     // 统计未读数
     Map<String, List<String>> eventMap = this.calculateUnread(events, unreadMap);
