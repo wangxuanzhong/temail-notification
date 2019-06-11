@@ -7,7 +7,7 @@ import com.syswin.temail.notification.main.application.NotificationTopicService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
-import com.syswin.temail.notification.main.domains.response.UnreadResponse;
+import com.syswin.temail.notification.main.dto.UnreadResponse;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.syswin.temail.notification.main.domains.response;
+package com.syswin.temail.notification.main.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

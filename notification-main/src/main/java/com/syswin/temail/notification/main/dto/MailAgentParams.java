@@ -1,4 +1,4 @@
-package com.syswin.temail.notification.main.domains.params;
+package com.syswin.temail.notification.main.dto;
 
 import java.util.List;
 

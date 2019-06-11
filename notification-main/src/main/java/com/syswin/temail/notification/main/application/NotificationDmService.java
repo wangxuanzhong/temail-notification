@@ -7,7 +7,7 @@ import com.syswin.temail.notification.foundation.exceptions.BaseException;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.domains.response.CDTPResponse;
+import com.syswin.temail.notification.main.dto.CDTPResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.NotificationPacketUtil;
