@@ -9,6 +9,9 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+/**
+ * @author 刘森
+ */
 @ControllerAdvice
 public class NotificationGlobalExceptionHandler {
 
