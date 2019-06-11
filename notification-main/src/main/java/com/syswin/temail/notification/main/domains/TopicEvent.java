@@ -6,10 +6,15 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import java.util.List;
 
+/**
+ * @author liusen
+ */
 @JsonInclude(Include.NON_NULL)
 public class TopicEvent {
 
-  // 事件参数
+  /**
+   * 事件参数
+   */
   @JsonIgnore
   private Long id;
   @JsonIgnore
@@ -17,7 +22,9 @@ public class TopicEvent {
   private Long eventSeqId;
   private Integer eventType;
 
-  // 话题参数
+  /**
+   * 话题参数
+   */
   private String topicId;
   private Long topicSeqId;
   private String msgId;
@@ -27,16 +34,18 @@ public class TopicEvent {
   private String to;
   private Long timestamp;
 
-  // 以下参数均存入扩展参数字段
-  // 话题主题
+  /**
+   * 以下参数均存入扩展参数字段
+   */
+  /**话题主题*/
   private String title;
-  // 收件人
+  /**收件人*/
   private List<String> receivers;
-  // 抄送
+  /**抄送*/
   private List<String> cc;
-  // 批量msgId
+  /**批量msgId*/
   private List<String> msgIds;
-  // 删除会话是否同时删除消息
+  /**删除会话是否同时删除消息*/
   private Boolean deleteAllMsg;
 
   @JsonIgnore

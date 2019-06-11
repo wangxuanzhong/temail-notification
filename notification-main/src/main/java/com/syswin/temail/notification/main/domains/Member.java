@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**
+ * @author liusen
+ */
 @JsonInclude(Include.NON_NULL)
 public class Member {
 
@@ -79,7 +82,13 @@ public class Member {
 
 
   public enum MemberRole {
+    /**
+     * 普通成员
+     */
     NORMAL(0, "普通成员"),
+    /**
+     * 管理员
+     */
     ADMIN(1, "管理员");
 
     private final int value;
@@ -96,7 +105,13 @@ public class Member {
   }
 
   public enum UserStatus {
+    /**
+     * 用户正常状态
+     */
     NORMAL(0, "正常"),
+    /**
+     * 用户免打扰状态
+     */
     DO_NOT_DISTURB(1, "免打扰");
 
     private final int value;

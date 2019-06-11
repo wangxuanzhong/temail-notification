@@ -1,5 +1,8 @@
 package com.syswin.temail.notification.main.domains;
 
+/**
+ * @author liusen
+ */
 public enum EventType {
   // 消息部分
   RESET(-1, "重置消息未读数"),

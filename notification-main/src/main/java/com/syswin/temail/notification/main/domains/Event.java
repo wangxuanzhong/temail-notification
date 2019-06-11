@@ -7,19 +7,26 @@ import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.main.util.GzipUtil;
 import java.util.List;
 
+/**
+ * @author liusen
+ */
 @JsonInclude(Include.NON_NULL)
 public class Event {
 
   public static final String GROUP_CHAT_KEY_POSTFIX = "::event_group_chat";
 
-  // 事件参数
+  /**
+   * 事件参数
+   */
   @JsonIgnore
   private Long id;
   private String xPacketId;
   private Long eventSeqId;
   private Integer eventType;
 
-  // 单聊参数
+  /**
+   * 单聊参数
+   */
   private String msgId;
   private String parentMsgId;
   private Long seqId;
@@ -28,39 +35,43 @@ public class Event {
   private String to;
   private Long timestamp;
 
-  // 群聊参数
+  /**
+   * 群聊参数
+   */
   private String groupTemail;
   private String temail;
   @JsonIgnore
   private Integer role;
 
-  // dm参数
-  // 全报文信息
+  /**
+   * dm参数
+   */
+  /**全报文信息*/
   private String packet;
-  // 压缩后报文
+  /**压缩后报文*/
   @JsonIgnore
   private byte[] zipPacket;
 
   // 以下参数均存入扩展参数字段
-  // 当事人名称
+  /**当事人名称*/
   private String name;
-  // 管理员名称
+  /**管理员名称*/
   private String adminName;
-  // 群名称
+  /**群名称*/
   private String groupName;
-  // @的temail
+  /**@的temail*/
   private String at;
-  // 批量msgId
+  /**批量msgId*/
   private List<String> msgIds;
-  // 单聊删除会话是否同时删除消息
+  /**单聊删除会话是否同时删除消息*/
   private Boolean deleteAllMsg;
-  // 单聊消息拥有者
+  /**单聊消息拥有者*/
   private String owner;
-  // 废纸篓删除的消息明细
+  /**废纸篓删除的消息明细*/
   private String trashMsgInfo;
-  // 消息发送者
+  /**消息发送者*/
   private String author;
-  // 被通知人员
+  /**被通知人员*/
   private List<String> filter;
 
   @JsonIgnore
@@ -69,7 +80,7 @@ public class Event {
   public Event() {
   }
 
-  // 单聊
+  /**单聊*/
   public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to,
       Long timestamp, String groupTemail, String temail, String xPacketId, String owner, Boolean deleteAllMsg) {
     this.eventType = eventType;
@@ -87,7 +98,7 @@ public class Event {
     this.deleteAllMsg = deleteAllMsg;
   }
 
-  // 群聊
+  /**群聊*/
   public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp,
       String groupTemail, String temail, Integer role, String name, String adminName, String groupName, String at, String xPacketId) {
     this.eventType = eventType;

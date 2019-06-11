@@ -3,6 +3,9 @@ package com.syswin.temail.notification.main.domains;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**
+ * @author liusen
+ */
 @JsonInclude(Include.NON_NULL)
 public class Unread {
 
