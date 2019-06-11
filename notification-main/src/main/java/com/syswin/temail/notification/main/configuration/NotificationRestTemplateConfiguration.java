@@ -6,6 +6,11 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * RestTemplate配置类
+ *
+ * @author liusen
+ */
 @Configuration
 public class NotificationRestTemplateConfiguration {
 

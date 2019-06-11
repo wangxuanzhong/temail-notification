@@ -10,16 +10,26 @@ import org.quartz.TriggerBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * quartz配置类
+ *
+ * @author liusen
+ */
 @Configuration
 public class NotificationQuartzConfiguration {
 
   private static final String DELETE_OLD_EVENT_CRON = "0 0 4 * * ?";
   private static final String DELETE_OLD_TOPIC_CRON = "0 0 3 * * ?";
 
-  // 定时清理历史单群聊事件
+  /**
+   * 定时清理历史单群聊事件
+   *
+   * @return JobDetail实例
+   */
   @Bean
   public JobDetail deleteOldEventTaskDetail() {
-    return JobBuilder.newJob(NotificationDeleteOldEventJob.class).withIdentity("deleteOldEventTaskTrigger").storeDurably().build();
+    return JobBuilder.newJob(NotificationDeleteOldEventJob.class).withIdentity("deleteOldEventTaskTrigger")
+        .storeDurably().build();
   }
 
   @Bean
@@ -31,10 +41,15 @@ public class NotificationQuartzConfiguration {
         .build();
   }
 
-  // 定时清理历史话题事件
+  /**
+   * 定时清理历史话题事件
+   *
+   * @return JobDetail实例
+   */
   @Bean
   public JobDetail deleteOldTopicTaskDetail() {
-    return JobBuilder.newJob(NotificationDeleteOldTopicJob.class).withIdentity("deleteOldTopicTaskTrigger").storeDurably().build();
+    return JobBuilder.newJob(NotificationDeleteOldTopicJob.class).withIdentity("deleteOldTopicTaskTrigger")
+        .storeDurably().build();
   }
 
   @Bean

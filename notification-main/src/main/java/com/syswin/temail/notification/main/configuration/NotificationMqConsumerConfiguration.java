@@ -18,7 +18,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * 初始化rocketmq消费者
+ * 初始化rocket mq消费者
+ *
+ * @author liusen
  */
 @Configuration
 public class NotificationMqConsumerConfiguration {
@@ -38,7 +40,9 @@ public class NotificationMqConsumerConfiguration {
   @Value("${app.temail.notification.mq.consumerType:REDIS}")
   private String consumerType;
 
-  /* init rocket mq consumer beans */
+  /**
+   * init rocket mq consumer beans
+   */
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
   public RocketMqConsumer notificationSingleChatRocketMqConsumer(NotificationSingleChatService singleChatService) {
@@ -67,7 +71,9 @@ public class NotificationMqConsumerConfiguration {
     return new RocketMqConsumer(dmService, host, saasTopic, ConsumerGroup.SAAS_CONSUMER_GROUP);
   }
 
-  /* init library message consumer beans */
+  /**
+   * init library message consumer beans
+   */
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "libraryMessage")
   MqConsumerConfig notificationSingleChatConsumerConfig(NotificationSingleChatService singleChatService) {
