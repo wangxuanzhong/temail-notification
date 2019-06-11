@@ -28,7 +28,8 @@ public interface TopicMapper {
    * @param pageSize 页大小
    * @return 查询结果
    */
-  List<TopicEvent> selectEvents(@Param("to") String to, @Param("begin") Long begin, @Param("pageSize") Integer pageSize);
+  List<TopicEvent> selectEvents(@Param("to") String to, @Param("begin") Long begin,
+      @Param("pageSize") Integer pageSize);
 
   /**
    * 查询最新序列号

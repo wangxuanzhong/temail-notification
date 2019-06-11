@@ -62,8 +62,8 @@ public class TopicEvent {
   public TopicEvent() {
   }
 
-  public TopicEvent(String xPacketId, Integer eventType, String topicId, String msgId, Long seqId, String message, String from, String to,
-      Long timestamp) {
+  public TopicEvent(String xPacketId, Integer eventType, String topicId, String msgId, Long seqId, String message,
+      String from, String to, Long timestamp) {
     this.xPacketId = xPacketId;
     this.eventType = eventType;
     this.topicId = topicId;
@@ -94,7 +94,8 @@ public class TopicEvent {
    * 自动配置扩展字段
    */
   public TopicEvent autoWriteExtendParam(IJsonService iJsonService) {
-    this.extendParam = iJsonService.toJson(new TopicExtendParam(this.title, this.receivers, this.cc, this.msgIds, this.deleteAllMsg));
+    this.extendParam = iJsonService
+        .toJson(new TopicExtendParam(this.title, this.receivers, this.cc, this.msgIds, this.deleteAllMsg));
     return this;
   }
 

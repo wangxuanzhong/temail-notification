@@ -52,8 +52,7 @@ public class NotificationEventService {
 
   @Autowired
   public NotificationEventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
-      IJsonService iJsonService,
-      IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl) {
+      IJsonService iJsonService, IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl) {
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
@@ -314,7 +313,7 @@ public class NotificationEventService {
       }
     });
 
-    // LOGGER.info("get unread result: {}", unreadResponses);
+    LOGGER.debug("get unread result: {}", unreadResponses);
     return unreadResponses;
   }
 
@@ -395,9 +394,8 @@ public class NotificationEventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    iMqProducer.sendMessage(
-        iJsonService
-            .toJson(new CdtpResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))));
+    iMqProducer.sendMessage(iJsonService
+        .toJson(new CdtpResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))));
   }
 
   /**
@@ -409,8 +407,7 @@ public class NotificationEventService {
     LOGGER.info("update user status, param: {}", member);
     Event event = new Event(null, null, null, null, null,
         member.getGroupTemail(), member.getTemail(), System.currentTimeMillis(), member.getGroupTemail(),
-        member.getTemail(),
-        null, null, null, null, null, null);
+        member.getTemail(), null, null, null, null, null, null);
 
     switch (userStatus) {
       case NORMAL:
@@ -427,9 +424,8 @@ public class NotificationEventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    iMqProducer.sendMessage(
-        iJsonService.toJson(
-            new CdtpResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))));
+    iMqProducer.sendMessage(iJsonService
+        .toJson(new CdtpResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))));
   }
 
   /**

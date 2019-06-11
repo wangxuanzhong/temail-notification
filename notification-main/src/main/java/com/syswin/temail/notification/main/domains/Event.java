@@ -68,7 +68,7 @@ public class Event {
    */
   private String groupName;
   /**
-   * @的temail
+   * at的temail
    */
   private String at;
   /**
@@ -125,8 +125,9 @@ public class Event {
   /**
    * 群聊
    */
-  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to, Long timestamp,
-      String groupTemail, String temail, Integer role, String name, String adminName, String groupName, String at, String xPacketId) {
+  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to,
+      Long timestamp, String groupTemail, String temail, Integer role, String name, String adminName, String groupName,
+      String at, String xPacketId) {
     this.eventType = eventType;
     this.msgId = msgId;
     this.parentMsgId = parentMsgId;
@@ -171,8 +172,8 @@ public class Event {
    */
   public Event autoWriteExtendParam(IJsonService iJsonService) {
     this.extendParam = iJsonService.toJson(
-        new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg, this.owner, this.trashMsgInfo,
-            null, this.author, this.filter));
+        new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg,
+            this.owner, this.trashMsgInfo, null, this.author, this.filter));
     return this;
   }
 

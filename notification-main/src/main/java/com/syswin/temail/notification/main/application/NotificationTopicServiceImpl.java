@@ -44,8 +44,8 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
   private int defaultPageSize;
 
   @Autowired
-  public NotificationTopicServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl,
-      TopicMapper topicMapper, IJsonService iJsonService) {
+  public NotificationTopicServiceImpl(IMqProducer iMqProducer,
+      NotificationRedisServiceImpl notificationRedisServiceImpl, TopicMapper topicMapper, IJsonService iJsonService) {
     this.iMqProducer = iMqProducer;
     this.notificationRedisServiceImpl = notificationRedisServiceImpl;
     this.topicMapper = topicMapper;
@@ -60,8 +60,8 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
   public void handleMqMessage(String body, String tags) {
     MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
     TopicEvent topicEvent = new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(),
-        params.getMsgid(),
-        params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp());
+        params.getMsgid(), params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
+        params.getTimestamp());
 
     // 前端需要的头信息
     String header = params.getHeader();
@@ -137,10 +137,8 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
     LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(),
         EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
-    iMqProducer.sendMessage(
-        iJsonService.toJson(new CdtpResponse(topicEvent.getTo(), topicEvent.getEventType(), header,
-            TopicEventUtil.toJson(iJsonService, topicEvent))),
-        tags);
+    iMqProducer.sendMessage(iJsonService.toJson(new CdtpResponse(topicEvent.getTo(), topicEvent.getEventType(), header,
+        TopicEventUtil.toJson(iJsonService, topicEvent))), tags);
 
   }
 

@@ -36,7 +36,8 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
   private final IJsonService iJsonService;
 
   @Autowired
-  public NotificationSingleChatServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl,
+  public NotificationSingleChatServiceImpl(IMqProducer iMqProducer,
+      NotificationRedisServiceImpl notificationRedisServiceImpl,
       EventMapper eventMapper, IJsonService iJsonService) {
     this.iMqProducer = iMqProducer;
     this.notificationRedisServiceImpl = notificationRedisServiceImpl;
@@ -52,10 +53,9 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
   public void handleMqMessage(String body, String tags) {
     MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(),
-        params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(),
-        params.getxPacketId(),
-        params.getOwner(), params.getDeleteAllMsg());
+        params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp(),
+        params.getGroupTemail(), params.getTemail(), params.getxPacketId(), params.getOwner(),
+        params.getDeleteAllMsg());
 
     // 前端需要的头信息
     String header = params.getHeader();
@@ -165,9 +165,9 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
   private void sendMessage(Event event, String to, String header, String tags) {
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     this.insert(event);
-    iMqProducer
-        .sendMessage(iJsonService
-            .toJson(new CdtpResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))), tags);
+    iMqProducer.sendMessage(
+        iJsonService.toJson(new CdtpResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+        tags);
   }
 
   /**
@@ -176,9 +176,8 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
   private void sendMessageToSender(Event event, String header, String tags) {
     LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(),
         EventType.getByValue(event.getEventType()));
-    iMqProducer
-        .sendMessage(iJsonService.toJson(
-            new CdtpResponse(event.getFrom(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
-            tags);
+    iMqProducer.sendMessage(iJsonService
+            .toJson(new CdtpResponse(event.getFrom(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+        tags);
   }
 }

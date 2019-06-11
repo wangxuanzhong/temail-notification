@@ -100,6 +100,7 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
     Map<String, Object> extraDataMap = iJsonService
         .fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
         }.getType());
+
     if (Boolean.valueOf(saasEnabled) && extraDataMap != null) {
       Object type = extraDataMap.get("type");
       if (type == null) {

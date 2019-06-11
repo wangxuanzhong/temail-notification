@@ -34,7 +34,8 @@ class TopicExtendParam {
   public TopicExtendParam() {
   }
 
-  public TopicExtendParam(String title, List<String> receivers, List<String> cc, List<String> msgIds, Boolean deleteAllMsg) {
+  public TopicExtendParam(String title, List<String> receivers, List<String> cc, List<String> msgIds,
+      Boolean deleteAllMsg) {
     this.title = title;
     this.receivers = receivers;
     this.cc = cc;

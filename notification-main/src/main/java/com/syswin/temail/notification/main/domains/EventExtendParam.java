@@ -59,8 +59,8 @@ class EventExtendParam {
   public EventExtendParam() {
   }
 
-  public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds, Boolean deleteAllMsg, String owner,
-      String trashMsgInfo, String packet, String author, List<String> filter) {
+  public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds,
+      Boolean deleteAllMsg, String owner, String trashMsgInfo, String packet, String author, List<String> filter) {
     this.name = name;
     this.adminName = adminName;
     this.groupName = groupName;

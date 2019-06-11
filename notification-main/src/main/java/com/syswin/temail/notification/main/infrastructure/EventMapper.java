@@ -96,7 +96,8 @@ public interface EventMapper {
    * @param eventTypes 事件类型
    * @return 返回结果
    */
-  List<Event> selectOldEvent(@Param("to") String to, @Param("createTime") LocalDateTime createTime, @Param("eventTypes") List<Integer> eventTypes);
+  List<Event> selectOldEvent(@Param("to") String to, @Param("createTime") LocalDateTime createTime,
+      @Param("eventTypes") List<Integer> eventTypes);
 
   /**
    * 分页查询过期事件
@@ -106,5 +107,6 @@ public interface EventMapper {
    * @param pageSize 页大小
    * @return 返回结果
    */
-  List<Long> selectOldEventId(@Param("createTime") LocalDateTime createTime, @Param("start") int start, @Param("pageSize") int pageSize);
+  List<Long> selectOldEventId(@Param("createTime") LocalDateTime createTime, @Param("start") int start,
+      @Param("pageSize") int pageSize);
 }

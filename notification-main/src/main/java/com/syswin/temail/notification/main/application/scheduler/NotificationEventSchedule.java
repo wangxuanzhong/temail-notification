@@ -45,7 +45,8 @@ public class NotificationEventSchedule {
   private final int deadline;
 
   @Autowired
-  public NotificationEventSchedule(EventMapper eventMapper, UnreadMapper unreadMapper, NotificationEventService notificationEventService,
+  public NotificationEventSchedule(EventMapper eventMapper, UnreadMapper unreadMapper,
+      NotificationEventService notificationEventService,
       NotificationRedisServiceImpl notificationRedisServiceImpl,
       TopicMapper topicMapper, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
     this.eventMapper = eventMapper;

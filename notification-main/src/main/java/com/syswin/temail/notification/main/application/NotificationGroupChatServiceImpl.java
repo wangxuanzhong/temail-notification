@@ -40,9 +40,9 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
   private final IJsonService iJsonService;
 
   @Autowired
-  public NotificationGroupChatServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl,
-      EventMapper eventMapper,
-      MemberMapper memberMapper, IJsonService iJsonService) {
+  public NotificationGroupChatServiceImpl(IMqProducer iMqProducer,
+      NotificationRedisServiceImpl notificationRedisServiceImpl,
+      EventMapper eventMapper, MemberMapper memberMapper, IJsonService iJsonService) {
     this.iMqProducer = iMqProducer;
     this.notificationRedisServiceImpl = notificationRedisServiceImpl;
     this.eventMapper = eventMapper;
@@ -58,10 +58,9 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
   public void handleMqMessage(String body, String tags) {
     MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
     Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(),
-        params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(),
-        params.getType(), params.getName(),
-        params.getAdminName(), params.getGroupName(), params.getAt(), params.getxPacketId());
+        params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp(),
+        params.getGroupTemail(), params.getTemail(), params.getType(), params.getName(), params.getAdminName(),
+        params.getGroupName(), params.getAt(), params.getxPacketId());
 
     // 前端需要的头信息
     String header = params.getHeader();
@@ -297,10 +296,9 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
   private void sendSingleMessageDirectly(Event event, String header, String tags) {
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    iMqProducer
-        .sendMessage(iJsonService.toJson(
-            new CdtpResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
-            tags);
+    iMqProducer.sendMessage(iJsonService
+            .toJson(new CdtpResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+        tags);
   }
 
   /**

@@ -49,7 +49,8 @@ public class GzipUtil {
     }
   }
 
-  private static ByteArrayOutputStream unzipByteArrayOutputStream(GZIPInputStream gzip, ByteArrayOutputStream bos) throws IOException {
+  private static ByteArrayOutputStream unzipByteArrayOutputStream(GZIPInputStream gzip, ByteArrayOutputStream bos)
+      throws IOException {
     byte[] buf = new byte[1024];
     int num = -1;
     while ((num = gzip.read(buf, 0, buf.length)) != -1) {

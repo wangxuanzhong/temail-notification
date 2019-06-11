@@ -16,6 +16,7 @@ import org.springframework.dao.DuplicateKeyException;
 
 /**
  * rocket mq 消费者
+ *
  * @author liusen
  */
 public class RocketMqConsumer {
@@ -53,7 +54,8 @@ public class RocketMqConsumer {
     consumer.registerMessageListener((MessageListenerConcurrently) (list, consumeConcurrentlyContext) -> {
       try {
         for (MessageExt msg : list) {
-          LOGGER.info("MQ: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(), msg.getKeys());
+          LOGGER.info("MQ: MsgId={} Topic={} Tags={} Keys={}", msg.getMsgId(), msg.getTopic(), msg.getTags(),
+              msg.getKeys());
           iMqConsumerService.handleMqMessage(new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET), msg.getTags());
         }
       } catch (DuplicateKeyException e) {
