@@ -22,13 +22,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * @author liusen
+ */
 @Service
 public class NotificationEventSchedule {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String DELETE_OLD_EVENT_KEY = "notification_deleteOldEvent";
-  private static final int PAGE_SIZE = 100000; // 分页删除，每次删除10W条
+  /**分页删除，每次删除10W条*/
+  private static final int PAGE_SIZE = 100000;
 
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
