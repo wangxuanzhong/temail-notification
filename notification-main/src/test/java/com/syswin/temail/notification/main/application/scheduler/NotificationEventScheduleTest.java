@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.application.scheduler;
 
 import com.syswin.temail.notification.main.application.NotificationEventService;
-import com.syswin.temail.notification.main.application.NotificationRedisService;
+import com.syswin.temail.notification.main.application.NotificationRedisServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Unread;
@@ -35,7 +35,7 @@ public class NotificationEventScheduleTest {
   private NotificationEventService notificationEventService;
 
   @MockBean
-  private NotificationRedisService notificationRedisService;
+  private NotificationRedisServiceImpl notificationRedisServiceImpl;
 
   @Autowired
   private TopicMapper topicMapper;
@@ -46,7 +46,7 @@ public class NotificationEventScheduleTest {
 
   @Before
   public void setUp() {
-    notificationEventSchedule = new NotificationEventSchedule(eventMapper, unreadMapper, notificationEventService, notificationRedisService,
+    notificationEventSchedule = new NotificationEventSchedule(eventMapper, unreadMapper, notificationEventService, notificationRedisServiceImpl,
         topicMapper, deadline);
   }
 
@@ -63,7 +63,7 @@ public class NotificationEventScheduleTest {
 
     unreadMapper.insert(new Unread("from", "to", 2));
 
-    Mockito.when(notificationRedisService.checkLock(Mockito.anyString(), Mockito.anyLong(), Mockito.any(TimeUnit.class))).thenReturn(true);
+    Mockito.when(notificationRedisServiceImpl.checkLock(Mockito.anyString(), Mockito.anyLong(), Mockito.any(TimeUnit.class))).thenReturn(true);
 
     notificationEventSchedule.deleteOldEvent();
   }

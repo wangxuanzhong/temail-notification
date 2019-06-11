@@ -29,22 +29,22 @@ import org.springframework.transaction.annotation.Transactional;
  * @author liusen
  */
 @Service
-public class NotificationGroupChatService implements IMqConsumerService {
+public class NotificationGroupChatServiceImpl implements IMqConsumerService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final IMqProducer iMqProducer;
-  private final NotificationRedisService notificationRedisService;
+  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
   private final EventMapper eventMapper;
   private final MemberMapper memberMapper;
   private final IJsonService iJsonService;
 
   @Autowired
-  public NotificationGroupChatService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
+  public NotificationGroupChatServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl,
       EventMapper eventMapper,
       MemberMapper memberMapper, IJsonService iJsonService) {
     this.iMqProducer = iMqProducer;
-    this.notificationRedisService = notificationRedisService;
+    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
     this.eventMapper = eventMapper;
     this.memberMapper = memberMapper;
     this.iJsonService = iJsonService;
@@ -72,7 +72,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
     // 校验收到的数据是否重复
     String redisKey =
         event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisService)) {
+    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
       return;
     }
 
@@ -267,7 +267,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
    * 插入数据库
    */
   private void insert(Event event) {
-    EventUtil.initEventSeqId(notificationRedisService, event);
+    EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
   }

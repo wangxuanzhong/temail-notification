@@ -2,10 +2,10 @@ package com.syswin.temail.notification.main.configuration;
 
 import com.syswin.library.messaging.all.spring.MqConsumerConfig;
 import com.syswin.library.messaging.all.spring.MqImplementation;
-import com.syswin.temail.notification.main.application.NotificationDmService;
-import com.syswin.temail.notification.main.application.NotificationGroupChatService;
-import com.syswin.temail.notification.main.application.NotificationSingleChatService;
-import com.syswin.temail.notification.main.application.NotificationTopicService;
+import com.syswin.temail.notification.main.application.NotificationDmServiceImpl;
+import com.syswin.temail.notification.main.application.NotificationGroupChatServiceImpl;
+import com.syswin.temail.notification.main.application.NotificationSingleChatServiceImpl;
+import com.syswin.temail.notification.main.application.NotificationTopicServiceImpl;
 import com.syswin.temail.notification.main.application.mq.RocketMqConsumer;
 import com.syswin.temail.notification.main.util.Constant.ConsumerGroup;
 import java.lang.invoke.MethodHandles;
@@ -45,28 +45,28 @@ public class NotificationMqConsumerConfiguration {
    */
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
-  public RocketMqConsumer notificationSingleChatRocketMqConsumer(NotificationSingleChatService singleChatService) {
+  public RocketMqConsumer notificationSingleChatRocketMqConsumer(NotificationSingleChatServiceImpl singleChatService) {
     LOGGER.info("IMqConsumer [rocketmq singleChat] started!");
     return new RocketMqConsumer(singleChatService, host, singleChatTopic, ConsumerGroup.SINGLE_CHAT_CONSUMER_GROUP);
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
-  public RocketMqConsumer notificationGroupChatRocketMqConsumer(NotificationGroupChatService groupChatService) {
+  public RocketMqConsumer notificationGroupChatRocketMqConsumer(NotificationGroupChatServiceImpl groupChatService) {
     LOGGER.info("IMqConsumer [rocketmq groupChat] started!");
     return new RocketMqConsumer(groupChatService, host, groupChatTopic, ConsumerGroup.GROUP_CHAT_CONSUMER_GROUP);
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
-  public RocketMqConsumer notificationTopicRocketMqConsumer(NotificationTopicService topicService) {
+  public RocketMqConsumer notificationTopicRocketMqConsumer(NotificationTopicServiceImpl topicService) {
     LOGGER.info("IMqConsumer [rocketmq topic] started!");
     return new RocketMqConsumer(topicService, host, topicTopic, ConsumerGroup.TOPIC_CONSUMER_GROUP);
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.saas.enabled", havingValue = "true")
-  public RocketMqConsumer notificationSaasRocketMqConsumer(NotificationDmService dmService) {
+  public RocketMqConsumer notificationSaasRocketMqConsumer(NotificationDmServiceImpl dmService) {
     LOGGER.info("IMqConsumer [rocketmq saas] started!");
     return new RocketMqConsumer(dmService, host, saasTopic, ConsumerGroup.SAAS_CONSUMER_GROUP);
   }
@@ -76,7 +76,7 @@ public class NotificationMqConsumerConfiguration {
    */
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "libraryMessage")
-  MqConsumerConfig notificationSingleChatConsumerConfig(NotificationSingleChatService singleChatService) {
+  MqConsumerConfig notificationSingleChatConsumerConfig(NotificationSingleChatServiceImpl singleChatService) {
     LOGGER.info("IMqConsumer [libraryMessage singleChat] started!");
     Consumer<String> listener = body -> singleChatService.handleMqMessage(body, null);
     return MqConsumerConfig.create()
@@ -89,7 +89,7 @@ public class NotificationMqConsumerConfiguration {
 
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "libraryMessage")
-  MqConsumerConfig notificationGroupChatConsumerConfig(NotificationGroupChatService groupChatService) {
+  MqConsumerConfig notificationGroupChatConsumerConfig(NotificationGroupChatServiceImpl groupChatService) {
     LOGGER.info("IMqConsumer [libraryMessage groupChat] started!");
     Consumer<String> listener = body -> groupChatService.handleMqMessage(body, null);
     return MqConsumerConfig.create()
@@ -102,7 +102,7 @@ public class NotificationMqConsumerConfiguration {
 
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "libraryMessage")
-  MqConsumerConfig notificationTopicConsumerConfig(NotificationTopicService topicService) {
+  MqConsumerConfig notificationTopicConsumerConfig(NotificationTopicServiceImpl topicService) {
     LOGGER.info("IMqConsumer [libraryMessage topic] started!");
     Consumer<String> listener = body -> topicService.handleMqMessage(body, null);
     return MqConsumerConfig.create()

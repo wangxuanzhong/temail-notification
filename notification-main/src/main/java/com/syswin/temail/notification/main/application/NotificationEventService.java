@@ -45,7 +45,7 @@ public class NotificationEventService {
   private final MemberMapper memberMapper;
   private final IJsonService iJsonService;
   private final IMqProducer iMqProducer;
-  private final NotificationRedisService notificationRedisService;
+  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
 
   @Value("${app.temail.notification.getEvents.defaultPageSize}")
   private int defaultPageSize;
@@ -53,13 +53,13 @@ public class NotificationEventService {
   @Autowired
   public NotificationEventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
       IJsonService iJsonService,
-      IMqProducer iMqProducer, NotificationRedisService notificationRedisService) {
+      IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl) {
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
     this.iJsonService = iJsonService;
     this.iMqProducer = iMqProducer;
-    this.notificationRedisService = notificationRedisService;
+    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
   }
 
   /**
@@ -384,7 +384,7 @@ public class NotificationEventService {
       cdtpEventType = EventType.GROUP_RESET.getValue();
     }
     event.setTimestamp(System.currentTimeMillis());
-    EventUtil.initEventSeqId(notificationRedisService, event);
+    EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
     eventMapper.insert(event);
 
     // 删除历史重置事件

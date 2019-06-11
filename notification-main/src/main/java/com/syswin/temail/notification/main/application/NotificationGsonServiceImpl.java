@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
  * @author liusen
  */
 @Service
-public class NotificationGsonService implements IJsonService {
+public class NotificationGsonServiceImpl implements IJsonService {
 
   private final Gson gson = new Gson();
 

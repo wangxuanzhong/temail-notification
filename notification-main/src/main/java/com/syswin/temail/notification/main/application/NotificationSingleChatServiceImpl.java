@@ -26,20 +26,20 @@ import org.springframework.transaction.annotation.Transactional;
  * @author liusen
  */
 @Service
-public class NotificationSingleChatService implements IMqConsumerService {
+public class NotificationSingleChatServiceImpl implements IMqConsumerService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final IMqProducer iMqProducer;
-  private final NotificationRedisService notificationRedisService;
+  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
   private final EventMapper eventMapper;
   private final IJsonService iJsonService;
 
   @Autowired
-  public NotificationSingleChatService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
+  public NotificationSingleChatServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl,
       EventMapper eventMapper, IJsonService iJsonService) {
     this.iMqProducer = iMqProducer;
-    this.notificationRedisService = notificationRedisService;
+    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
     this.eventMapper = eventMapper;
     this.iJsonService = iJsonService;
   }
@@ -65,7 +65,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisService)) {
+    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
       return;
     }
 
@@ -83,7 +83,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
         event.setAuthor(params.getAuthor());
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
-          EventUtil.initEventSeqId(notificationRedisService, event);
+          EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
           event.autoWriteExtendParam(iJsonService);
           sendMessageToSender(event, header, tags);
           // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
@@ -147,7 +147,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
    * 插入数据库
    */
   private void insert(Event event) {
-    EventUtil.initEventSeqId(notificationRedisService, event);
+    EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
   }

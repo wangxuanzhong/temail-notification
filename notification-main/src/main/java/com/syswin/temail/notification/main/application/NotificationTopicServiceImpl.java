@@ -31,12 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
  * @author liusen
  */
 @Service
-public class NotificationTopicService implements IMqConsumerService {
+public class NotificationTopicServiceImpl implements IMqConsumerService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final IMqProducer iMqProducer;
-  private final NotificationRedisService notificationRedisService;
+  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
   private final TopicMapper topicMapper;
   private final IJsonService iJsonService;
 
@@ -44,10 +44,10 @@ public class NotificationTopicService implements IMqConsumerService {
   private int defaultPageSize;
 
   @Autowired
-  public NotificationTopicService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
+  public NotificationTopicServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl,
       TopicMapper topicMapper, IJsonService iJsonService) {
     this.iMqProducer = iMqProducer;
-    this.notificationRedisService = notificationRedisService;
+    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
     this.topicMapper = topicMapper;
     this.iJsonService = iJsonService;
   }
@@ -125,7 +125,7 @@ public class NotificationTopicService implements IMqConsumerService {
    * 插入数据库
    */
   private void insert(TopicEvent topicEvent) {
-    TopicEventUtil.initTopicEventSeqId(notificationRedisService, topicEvent);
+    TopicEventUtil.initTopicEventSeqId(notificationRedisServiceImpl, topicEvent);
     topicEvent.autoWriteExtendParam(iJsonService);
     topicMapper.insert(topicEvent);
   }

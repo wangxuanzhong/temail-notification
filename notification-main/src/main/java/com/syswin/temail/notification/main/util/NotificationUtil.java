@@ -1,6 +1,6 @@
 package com.syswin.temail.notification.main.util;
 
-import com.syswin.temail.notification.main.application.NotificationRedisService;
+import com.syswin.temail.notification.main.application.NotificationRedisServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import java.lang.invoke.MethodHandles;
@@ -21,7 +21,8 @@ public class NotificationUtil {
   /**
    * 幂等校验
    */
-  public static boolean checkUnique(Event event, String redisKey, EventMapper eventMapper, NotificationRedisService notificationRedisService) {
+  public static boolean checkUnique(Event event, String redisKey, EventMapper eventMapper,
+      NotificationRedisServiceImpl notificationRedisServiceImpl) {
     // xPacketId为空则认为是无效数据
     if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
       LOGGER.warn("xPacketId is null!");
@@ -29,7 +30,7 @@ public class NotificationUtil {
     }
 
     // 第一步：查询redis，是否key值未过期，解决并发问题
-    if (!notificationRedisService.checkUnique(redisKey)) {
+    if (!notificationRedisServiceImpl.checkUnique(redisKey)) {
       LOGGER.warn("check unique from redis failed: {}", event);
       return false;
     }

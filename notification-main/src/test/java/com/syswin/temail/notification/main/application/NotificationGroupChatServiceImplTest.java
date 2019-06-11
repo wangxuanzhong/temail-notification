@@ -10,7 +10,7 @@ import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
-import com.syswin.temail.notification.main.mock.RedisServiceMock;
+import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Before;
@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class NotificationGroupChatServiceTest {
+public class NotificationGroupChatServiceImplTest {
 
   private final String TEST_GROUP = "g";
   private final String TEST_GROUP_MSG_ID = "g_";
@@ -42,7 +42,7 @@ public class NotificationGroupChatServiceTest {
   @Autowired
   private IMqProducer iMqProducer;
   @Autowired
-  private NotificationRedisService notificationRedisService;
+  private NotificationRedisServiceImpl notificationRedisServiceImpl;
   @Autowired
   private EventMapper eventMapper;
   @Autowired
@@ -51,17 +51,17 @@ public class NotificationGroupChatServiceTest {
   private IJsonService iJsonService;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
-  private RedisServiceMock redisServiceMock = new RedisServiceMock();
+  private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
 
-  private NotificationGroupChatService notificationGroupChatService;
+  private NotificationGroupChatServiceImpl notificationGroupChatServiceImpl;
 
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      notificationGroupChatService = new NotificationGroupChatService(mqProducerMock, redisServiceMock, eventMapper, memberMapper,
+      notificationGroupChatServiceImpl = new NotificationGroupChatServiceImpl(mqProducerMock, redisServiceMock, eventMapper, memberMapper,
           iJsonService);
     } else {
-      notificationGroupChatService = new NotificationGroupChatService(iMqProducer, notificationRedisService, eventMapper,
+      notificationGroupChatServiceImpl = new NotificationGroupChatServiceImpl(iMqProducer, notificationRedisServiceImpl, eventMapper,
           memberMapper, iJsonService);
     }
 
@@ -533,7 +533,7 @@ public class NotificationGroupChatServiceTest {
       iMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
       Thread.sleep(2000);
     } else {
-      notificationGroupChatService.handleMqMessage(gson.toJson(param), tags);
+      notificationGroupChatServiceImpl.handleMqMessage(gson.toJson(param), tags);
     }
   }
 }

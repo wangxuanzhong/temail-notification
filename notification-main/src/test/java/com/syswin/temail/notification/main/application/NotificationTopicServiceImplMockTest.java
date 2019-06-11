@@ -5,7 +5,7 @@ import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
-import com.syswin.temail.notification.main.mock.RedisServiceMock;
+import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class NotificationTopicServiceMockTest {
+public class NotificationTopicServiceImplMockTest {
 
   private static final String message = "aaa";
   private static final String from = "a";
@@ -41,13 +41,13 @@ public class NotificationTopicServiceMockTest {
   private IJsonService iJsonService;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
-  private RedisServiceMock redisServiceMock = new RedisServiceMock();
+  private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
 
-  private NotificationTopicService notificationTopicService;
+  private NotificationTopicServiceImpl notificationTopicServiceImpl;
 
   @Before
   public void setUp() {
-    notificationTopicService = new NotificationTopicService(mqProducerMock, redisServiceMock, topicMapper, iJsonService);
+    notificationTopicServiceImpl = new NotificationTopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper, iJsonService);
   }
 
   private TopicEvent initEvent() {
@@ -64,7 +64,7 @@ public class NotificationTopicServiceMockTest {
   public void TestGetEventsBranchEmpty() {
     List<TopicEvent> topicEvents = new ArrayList<>();
     Mockito.when(topicMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(topicEvents);
-    List<TopicEvent> result = (List<TopicEvent>) notificationTopicService.getTopicEventsLimited(to, 0L, null).get("events");
+    List<TopicEvent> result = (List<TopicEvent>) notificationTopicServiceImpl.getTopicEventsLimited(to, 0L, null).get("events");
     Assertions.assertThat(result).isEmpty();
   }
 
@@ -224,7 +224,7 @@ public class NotificationTopicServiceMockTest {
   private List<TopicEvent> getEvents(List<TopicEvent> topicEvents) {
     Mockito.when(topicMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(topicEvents);
     Mockito.when(topicMapper.selectLastEventSeqId(Mockito.anyString())).thenReturn(topicEvents.get(topicEvents.size() - 1).getEventSeqId());
-    List<TopicEvent> result = (List<TopicEvent>) notificationTopicService.getTopicEventsLimited(to, 0L, null).get("events");
+    List<TopicEvent> result = (List<TopicEvent>) notificationTopicServiceImpl.getTopicEventsLimited(to, 0L, null).get("events");
     System.out.println(result);
     return result;
   }

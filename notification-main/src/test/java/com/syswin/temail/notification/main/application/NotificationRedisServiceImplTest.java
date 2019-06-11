@@ -15,17 +15,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 @ActiveProfiles("test")
 @Ignore
-public class NotificationRedisServiceTest {
+public class NotificationRedisServiceImplTest {
 
   @Autowired
-  private NotificationRedisService notificationRedisService;
+  private NotificationRedisServiceImpl notificationRedisServiceImpl;
 
   @Test
   public void getNextSeq() {
     String key = "test_user";
-    notificationRedisService.deleteSeq(key);
+    notificationRedisServiceImpl.deleteSeq(key);
     for (long i = 1; i <= 5; i++) {
-      long seq = notificationRedisService.getNextSeq(key);
+      long seq = notificationRedisServiceImpl.getNextSeq(key);
       System.out.println(seq);
       assertThat(seq).isEqualTo(i);
     }
@@ -34,18 +34,18 @@ public class NotificationRedisServiceTest {
   @Test
   public void testCheckUnique() {
     String key = UUID.randomUUID().toString();
-    assertThat(notificationRedisService.checkUnique(key)).isTrue();
-    assertThat(notificationRedisService.checkUnique(key)).isFalse();
+    assertThat(notificationRedisServiceImpl.checkUnique(key)).isTrue();
+    assertThat(notificationRedisServiceImpl.checkUnique(key)).isFalse();
   }
 
   @Test
   @Ignore
   public void testDeleteSeq() {
-    notificationRedisService.deleteSeq("jack@t.email");
-    notificationRedisService.deleteSeq("sean@t.email");
-    notificationRedisService.deleteSeq("Jack@t.email");
-    notificationRedisService.deleteSeq("Sean@t.email");
-    notificationRedisService.deleteSeq("bob@temail.com");
-    notificationRedisService.deleteSeq("alice@temail.com");
+    notificationRedisServiceImpl.deleteSeq("jack@t.email");
+    notificationRedisServiceImpl.deleteSeq("sean@t.email");
+    notificationRedisServiceImpl.deleteSeq("Jack@t.email");
+    notificationRedisServiceImpl.deleteSeq("Sean@t.email");
+    notificationRedisServiceImpl.deleteSeq("bob@temail.com");
+    notificationRedisServiceImpl.deleteSeq("alice@temail.com");
   }
 }

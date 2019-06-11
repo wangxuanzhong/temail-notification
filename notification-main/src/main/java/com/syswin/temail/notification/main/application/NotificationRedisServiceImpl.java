@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
  * @author liusen
  */
 @Service
-public class NotificationRedisService implements ISequenceService {
+public class NotificationRedisServiceImpl implements ISequenceService {
 
   private final StringRedisTemplate redisTemplate;
 
   @Autowired
-  public NotificationRedisService(StringRedisTemplate stringRedisTemplate) {
+  public NotificationRedisServiceImpl(StringRedisTemplate stringRedisTemplate) {
     this.redisTemplate = stringRedisTemplate;
   }
 

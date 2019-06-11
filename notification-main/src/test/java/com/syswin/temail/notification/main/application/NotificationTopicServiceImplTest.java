@@ -10,7 +10,7 @@ import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
-import com.syswin.temail.notification.main.mock.RedisServiceMock;
+import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Before;
@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class NotificationTopicServiceTest {
+public class NotificationTopicServiceImplTest {
 
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
@@ -42,23 +42,23 @@ public class NotificationTopicServiceTest {
   @Autowired
   private IMqProducer iMqProducer;
   @Autowired
-  private NotificationRedisService notificationRedisService;
+  private NotificationRedisServiceImpl notificationRedisServiceImpl;
   @Autowired
   private TopicMapper topicMapper;
   @Autowired
   private IJsonService iJsonService;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
-  private RedisServiceMock redisServiceMock = new RedisServiceMock();
+  private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
 
-  private NotificationTopicService notificationTopicService;
+  private NotificationTopicServiceImpl notificationTopicServiceImpl;
 
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      notificationTopicService = new NotificationTopicService(mqProducerMock, redisServiceMock, topicMapper, iJsonService);
+      notificationTopicServiceImpl = new NotificationTopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper, iJsonService);
     } else {
-      notificationTopicService = new NotificationTopicService(iMqProducer, notificationRedisService, topicMapper, iJsonService);
+      notificationTopicServiceImpl = new NotificationTopicServiceImpl(iMqProducer, notificationRedisServiceImpl, topicMapper, iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -195,7 +195,7 @@ public class NotificationTopicServiceTest {
         e.printStackTrace();
       }
     } else {
-      notificationTopicService.handleMqMessage(gson.toJson(param), tags);
+      notificationTopicServiceImpl.handleMqMessage(gson.toJson(param), tags);
     }
   }
 }

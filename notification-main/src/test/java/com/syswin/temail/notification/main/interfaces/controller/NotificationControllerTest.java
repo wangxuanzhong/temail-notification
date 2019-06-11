@@ -3,7 +3,7 @@ package com.syswin.temail.notification.main.interfaces.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.main.application.NotificationEventService;
-import com.syswin.temail.notification.main.application.NotificationTopicService;
+import com.syswin.temail.notification.main.application.NotificationTopicServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
@@ -41,7 +41,7 @@ public class NotificationControllerTest {
   private NotificationEventService notificationEventService;
 
   @MockBean
-  private NotificationTopicService notificationTopicService;
+  private NotificationTopicServiceImpl notificationTopicServiceImpl;
 
   private String header = "header";
 
@@ -112,7 +112,7 @@ public class NotificationControllerTest {
   @Test
   public void testGetTopicEvents() throws Exception {
     Response<Map<String, Object>> response = new Response<>(HttpStatus.OK, null, new HashMap<>());
-    Mockito.when(notificationTopicService.getTopicEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(new HashMap<>());
+    Mockito.when(notificationTopicServiceImpl.getTopicEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(new HashMap<>());
 
     MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/notification/topic/events")
         .header("CDTP-header", header)
@@ -178,7 +178,7 @@ public class NotificationControllerTest {
   @Test
   public void testGetTopicEventsLimited() throws Exception {
     Response<Map<String, Object>> response = new Response<>(HttpStatus.OK, null, new HashMap<>());
-    Mockito.when(notificationTopicService.getTopicEventsLimited(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt()))
+    Mockito.when(notificationTopicServiceImpl.getTopicEventsLimited(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt()))
         .thenReturn(new HashMap<>());
 
     MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/notification/limit/topic/events")

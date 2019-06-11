@@ -13,7 +13,7 @@ import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
-import com.syswin.temail.notification.main.mock.RedisServiceMock;
+import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import com.syswin.temail.notification.main.util.GzipUtil;
 import com.syswin.temail.notification.main.util.NotificationPacketUtil;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class NotificationEventServiceTest {
   @Autowired
   private IJsonService iJsonService;
   private MqProducerMock mqProducerMock = new MqProducerMock();
-  private RedisServiceMock redisServiceMock = new RedisServiceMock();
+  private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
   private NotificationEventService notificationEventService;
   private NotificationPacketUtil notificationPacketUtil = new NotificationPacketUtil();
 

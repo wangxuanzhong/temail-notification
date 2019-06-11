@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.interfaces.controller;
 
 import com.syswin.temail.notification.foundation.domains.Response;
-import com.syswin.temail.notification.main.application.NotificationDmService;
+import com.syswin.temail.notification.main.application.NotificationDmServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,11 +32,11 @@ public class NotificationDmController {
   private static final String CDTP_HEADER = "CDTP-header";
   private static final String X_PACKET_ID = "X-PACKET-ID";
 
-  private final NotificationDmService notificationDmService;
+  private final NotificationDmServiceImpl notificationDmServiceImpl;
 
   @Autowired
-  public NotificationDmController(NotificationDmService notificationDmService) {
-    this.notificationDmService = notificationDmService;
+  public NotificationDmController(NotificationDmServiceImpl notificationDmServiceImpl) {
+    this.notificationDmServiceImpl = notificationDmServiceImpl;
   }
 
   @ApiOperation(value = "save packet event 1 3000", consumes = "application/json")
@@ -45,7 +45,7 @@ public class NotificationDmController {
       @RequestHeader(name = X_PACKET_ID) String xPacketId) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    notificationDmService.savePacketEvent(event, header, xPacketId);
+    notificationDmServiceImpl.savePacketEvent(event, header, xPacketId);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
   }
 }

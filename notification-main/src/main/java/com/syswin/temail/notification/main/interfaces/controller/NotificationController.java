@@ -2,7 +2,7 @@ package com.syswin.temail.notification.main.interfaces.controller;
 
 import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.main.application.NotificationEventService;
-import com.syswin.temail.notification.main.application.NotificationTopicService;
+import com.syswin.temail.notification.main.application.NotificationTopicServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
@@ -41,12 +41,12 @@ public class NotificationController {
   private static final String CDTP_HEADER = "CDTP-header";
 
   private final NotificationEventService notificationEventService;
-  private final NotificationTopicService notificationTopicService;
+  private final NotificationTopicServiceImpl notificationTopicServiceImpl;
 
   @Autowired
-  public NotificationController(NotificationEventService notificationEventService, NotificationTopicService notificationTopicService) {
+  public NotificationController(NotificationEventService notificationEventService, NotificationTopicServiceImpl notificationTopicServiceImpl) {
     this.notificationEventService = notificationEventService;
-    this.notificationTopicService = notificationTopicService;
+    this.notificationTopicServiceImpl = notificationTopicServiceImpl;
   }
 
   @ApiOperation(value = "pull event 3 0001", consumes = "application/json")
@@ -114,7 +114,7 @@ public class NotificationController {
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    Map<String, Object> result = notificationTopicService.getTopicEvents(to, eventSeqId, pageSize);
+    Map<String, Object> result = notificationTopicServiceImpl.getTopicEvents(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 
@@ -172,7 +172,7 @@ public class NotificationController {
       Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    Map<String, Object> result = notificationTopicService.getTopicEventsLimited(to, eventSeqId, pageSize);
+    Map<String, Object> result = notificationTopicServiceImpl.getTopicEventsLimited(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
 }

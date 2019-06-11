@@ -1,6 +1,6 @@
 package com.syswin.temail.notification.main.mock;
 
-import com.syswin.temail.notification.main.application.NotificationRedisService;
+import com.syswin.temail.notification.main.application.NotificationRedisServiceImpl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,12 +8,12 @@ import java.util.Map;
 import org.mockito.Mockito;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-public class RedisServiceMock extends NotificationRedisService {
+public class RedisServiceImplMock extends NotificationRedisServiceImpl {
 
   private static List<String> keys = new ArrayList<>();
   private static Map<String, Long> seqMap = new HashMap<>();
 
-  public RedisServiceMock() {
+  public RedisServiceImplMock() {
     super(Mockito.mock(StringRedisTemplate.class));
   }
 

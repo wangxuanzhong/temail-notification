@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.application.scheduler;
 
 import com.syswin.temail.notification.main.application.NotificationEventService;
-import com.syswin.temail.notification.main.application.NotificationRedisService;
+import com.syswin.temail.notification.main.application.NotificationRedisServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
@@ -40,19 +40,19 @@ public class NotificationEventSchedule {
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
   private final NotificationEventService notificationEventService;
-  private final NotificationRedisService notificationRedisService;
+  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
   private final TopicMapper topicMapper;
   private final int deadline;
 
   @Autowired
   public NotificationEventSchedule(EventMapper eventMapper, UnreadMapper unreadMapper, NotificationEventService notificationEventService,
-      NotificationRedisService notificationRedisService,
+      NotificationRedisServiceImpl notificationRedisServiceImpl,
       TopicMapper topicMapper, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
     this.eventMapper = eventMapper;
     this.notificationEventService = notificationEventService;
     this.topicMapper = topicMapper;
     this.unreadMapper = unreadMapper;
-    this.notificationRedisService = notificationRedisService;
+    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
     this.deadline = deadline;
   }
 
@@ -64,7 +64,7 @@ public class NotificationEventSchedule {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old event before {}", createTime);
 
-    if (!notificationRedisService.checkLock(DELETE_OLD_EVENT_KEY, TIMEOUT, TimeUnit.MINUTES)) {
+    if (!notificationRedisServiceImpl.checkLock(DELETE_OLD_EVENT_KEY, TIMEOUT, TimeUnit.MINUTES)) {
       LOGGER.warn("check lock from redis failed!");
       return;
     }

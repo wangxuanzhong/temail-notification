@@ -32,7 +32,7 @@ import org.springframework.web.client.RestTemplate;
  * @author liusen
  */
 @Service
-public class NotificationDmService implements IMqConsumerService {
+public class NotificationDmServiceImpl implements IMqConsumerService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -41,7 +41,7 @@ public class NotificationDmService implements IMqConsumerService {
   private static final int EVENT_COMMAND = 0x3000;
 
   private final IMqProducer iMqProducer;
-  private final NotificationRedisService notificationRedisService;
+  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
   private final EventMapper eventMapper;
   private final IJsonService iJsonService;
   private final RestTemplate restTemplate;
@@ -53,14 +53,14 @@ public class NotificationDmService implements IMqConsumerService {
   private final String authUrl;
 
   @Autowired
-  public NotificationDmService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
+  public NotificationDmServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl,
       EventMapper eventMapper, IJsonService iJsonService, RestTemplate notificationRestTemplate,
       @Value("${app.temail.notification.saas.enabled:false}") String saasEnabled,
       @Value("${spring.rocketmq.topics.notify.groupChat:notify}") String groupChatTopic,
       @Value("${spring.rocketmq.topics.notify.application:notify}") String applicationTopic,
       @Value("${url.temail.auth:authUrl}") String authUrl) {
     this.iMqProducer = iMqProducer;
-    this.notificationRedisService = notificationRedisService;
+    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
     this.eventMapper = eventMapper;
     this.iJsonService = iJsonService;
     this.restTemplate = notificationRestTemplate;
@@ -81,14 +81,14 @@ public class NotificationDmService implements IMqConsumerService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisService)) {
+    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
       return;
     }
 
     CDTPHeader cdtpHeader = iJsonService.fromJson(header, CDTPHeader.class);
     event.setFrom(cdtpHeader.getSender());
     event.setTo(cdtpHeader.getReceiver());
-    EventUtil.initEventSeqId(notificationRedisService, event);
+    EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
     event.autoWriteExtendParam(iJsonService);
     event.zip();
     eventMapper.insert(event);
@@ -151,11 +151,11 @@ public class NotificationDmService implements IMqConsumerService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisService)) {
+    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
       return;
     }
 
-    EventUtil.initEventSeqId(notificationRedisService, event);
+    EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
     event.autoWriteExtendParam(iJsonService);
     event.zip();
     eventMapper.insert(event);

@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.interfaces.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.syswin.temail.notification.main.application.NotificationDmService;
+import com.syswin.temail.notification.main.application.NotificationDmServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 public class NotificationDmControllerTest {
 
   @MockBean
-  NotificationDmService dmService;
+  NotificationDmServiceImpl dmService;
 
   @Autowired
   private MockMvc mvc;

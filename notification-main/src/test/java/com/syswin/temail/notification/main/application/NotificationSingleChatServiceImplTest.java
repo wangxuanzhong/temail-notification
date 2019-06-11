@@ -9,7 +9,7 @@ import com.syswin.temail.notification.main.dto.MailAgentParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
-import com.syswin.temail.notification.main.mock.RedisServiceMock;
+import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class NotificationSingleChatServiceTest {
+public class NotificationSingleChatServiceImplTest {
 
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
@@ -43,23 +43,23 @@ public class NotificationSingleChatServiceTest {
   @Autowired
   private IMqProducer iMqProducer;
   @Autowired
-  private NotificationRedisService notificationRedisService;
+  private NotificationRedisServiceImpl notificationRedisServiceImpl;
   @Autowired
   private EventMapper eventMapper;
   @Autowired
   private IJsonService iJsonService;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
-  private RedisServiceMock redisServiceMock = new RedisServiceMock();
+  private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
 
-  private NotificationSingleChatService notificationSingleChatService;
+  private NotificationSingleChatServiceImpl notificationSingleChatServiceImpl;
 
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      notificationSingleChatService = new NotificationSingleChatService(mqProducerMock, redisServiceMock, eventMapper, iJsonService);
+      notificationSingleChatServiceImpl = new NotificationSingleChatServiceImpl(mqProducerMock, redisServiceMock, eventMapper, iJsonService);
     } else {
-      notificationSingleChatService = new NotificationSingleChatService(iMqProducer, notificationRedisService, eventMapper, iJsonService);
+      notificationSingleChatServiceImpl = new NotificationSingleChatServiceImpl(iMqProducer, notificationRedisServiceImpl, eventMapper, iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -303,7 +303,7 @@ public class NotificationSingleChatServiceTest {
       iMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
       Thread.sleep(2000);
     } else {
-      notificationSingleChatService.handleMqMessage(gson.toJson(param), tags);
+      notificationSingleChatServiceImpl.handleMqMessage(gson.toJson(param), tags);
     }
   }
 }
