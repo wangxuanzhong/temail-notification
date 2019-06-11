@@ -10,27 +10,49 @@ import java.util.List;
 @JsonInclude(Include.NON_NULL)
 class EventExtendParam {
 
-  /**当事人名称*/
+  /**
+   * 当事人名称
+   */
   private String name;
-  /**触发人名称*/
+  /**
+   * 触发人名称
+   */
   private String adminName;
-  /**群名称*/
+  /**
+   * 群名称
+   */
   private String groupName;
-  /**@的temail*/
+  /**
+   * at的temail
+   */
   private String at;
-  /**批量msgId*/
+  /**
+   * 批量msgId
+   */
   private List<String> msgIds;
-  /**单聊删除会话是否同时删除消息*/
+  /**
+   * 单聊删除会话是否同时删除消息
+   */
   private Boolean deleteAllMsg;
-  /**单聊消息拥有者*/
+  /**
+   * 单聊消息拥有者
+   */
   private String owner;
-  /**废纸篓删除的消息明细*/
+  /**
+   * 废纸篓删除的消息明细
+   */
   private String trashMsgInfo;
-  /**全报文信息*/
+  /**
+   * 全报文信息
+   */
   private String packet;
-  /**消息发送者*/
+  /**
+   * 消息发送者
+   */
   private String author;
-  /**被通知人员*/
+  /**
+   * 被通知人员
+   */
   private List<String> filter;
 
 

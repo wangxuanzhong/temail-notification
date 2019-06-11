@@ -34,18 +34,26 @@ public class TopicEvent {
   private String to;
   private Long timestamp;
 
+  // 以下参数均存入扩展参数字段
   /**
-   * 以下参数均存入扩展参数字段
+   * 话题主题
    */
-  /**话题主题*/
   private String title;
-  /**收件人*/
+  /**
+   * 收件人
+   */
   private List<String> receivers;
-  /**抄送*/
+  /**
+   * 抄送
+   */
   private List<String> cc;
-  /**批量msgId*/
+  /**
+   * 批量msgId
+   */
   private List<String> msgIds;
-  /**删除会话是否同时删除消息*/
+  /**
+   * 删除会话是否同时删除消息
+   */
   private Boolean deleteAllMsg;
 
   @JsonIgnore

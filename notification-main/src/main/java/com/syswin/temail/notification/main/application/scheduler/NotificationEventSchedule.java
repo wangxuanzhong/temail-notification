@@ -31,8 +31,11 @@ public class NotificationEventSchedule {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String DELETE_OLD_EVENT_KEY = "notification_deleteOldEvent";
-  /**分页删除，每次删除10W条*/
+  /**
+   * 分页删除，每次删除10W条
+   */
   private static final int PAGE_SIZE = 100000;
+  private static final int TIMEOUT = 10;
 
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
@@ -61,7 +64,7 @@ public class NotificationEventSchedule {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old event before {}", createTime);
 
-    if (!notificationRedisService.checkLock(DELETE_OLD_EVENT_KEY, 10, TimeUnit.MINUTES)) {
+    if (!notificationRedisService.checkLock(DELETE_OLD_EVENT_KEY, TIMEOUT, TimeUnit.MINUTES)) {
       LOGGER.warn("check lock from redis failed!");
       return;
     }
@@ -72,7 +75,7 @@ public class NotificationEventSchedule {
     // 循环计算出所有to的未读数并插入数据库
     tos.forEach(to -> {
       // 获取已经删除的事件的未读数
-      Map<String, Integer> unreadMap = new HashMap<>();
+      Map<String, Integer> unreadMap = new HashMap<>(16);
       unreadMapper.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
 
       List<Event> events = eventMapper.selectOldEvent(to, createTime, EventCondition.UNREAD_EVENT_TYPES);
