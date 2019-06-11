@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+/**
+ * @author liusen
+ */
 @RestController
 @RequestMapping("/notification/schedule")
 @Api(value = "schedule", tags = "event schedule")

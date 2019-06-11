@@ -28,6 +28,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+/**
+ * @author liusen
+ */
 @RestController
 @RequestMapping("/notification")
 @Api(value = "notification", tags = "notification service")
@@ -72,14 +75,15 @@ public class NotificationController {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
-    if (event.getTo() == null || event.getTo().equals("")) {
+    if (event.getTo() == null || "".equals(event.getTo())) {
       LOGGER.warn("reset 3 0004 : to mast not null!");
       return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "to mast not null!"), headers,
           HttpStatus.BAD_REQUEST);
     }
 
-    if ((event.getFrom() == null || event.getFrom().equals("")) && (event.getGroupTemail() == null || event
-        .getGroupTemail().equals(""))) {
+    boolean fromIsEmpty = event.getFrom() == null || "".equals(event.getFrom());
+    boolean groupTemailIsEmpty = event.getGroupTemail() == null || "".equals(event.getGroupTemail());
+    if (fromIsEmpty && groupTemailIsEmpty) {
       LOGGER.warn("reset 3 0004 : from and groupTemail mast not null at the same time!");
       return new ResponseEntity<>(
           new Response<>(HttpStatus.BAD_REQUEST, "from and groupTemail mast not null at the same time!"), headers,
