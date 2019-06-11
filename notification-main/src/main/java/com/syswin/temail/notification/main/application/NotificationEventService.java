@@ -390,8 +390,7 @@ public class NotificationEventService {
   public void updateGroupChatUserStatus(Member member, UserStatus userStatus, String header) {
     LOGGER.info("update user status, param: {}", member);
     Event event = new Event(null, null, null, null, null,
-        member.getGroupTemail(), member.getTemail(), System.currentTimeMillis(), member.getGroupTemail(),
-        member.getTemail(),
+        member.getGroupTemail(), member.getTemail(), System.currentTimeMillis(), member.getGroupTemail(), member.getTemail(),
         null, null, null, null, null, null);
 
     switch (userStatus) {

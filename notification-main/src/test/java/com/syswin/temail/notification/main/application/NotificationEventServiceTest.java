@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
+import com.syswin.temail.notification.main.domains.Member;
+import com.syswin.temail.notification.main.domains.Member.UserStatus;
 import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.domains.params.MailAgentParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.domains.response.UnreadResponse;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -551,5 +554,26 @@ public class NotificationEventServiceTest {
 
     Assertions.assertThat(result).hasSize(1);
     Assertions.assertThat(result.get(0).getUnread()).isEqualTo(3);
+  }
+
+  @Test
+  public void testUpdateGroupChatUserStatus() {
+    String header = "header";
+    Member member = new Member();
+    member.setGroupTemail("some group");
+    member.setTemail("some one");
+
+    Mockito.doNothing().when(memberMapper).updateUserStatus(Mockito.any(Member.class));
+
+    notificationEventService.updateGroupChatUserStatus(member, UserStatus.NORMAL, header);
+    notificationEventService.updateGroupChatUserStatus(member, UserStatus.DO_NOT_DISTURB, header);
+  }
+
+  @Test
+  public void testGetGroupChatUserStatus() {
+    Mockito.when(memberMapper.selectUserStatus(Mockito.anyString(), Mockito.anyString())).thenReturn(1);
+
+    Map<String, Integer> result = notificationEventService.getGroupChatUserStatus("some one", "some group");
+    Assertions.assertThat(result.get("userStatus")).isEqualTo(1);
   }
 }

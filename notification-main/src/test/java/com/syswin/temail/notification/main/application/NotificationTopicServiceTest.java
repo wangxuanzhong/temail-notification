@@ -198,10 +198,4 @@ public class NotificationTopicServiceTest {
       notificationTopicService.handleMqMessage(gson.toJson(param), tags);
     }
   }
-
-
-  @Test
-  public void TestGetTopicEventsLimited() {
-    notificationTopicService.getTopicEventsLimited("b", 0L, 10);
-  }
 }
