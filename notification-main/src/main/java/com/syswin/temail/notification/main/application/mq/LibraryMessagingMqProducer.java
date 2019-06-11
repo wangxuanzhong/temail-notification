@@ -11,6 +11,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * rocket mq生产者
+ * @author liusen
+ */
 public class LibraryMessagingMqProducer implements IMqProducer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
