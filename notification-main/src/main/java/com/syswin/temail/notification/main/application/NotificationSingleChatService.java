@@ -6,8 +6,8 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.dto.CDTPResponse;
+import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.NotificationUtil;
@@ -20,6 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 单聊通知事件处理类
+ *
+ * @author liusen
+ */
 @Service
 public class NotificationSingleChatService implements IMqConsumerService {
 
@@ -46,8 +51,10 @@ public class NotificationSingleChatService implements IMqConsumerService {
   @Override
   public void handleMqMessage(String body, String tags) {
     MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
-    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(), params.getxPacketId(),
+    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(),
+        params.getSeqNo(), params.getToMsg(),
+        params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(),
+        params.getxPacketId(),
         params.getOwner(), params.getDeleteAllMsg());
 
     // 前端需要的头信息
@@ -116,7 +123,8 @@ public class NotificationSingleChatService implements IMqConsumerService {
       case ARCHIVE:
       case ARCHIVE_CANCEL:
       case DO_NOT_DISTURB:
-      case DO_NOT_DISTURB_CANCEL: // 只提供多端同步
+      case DO_NOT_DISTURB_CANCEL:
+        // 只提供多端同步
         // from是操作人，to是会话的另一方
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
@@ -131,7 +139,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
         sendMessage(event, header, tags);
         break;
       default:
-        LOGGER.warn("unsupport event type!");
+        LOGGER.warn("not support event type!");
     }
   }
 
@@ -158,16 +166,19 @@ public class NotificationSingleChatService implements IMqConsumerService {
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     this.insert(event);
     iMqProducer
-        .sendMessage(iJsonService.toJson(new CDTPResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))), tags);
+        .sendMessage(iJsonService
+            .toJson(new CDTPResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))), tags);
   }
 
   /**
    * 发送消息，提供多端同步功能
    */
   private void sendMessageToSender(Event event, String header, String tags) {
-    LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(), EventType.getByValue(event.getEventType()));
+    LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(),
+        EventType.getByValue(event.getEventType()));
     iMqProducer
-        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+        .sendMessage(iJsonService.toJson(
+            new CDTPResponse(event.getFrom(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
             tags);
   }
 }

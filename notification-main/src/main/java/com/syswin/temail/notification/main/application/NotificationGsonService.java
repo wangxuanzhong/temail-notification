@@ -5,6 +5,11 @@ import com.syswin.temail.notification.foundation.application.IJsonService;
 import java.lang.reflect.Type;
 import org.springframework.stereotype.Service;
 
+/**
+ * gson工具类
+ *
+ * @author liusen
+ */
 @Service
 public class NotificationGsonService implements IJsonService {
 

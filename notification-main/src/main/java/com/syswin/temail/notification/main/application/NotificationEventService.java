@@ -7,8 +7,8 @@ import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
-import com.syswin.temail.notification.main.dto.MailAgentParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.dto.CDTPResponse;
+import com.syswin.temail.notification.main.dto.MailAgentParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.dto.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
@@ -30,6 +30,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 单聊通知事件处理类
+ *
+ * @author liusen
+ */
 @Service
 public class NotificationEventService {
 
@@ -46,7 +51,8 @@ public class NotificationEventService {
   private int defaultPageSize;
 
   @Autowired
-  public NotificationEventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper, IJsonService iJsonService,
+  public NotificationEventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
+      IJsonService iJsonService,
       IMqProducer iMqProducer, NotificationRedisService notificationRedisService) {
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
@@ -88,16 +94,18 @@ public class NotificationEventService {
 //    });
 //    Map<Long, EventRow> eventRowMap = nosqlMsgTemplate.getByIds("notification", "event", packetEventIds.toArray());
 
-    Map<String, Map<String, Event>> eventMap = new HashMap<>();
-    List<String> messages = new ArrayList<>();  // 存放普通消息，以便抵消操作处理
-    List<String> trashMsgIds = new ArrayList<>();  // 存放废纸篓消息，以便还原操作处理
+    Map<String, Map<String, Event>> eventMap = new HashMap<>(16);
+    // 存放普通消息，以便抵消操作处理
+    List<String> messages = new ArrayList<>();
+    // 存放废纸篓消息，以便还原操作处理
+    List<String> trashMsgIds = new ArrayList<>();
     events.forEach(event -> {
       event.autoReadExtendParam(iJsonService);
 
       // 按照会话统计事件，方便对单个会话多事件进行处理
       String key = event.getFrom();
 
-      if (event.getGroupTemail() != null && !event.getGroupTemail().equals("")) {
+      if (event.getGroupTemail() != null && !"".equals(event.getGroupTemail())) {
         key = event.getGroupTemail();
       }
 
@@ -109,7 +117,7 @@ public class NotificationEventService {
       }
 
       if (!eventMap.containsKey(key)) {
-        eventMap.put(key, new HashMap<>());
+        eventMap.put(key, new HashMap<>(16));
       }
 
       Map<String, Event> sessionEventMap = eventMap.get(key);
@@ -148,7 +156,8 @@ public class NotificationEventService {
           // 只返回最后一条事件
           sessionEventMap.put(EventUtil.getMsgId(eventType, event), event);
           break;
-        case TRASH: // 移动到废纸篓不需要查询返回，只需要记录移动的消息id
+        case TRASH:
+          // 移动到废纸篓不需要查询返回，只需要记录移动的消息id
           trashMsgIds.addAll(event.getMsgIds());
           break;
         case TRASH_CANCEL:
@@ -199,7 +208,8 @@ public class NotificationEventService {
             List<String> msgIds = new ArrayList<>(event.getMsgIds());
             event.getMsgIds().forEach(msgId -> {
               if (messages.contains(msgId)) {
-                msgIds.remove(msgId); // 删除已出现的msgId
+                // 删除已出现的msgId
+                msgIds.remove(msgId);
               }
             });
             // 将此次拉取中未出现的msgId添加到删除事件中，供前端处理
@@ -244,6 +254,8 @@ public class NotificationEventService {
           }
           sessionEventMap.put(UUID.randomUUID().toString(), event);
           break;
+        default:
+          // do nothing
       }
     });
 
@@ -251,17 +263,17 @@ public class NotificationEventService {
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
 
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
-    Map<String, Object> result = new HashMap<>();
+    Map<String, Object> result = new HashMap<>(2);
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
 
     // 返回结果最多1000条
-    if (notifyEvents.size() > 1000) {
-      result.put("events", notifyEvents.subList(notifyEvents.size() - 1000, notifyEvents.size()));
+    final int maxReturnNum = 1000;
+    if (notifyEvents.size() > maxReturnNum) {
+      result.put("events", notifyEvents.subList(notifyEvents.size() - maxReturnNum, notifyEvents.size()));
     } else {
       result.put("events", notifyEvents);
     }
-    // LOGGER.info("pull events result: {}", result);
     return result;
   }
 
@@ -274,7 +286,7 @@ public class NotificationEventService {
     LOGGER.info("get unread, to: {}", to);
 
     // 获取已经删除的事件的未读数
-    Map<String, Integer> unreadMap = new HashMap<>();
+    Map<String, Integer> unreadMap = new HashMap<>(16);
     unreadMapper.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
 
     // 查询所有事件
@@ -310,12 +322,12 @@ public class NotificationEventService {
    * 统计消息未读数
    */
   public Map<String, List<String>> calculateUnread(List<Event> events, Map<String, Integer> unreadMap) {
-    Map<String, List<String>> eventMap = new HashMap<>();
+    Map<String, List<String>> eventMap = new HashMap<>(16);
     events.forEach(event -> {
       event.autoReadExtendParam(iJsonService);
       // 为了区分单聊和群聊，给群聊添加后缀
       String key = event.getFrom();
-      if (event.getGroupTemail() != null && !event.getGroupTemail().equals("")) {
+      if (event.getGroupTemail() != null && !"".equals(event.getGroupTemail())) {
         key += Event.GROUP_CHAT_KEY_POSTFIX;
       }
 
@@ -324,12 +336,15 @@ public class NotificationEventService {
       }
       List<String> msgIds = eventMap.get(key);
       switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
-        case RESET: // 清空未读数
+        case RESET:
+          // 清空未读数
           msgIds.clear();
           unreadMap.remove(event.getFrom());
           break;
-        case RECEIVE: // 消息发送者不计未读数
-        case DESTROY: // 焚毁消息发送者不计未读数
+        case RECEIVE:
+          // 消息发送者不计未读数
+        case DESTROY:
+          // 焚毁消息发送者不计未读数
           if (!event.getFrom().equals(event.getTo()) && !event.getTo().equals(event.getTemail())) {
             msgIds.add(event.getMsgId());
           }
@@ -341,7 +356,7 @@ public class NotificationEventService {
         case DELETE:
           // msgIds不为空，则为批量删除消息
           if (event.getMsgIds() != null) {
-            event.getMsgIds().forEach(msgIds::remove);
+            msgIds.removeAll(event.getMsgIds());
           } else { // 单聊删除会话和消息
             if (event.getDeleteAllMsg() != null && event.getDeleteAllMsg()) {
               msgIds.clear();
@@ -349,6 +364,8 @@ public class NotificationEventService {
             }
           }
           break;
+        default:
+          // do nothing
       }
     });
     return eventMap;
@@ -379,7 +396,8 @@ public class NotificationEventService {
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))));
+        iJsonService
+            .toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))));
   }
 
   /**
@@ -390,7 +408,8 @@ public class NotificationEventService {
   public void updateGroupChatUserStatus(Member member, UserStatus userStatus, String header) {
     LOGGER.info("update user status, param: {}", member);
     Event event = new Event(null, null, null, null, null,
-        member.getGroupTemail(), member.getTemail(), System.currentTimeMillis(), member.getGroupTemail(), member.getTemail(),
+        member.getGroupTemail(), member.getTemail(), System.currentTimeMillis(), member.getGroupTemail(),
+        member.getTemail(),
         null, null, null, null, null, null);
 
     switch (userStatus) {
@@ -409,7 +428,8 @@ public class NotificationEventService {
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))));
+        iJsonService.toJson(
+            new CDTPResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))));
   }
 
   /**
@@ -418,7 +438,7 @@ public class NotificationEventService {
   @Deprecated
   public Map<String, Integer> getGroupChatUserStatus(String temail, String groupTemail) {
     LOGGER.info("get do not disturb group, temail: {}", temail);
-    Map<String, Integer> result = new HashMap<>();
+    Map<String, Integer> result = new HashMap<>(1);
     result.put("userStatus", memberMapper.selectUserStatus(temail, groupTemail));
     return result;
   }

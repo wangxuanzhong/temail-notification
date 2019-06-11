@@ -7,8 +7,8 @@ import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
-import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.dto.CDTPResponse;
+import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
@@ -23,6 +23,11 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 旧群聊通知事件处理类
+ *
+ * @author liusen
+ */
 @Service
 public class NotificationGroupChatService implements IMqConsumerService {
 
@@ -35,7 +40,8 @@ public class NotificationGroupChatService implements IMqConsumerService {
   private final IJsonService iJsonService;
 
   @Autowired
-  public NotificationGroupChatService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService, EventMapper eventMapper,
+  public NotificationGroupChatService(IMqProducer iMqProducer, NotificationRedisService notificationRedisService,
+      EventMapper eventMapper,
       MemberMapper memberMapper, IJsonService iJsonService) {
     this.iMqProducer = iMqProducer;
     this.notificationRedisService = notificationRedisService;
@@ -51,8 +57,10 @@ public class NotificationGroupChatService implements IMqConsumerService {
   @Override
   public void handleMqMessage(String body, String tags) {
     MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
-    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(), params.getSeqNo(), params.getToMsg(),
-        params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(), params.getType(), params.getName(),
+    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(),
+        params.getSeqNo(), params.getToMsg(),
+        params.getFrom(), params.getTo(), params.getTimestamp(), params.getGroupTemail(), params.getTemail(),
+        params.getType(), params.getName(),
         params.getAdminName(), params.getGroupName(), params.getAt(), params.getxPacketId());
 
     // 前端需要的头信息
@@ -62,7 +70,8 @@ public class NotificationGroupChatService implements IMqConsumerService {
     LOGGER.info("group chat event type: {}", EventType.getByValue(event.getEventType()));
 
     // 校验收到的数据是否重复
-    String redisKey = event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail();
+    String redisKey =
+        event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail();
     if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisService)) {
       return;
     }
@@ -105,7 +114,8 @@ public class NotificationGroupChatService implements IMqConsumerService {
         event.setTemail(null);
         memberMapper.deleteGroupMember(event);
         break;
-      case ADD_MEMBER: // 只通知被添加的人
+      case ADD_MEMBER:
+        // 只通知被添加的人
         // 校验群成员是否已存在，不存在时添加到数据库
         List<String> members = memberMapper.selectMember(event);
         if (!members.contains(event.getTemail())) {
@@ -121,7 +131,8 @@ public class NotificationGroupChatService implements IMqConsumerService {
           LOGGER.warn("{} was group {} member, do nothing.", event.getTemail(), event.getGroupTemail());
         }
         break;
-      case DELETE_MEMBER: // 只通知被删除的人
+      case DELETE_MEMBER:
+        // 只通知被删除的人
         List<String> temails = iJsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
         }.getType());
         List<String> names = iJsonService.fromJson(event.getName(), new TypeToken<List<String>>() {
@@ -145,7 +156,8 @@ public class NotificationGroupChatService implements IMqConsumerService {
           this.sendSingleMessage(event, header, tags);
         }
         break;
-      case LEAVE_GROUP: // 只通知当事人
+      case LEAVE_GROUP:
+        // 只通知当事人
         memberMapper.deleteGroupMember(event);
         // 通知当事人
         this.sendSingleMessage(event, header, tags);
@@ -187,8 +199,10 @@ public class NotificationGroupChatService implements IMqConsumerService {
       case GROUP_ARCHIVE:
       case GROUP_ARCHIVE_CANCEL:
       case GROUP_SESSION_HIDDEN:
-      case GROUP_DO_NOT_DISTURB:  // 暂时无此事件
-      case GROUP_DO_NOT_DISTURB_CANCEL:  // 暂时无此事件
+      case GROUP_DO_NOT_DISTURB:
+        // 暂时无此事件
+      case GROUP_DO_NOT_DISTURB_CANCEL:
+        // 暂时无此事件
         this.sendSingleMessage(event, header, tags);
         break;
       case GROUP_STICK:
@@ -206,8 +220,10 @@ public class NotificationGroupChatService implements IMqConsumerService {
           this.sendGroupMessageToAll(event, header, tags);
         }
         break;
-      case RECEIVE_AT:  // @消息下发时为多条，from为发送者，to和temail为接收者
-        event.setTemail(params.getFrom());  // 当事人为发件人
+      case RECEIVE_AT:
+        // @消息下发时为多条，from为发送者，to和temail为接收者
+        event.setTemail(params.getFrom());
+        // 当事人为发件人
         this.sendSingleMessageDirectly(event, header, tags);
         break;
       case DELETE_AT:
@@ -271,7 +287,8 @@ public class NotificationGroupChatService implements IMqConsumerService {
     event.setTo(event.getTemail());
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))), tags);
+    iMqProducer.sendMessage(iJsonService
+        .toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))), tags);
   }
 
   /**
@@ -281,7 +298,9 @@ public class NotificationGroupChatService implements IMqConsumerService {
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
     iMqProducer
-        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))), tags);
+        .sendMessage(iJsonService.toJson(
+            new CDTPResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+            tags);
   }
 
   /**
@@ -309,7 +328,9 @@ public class NotificationGroupChatService implements IMqConsumerService {
     for (String to : tos) {
       event.setTo(to);
       this.insert(event);
-      iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, cdtpEventType, header, EventUtil.toJson(iJsonService, event))), tags);
+      iMqProducer.sendMessage(
+          iJsonService.toJson(new CDTPResponse(to, cdtpEventType, header, EventUtil.toJson(iJsonService, event))),
+          tags);
     }
   }
 

@@ -6,6 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+/**
+ * redis功能类
+ *
+ * @author liusen
+ */
 @Service
 public class NotificationRedisService implements ISequenceService {
 
@@ -40,12 +45,10 @@ public class NotificationRedisService implements ISequenceService {
    */
   public boolean checkUnique(String key) {
     Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "value");
-    if (result == null) {
-      return false;
-    }
+
     // 设置key有效时间为5s
     redisTemplate.expire(key, 5, TimeUnit.SECONDS);
-    return result;
+    return result == null ? false : result;
   }
 
   /**
@@ -53,11 +56,9 @@ public class NotificationRedisService implements ISequenceService {
    */
   public boolean checkLock(String key, long timeout, TimeUnit unit) {
     Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "value");
-    if (result == null) {
-      return false;
-    }
+
     // 设置key有效时间为5s
     redisTemplate.expire(key, timeout, unit);
-    return result;
+    return result == null ? false : result;
   }
 }

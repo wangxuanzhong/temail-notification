@@ -6,8 +6,8 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
-import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.dto.CDTPResponse;
+import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.util.TopicEventUtil;
 import java.lang.invoke.MethodHandles;
@@ -25,6 +25,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 话题通知事件处理类
+ *
+ * @author liusen
+ */
 @Service
 public class NotificationTopicService implements IMqConsumerService {
 
@@ -54,7 +59,8 @@ public class NotificationTopicService implements IMqConsumerService {
   @Override
   public void handleMqMessage(String body, String tags) {
     MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
-    TopicEvent topicEvent = new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(), params.getMsgid(),
+    TopicEvent topicEvent = new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(),
+        params.getMsgid(),
         params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp());
 
     // 前端需要的头信息
@@ -69,7 +75,8 @@ public class NotificationTopicService implements IMqConsumerService {
         topicEvent.setTitle(params.getTitle());
         topicEvent.setReceivers(params.getReceivers());
         topicEvent.setCc(params.getCc());
-        topicEvent.setTopicSeqId(params.getTopicSeqId()); // 话题单独的序列号
+        // 话题单独的序列号
+        topicEvent.setTopicSeqId(params.getTopicSeqId());
         sendMessage(topicEvent, header, tags);
         break;
       case TOPIC_REPLY:
@@ -127,10 +134,12 @@ public class NotificationTopicService implements IMqConsumerService {
    * 发送消息
    */
   private void sendMessage(TopicEvent topicEvent, String header, String tags) {
-    LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
+    LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(),
+        EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, TopicEventUtil.toJson(iJsonService, topicEvent))),
+        iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header,
+            TopicEventUtil.toJson(iJsonService, topicEvent))),
         tags);
 
   }
@@ -159,8 +168,8 @@ public class NotificationTopicService implements IMqConsumerService {
       lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
     }
 
-    Map<String, Map<String, TopicEvent>> allTopicMap = new HashMap<>();
-    Map<String, Map<String, TopicEvent>> allReplyMap = new HashMap<>();
+    Map<String, Map<String, TopicEvent>> allTopicMap = new HashMap<>(16);
+    Map<String, Map<String, TopicEvent>> allReplyMap = new HashMap<>(16);
     List<TopicEvent> notifyEvents = new ArrayList<>();
     events.forEach(event -> {
       event.autoReadExtendParam(iJsonService);
@@ -210,6 +219,8 @@ public class NotificationTopicService implements IMqConsumerService {
           }
           topicMap.put(event.getTopicId(), event);
           break;
+        default:
+          // do nothing
       }
     });
 
@@ -232,7 +243,7 @@ public class NotificationTopicService implements IMqConsumerService {
       notifyEvents.subList(0, notifyEvents.size() - maxReturnNum).clear();
     }
 
-    Map<String, Object> result = new HashMap<>();
+    Map<String, Object> result = new HashMap<>(3);
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
     result.put("events", notifyEvents);
