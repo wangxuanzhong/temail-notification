@@ -11,6 +11,7 @@ import com.syswin.temail.notification.main.domains.params.MailAgentParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
+import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
@@ -68,11 +69,11 @@ public class NotificationGroupChatService implements IMqConsumerService {
 
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
-        event.notifyToAll();
+        EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, EventType.GROUP_RECEIVE.getValue(), header, tags);
         break;
       case RETRACT:
-        event.notifyToAll();
+        EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, EventType.GROUP_RETRACT.getValue(), header, tags);
         break;
       case PULLED:
@@ -90,7 +91,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
         event.setMsgIds(iJsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
         }.getType()));
         event.setMsgId(null);
-        event.notifyToAll();
+        EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, EventType.GROUP_DELETE.getValue(), header, tags);
         break;
       case ADD_GROUP:
@@ -99,7 +100,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
         this.sendSingleMessage(event, header, tags);
         break;
       case DELETE_GROUP:
-        event.notifyToAll();
+        EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, header, tags);
         event.setTemail(null);
         memberMapper.deleteGroupMember(event);
@@ -150,7 +151,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
         this.sendSingleMessage(event, header, tags);
         break;
       case APPLY:
-        event.notifyToAdmin();
+        EventUtil.notifyToAdmin(event);
         this.sendGroupMessageToAll(event, header, tags);
         break;
       case INVITATION:
@@ -161,18 +162,18 @@ public class NotificationGroupChatService implements IMqConsumerService {
       case INVITATION_ADOPT:
       case INVITATION_REFUSE:
         // 通知所有管理员，提供多端同步功能
-        event.notifyToAdmin();
+        EventUtil.notifyToAdmin(event);
         this.sendGroupMessageToAll(event, header, tags);
         // 通知申请人，此通知当跨域时有可能申请人接收不到，因此修改为通过单聊发送，通知服务不单独通知申请人(向前兼容)
         this.sendSingleMessage(event, header, tags);
         break;
       case UPDATE_GROUP_CARD:
-        event.notifyToAll();
+        EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, header, tags);
         break;
       case REPLY:
       case REPLY_RETRACT:
-        event.notifyToAll();
+        EventUtil.notifyToAll(event);
         this.sendReplyMessage(event, header, tags);
         break;
       case REPLY_DELETE:
@@ -180,7 +181,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
         event.setMsgIds(iJsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
         }.getType()));
         event.setMsgId(null);
-        event.notifyToAll();
+        EventUtil.notifyToAll(event);
         this.sendReplyMessage(event, header, tags);
         break;
       case GROUP_ARCHIVE:
@@ -192,12 +193,12 @@ public class NotificationGroupChatService implements IMqConsumerService {
         break;
       case GROUP_STICK:
       case GROUP_STICK_CANCEL:
-        event.notifyToAll();
+        EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, header, tags);
         break;
       case BLACKLIST:
       case BLACKLIST_CANCEL:
-        event.notifyToAdmin();
+        EventUtil.notifyToAdmin(event);
         temails = iJsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
         }.getType());
         for (String temail : temails) {
@@ -231,14 +232,14 @@ public class NotificationGroupChatService implements IMqConsumerService {
       case ADD_ADMIN:
         event.setRole(MemberRole.ADMIN.getValue());
         memberMapper.updateRole(event);
-        event.notifyToAll();
+        EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, header, tags);
         break;
       case DELETE_ADMIN:
       case ABANDON_ADMIN:
         event.setRole(MemberRole.NORMAL.getValue());
         memberMapper.updateRole(event);
-        event.notifyToAll();
+        EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, header, tags);
         break;
       default:
@@ -250,7 +251,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
    * 插入数据库
    */
   private void insert(Event event) {
-    event.initEventSeqId(notificationRedisService);
+    EventUtil.initEventSeqId(notificationRedisService, event);
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
   }
@@ -270,7 +271,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
     event.setTo(event.getTemail());
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, Event.toJson(iJsonService, event))), tags);
+    iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))), tags);
   }
 
   /**
@@ -280,7 +281,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
     iMqProducer
-        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event))), tags);
+        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))), tags);
   }
 
   /**
@@ -308,7 +309,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
     for (String to : tos) {
       event.setTo(to);
       this.insert(event);
-      iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, cdtpEventType, header, Event.toJson(iJsonService, event))), tags);
+      iMqProducer.sendMessage(iJsonService.toJson(new CDTPResponse(to, cdtpEventType, header, EventUtil.toJson(iJsonService, event))), tags);
     }
   }
 

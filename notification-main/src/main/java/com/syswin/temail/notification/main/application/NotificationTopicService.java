@@ -9,6 +9,7 @@ import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.domains.params.MailAgentParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
+import com.syswin.temail.notification.main.util.TopicEventUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -117,7 +118,7 @@ public class NotificationTopicService implements IMqConsumerService {
    * 插入数据库
    */
   private void insert(TopicEvent topicEvent) {
-    topicEvent.initTopicEventSeqId(notificationRedisService);
+    TopicEventUtil.initTopicEventSeqId(notificationRedisService, topicEvent);
     topicEvent.autoWriteExtendParam(iJsonService);
     topicMapper.insert(topicEvent);
   }
@@ -129,7 +130,7 @@ public class NotificationTopicService implements IMqConsumerService {
     LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(), EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, TopicEvent.toJson(iJsonService, topicEvent))),
+        iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header, TopicEventUtil.toJson(iJsonService, topicEvent))),
         tags);
 
   }

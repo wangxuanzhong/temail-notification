@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.foundation.application.ISequenceService;
 import java.util.List;
 
 @JsonInclude(Include.NON_NULL)
@@ -57,21 +56,6 @@ public class TopicEvent {
     this.from = from;
     this.to = to;
     this.timestamp = timestamp;
-  }
-
-  /**
-   * 转换成json，清空extendParam
-   */
-  public static String toJson(IJsonService iJsonService, TopicEvent topicEvent) {
-    topicEvent.setExtendParam(null);
-    return iJsonService.toJson(topicEvent);
-  }
-
-  /**
-   * 生成seqId
-   */
-  public void initTopicEventSeqId(ISequenceService iSequenceService) {
-    this.eventSeqId = iSequenceService.getNextSeq("topic_" + this.to);
   }
 
   /**

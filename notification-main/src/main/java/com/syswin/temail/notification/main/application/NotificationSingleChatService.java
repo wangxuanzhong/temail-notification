@@ -9,6 +9,7 @@ import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.params.MailAgentParams;
 import com.syswin.temail.notification.main.domains.response.CDTPResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
+import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
@@ -75,7 +76,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
         event.setAuthor(params.getAuthor());
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
-          event.initEventSeqId(notificationRedisService);
+          EventUtil.initEventSeqId(notificationRedisService, event);
           event.autoWriteExtendParam(iJsonService);
           sendMessageToSender(event, header, tags);
           // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
@@ -138,7 +139,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
    * 插入数据库
    */
   private void insert(Event event) {
-    event.initEventSeqId(notificationRedisService);
+    EventUtil.initEventSeqId(notificationRedisService, event);
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
   }
@@ -157,7 +158,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     this.insert(event);
     iMqProducer
-        .sendMessage(iJsonService.toJson(new CDTPResponse(to, event.getEventType(), header, Event.toJson(iJsonService, event))), tags);
+        .sendMessage(iJsonService.toJson(new CDTPResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))), tags);
   }
 
   /**
@@ -166,6 +167,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
   private void sendMessageToSender(Event event, String header, String tags) {
     LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(), EventType.getByValue(event.getEventType()));
     iMqProducer
-        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, Event.toJson(iJsonService, event))), tags);
+        .sendMessage(iJsonService.toJson(new CDTPResponse(event.getFrom(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+            tags);
   }
 }

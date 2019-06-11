@@ -14,6 +14,7 @@ import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.util.Constant;
+import com.syswin.temail.notification.main.util.EventUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -145,7 +146,7 @@ public class NotificationEventService {
         case GROUP_DO_NOT_DISTURB:
         case DO_NOT_DISTURB:
           // 只返回最后一条事件
-          sessionEventMap.put(event.getMsgId(eventType), event);
+          sessionEventMap.put(EventUtil.getMsgId(eventType, event), event);
           break;
         case TRASH: // 移动到废纸篓不需要查询返回，只需要记录移动的消息id
           trashMsgIds.addAll(event.getMsgIds());
@@ -186,10 +187,10 @@ public class NotificationEventService {
         case GROUP_STICK_CANCEL:
         case GROUP_DO_NOT_DISTURB_CANCEL:
         case DO_NOT_DISTURB_CANCEL:
-          if (sessionEventMap.containsKey(event.getMsgId(eventType))) {
-            sessionEventMap.remove(event.getMsgId(eventType));
+          if (sessionEventMap.containsKey(EventUtil.getMsgId(eventType, event))) {
+            sessionEventMap.remove(EventUtil.getMsgId(eventType, event));
           } else {
-            sessionEventMap.put(event.getMsgId(eventType), event);
+            sessionEventMap.put(EventUtil.getMsgId(eventType, event), event);
           }
           break;
         case DELETE:
@@ -222,17 +223,17 @@ public class NotificationEventService {
         case ADD_ADMIN:
           // 只有当事人添加此事件
           if (to.equals(event.getTemail())) {
-            sessionEventMap.put(event.getMsgId(eventType), event);
+            sessionEventMap.put(EventUtil.getMsgId(eventType, event), event);
           }
           break;
         case DELETE_ADMIN:
         case ABANDON_ADMIN:
-          if (sessionEventMap.containsKey(event.getMsgId(eventType))) {
-            sessionEventMap.remove(event.getMsgId(eventType));
+          if (sessionEventMap.containsKey(EventUtil.getMsgId(eventType, event))) {
+            sessionEventMap.remove(EventUtil.getMsgId(eventType, event));
           } else {
             // 只有当事人添加此事件
             if (to.equals(event.getTemail())) {
-              sessionEventMap.put(event.getMsgId(eventType), event);
+              sessionEventMap.put(EventUtil.getMsgId(eventType, event), event);
             }
           }
           break;
@@ -366,7 +367,7 @@ public class NotificationEventService {
       cdtpEventType = EventType.GROUP_RESET.getValue();
     }
     event.setTimestamp(System.currentTimeMillis());
-    event.initEventSeqId(notificationRedisService);
+    EventUtil.initEventSeqId(notificationRedisService, event);
     eventMapper.insert(event);
 
     // 删除历史重置事件
@@ -378,7 +379,7 @@ public class NotificationEventService {
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, Event.toJson(iJsonService, event))));
+        iJsonService.toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))));
   }
 
   /**
@@ -409,7 +410,7 @@ public class NotificationEventService {
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, Event.toJson(iJsonService, event))));
+        iJsonService.toJson(new CDTPResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))));
   }
 
   /**

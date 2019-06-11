@@ -4,11 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.foundation.application.ISequenceService;
-import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import com.syswin.temail.notification.main.util.GzipUtil;
 import java.util.List;
-import java.util.Objects;
 
 @JsonInclude(Include.NON_NULL)
 public class Event {
@@ -112,67 +109,6 @@ public class Event {
   }
 
   /**
-   * 转换成json，清空后端使用参数
-   */
-  public static String toJson(IJsonService iJsonService, Event event) {
-    event.setExtendParam(null);
-    event.setZipPacket(null);
-    return iJsonService.toJson(event);
-  }
-
-  /**
-   * 去除角色条件，即通知所有人
-   */
-  public void notifyToAll() {
-    this.role = null;
-  }
-
-  /**
-   * 角色设置为管理员，只通知管理员
-   */
-  public void notifyToAdmin() {
-    this.role = MemberRole.ADMIN.getValue();
-  }
-
-  /**
-   * 获取msgId，如果msgId为空则临时生成，反向业务使用对立事件类型生成
-   */
-  public String getMsgId(EventType eventType) {
-    EventType againstEventType;
-    switch (eventType) {
-      // 单聊
-      case DO_NOT_DISTURB_CANCEL:
-        againstEventType = EventType.DO_NOT_DISTURB;
-        break;
-      // 群聊
-      case APPLY_ADOPT:
-      case APPLY_REFUSE:
-        againstEventType = EventType.APPLY;
-        break;
-      case INVITATION_ADOPT:
-      case INVITATION_REFUSE:
-        againstEventType = EventType.INVITATION;
-        break;
-      case DELETE_ADMIN:
-      case ABANDON_ADMIN:
-        againstEventType = EventType.ADD_ADMIN;
-        break;
-      case GROUP_DO_NOT_DISTURB_CANCEL:
-        againstEventType = EventType.GROUP_DO_NOT_DISTURB;
-        break;
-      default:
-        againstEventType = eventType;
-        break;
-    }
-
-    if (this.msgId == null) {
-      return this.from + "_" + this.to + "_" + this.temail + "_" + againstEventType;
-    } else {
-      return this.msgId;
-    }
-  }
-
-  /**
    * 自动解析扩展字段
    */
   public Event autoReadExtendParam(IJsonService iJsonService) {
@@ -204,7 +140,7 @@ public class Event {
   }
 
   /**
-   * 自动配置扩展字段
+   * 压缩packet到zipPacket
    */
   public Event zip() {
     if (this.packet != null) {
@@ -214,7 +150,7 @@ public class Event {
   }
 
   /**
-   * 自动配置扩展字段
+   * 解压缩zipPacket到packet
    */
   public Event unzip() {
     if (this.zipPacket != null) {
@@ -223,26 +159,6 @@ public class Event {
     return this;
   }
 
-  /**
-   * 根据不同事件类型按照不同的key生成seqId
-   */
-  public void initEventSeqId(ISequenceService iSequenceService) {
-    switch (Objects.requireNonNull(EventType.getByValue(this.eventType))) {
-      case RECEIVE:
-      case RETRACT:
-      case DESTROY:
-      case DESTROYED:
-      case REPLY:
-      case REPLY_RETRACT:
-      case REPLY_DELETE:
-      case REPLY_DESTROYED:
-        this.eventSeqId = iSequenceService.getNextSeq(this.owner == null ? this.to : this.owner);
-        break;
-      default:
-        this.eventSeqId = iSequenceService.getNextSeq(this.to);
-        break;
-    }
-  }
 
   public Long getId() {
     return id;
