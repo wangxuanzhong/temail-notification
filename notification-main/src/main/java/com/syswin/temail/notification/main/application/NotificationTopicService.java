@@ -6,7 +6,7 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
-import com.syswin.temail.notification.main.dto.CDTPResponse;
+import com.syswin.temail.notification.main.dto.CdtpResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.util.TopicEventUtil;
@@ -138,7 +138,7 @@ public class NotificationTopicService implements IMqConsumerService {
         EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CDTPResponse(topicEvent.getTo(), topicEvent.getEventType(), header,
+        iJsonService.toJson(new CdtpResponse(topicEvent.getTo(), topicEvent.getEventType(), header,
             TopicEventUtil.toJson(iJsonService, topicEvent))),
         tags);
 

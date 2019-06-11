@@ -6,7 +6,7 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.dto.CDTPResponse;
+import com.syswin.temail.notification.main.dto.CdtpResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
@@ -167,7 +167,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
     this.insert(event);
     iMqProducer
         .sendMessage(iJsonService
-            .toJson(new CDTPResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))), tags);
+            .toJson(new CdtpResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))), tags);
   }
 
   /**
@@ -178,7 +178,7 @@ public class NotificationSingleChatService implements IMqConsumerService {
         EventType.getByValue(event.getEventType()));
     iMqProducer
         .sendMessage(iJsonService.toJson(
-            new CDTPResponse(event.getFrom(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+            new CdtpResponse(event.getFrom(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
             tags);
   }
 }

@@ -7,7 +7,7 @@ import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
-import com.syswin.temail.notification.main.dto.CDTPResponse;
+import com.syswin.temail.notification.main.dto.CdtpResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.dto.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
@@ -397,7 +397,7 @@ public class NotificationEventService {
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(
         iJsonService
-            .toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))));
+            .toJson(new CdtpResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))));
   }
 
   /**
@@ -429,7 +429,7 @@ public class NotificationEventService {
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(
         iJsonService.toJson(
-            new CDTPResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))));
+            new CdtpResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))));
   }
 
   /**

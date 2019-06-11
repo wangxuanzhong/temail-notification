@@ -2,64 +2,69 @@ package com.syswin.temail.notification.main.dto;
 
 import java.util.List;
 
+/**
+ * @author liusen
+ */
 public class MailAgentParams {
 
   public static final String MSG_ID_SPLIT = ",";
 
-  // eventType 事件类型
+  /**
+   * eventType 事件类型
+   */
   private Integer sessionMessageType;
-  // 发起方
+  /** 发起方 */
   private String from;
-  // 接收方
+  /** 接收方 */
   private String to;
-  // 消息ID
+  /** 消息ID */
   private String msgid;
-  // 父消息ID
+  /** 父消息ID */
   private String parentMsgId;
-  // seqId 消息序号
+  /** seqId 消息序号 */
   private Long seqNo;
-  // message 消息体
+  /** message 消息体 */
   private String toMsg;
-  // 时间戳
+  /** 时间戳 */
   private Long timestamp;
-  // 删除会话是否同时删除消息
+  /** 删除会话是否同时删除消息 */
   private Boolean deleteAllMsg;
-  // 单聊消息拥有人
+  /** 单聊消息拥有人 */
   private String owner;
-  // 废纸篓删除的消息明细
+  /** 废纸篓删除的消息明细 */
   private String trashMsgInfo;
-  // 新群聊发起方
+  /** 新群聊发起方 */
   private String author;
-  // 新群聊被通知人员
+  /** 新群聊被通知人员 */
   private List<String> filter;
 
-  // 群邮件
+  /** 群邮件 */
   private String groupTemail;
-  // 群名称
+  /** 群名称 */
   private String groupName;
-  // 当事人
+  /** 当事人 */
   private String temail;
-  // 当事人名称
+  /** 当事人名称 */
   private String name;
-  // 管理员名称
+  /** 管理员名称 */
   private String adminName;
-  // 成员类型
+  /** 成员类型 */
   private Integer type;
-  // @对象
+  /** @对象 */
   private String at;
 
-  // 话题id
+  /** 话题id */
   private String topicId;
-  // 话题序列号
+  /** 话题序列号 */
   private Long topicSeqId;
-  // 话题主题
+  /** 话题主题 */
   private String title;
-  // 收件人
+  /** 收件人 */
   private List<String> receivers;
-  // 抄送
+  /** 抄送 */
   private List<String> cc;
 
-  // CDTP报文头
+  /** CDTP报文头 */
   private String header;
   private String xPacketId;
 

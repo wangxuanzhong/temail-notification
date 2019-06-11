@@ -7,7 +7,7 @@ import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
-import com.syswin.temail.notification.main.dto.CDTPResponse;
+import com.syswin.temail.notification.main.dto.CdtpResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
@@ -288,7 +288,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
     this.insert(event);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
     iMqProducer.sendMessage(iJsonService
-        .toJson(new CDTPResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))), tags);
+        .toJson(new CdtpResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))), tags);
   }
 
   /**
@@ -299,7 +299,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
     iMqProducer
         .sendMessage(iJsonService.toJson(
-            new CDTPResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+            new CdtpResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
             tags);
   }
 
@@ -329,7 +329,7 @@ public class NotificationGroupChatService implements IMqConsumerService {
       event.setTo(to);
       this.insert(event);
       iMqProducer.sendMessage(
-          iJsonService.toJson(new CDTPResponse(to, cdtpEventType, header, EventUtil.toJson(iJsonService, event))),
+          iJsonService.toJson(new CdtpResponse(to, cdtpEventType, header, EventUtil.toJson(iJsonService, event))),
           tags);
     }
   }

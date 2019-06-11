@@ -7,7 +7,7 @@ import com.syswin.temail.notification.foundation.exceptions.BaseException;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.dto.CDTPResponse;
+import com.syswin.temail.notification.main.dto.CdtpResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.NotificationPacketUtil;
@@ -95,7 +95,7 @@ public class NotificationDmService implements IMqConsumerService {
 
     LOGGER.info("send packet event to {}", event.getTo());
     String tag = event.getFrom() + "_" + event.getTo();
-    CDTPResponse response = new CDTPResponse(event.getTo(), event.getEventType(), header,
+    CdtpResponse response = new CdtpResponse(event.getTo(), event.getEventType(), header,
         EventUtil.toJson(iJsonService, event));
     Map<String, Object> extraDataMap = iJsonService
         .fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
@@ -162,7 +162,7 @@ public class NotificationDmService implements IMqConsumerService {
 
     // 解析packet取出CDTPHeader推送给dispatcher
     String header = iJsonService.toJson(cdtpPacket.getHeader());
-    CDTPResponse cdtpResponse = new CDTPResponse(event.getTo(), event.getEventType(), header,
+    CdtpResponse cdtpResponse = new CdtpResponse(event.getTo(), event.getEventType(), header,
         EventUtil.toJson(iJsonService, event));
     String tag = event.getFrom() + "_" + event.getTo();
     iMqProducer.sendMessage(iJsonService.toJson(cdtpResponse), tag);
