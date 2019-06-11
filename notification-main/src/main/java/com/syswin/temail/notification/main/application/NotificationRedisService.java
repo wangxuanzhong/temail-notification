@@ -45,10 +45,12 @@ public class NotificationRedisService implements ISequenceService {
    */
   public boolean checkUnique(String key) {
     Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "value");
-
+    if (result == null) {
+      return false;
+    }
     // 设置key有效时间为5s
     redisTemplate.expire(key, 5, TimeUnit.SECONDS);
-    return result == null ? false : result;
+    return result;
   }
 
   /**
@@ -56,9 +58,11 @@ public class NotificationRedisService implements ISequenceService {
    */
   public boolean checkLock(String key, long timeout, TimeUnit unit) {
     Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "value");
-
+    if (result == null) {
+      return false;
+    }
     // 设置key有效时间为5s
     redisTemplate.expire(key, timeout, unit);
-    return result == null ? false : result;
+    return result;
   }
 }
