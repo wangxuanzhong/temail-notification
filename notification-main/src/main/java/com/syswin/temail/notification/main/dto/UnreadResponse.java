@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * @author liusen
  */
 @JsonInclude(Include.NON_NULL)
-public class UnreadResponse{
+public class UnreadResponse {
 
   private Integer unread;
 
