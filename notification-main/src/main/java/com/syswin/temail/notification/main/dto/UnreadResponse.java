@@ -2,19 +2,24 @@ package com.syswin.temail.notification.main.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.syswin.temail.notification.main.domains.Event;
 
 /**
  * @author liusen
  */
 @JsonInclude(Include.NON_NULL)
-public class UnreadResponse extends Event {
+public class UnreadResponse{
 
   private Integer unread;
 
+  private String from;
+
+  private String to;
+
+  private String groupTemail;
+
   public UnreadResponse(String from, String to, Integer unread) {
-    this.setFrom(from);
-    this.setTo(to);
+    this.from = from;
+    this.to = to;
     this.unread = unread;
   }
 
@@ -30,13 +35,37 @@ public class UnreadResponse extends Event {
     this.unread = unread;
   }
 
+  public String getFrom() {
+    return from;
+  }
+
+  public void setFrom(String from) {
+    this.from = from;
+  }
+
+  public String getTo() {
+    return to;
+  }
+
+  public void setTo(String to) {
+    this.to = to;
+  }
+
+  public String getGroupTemail() {
+    return groupTemail;
+  }
+
+  public void setGroupTemail(String groupTemail) {
+    this.groupTemail = groupTemail;
+  }
+
   @Override
   public String toString() {
     return "UnreadResponse{" +
         "unread=" + unread +
-        ", from=" + this.getFrom() +
-        ", to=" + this.getTo() +
-        ", groupTemail=" + this.getGroupTemail() +
+        ", from='" + from + '\'' +
+        ", to='" + to + '\'' +
+        ", groupTemail='" + groupTemail + '\'' +
         '}';
   }
 }
