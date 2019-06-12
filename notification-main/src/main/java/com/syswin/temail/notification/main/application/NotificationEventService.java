@@ -247,11 +247,7 @@ public class NotificationEventService {
           }
           break;
         case PACKET:
-          // 兼容旧数据
-          if (event.getPacket() == null) {
-            event.unzip();
-          }
-          sessionEventMap.put(UUID.randomUUID().toString(), event);
+          sessionEventMap.put(UUID.randomUUID().toString(), event.unzip());
           break;
         default:
           // do nothing

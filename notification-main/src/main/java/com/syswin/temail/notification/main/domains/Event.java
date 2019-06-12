@@ -160,7 +160,6 @@ public class Event {
       this.deleteAllMsg = eventExtendParam.getDeleteAllMsg();
       this.owner = eventExtendParam.getOwner();
       this.trashMsgInfo = eventExtendParam.getTrashMsgInfo();
-      this.packet = eventExtendParam.getPacket();
       this.author = eventExtendParam.getAuthor();
       this.filter = eventExtendParam.getFilter();
     }
@@ -173,7 +172,7 @@ public class Event {
   public Event autoWriteExtendParam(IJsonService iJsonService) {
     this.extendParam = iJsonService.toJson(
         new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg,
-            this.owner, this.trashMsgInfo, null, this.author, this.filter));
+            this.owner, this.trashMsgInfo, this.author, this.filter));
     return this;
   }
 

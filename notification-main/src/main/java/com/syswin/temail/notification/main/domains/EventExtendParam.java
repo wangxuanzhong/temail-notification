@@ -43,10 +43,6 @@ class EventExtendParam {
    */
   private String trashMsgInfo;
   /**
-   * 全报文信息
-   */
-  private String packet;
-  /**
    * 消息发送者
    */
   private String author;
@@ -60,7 +56,7 @@ class EventExtendParam {
   }
 
   public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds,
-      Boolean deleteAllMsg, String owner, String trashMsgInfo, String packet, String author, List<String> filter) {
+      Boolean deleteAllMsg, String owner, String trashMsgInfo, String author, List<String> filter) {
     this.name = name;
     this.adminName = adminName;
     this.groupName = groupName;
@@ -69,7 +65,6 @@ class EventExtendParam {
     this.deleteAllMsg = deleteAllMsg;
     this.owner = owner;
     this.trashMsgInfo = trashMsgInfo;
-    this.packet = packet;
     this.author = author;
     this.filter = filter;
   }
@@ -104,10 +99,6 @@ class EventExtendParam {
 
   public String getTrashMsgInfo() {
     return trashMsgInfo;
-  }
-
-  public String getPacket() {
-    return packet;
   }
 
   public String getAuthor() {
