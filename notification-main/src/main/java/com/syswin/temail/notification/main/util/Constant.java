@@ -7,43 +7,39 @@ import java.util.List;
 /**
  * @author liusen
  */
-public class Constant {
-
-  private Constant() {
-    throw new IllegalStateException("Utility class");
-  }
+public interface Constant {
 
   /**
    * MQ消费组
    */
-  public static class ConsumerGroup {
+  interface ConsumerGroup {
 
-    public static final String SINGLE_CHAT_CONSUMER_GROUP = "notificationSingleChatConsumer";
+    String SINGLE_CHAT_CONSUMER_GROUP = "notificationSingleChatConsumer";
 
-    public static final String GROUP_CHAT_CONSUMER_GROUP = "notificationGroupChatConsumer";
+    String GROUP_CHAT_CONSUMER_GROUP = "notificationGroupChatConsumer";
 
-    public static final String TOPIC_CONSUMER_GROUP = "notificationTopicConsumer";
+    String TOPIC_CONSUMER_GROUP = "notificationTopicConsumer";
 
-    public static final String SAAS_CONSUMER_GROUP = "notificationGroupEventPushConsumer";
+    String SAAS_CONSUMER_GROUP = "notificationGroupEventPushConsumer";
   }
 
   /**
    * MQ生产组
    */
-  public static class ProducerGroup {
+  interface ProducerGroup {
 
-    public static final String PRODUCER_GROUP = "notificationProducer";
+    String PRODUCER_GROUP = "notificationProducer";
   }
 
   /**
    * 事件筛选条件
    */
-  public static class EventCondition {
+  interface EventCondition {
 
     /**
      * 统计未读数时需要查询出来的eventType
      */
-    public static final List<Integer> UNREAD_EVENT_TYPES = Arrays.asList(
+    List<Integer> UNREAD_EVENT_TYPES = Arrays.asList(
         EventType.RESET.getValue(),
         EventType.RECEIVE.getValue(),
         EventType.DESTROY.getValue(),
