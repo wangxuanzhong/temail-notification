@@ -258,7 +258,7 @@ public class NotificationEventService {
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
 
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
-    Map<String, Object> result = new HashMap<>(2);
+    Map<String, Object> result = new HashMap<>(3);
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
 
