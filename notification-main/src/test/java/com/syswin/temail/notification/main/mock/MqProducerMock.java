@@ -12,11 +12,6 @@ public class MqProducerMock implements IMqProducer {
   private final String topic = "test";
 
   @Override
-  public void start() {
-
-  }
-
-  @Override
   public void sendMessage(String body, String topic, String tags, String keys) {
     LOGGER.info("MQ: body: {}", body);
     LOGGER.info("MQ: topic: {}", topic);
@@ -38,9 +33,5 @@ public class MqProducerMock implements IMqProducer {
   @Override
   public void sendMessage(String body) {
     sendMessage(body, topic, "", "");
-  }
-
-  @Override
-  public void stop() {
   }
 }

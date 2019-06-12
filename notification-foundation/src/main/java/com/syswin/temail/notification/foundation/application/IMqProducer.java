@@ -8,7 +8,8 @@ public interface IMqProducer {
   /**
    * 启动
    */
-  void start();
+  default void start() {
+  }
 
   /**
    * 发消息
@@ -38,6 +39,7 @@ public interface IMqProducer {
   /**
    * 关闭资源
    */
-  void stop();
+  default void stop() {
+  }
 
 }

@@ -27,11 +27,6 @@ public class LibraryMessagingMqProducer implements IMqProducer {
     this.topic = topic;
   }
 
-  @Override
-  public void start() {
-    // 启动不在此处实现
-  }
-
   /**
    * 发送消息
    */
@@ -65,10 +60,4 @@ public class LibraryMessagingMqProducer implements IMqProducer {
   public void sendMessage(String body) {
     sendMessage(body, topic, "", "");
   }
-
-  @Override
-  public void stop() {
-    // 停止不在此处实现
-  }
-
 }

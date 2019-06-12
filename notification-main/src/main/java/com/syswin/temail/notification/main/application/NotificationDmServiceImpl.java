@@ -120,7 +120,7 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
           }
         }
       }
-    } else { // dispatcher tpoic
+    } else { // dispatcher topic
       iMqProducer.sendMessage(iJsonService.toJson(response), tag);
     }
   }
