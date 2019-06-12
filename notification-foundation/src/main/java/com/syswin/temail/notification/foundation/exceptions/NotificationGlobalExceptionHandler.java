@@ -20,7 +20,8 @@ public class NotificationGlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Response> handleException(Exception e) {
     LOGGER.error("Exception:{}", getExceptionStack(e));
-    return new ResponseEntity<>(new Response(HttpStatus.INTERNAL_SERVER_ERROR, "system exception: " + e), HttpStatus.INTERNAL_SERVER_ERROR);
+    return new ResponseEntity<>(new Response(HttpStatus.INTERNAL_SERVER_ERROR, "system exception: " + e),
+        HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   /**
@@ -29,7 +30,8 @@ public class NotificationGlobalExceptionHandler {
   @ExceptionHandler(ServletRequestBindingException.class)
   public ResponseEntity<Response> handleServletRequestBindingException(Exception e) {
     LOGGER.warn("Exception:{}", getExceptionStack(e));
-    return new ResponseEntity<>(new Response(HttpStatus.BAD_REQUEST, "bad request exception: " + e), HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(new Response(HttpStatus.BAD_REQUEST, "bad request exception: " + e),
+        HttpStatus.BAD_REQUEST);
   }
 
   private String getExceptionStack(Exception e) {
