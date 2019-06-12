@@ -5,9 +5,6 @@ import com.syswin.temail.notification.main.application.NotificationDmServiceImpl
 import com.syswin.temail.notification.main.domains.Event;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.lang.invoke.MethodHandles;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/notification")
 @Api(value = "notification", tags = "notification dm service")
 public class NotificationDmController {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String CDTP_HEADER = "CDTP-header";
   private static final String X_PACKET_ID = "X-PACKET-ID";
