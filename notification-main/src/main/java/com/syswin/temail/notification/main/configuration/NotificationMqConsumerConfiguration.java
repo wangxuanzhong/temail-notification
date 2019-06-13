@@ -7,7 +7,7 @@ import com.syswin.temail.notification.main.application.NotificationGroupChatServ
 import com.syswin.temail.notification.main.application.NotificationSingleChatServiceImpl;
 import com.syswin.temail.notification.main.application.NotificationTopicServiceImpl;
 import com.syswin.temail.notification.main.application.mq.RocketMqConsumer;
-import com.syswin.temail.notification.main.util.Constant.ConsumerGroup;
+import com.syswin.temail.notification.main.constants.Constant.ConsumerGroup;
 import java.lang.invoke.MethodHandles;
 import java.util.function.Consumer;
 import org.slf4j.Logger;

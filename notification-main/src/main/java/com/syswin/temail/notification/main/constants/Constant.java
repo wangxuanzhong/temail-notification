@@ -1,4 +1,4 @@
-package com.syswin.temail.notification.main.util;
+package com.syswin.temail.notification.main.constants;
 
 import com.syswin.temail.notification.main.domains.EventType;
 import java.util.Arrays;

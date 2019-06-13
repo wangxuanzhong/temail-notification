@@ -2,12 +2,12 @@ package com.syswin.temail.notification.main.application.scheduler;
 
 import com.syswin.temail.notification.main.application.NotificationEventService;
 import com.syswin.temail.notification.main.application.NotificationRedisServiceImpl;
+import com.syswin.temail.notification.main.constants.Constant.EventCondition;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
-import com.syswin.temail.notification.main.util.Constant.EventCondition;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

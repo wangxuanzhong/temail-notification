@@ -6,7 +6,7 @@ import com.syswin.library.messaging.all.spring.MqProducerConfig;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.LibraryMessagingMqProducer;
 import com.syswin.temail.notification.main.application.mq.RocketMqProducer;
-import com.syswin.temail.notification.main.util.Constant.ProducerGroup;
+import com.syswin.temail.notification.main.constants.Constant.ProducerGroup;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import org.slf4j.Logger;
