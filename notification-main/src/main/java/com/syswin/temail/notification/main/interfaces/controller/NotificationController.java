@@ -123,12 +123,10 @@ public class NotificationController {
   }
 
   /**
-   * 接口功能已废弃
+   * 接口功能只有旧群聊使用
    */
   @ApiOperation(value = "update group chat user status 3 0007", consumes = "application/json")
-  @ApiIgnore
   @PutMapping("/groupchat/user/status")
-  @Deprecated
   public ResponseEntity<Response> updateGroupChatUserStatus(@RequestBody Member member,
       @RequestHeader(name = CDTP_HEADER) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -146,12 +144,10 @@ public class NotificationController {
   }
 
   /**
-   * 接口功能已废弃
+   * 接口功能只有旧群聊使用
    */
   @ApiOperation(value = "get do not disturb group 3 0008", consumes = "application/json")
-  @ApiIgnore
   @GetMapping("/groupchat/user/status")
-  @Deprecated
   public ResponseEntity<Response<Map<String, Integer>>> getUserDoNotDisturbGroups(@RequestParam String temail,
       @RequestParam String groupTemail, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();

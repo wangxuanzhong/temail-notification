@@ -397,7 +397,6 @@ public class NotificationEventService {
   /**
    * 修改群成员个人状态
    */
-  @Deprecated
   @Transactional(rollbackFor = Exception.class)
   public void updateGroupChatUserStatus(Member member, UserStatus userStatus, String header) {
     LOGGER.info("update user status, param: {}", member);
@@ -427,7 +426,6 @@ public class NotificationEventService {
   /**
    * 查询群成员个人状态
    */
-  @Deprecated
   public Map<String, Integer> getGroupChatUserStatus(String temail, String groupTemail) {
     LOGGER.info("get do not disturb group, temail: {}", temail);
     Map<String, Integer> result = new HashMap<>(1);
