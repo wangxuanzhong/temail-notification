@@ -258,7 +258,7 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
         this.sendGroupMessageToAll(event, header, tags);
         break;
       default:
-        LOGGER.warn("unsupport event type!");
+        LOGGER.warn("unsupported event type!");
     }
   }
 

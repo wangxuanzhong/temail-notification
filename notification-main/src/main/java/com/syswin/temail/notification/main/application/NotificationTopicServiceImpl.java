@@ -222,8 +222,8 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
     // 每个话题只返回最新一条回复消息
     allReplyMap.values().forEach(map -> {
       if (!map.isEmpty()) {
-        List<TopicEvent> replys = new ArrayList<>(map.values());
-        notifyEvents.add(replys.get(replys.size() - 1));
+        List<TopicEvent> replies = new ArrayList<>(map.values());
+        notifyEvents.add(replies.get(replies.size() - 1));
       }
     });
 
