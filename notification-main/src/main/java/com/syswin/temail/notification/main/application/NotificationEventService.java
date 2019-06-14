@@ -332,9 +332,8 @@ public class NotificationEventService {
           unreadMap.remove(event.getFrom());
           break;
         case RECEIVE:
-          // 消息发送者不计未读数
         case DESTROY:
-          // 焚毁消息发送者不计未读数
+          // 普通消息和焚毁消息发送者不计未读数
           if (!event.getFrom().equals(event.getTo()) && !event.getTo().equals(event.getTemail())) {
             msgIds.add(event.getMsgId());
           }
