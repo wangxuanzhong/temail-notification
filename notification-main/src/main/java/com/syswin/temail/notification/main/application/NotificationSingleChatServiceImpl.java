@@ -120,11 +120,11 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
         event.setTo(params.getFrom());
         sendMessage(event, header, tags);
         break;
+      // 只提供多端同步
       case ARCHIVE:
       case ARCHIVE_CANCEL:
       case DO_NOT_DISTURB:
       case DO_NOT_DISTURB_CANCEL:
-        // 只提供多端同步
         // from是操作人，to是会话的另一方
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
