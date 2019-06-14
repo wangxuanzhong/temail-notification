@@ -159,12 +159,7 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
     Long maxEventSeqId = topicMapper.selectLastEventSeqId(to);
 
     // 获取当前最新eventSeqId
-    Long lastEventSeqId;
-    if (events.isEmpty()) {
-      lastEventSeqId = maxEventSeqId;
-    } else {
-      lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
-    }
+    Long lastEventSeqId = events.isEmpty() ? maxEventSeqId : events.get(events.size() - 1).getEventSeqId();
 
     Map<String, Map<String, TopicEvent>> allTopicMap = new HashMap<>(16);
     Map<String, Map<String, TopicEvent>> allReplyMap = new HashMap<>(16);

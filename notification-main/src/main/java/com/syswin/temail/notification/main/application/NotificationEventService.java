@@ -78,12 +78,7 @@ public class NotificationEventService {
     Long maxEventSeqId = eventMapper.selectLastEventSeqId(to);
 
     // 获取当前最新eventSeqId
-    Long lastEventSeqId;
-    if (events.isEmpty()) {
-      lastEventSeqId = maxEventSeqId;
-    } else {
-      lastEventSeqId = events.get(events.size() - 1).getEventSeqId();
-    }
+    Long lastEventSeqId = events.isEmpty() ? maxEventSeqId : events.get(events.size() - 1).getEventSeqId();
 
 //    List<Long> packetEventIds = new ArrayList<>();
 //    events.forEach(event -> {
