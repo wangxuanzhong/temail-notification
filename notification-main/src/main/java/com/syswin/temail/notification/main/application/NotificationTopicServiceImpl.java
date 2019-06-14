@@ -66,7 +66,7 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
     // 前端需要的头信息
     String header = params.getHeader();
 
-    LOGGER.info("topic params: {}", params);
+    LOGGER.info("topic params: {}, tags: {}", params, tags);
     LOGGER.info("topic event type: {}", EventType.getByValue(topicEvent.getEventType()));
 
     switch (Objects.requireNonNull(EventType.getByValue(topicEvent.getEventType()))) {

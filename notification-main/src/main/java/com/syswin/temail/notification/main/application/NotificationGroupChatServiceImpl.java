@@ -64,8 +64,7 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
 
     // 前端需要的头信息
     String header = params.getHeader();
-
-    LOGGER.info("group chat params: {}", params);
+    LOGGER.info("group chat params: {}, tags: {}", params, tags);
     LOGGER.info("group chat event type: {}", EventType.getByValue(event.getEventType()));
 
     // 校验收到的数据是否重复

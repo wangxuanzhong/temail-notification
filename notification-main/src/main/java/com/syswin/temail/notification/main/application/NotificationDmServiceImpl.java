@@ -132,7 +132,7 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
   @Override
   public void handleMqMessage(String body, String tags) {
     Event event = iJsonService.fromJson(body, Event.class);
-    LOGGER.info("dm params: {}", event);
+    LOGGER.info("dm params: event={}, tags={}", event, tags);
     event.setEventType(EventType.PACKET.getValue());
 
     // 校验收到的消息通道是否是1x3000

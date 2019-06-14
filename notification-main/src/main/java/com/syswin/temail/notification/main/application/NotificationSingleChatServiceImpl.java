@@ -60,7 +60,7 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
     // 前端需要的头信息
     String header = params.getHeader();
 
-    LOGGER.info("single chat params: {}", params);
+    LOGGER.info("single chat params: {}, tags: {}", params, tags);
     LOGGER.info("single chat event type: {}", EventType.getByValue(event.getEventType()));
 
     // 校验收到的数据是否重复
