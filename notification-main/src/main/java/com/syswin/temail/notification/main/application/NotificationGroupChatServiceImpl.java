@@ -113,8 +113,8 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
         event.setTemail(null);
         memberMapper.deleteGroupMember(event);
         break;
+      // 只通知被添加的人
       case ADD_MEMBER:
-        // 只通知被添加的人
         // 校验群成员是否已存在，不存在时添加到数据库
         List<String> members = memberMapper.selectMember(event);
         if (!members.contains(event.getTemail())) {
@@ -130,8 +130,8 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
           LOGGER.warn("{} was group {} member, do nothing.", event.getTemail(), event.getGroupTemail());
         }
         break;
+      // 只通知被删除的人
       case DELETE_MEMBER:
-        // 只通知被删除的人
         List<String> temails = iJsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
         }.getType());
         List<String> names = iJsonService.fromJson(event.getName(), new TypeToken<List<String>>() {
@@ -155,8 +155,8 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
           this.sendSingleMessage(event, header, tags);
         }
         break;
+      // 只通知当事人
       case LEAVE_GROUP:
-        // 只通知当事人
         memberMapper.deleteGroupMember(event);
         // 通知当事人
         this.sendSingleMessage(event, header, tags);
@@ -199,9 +199,7 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
       case GROUP_ARCHIVE_CANCEL:
       case GROUP_SESSION_HIDDEN:
       case GROUP_DO_NOT_DISTURB:
-        // 暂时无此事件
       case GROUP_DO_NOT_DISTURB_CANCEL:
-        // 暂时无此事件
         this.sendSingleMessage(event, header, tags);
         break;
       case GROUP_STICK:
