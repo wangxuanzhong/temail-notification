@@ -236,7 +236,7 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
       notifyEvents.subList(0, notifyEvents.size() - maxReturnNum).clear();
     }
 
-    Map<String, Object> result = new HashMap<>(3);
+    Map<String, Object> result = new HashMap<>(5);
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
     result.put("events", notifyEvents);

@@ -253,7 +253,7 @@ public class NotificationEventService {
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
 
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
-    Map<String, Object> result = new HashMap<>(3);
+    Map<String, Object> result = new HashMap<>(5);
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
 
@@ -422,7 +422,7 @@ public class NotificationEventService {
    */
   public Map<String, Integer> getGroupChatUserStatus(String temail, String groupTemail) {
     LOGGER.info("get do not disturb group, temail: {}", temail);
-    Map<String, Integer> result = new HashMap<>(1);
+    Map<String, Integer> result = new HashMap<>(3);
     result.put("userStatus", memberMapper.selectUserStatus(temail, groupTemail));
     return result;
   }
