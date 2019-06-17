@@ -1,11 +1,17 @@
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
+import com.syswin.temail.notification.main.dto.CdtpResponse;
+import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
+import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
+import com.syswin.temail.notification.main.util.TopicEventUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -32,22 +37,34 @@ public class NotificationTopicServiceImplMockTest {
   private static final String from = "a";
   private static final String to = "b";
 
-  @Value("${spring.rocketmq.topics.mailAgent.topicChat}")
-  private String topic;
+  private MailAgentParams params = new MailAgentParams();
+  private Gson gson = new Gson();
 
   @MockBean
   private TopicMapper topicMapper;
+  @MockBean
+  private IMqProducer iMqProducer;
+  @MockBean
+  private NotificationRedisServiceImpl redisService;
   @Autowired
   private IJsonService iJsonService;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
 
-  private NotificationTopicServiceImpl notificationTopicServiceImpl;
+  private NotificationTopicServiceImpl topicServiceForGet;
+  private NotificationTopicServiceImpl topicServiceForHandle;
 
   @Before
   public void setUp() {
-    notificationTopicServiceImpl = new NotificationTopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper, iJsonService);
+    topicServiceForGet = new NotificationTopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper, iJsonService);
+    topicServiceForHandle = new NotificationTopicServiceImpl(iMqProducer, redisService, topicMapper, iJsonService);
+
+    params.setHeader(ConstantMock.HEADER);
+    params.setFrom(from);
+    params.setTo(to);
+    params.setxPacketId(UUID.randomUUID().toString());
+    params.setTimestamp(System.currentTimeMillis());
   }
 
   private TopicEvent initEvent() {
@@ -63,8 +80,9 @@ public class NotificationTopicServiceImplMockTest {
   @Test
   public void TestGetEventsBranchEmpty() {
     List<TopicEvent> topicEvents = new ArrayList<>();
-    Mockito.when(topicMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(topicEvents);
-    List<TopicEvent> result = (List<TopicEvent>) notificationTopicServiceImpl.getTopicEventsLimited(to, 0L, null).get("events");
+    Mockito.when(topicMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt()))
+        .thenReturn(topicEvents);
+    List<TopicEvent> result = (List<TopicEvent>) topicServiceForGet.getTopicEventsLimited(to, 0L, null).get("events");
     Assertions.assertThat(result).isEmpty();
   }
 
@@ -222,10 +240,79 @@ public class NotificationTopicServiceImplMockTest {
    * @return 合并后的结果
    */
   private List<TopicEvent> getEvents(List<TopicEvent> topicEvents) {
-    Mockito.when(topicMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(topicEvents);
-    Mockito.when(topicMapper.selectLastEventSeqId(Mockito.anyString())).thenReturn(topicEvents.get(topicEvents.size() - 1).getEventSeqId());
-    List<TopicEvent> result = (List<TopicEvent>) notificationTopicServiceImpl.getTopicEventsLimited(to, 0L, null).get("events");
+    Mockito.when(topicMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt()))
+        .thenReturn(topicEvents);
+    Mockito.when(topicMapper.selectLastEventSeqId(Mockito.anyString()))
+        .thenReturn(topicEvents.get(topicEvents.size() - 1).getEventSeqId());
+    List<TopicEvent> result = (List<TopicEvent>) topicServiceForGet.getTopicEventsLimited(to, 0L, null).get("events");
     System.out.println(result);
     return result;
+  }
+
+
+  /**
+   * EventType TOPIC 21 话题消息发送
+   */
+  @Test
+  public void testEventTypeTopic() {
+    params.setSessionMessageType(EventType.TOPIC.getValue());
+    params.setTopicId("topic_1");
+    params.setMsgid("1");
+    params.setSeqNo(1L);
+    params.setTopicSeqId(1L);
+    params.setToMsg("这是一条话题测试消息！");
+    params.setTitle("话题标题");
+    params.setReceivers(Arrays.asList("b", "c", "d"));
+    params.setCc(Arrays.asList("J", "Q", "K"));
+    params.setTo("b");
+
+    TopicEvent topicEvent = this.mock();
+    topicEvent.setTitle(params.getTitle());
+    topicEvent.setReceivers(params.getReceivers());
+    topicEvent.setCc(params.getCc());
+    topicEvent.setTopicSeqId(params.getTopicSeqId());
+    topicEvent.setEventSeqId(1L);
+    topicEvent.autoWriteExtendParam(iJsonService);
+
+    CdtpResponse cdtpResponse = new CdtpResponse(topicEvent.getTo(), topicEvent.getEventType(), ConstantMock.HEADER,
+        TopicEventUtil.toJson(iJsonService, topicEvent));
+
+    topicServiceForHandle.handleMqMessage(gson.toJson(params), params.getTopicId());
+
+    Mockito.verify(iMqProducer).sendMessage(gson.toJson(cdtpResponse), params.getTopicId());
+  }
+
+
+  /**
+   * EventType TOPIC_REPLY 22 话题回复消息发送
+   */
+  @Test
+  public void testEventTypeTopicReply() {
+    params.setSessionMessageType(EventType.TOPIC_REPLY.getValue());
+    params.setTopicId("topic_1");
+    params.setMsgid("2");
+    params.setSeqNo(2L);
+    params.setToMsg("这是一条话题回复测试消息！");
+    params.setTo("b");
+
+    TopicEvent topicEvent = this.mock();
+    topicEvent.setEventSeqId(1L);
+    topicEvent.autoWriteExtendParam(iJsonService);
+
+    CdtpResponse cdtpResponse = new CdtpResponse(topicEvent.getTo(), topicEvent.getEventType(), ConstantMock.HEADER,
+        TopicEventUtil.toJson(iJsonService, topicEvent));
+
+    topicServiceForHandle.handleMqMessage(gson.toJson(params), params.getTopicId());
+
+    Mockito.verify(iMqProducer).sendMessage(gson.toJson(cdtpResponse), params.getTopicId());
+
+  }
+
+  private TopicEvent mock() {
+    Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
+
+    return new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(),
+        params.getMsgid(), params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
+        params.getTimestamp());
   }
 }

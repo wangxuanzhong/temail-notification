@@ -1,7 +1,5 @@
 package com.syswin.temail.notification.main.application;
 
-import static com.syswin.temail.notification.main.domains.EventType.TOPIC_REPLY;
-
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
@@ -56,9 +54,11 @@ public class NotificationTopicServiceImplTest {
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      notificationTopicServiceImpl = new NotificationTopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper, iJsonService);
+      notificationTopicServiceImpl = new NotificationTopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper,
+          iJsonService);
     } else {
-      notificationTopicServiceImpl = new NotificationTopicServiceImpl(iMqProducer, notificationRedisServiceImpl, topicMapper, iJsonService);
+      notificationTopicServiceImpl = new NotificationTopicServiceImpl(iMqProducer, notificationRedisServiceImpl,
+          topicMapper, iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -96,7 +96,7 @@ public class NotificationTopicServiceImplTest {
    */
   @Test
   public void testEventTypeTopicReply() {
-    params.setSessionMessageType(TOPIC_REPLY.getValue());
+    params.setSessionMessageType(EventType.TOPIC_REPLY.getValue());
     params.setTopicId("topic_1");
     params.setMsgid("2");
     params.setSeqNo(2L);
