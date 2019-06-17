@@ -76,13 +76,11 @@ public class NotificationDmServiceImplTest {
   @Before
   public void setUp() {
     if (isMock) {
-      notificationDmServiceImpl = new NotificationDmServiceImpl(mqProducerMock, redisServiceMock, eventMapper, iJsonService, restTemplateMock,
-          saasEnabled,
-          groupChatTopic, applicationTopic, authUrl);
+      notificationDmServiceImpl = new NotificationDmServiceImpl(mqProducerMock, redisServiceMock, eventMapper,
+          iJsonService, restTemplateMock, saasEnabled, groupChatTopic, applicationTopic, authUrl);
     } else {
-      notificationDmServiceImpl = new NotificationDmServiceImpl(iMqProducer, notificationRedisServiceImpl, eventMapper, iJsonService,
-          notificationRestTemplate,
-          saasEnabled, groupChatTopic, applicationTopic, authUrl);
+      notificationDmServiceImpl = new NotificationDmServiceImpl(iMqProducer, notificationRedisServiceImpl, eventMapper,
+          iJsonService, notificationRestTemplate, saasEnabled, groupChatTopic, applicationTopic, authUrl);
     }
   }
 
