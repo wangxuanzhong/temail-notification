@@ -35,8 +35,8 @@ public class NotificationMqConsumerConfiguration {
   private String groupChatTopic;
   @Value("${spring.rocketmq.topics.mailAgent.topicChat}")
   private String topicTopic;
-  @Value("${spring.rocketmq.topics.saas:saasTopic}")
-  private String saasTopic;
+  @Value("${spring.rocketmq.topics.dm:dmTopic}")
+  private String dmTopic;
   @Value("${app.temail.notification.mq.consumerType:REDIS}")
   private String consumerType;
 
@@ -65,10 +65,10 @@ public class NotificationMqConsumerConfiguration {
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
-  @ConditionalOnProperty(name = "app.temail.notification.saas.enabled", havingValue = "true")
-  public RocketMqConsumer notificationSaasRocketMqConsumer(NotificationDmServiceImpl dmService) {
-    LOGGER.info("IMqConsumer [rocketmq saas] started!");
-    return new RocketMqConsumer(dmService, host, saasTopic, ConsumerGroup.SAAS_CONSUMER_GROUP);
+  @ConditionalOnProperty(name = "app.temail.notification.mq.dm.consumer", havingValue = "rocketmq")
+  public RocketMqConsumer notificationDmRocketMqConsumer(NotificationDmServiceImpl dmService) {
+    LOGGER.info("IMqConsumer [rocketmq dm] started!");
+    return new RocketMqConsumer(dmService, host, dmTopic, ConsumerGroup.DM_CONSUMER_GROUP);
   }
 
   /**
@@ -108,6 +108,19 @@ public class NotificationMqConsumerConfiguration {
     return MqConsumerConfig.create()
         .group(ConsumerGroup.TOPIC_CONSUMER_GROUP)
         .topic(topicTopic)
+        .listener(listener)
+        .implementation(MqImplementation.valueOf(consumerType))
+        .build();
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "app.temail.notification.mq.dm.consumer", havingValue = "libraryMessage")
+  MqConsumerConfig notificationDmConsumerConfig(NotificationDmServiceImpl dmService) {
+    LOGGER.info("IMqConsumer [libraryMessage dm] started!");
+    Consumer<String> listener = body -> dmService.handleMqMessage(body, null);
+    return MqConsumerConfig.create()
+        .group(ConsumerGroup.DM_CONSUMER_GROUP)
+        .topic(dmTopic)
         .listener(listener)
         .implementation(MqImplementation.valueOf(consumerType))
         .build();

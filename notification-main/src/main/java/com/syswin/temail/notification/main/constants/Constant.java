@@ -24,7 +24,7 @@ public class Constant {
 
     public static final String TOPIC_CONSUMER_GROUP = "notificationTopicConsumer";
 
-    public static final String SAAS_CONSUMER_GROUP = "notificationGroupEventPushConsumer";
+    public static final String DM_CONSUMER_GROUP = "notificationGroupEventPushConsumer";
   }
 
   /**
