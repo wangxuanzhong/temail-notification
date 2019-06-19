@@ -170,7 +170,7 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
   }
 
 
-  public boolean checkIsSameDomain(String temail) {
+  private boolean checkIsSameDomain(String temail) {
     String url = authUrl + String.format(GET_PUBLIC_KEY, temail);
     try {
       // 调用auth获取公钥接口，接口返回404则表示用户不存在或是不在本域。

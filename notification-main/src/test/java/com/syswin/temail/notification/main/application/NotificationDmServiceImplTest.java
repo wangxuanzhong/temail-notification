@@ -1,7 +1,5 @@
 package com.syswin.temail.notification.main.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
@@ -103,15 +101,11 @@ public class NotificationDmServiceImplTest {
   @Test
   public void testHandleMqMessage() {
     String body = "{\"from\":\"a.group@systoontest.com\",\"to\":\"kingskaaay@systoontest.com\",\"xPacketId\":\"98db4c73-da07-4935-8858-ac7d98bb3b0e:R\",\"packet\":\"AAAElwABMAAAAAM1CiRlM2FiZjQ5MC0yNjUwLTQ0YjUtOWNmNi1lNDVhMjY0OGExMTIQAhq6AU1JR0lBa0lCMDNhYWY4cmhxRXl4VHFwcXAzR0ZhYUtnaVhsUWxEODVRLW5kWlN4REl4bmV0YW5ORnQtVjJxUjNSYzA0bVVELTBFVHdJeXlvWHlsZVlzZnlOWnFqUG9vQ1FnQy1pVkEyUm45UVZVbVpoS2NSMFpodU1majBXOFdBNEI5aEM4cFFMMUVudVllaVRPZF9FamZtX1ZybFlpV19Qd21WeVFPaTVtbVhkeEZ6NXJYUEVKRjcyQSAEKSJeCy5qAQAAMiY5OGRiNGM3My1kYTA3LTQ5MzUtODg1OC1hYzdkOThiYjNiMGU6UjoXYS5ncm91cEBzeXN0b29udGVzdC5jb21C0wFNSUdiTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFqQTRHR0FBUUFjRVJqbmdubDFKMGhFVTZ2T2Z2MVdDQTh6cW9oZGpKWWVpVWN6Nk1RbUx3dEhqbjZZZVNBYWZheFdjOF9QOEJYZWt2aDRna3hZeFZSeG1ZcHdqdi1SRU1CbFR1bDkwWWhkdF9OUU1JREg1UGo0Smg4TkhCaUVSYkNZZU1zN1B1VVdpUGRKYXl1UkZHM1hvaERSVUlvOHE1dVJIYjJFZlg0aGFEcmFxNm9Bc0M2SGtzShdraW5nc2t5QHN5c3Rvb250ZXN0LmNvbVLTAU1JR2JNQkFHQnlxR1NNNDlBZ0VHQlN1QkJBQWpBNEdHQUFRQVlrZWpaMGxwMmdRVUpaS1lSaGNER042MDJiSFNnRHBTTHE0Y1JGanZGbUVhYmxWWVR6VndPVGZmTFB0R0V4QjVQNzdKbVA4azlHVVV0Y2RmWUVSTDlQY0FmdkxRdUNqM2o1U291ZXBuUk9Sdk5zd2pUN1ZZZ3I5T3lxNmdHMi02MDJINWktYmRvUW9qdDJJOVFwbWNhQXhLT2FEQmRvTlJPVV9NQzdNbzI5UGpFTHNqHyJ7XG5cdFwidHlwZVwiIDogXCJCMDAwXCJcbn1cbiJyHG1zZ3NlYWwuc3lzdG9vbnRlc3QuY29tOjgwOTlBQUFBUXdBQUFFQUFBQUJ3QUFBQVlRTUFKTjFTS0Z6LUV6RlVoaThnbkowanhVVDdycENTejZON2xNeHlRaEg4dm9LejhtTmdEY1lyNFExQVZDc1VZbEpFVWt4RjV0LXpJQzZ3TVdYZHVCTnMtcEZ1LVJqOGlMR1VkX3hTNjR0WlBNdEpIc0F1X2NTWkp4Sm14Z0hzT3hEdnZwSjFqbE1DMHFqMjFOZm9IZWVzZlNGN01sem13N2Z6eGViMVJOTG9nVERIODcxcU4zaGR1T051aVBlajZJY0ZnYmhJLUN1QnpINmtNMTYyTGpMeUttVjRVZ0hxX2JOWlV0Q2VmNlloc3VFdUd0eUtmckdvLXZoMFRSUGNhZUpDeVkwSTNFb1B0RXAwUy1uVHl3WlNUWUtDaVVxUWFVZHJNQjZheWh0SGlsanl0bDRZd2ZlRDFsOF95bUZnLUhKcXdB\"}";
+//    body = "{\"xPacketId\":\"2d879886-21b2-4c85-b0c4-06fffb0d95da\",\"from\":\"a\",\"to\":\"b\",\"packet\":\"AAEwAAABAAY6AWFKAWIA\"}";
     notificationDmServiceImpl.handleMqMessage(body, null);
     notificationDmServiceImpl.handleMqMessage(body, null);
   }
 
-
-  @Test
-  public void testCheckIsSameDomain() {
-    assertThat(notificationDmServiceImpl.checkIsSameDomain("ctt40@systoontest.com")).isTrue();
-  }
 
   @Test
   @Ignore
@@ -124,11 +118,33 @@ public class NotificationDmServiceImplTest {
     System.out.println("data ======> " + data);
   }
 
+  @Test
+  @Ignore
+  public void buildPacket() {
+    CDTPHeader cdtpHeader = new CDTPHeader();
+    cdtpHeader.setSender("a");
+    cdtpHeader.setReceiver("b");
+
+    CDTPPacket cdtpPacket = new CDTPPacket();
+    cdtpPacket.setCommandSpace((short) 1);
+    cdtpPacket.setCommand((short) 0x3000);
+    cdtpPacket.setVersion((short) 1);
+    cdtpPacket.setHeader(cdtpHeader);
+    cdtpPacket.setData(new byte[1]);
+
+    Event event = new Event();
+    event.setFrom("a");
+    event.setTo("b");
+    event.setxPacketId(UUID.randomUUID().toString());
+    event.setPacket(notificationPacketUtil.encodeData(NotificationPacketUtil.pack(cdtpPacket)));
+
+    System.out.println(gson.toJson(event));
+  }
 
   @Test
   public void testSavePacketEventAll() {
     Event event = new Event();
-    event.setPacket(notificationPacketUtil.encodeData("test packet".getBytes()));
+    event.setPacket(notificationPacketUtil.encodeData("".getBytes()));
 
     CDTPHeader cdtpHeader = new CDTPHeader();
     cdtpHeader.setSender("a@test.com");
@@ -138,7 +154,6 @@ public class NotificationDmServiceImplTest {
     notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
 
     Map<String, Object> extraData = new HashMap<>();
-    cdtpHeader.setExtraData(gson.toJson(extraData));
     notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
 
     extraData.put("type", "A000");

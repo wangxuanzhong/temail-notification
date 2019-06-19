@@ -12,6 +12,7 @@ import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
@@ -57,9 +58,11 @@ public class NotificationSingleChatServiceImplTest {
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      notificationSingleChatServiceImpl = new NotificationSingleChatServiceImpl(mqProducerMock, redisServiceMock, eventMapper, iJsonService);
+      notificationSingleChatServiceImpl = new NotificationSingleChatServiceImpl(mqProducerMock, redisServiceMock,
+          eventMapper, iJsonService);
     } else {
-      notificationSingleChatServiceImpl = new NotificationSingleChatServiceImpl(iMqProducer, notificationRedisServiceImpl, eventMapper, iJsonService);
+      notificationSingleChatServiceImpl = new NotificationSingleChatServiceImpl(iMqProducer,
+          notificationRedisServiceImpl, eventMapper, iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -75,7 +78,7 @@ public class NotificationSingleChatServiceImplTest {
     params.setSessionMessageType(EventType.RECEIVE.getValue());
     params.setMsgid("1");
     params.setSeqNo(1L);
-    params.setToMsg("这是一条单聊测试消息！");
+    params.setToMsg(Base64.getUrlEncoder().encodeToString("这是一条单聊测试消息！".getBytes()));
     params.setAuthor("a");
     params.setFilter(Arrays.asList("b", "c", "d"));
 
@@ -117,6 +120,10 @@ public class NotificationSingleChatServiceImplTest {
   public void testEventTypeDestroyed() throws Exception {
     params.setSessionMessageType(EventType.DESTROYED.getValue());
     params.setMsgid("2");
+    params.setOwner(TEST_TO);
+    this.sendMessage(params, params.getFrom());
+
+    params.setOwner(TEST_FROM);
     this.sendMessage(params, params.getFrom());
   }
 
@@ -152,7 +159,7 @@ public class NotificationSingleChatServiceImplTest {
     params.setSessionMessageType(EventType.DESTROY.getValue());
     params.setMsgid("5");
     params.setSeqNo(1L);
-    params.setToMsg("这是一条单聊阅后即焚测试消息！");
+    params.setToMsg(Base64.getUrlEncoder().encodeToString("这是一条单聊阅后即焚测试消息！".getBytes()));
 
     params.setOwner(TEST_TO);
     this.sendMessage(params, params.getFrom());
@@ -167,10 +174,10 @@ public class NotificationSingleChatServiceImplTest {
   @Test
   public void testEventTypeReply() throws Exception {
     params.setSessionMessageType(EventType.REPLY.getValue());
-    params.setMsgid("reply_3");
+    params.setMsgid("reply_1");
     params.setParentMsgId("1");
     params.setSeqNo(1L);
-    params.setToMsg("这是一条单聊回复测试消息！");
+    params.setToMsg(Base64.getUrlEncoder().encodeToString("这是一条单聊回复测试消息！".getBytes()));
 
     params.setOwner(TEST_TO);
     this.sendMessage(params, params.getFrom());
@@ -202,6 +209,21 @@ public class NotificationSingleChatServiceImplTest {
     params.setSessionMessageType(EventType.REPLY_DELETE.getValue());
     params.setMsgid(gson.toJson(Arrays.asList("reply_5", "reply_3", "reply_4")));
     params.setParentMsgId("1");
+    this.sendMessage(params, params.getFrom());
+  }
+
+  /**
+   * EventType REPLY_RETRACT 19 回复消息已焚毁
+   */
+  @Test
+  public void testEventTypeReplyDestroyed() throws Exception {
+    params.setSessionMessageType(EventType.REPLY_DESTROYED.getValue());
+    params.setMsgid("reply_1");
+    params.setParentMsgId("1");
+    params.setOwner(TEST_TO);
+    this.sendMessage(params, params.getFrom());
+
+    params.setOwner(TEST_FROM);
     this.sendMessage(params, params.getFrom());
   }
 
@@ -251,7 +273,7 @@ public class NotificationSingleChatServiceImplTest {
   }
 
   /**
-   * EventType TRASH_DELETE 37 废纸篓消息还原
+   * EventType TRASH_DELETE 37 废纸篓消息删除
    */
   @Test
   public void testEventTypeTrashDelete() throws Exception {
@@ -303,6 +325,8 @@ public class NotificationSingleChatServiceImplTest {
       iMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
       Thread.sleep(2000);
     } else {
+      System.out.println("Message Body：" + gson.toJson(param));
+      System.out.println("Tag：" + tags);
       notificationSingleChatServiceImpl.handleMqMessage(gson.toJson(param), tags);
     }
   }

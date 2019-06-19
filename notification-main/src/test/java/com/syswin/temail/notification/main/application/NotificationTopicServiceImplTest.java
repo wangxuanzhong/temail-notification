@@ -10,6 +10,7 @@ import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,7 +77,7 @@ public class NotificationTopicServiceImplTest {
     params.setMsgid("1");
     params.setSeqNo(1L);
     params.setTopicSeqId(1L);
-    params.setToMsg("这是一条话题测试消息！");
+    params.setToMsg(Base64.getUrlEncoder().encodeToString("这是一条话题测试消息！".getBytes()));
     params.setTitle("话题标题");
     params.setReceivers(Arrays.asList("b", "c", "d"));
     params.setCc(Arrays.asList("J", "Q", "K"));
@@ -100,7 +101,7 @@ public class NotificationTopicServiceImplTest {
     params.setTopicId("topic_1");
     params.setMsgid("2");
     params.setSeqNo(2L);
-    params.setToMsg("这是一条话题回复测试消息！");
+    params.setToMsg(Base64.getUrlEncoder().encodeToString("这是一条话题回复测试消息！".getBytes()));
     params.setTo("b");
     this.sendMessage(params, params.getTopicId());
     params.setTo("c");
@@ -173,10 +174,10 @@ public class NotificationTopicServiceImplTest {
   public void testEventTypeTopicSessionDelete() {
     params.setSessionMessageType(EventType.TOPIC_SESSION_DELETE.getValue());
     params.setTopicId("topic_1");
-    params.setFrom("b");
+    params.setFrom("a");
     params.setTo(null);
     params.setDeleteAllMsg(true);
-    this.sendMessage(params, params.getTopicId());
+    this.sendMessage(params, params.getFrom());
   }
 
   private void sendMessage(MailAgentParams param, String tags) {
@@ -195,6 +196,8 @@ public class NotificationTopicServiceImplTest {
         e.printStackTrace();
       }
     } else {
+      System.out.println("Message Body：" + gson.toJson(param));
+      System.out.println("Tag：" + tags);
       notificationTopicServiceImpl.handleMqMessage(gson.toJson(param), tags);
     }
   }
