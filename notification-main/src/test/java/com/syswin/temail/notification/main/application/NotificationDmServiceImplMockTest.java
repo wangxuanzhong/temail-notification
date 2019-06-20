@@ -49,8 +49,10 @@ public class NotificationDmServiceImplMockTest {
   @MockBean
   private NotificationRedisServiceImpl redisService;
 
-  @Value("${app.temail.notification.saas.enabled:false}")
-  private String saasEnabled;
+  @Value("${app.temail.notification.groupChat.enabled:false}")
+  private String groupChatEnabled;
+  @Value("${app.temail.notification.application.enabled:false}")
+  private String applicationEnabled;
   @Value("${spring.rocketmq.topics.notify.groupChat:notify}")
   private String groupChatTopic;
   @Value("${spring.rocketmq.topics.notify.application:notify}")
@@ -72,7 +74,7 @@ public class NotificationDmServiceImplMockTest {
   @Before
   public void setUp() {
     dmService = new NotificationDmServiceImpl(iMqProducer, redisService, eventMapper, iJsonService, restTemplateMock,
-        saasEnabled, groupChatTopic, applicationTopic, authUrl);
+        groupChatEnabled, applicationEnabled, groupChatTopic, applicationTopic, authUrl);
   }
 
   @Test

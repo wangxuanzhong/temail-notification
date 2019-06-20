@@ -48,8 +48,10 @@ public class NotificationDmServiceImplTest {
   private NotificationRedisServiceImpl notificationRedisServiceImpl;
   @Autowired
   private RestTemplate notificationRestTemplate;
-  @Value("${app.temail.notification.saas.enabled:false}")
-  private String saasEnabled;
+  @Value("${app.temail.notification.groupChat.enabled:false}")
+  private String groupChatEnabled;
+  @Value("${app.temail.notification.application.enabled:false}")
+  private String applicationEnabled;
   @Value("${spring.rocketmq.topics.notify.groupChat:notify}")
   private String groupChatTopic;
   @Value("${spring.rocketmq.topics.notify.application:notify}")
@@ -75,10 +77,12 @@ public class NotificationDmServiceImplTest {
   public void setUp() {
     if (isMock) {
       notificationDmServiceImpl = new NotificationDmServiceImpl(mqProducerMock, redisServiceMock, eventMapper,
-          iJsonService, restTemplateMock, saasEnabled, groupChatTopic, applicationTopic, authUrl);
+          iJsonService, restTemplateMock, groupChatEnabled, applicationEnabled, groupChatTopic, applicationTopic,
+          authUrl);
     } else {
       notificationDmServiceImpl = new NotificationDmServiceImpl(iMqProducer, notificationRedisServiceImpl, eventMapper,
-          iJsonService, notificationRestTemplate, saasEnabled, groupChatTopic, applicationTopic, authUrl);
+          iJsonService, notificationRestTemplate, groupChatEnabled, applicationEnabled, groupChatTopic,
+          applicationTopic, authUrl);
     }
   }
 
@@ -150,11 +154,11 @@ public class NotificationDmServiceImplTest {
     cdtpHeader.setSender("a@test.com");
     cdtpHeader.setReceiver("b@test.com");
     String xPacketId = UUID.randomUUID().toString();
-    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
-    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
+//    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
+//    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
 
     Map<String, Object> extraData = new HashMap<>();
-    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
+//    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
 
     extraData.put("type", "A000");
     cdtpHeader.setExtraData(gson.toJson(extraData));

@@ -36,9 +36,12 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final String GET_PUBLIC_KEY = "/temails/%s";
+  private static final String GET_PUBLIC_KEY_PATH = "/temails/%s";
   private static final int EVENT_COMMAND_SPACE = 0x1;
   private static final int EVENT_COMMAND = 0x3000;
+
+  private static final String GROUP_CHAT_TYPE_PREFIX = "A";
+  private static final String APPLICATION_TYPE_PREFIX = "B";
 
   private final IMqProducer iMqProducer;
   private final NotificationRedisServiceImpl notificationRedisServiceImpl;
@@ -47,7 +50,8 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
   private final RestTemplate restTemplate;
   private final NotificationPacketUtil notificationPacketUtil = new NotificationPacketUtil();
 
-  private final String saasEnabled;
+  private final String groupChatEnabled;
+  private final String applicationEnabled;
   private final String groupChatTopic;
   private final String applicationTopic;
   private final String authUrl;
@@ -55,7 +59,8 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
   @Autowired
   public NotificationDmServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl,
       EventMapper eventMapper, IJsonService iJsonService, RestTemplate notificationRestTemplate,
-      @Value("${app.temail.notification.saas.enabled:false}") String saasEnabled,
+      @Value("${app.temail.notification.groupChat.enabled:false}") String groupChatEnabled,
+      @Value("${app.temail.notification.application.enabled:false}") String applicationEnabled,
       @Value("${spring.rocketmq.topics.notify.groupChat:notify}") String groupChatTopic,
       @Value("${spring.rocketmq.topics.notify.application:notify}") String applicationTopic,
       @Value("${url.temail.auth:authUrl}") String authUrl) {
@@ -64,7 +69,8 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
     this.eventMapper = eventMapper;
     this.iJsonService = iJsonService;
     this.restTemplate = notificationRestTemplate;
-    this.saasEnabled = saasEnabled;
+    this.groupChatEnabled = groupChatEnabled;
+    this.applicationEnabled = applicationEnabled;
     this.groupChatTopic = groupChatTopic;
     this.applicationTopic = applicationTopic;
     this.authUrl = authUrl;
@@ -101,26 +107,25 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
         .fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
         }.getType());
 
-    if (Boolean.valueOf(saasEnabled) && extraDataMap != null) {
+    if (extraDataMap != null) {
       Object type = extraDataMap.get("type");
       if (type == null) {
+        // 发送到dispatcher
         iMqProducer.sendMessage(iJsonService.toJson(response), tag);
+      } else if (Boolean.valueOf(groupChatEnabled) && type instanceof String && type.toString()
+          .startsWith(GROUP_CHAT_TYPE_PREFIX)) {
+        // 发送到新群聊topic
+        iMqProducer.sendMessage(EventUtil.toJson(iJsonService, event), groupChatTopic, tag, "");
+      } else if (Boolean.valueOf(applicationEnabled) && type instanceof String && type.toString()
+          .startsWith(APPLICATION_TYPE_PREFIX)) {
+        // 发送到协同应用topic
+        iMqProducer.sendMessage(EventUtil.toJson(iJsonService, event), applicationTopic, tag, "");
       } else {
-        final String groupChatTypePrefix = "A";
-        if (type instanceof String && type.toString().startsWith(groupChatTypePrefix)) {
-          // 新群聊 topic
-          iMqProducer.sendMessage(EventUtil.toJson(iJsonService, event), groupChatTopic, tag, "");
-        } else {
-          final String appTypePrefix = "B";
-          if (type instanceof String && type.toString().startsWith(appTypePrefix)) {
-            // 协同应用 topic
-            iMqProducer.sendMessage(EventUtil.toJson(iJsonService, event), applicationTopic, tag, "");
-          } else {  // dispatcher topic
-            iMqProducer.sendMessage(iJsonService.toJson(response), tag);
-          }
-        }
+        // 发送到dispatcher
+        iMqProducer.sendMessage(iJsonService.toJson(response), tag);
       }
-    } else { // dispatcher topic
+    } else {
+      // 发送到dispatcher
       iMqProducer.sendMessage(iJsonService.toJson(response), tag);
     }
   }
@@ -171,7 +176,7 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
 
 
   private boolean checkIsSameDomain(String temail) {
-    String url = authUrl + String.format(GET_PUBLIC_KEY, temail);
+    String url = authUrl + String.format(GET_PUBLIC_KEY_PATH, temail);
     try {
       // 调用auth获取公钥接口，接口返回404则表示用户不存在或是不在本域。
       LOGGER.debug("check domain url: {}", url);
