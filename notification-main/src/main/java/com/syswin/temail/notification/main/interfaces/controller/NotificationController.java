@@ -57,6 +57,19 @@ public class NotificationController {
       @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
+
+    if (to == null || "".equals(to)) {
+      LOGGER.warn("pull event 3 0001 : from mast not empty!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from mast not empty!"), headers,
+          HttpStatus.BAD_REQUEST);
+    }
+
+    if (eventSeqId == null) {
+      LOGGER.warn("pull event 3 0001 : eventSeqId mast not null!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "eventSeqId mast not null!"), headers,
+          HttpStatus.BAD_REQUEST);
+    }
+
     Map<String, Object> result = notificationEventService.getEvents(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
@@ -67,6 +80,13 @@ public class NotificationController {
       @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
+
+    if (to == null || "".equals(to)) {
+      LOGGER.warn("get unread 3 0002 : from mast not empty!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from mast not empty!"), headers,
+          HttpStatus.BAD_REQUEST);
+    }
+
     List<UnreadResponse> result = notificationEventService.getUnread(to);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
@@ -78,17 +98,17 @@ public class NotificationController {
     headers.add(CDTP_HEADER, header);
 
     if (event.getTo() == null || "".equals(event.getTo())) {
-      LOGGER.warn("reset 3 0004 : to mast not null!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "to mast not null!"), headers,
+      LOGGER.warn("reset 3 0004 : to mast not empty!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "to mast not empty!"), headers,
           HttpStatus.BAD_REQUEST);
     }
 
     boolean fromIsEmpty = event.getFrom() == null || "".equals(event.getFrom());
     boolean groupTemailIsEmpty = event.getGroupTemail() == null || "".equals(event.getGroupTemail());
     if (fromIsEmpty && groupTemailIsEmpty) {
-      LOGGER.warn("reset 3 0004 : from and groupTemail mast not null at the same time!");
+      LOGGER.warn("reset 3 0004 : from and groupTemail mast not empty at the same time!");
       return new ResponseEntity<>(
-          new Response<>(HttpStatus.BAD_REQUEST, "from and groupTemail mast not null at the same time!"), headers,
+          new Response<>(HttpStatus.BAD_REQUEST, "from and groupTemail mast not empty at the same time!"), headers,
           HttpStatus.BAD_REQUEST);
     }
 
@@ -118,6 +138,19 @@ public class NotificationController {
       @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
+
+    if (to == null || "".equals(to)) {
+      LOGGER.warn("pull topic event 3 0006 : from mast not empty!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from mast not empty!"), headers,
+          HttpStatus.BAD_REQUEST);
+    }
+
+    if (eventSeqId == null) {
+      LOGGER.warn("pull topic event 3 0006 : eventSeqId mast not null!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "eventSeqId mast not null!"), headers,
+          HttpStatus.BAD_REQUEST);
+    }
+
     Map<String, Object> result = notificationTopicServiceImpl.getTopicEvents(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
@@ -164,6 +197,19 @@ public class NotificationController {
       @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
+
+    if (to == null || "".equals(to)) {
+      LOGGER.warn("pull event limited 3 0009 : from mast not empty!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from mast not empty!"), headers,
+          HttpStatus.BAD_REQUEST);
+    }
+
+    if (eventSeqId == null) {
+      LOGGER.warn("pull event limited 3 0009 : eventSeqId mast not null!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "eventSeqId mast not null!"), headers,
+          HttpStatus.BAD_REQUEST);
+    }
+
     Map<String, Object> result = notificationEventService.getEventsLimited(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
@@ -175,6 +221,19 @@ public class NotificationController {
       @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
+
+    if (to == null || "".equals(to)) {
+      LOGGER.warn("pull topic event limited 3 000A : from mast not empty!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from mast not empty!"), headers,
+          HttpStatus.BAD_REQUEST);
+    }
+
+    if (eventSeqId == null) {
+      LOGGER.warn("pull topic event limited 3 000A : eventSeqId mast not null!");
+      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "eventSeqId mast not null!"), headers,
+          HttpStatus.BAD_REQUEST);
+    }
+
     Map<String, Object> result = notificationTopicServiceImpl.getTopicEventsLimited(to, eventSeqId, pageSize);
     return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
   }
