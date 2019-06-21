@@ -17,6 +17,7 @@ public class SyncEventUtil {
    * 转换成json，清空后端使用参数
    */
   public static String toJson(IJsonService iJsonService, SyncEvent event) {
+    event.setHeader(null);
     return iJsonService.toJson(event);
   }
 

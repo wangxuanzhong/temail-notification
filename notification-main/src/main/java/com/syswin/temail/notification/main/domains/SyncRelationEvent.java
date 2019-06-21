@@ -20,6 +20,9 @@ public class SyncRelationEvent extends SyncEvent {
   private Long createTimeStp;
   private Long updateTimeStp;
 
+  public SyncRelationEvent() {
+  }
+
   public SyncRelationEvent(String xPacketId, Integer eventType, String from, String to, String myVcardId,
       String oppositeId, String remark, int status, Integer isEmail, Integer contactType, Long createTimeStp,
       Long updateTimeStp) {
