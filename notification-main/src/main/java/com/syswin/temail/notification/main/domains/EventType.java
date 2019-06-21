@@ -99,7 +99,12 @@ public enum EventType {
   TOPIC_SESSION_DELETE(39, "话题会话删除"),
 
   // 其他
-  PACKET(52, "报文事件");
+  PACKET(52, "报文事件"),
+
+  // 多端同步
+  RELATION_ADD(53, "新增关系"),
+  RELATION_UPDATE(54, "更新关系"),
+  RELATION_DELETE(55, "删除关系");
 
 
   private final int value;
