@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * 话题通知事件处理类
  *
- * @author liusen
+ * @author liusen@syswin.com
  */
 @Service
 public class NotificationTopicServiceImpl implements IMqConsumerService {

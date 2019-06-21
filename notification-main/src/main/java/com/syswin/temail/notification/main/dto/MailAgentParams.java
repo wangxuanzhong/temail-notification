@@ -3,7 +3,7 @@ package com.syswin.temail.notification.main.dto;
 import java.util.List;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 public class MailAgentParams {
 

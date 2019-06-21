@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 @RestController
 @RequestMapping("/notification/schedule")

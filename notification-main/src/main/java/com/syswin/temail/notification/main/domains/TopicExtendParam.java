@@ -6,6 +6,8 @@ import java.util.List;
 
 /**
  * 事件扩展参数
+ *
+ * @author liusen@syswin.com
  */
 @JsonInclude(Include.NON_NULL)
 class TopicExtendParam {

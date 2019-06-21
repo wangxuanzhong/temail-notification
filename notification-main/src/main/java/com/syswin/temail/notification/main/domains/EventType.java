@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.main.domains;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 public enum EventType {
   // 消息部分

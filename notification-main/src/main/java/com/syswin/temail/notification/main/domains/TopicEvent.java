@@ -7,7 +7,7 @@ import com.syswin.temail.notification.foundation.application.IJsonService;
 import java.util.List;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 @JsonInclude(Include.NON_NULL)
 public class TopicEvent {

@@ -29,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * dm事件处理类
  *
- * @author liusen
+ * @author liusen@syswin.com
  */
 @Service
 public class NotificationDmServiceImpl implements IMqConsumerService {

@@ -7,7 +7,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 @Service
 public class NotificationRedisServiceImpl implements ISequenceService {

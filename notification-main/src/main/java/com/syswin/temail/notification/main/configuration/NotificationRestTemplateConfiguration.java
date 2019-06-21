@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * RestTemplate配置类
  *
- * @author liusen
+ * @author liusen@syswin.com
  */
 @Configuration
 public class NotificationRestTemplateConfiguration {

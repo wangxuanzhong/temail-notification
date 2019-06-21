@@ -6,7 +6,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 @SpringBootApplication(scanBasePackages = "com.syswin.temail.notification")
 public class Application extends SpringBootServletInitializer {

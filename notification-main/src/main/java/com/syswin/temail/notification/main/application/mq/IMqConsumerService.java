@@ -2,7 +2,7 @@ package com.syswin.temail.notification.main.application.mq;
 
 /**
  * rocket mq 消费者
- * @author liusen
+ * @author liusen@syswin.com
  */
 public interface IMqConsumerService {
 

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * quartz配置类
  *
- * @author liusen
+ * @author liusen@syswin.com
  */
 @Configuration
 public class NotificationQuartzConfiguration {

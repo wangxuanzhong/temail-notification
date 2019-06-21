@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 /**
  * gson工具类
  *
- * @author liusen
+ * @author liusen@syswin.com
  */
 @Service
 public class NotificationGsonServiceImpl implements IJsonService {

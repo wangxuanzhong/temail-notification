@@ -17,7 +17,7 @@ import org.springframework.dao.DuplicateKeyException;
 /**
  * rocket mq 消费者
  *
- * @author liusen
+ * @author liusen@syswin.com
  */
 public class RocketMqConsumer {
 

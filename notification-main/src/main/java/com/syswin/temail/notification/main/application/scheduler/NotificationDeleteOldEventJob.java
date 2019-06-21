@@ -8,7 +8,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 /**
  * 清理过期单群聊事件job类
  *
- * @author liusen
+ * @author liusen@syswin.com
  */
 @DisallowConcurrentExecution
 public class NotificationDeleteOldEventJob extends QuartzJobBean {

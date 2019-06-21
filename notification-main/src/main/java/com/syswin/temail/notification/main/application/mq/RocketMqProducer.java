@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 /**
  * rocket mq 生产者
  *
- * @author liusen
+ * @author liusen@syswin.com
  */
 public class RocketMqProducer implements IMqProducer {
 

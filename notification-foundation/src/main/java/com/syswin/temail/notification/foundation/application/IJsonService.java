@@ -3,7 +3,7 @@ package com.syswin.temail.notification.foundation.application;
 import java.lang.reflect.Type;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 public interface IJsonService {
 

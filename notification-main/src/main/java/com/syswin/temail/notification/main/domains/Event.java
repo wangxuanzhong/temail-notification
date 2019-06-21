@@ -8,7 +8,7 @@ import com.syswin.temail.notification.main.util.GzipUtil;
 import java.util.List;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 @JsonInclude(Include.NON_NULL)
 public class Event {

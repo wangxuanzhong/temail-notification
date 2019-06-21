@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 @RestController
 @RequestMapping("/notification")

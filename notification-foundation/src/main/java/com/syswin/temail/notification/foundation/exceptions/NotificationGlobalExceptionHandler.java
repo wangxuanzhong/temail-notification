@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
- * @author 刘森
+ * @author liusen@syswin.com
  */
 @ControllerAdvice
 public class NotificationGlobalExceptionHandler {

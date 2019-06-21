@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 初始化rocket mq生产者
  *
- * @author 刘森
+ * @author liusen@syswin.com
  */
 @Configuration
 public class NotificationMqProducerConfiguration {

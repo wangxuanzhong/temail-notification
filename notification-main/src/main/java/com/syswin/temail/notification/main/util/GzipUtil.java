@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 public class GzipUtil {
 

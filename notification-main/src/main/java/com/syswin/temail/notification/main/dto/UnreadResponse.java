@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 @JsonInclude(Include.NON_NULL)
 public class UnreadResponse {

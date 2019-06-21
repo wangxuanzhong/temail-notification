@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * 旧群聊通知事件处理类
  *
- * @author liusen
+ * @author liusen@syswin.com
  */
 @Service
 public class NotificationGroupChatServiceImpl implements IMqConsumerService {

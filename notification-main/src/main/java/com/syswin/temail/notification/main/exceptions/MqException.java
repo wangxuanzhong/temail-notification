@@ -3,7 +3,7 @@ package com.syswin.temail.notification.main.exceptions;
 import com.syswin.temail.notification.foundation.exceptions.BaseException;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 public class MqException extends BaseException {
 

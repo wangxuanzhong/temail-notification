@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 @Repository
 public interface UnreadMapper {

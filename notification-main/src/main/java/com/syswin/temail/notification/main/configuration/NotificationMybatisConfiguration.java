@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * mybatis配置类
  *
- * @author liusen
+ * @author liusen@syswin.com
  */
 @Configuration
 @MapperScan("com.syswin.temail.notification.main.infrastructure")

@@ -8,7 +8,7 @@ import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import java.util.Objects;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 public class EventUtil {
 

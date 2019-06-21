@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 @Repository
 public interface EventMapper {

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 public class Constant {
 

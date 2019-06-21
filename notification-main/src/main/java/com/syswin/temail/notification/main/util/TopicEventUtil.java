@@ -5,7 +5,7 @@ import com.syswin.temail.notification.foundation.application.ISequenceService;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 
 /**
- * @author liusen
+ * @author liusen@syswin.com
  */
 public class TopicEventUtil {
 

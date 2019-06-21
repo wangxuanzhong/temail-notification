@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.springframework.http.HttpStatus;
 
 /**
- * @author 刘森
+ * @author liusen@syswin.com
  */
 @JsonInclude(Include.NON_NULL)
 public class Response<T> {

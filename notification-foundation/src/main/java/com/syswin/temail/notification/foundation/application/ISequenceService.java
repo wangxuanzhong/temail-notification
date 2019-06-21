@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.foundation.application;
 
 /**
- * @author 刘森
+ * @author liusen@syswin.com
  */
 public interface ISequenceService {
 

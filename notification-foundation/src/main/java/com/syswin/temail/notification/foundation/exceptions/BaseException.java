@@ -1,7 +1,7 @@
 package com.syswin.temail.notification.foundation.exceptions;
 
 /**
- * @author 刘森
+ * @author liusen@syswin.com
  */
 public class BaseException extends RuntimeException {
 
