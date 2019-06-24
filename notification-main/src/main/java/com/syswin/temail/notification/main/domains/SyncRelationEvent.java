@@ -2,6 +2,7 @@ package com.syswin.temail.notification.main.domains;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.List;
 
 /**
  * 关系服务多端同步参数
@@ -19,13 +20,14 @@ public class SyncRelationEvent extends SyncEvent {
   private Integer contactType;
   private Long createTimeStp;
   private Long updateTimeStp;
+  private List<String> deleteList;
 
   public SyncRelationEvent() {
   }
 
   public SyncRelationEvent(String xPacketId, Integer eventType, String from, String to, String myVcardId,
       String oppositeId, String remark, int status, Integer isEmail, Integer contactType, Long createTimeStp,
-      Long updateTimeStp) {
+      Long updateTimeStp, List<String> deleteList) {
     super(xPacketId, eventType, from, to);
     this.myVcardId = myVcardId;
     this.oppositeId = oppositeId;
@@ -35,6 +37,7 @@ public class SyncRelationEvent extends SyncEvent {
     this.contactType = contactType;
     this.createTimeStp = createTimeStp;
     this.updateTimeStp = updateTimeStp;
+    this.deleteList = deleteList;
   }
 
   public String getMyVcardId() {
@@ -101,6 +104,14 @@ public class SyncRelationEvent extends SyncEvent {
     this.updateTimeStp = updateTimeStp;
   }
 
+  public List<String> getDeleteList() {
+    return deleteList;
+  }
+
+  public void setDeleteList(List<String> deleteList) {
+    this.deleteList = deleteList;
+  }
+
   @Override
   public String toString() {
     return "SyncRelationEvent{" +
@@ -112,6 +123,7 @@ public class SyncRelationEvent extends SyncEvent {
         ", contactType=" + contactType +
         ", createTimeStp=" + createTimeStp +
         ", updateTimeStp=" + updateTimeStp +
+        ", deleteList=" + deleteList +
         "} " + super.toString();
   }
 }
