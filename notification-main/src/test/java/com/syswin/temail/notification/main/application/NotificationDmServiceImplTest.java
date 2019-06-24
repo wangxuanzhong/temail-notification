@@ -48,9 +48,9 @@ public class NotificationDmServiceImplTest {
   private NotificationRedisServiceImpl notificationRedisServiceImpl;
   @Autowired
   private RestTemplate notificationRestTemplate;
-  @Value("${app.temail.notification.groupChat.enabled:false}")
+  @Value("${app.temail.notification.dm.groupChat.enabled:false}")
   private String groupChatEnabled;
-  @Value("${app.temail.notification.application.enabled:false}")
+  @Value("${app.temail.notification.dm.application.enabled:false}")
   private String applicationEnabled;
   @Value("${spring.rocketmq.topics.notify.groupChat:notify}")
   private String groupChatTopic;
@@ -154,11 +154,11 @@ public class NotificationDmServiceImplTest {
     cdtpHeader.setSender("a@test.com");
     cdtpHeader.setReceiver("b@test.com");
     String xPacketId = UUID.randomUUID().toString();
-//    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
-//    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
+    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
+    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
 
     Map<String, Object> extraData = new HashMap<>();
-//    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
+    notificationDmServiceImpl.savePacketEvent(event, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
 
     extraData.put("type", "A000");
     cdtpHeader.setExtraData(gson.toJson(extraData));

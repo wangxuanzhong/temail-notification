@@ -59,8 +59,8 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
   @Autowired
   public NotificationDmServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl,
       EventMapper eventMapper, IJsonService iJsonService, RestTemplate notificationRestTemplate,
-      @Value("${app.temail.notification.groupChat.enabled:false}") String groupChatEnabled,
-      @Value("${app.temail.notification.application.enabled:false}") String applicationEnabled,
+      @Value("${app.temail.notification.dm.groupChat.enabled:false}") String groupChatEnabled,
+      @Value("${app.temail.notification.dm.application.enabled:false}") String applicationEnabled,
       @Value("${spring.rocketmq.topics.notify.groupChat:notify}") String groupChatTopic,
       @Value("${spring.rocketmq.topics.notify.application:notify}") String applicationTopic,
       @Value("${url.temail.auth:authUrl}") String authUrl) {

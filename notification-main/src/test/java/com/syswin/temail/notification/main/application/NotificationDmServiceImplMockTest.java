@@ -49,9 +49,9 @@ public class NotificationDmServiceImplMockTest {
   @MockBean
   private NotificationRedisServiceImpl redisService;
 
-  @Value("${app.temail.notification.groupChat.enabled:false}")
+  @Value("${app.temail.notification.dm.groupChat.enabled:false}")
   private String groupChatEnabled;
-  @Value("${app.temail.notification.application.enabled:false}")
+  @Value("${app.temail.notification.dm.application.enabled:false}")
   private String applicationEnabled;
   @Value("${spring.rocketmq.topics.notify.groupChat:notify}")
   private String groupChatTopic;
