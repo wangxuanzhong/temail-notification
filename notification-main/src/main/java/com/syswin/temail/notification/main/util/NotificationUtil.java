@@ -36,7 +36,7 @@ public class NotificationUtil {
     }
 
     // 第二步：查询数据库是否存在重复数据，保证数据的唯一性
-    if (!eventMapper.checkUnique(event).isEmpty()) {
+    if (!eventMapper.selectEventsByPacketIdAndEventType(event).isEmpty()) {
       LOGGER.warn("check unique from database failed: {}", event);
       return false;
     }

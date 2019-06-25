@@ -34,10 +34,10 @@ public class NotificationUtilTest {
     Assertions.assertThat(NotificationUtil.checkUnique(event, "key", eventMapper, notificationRedisServiceImpl)).isFalse();
 
     Mockito.when(notificationRedisServiceImpl.checkUnique(Mockito.anyString())).thenReturn(true);
-    Mockito.when(eventMapper.checkUnique(Mockito.any(Event.class))).thenReturn(Collections.singletonList(event));
+    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(Collections.singletonList(event));
     Assertions.assertThat(NotificationUtil.checkUnique(event, "key", eventMapper, notificationRedisServiceImpl)).isFalse();
 
-    Mockito.when(eventMapper.checkUnique(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
+    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
     Assertions.assertThat(NotificationUtil.checkUnique(event, "key", eventMapper, notificationRedisServiceImpl)).isTrue();
 
   }

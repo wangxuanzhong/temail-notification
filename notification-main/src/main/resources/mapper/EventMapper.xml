@@ -80,7 +80,7 @@
     )
   </delete>
 
-  <select id="checkUnique" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">
+  <select id="selectEventsByPacketIdAndEventType" parameterType="com.syswin.temail.notification.main.domains.Event" resultMap="EventMap">
     SELECT
     <include refid="baseField"/>
     FROM `event`

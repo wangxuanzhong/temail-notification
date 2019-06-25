@@ -76,7 +76,7 @@ public interface EventMapper {
    * @param event 事件条件
    * @return 查询结果
    */
-  List<Event> checkUnique(Event event);
+  List<Event> selectEventsByPacketIdAndEventType(Event event);
 
   // 以下为清除历史数据功能所用sql
 

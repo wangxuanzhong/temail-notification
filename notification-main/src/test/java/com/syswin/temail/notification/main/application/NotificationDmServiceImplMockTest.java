@@ -94,7 +94,7 @@ public class NotificationDmServiceImplMockTest {
     cdtpHeader.setExtraData(gson.toJson(extraData));
 
     Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(true);
-    Mockito.when(eventMapper.checkUnique(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
+    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
     String xPacketId = UUID.randomUUID().toString();
@@ -120,7 +120,7 @@ public class NotificationDmServiceImplMockTest {
     event.setEventType(EventType.PACKET.getValue());
 
     Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(true);
-    Mockito.when(eventMapper.checkUnique(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
+    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
     event.setEventSeqId(1L);

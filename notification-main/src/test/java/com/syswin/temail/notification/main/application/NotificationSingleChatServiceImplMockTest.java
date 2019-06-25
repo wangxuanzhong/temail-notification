@@ -148,7 +148,7 @@ public class NotificationSingleChatServiceImplMockTest {
 
   private Event mock() {
     Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(true);
-    Mockito.when(eventMapper.checkUnique(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
+    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
     return new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(),
