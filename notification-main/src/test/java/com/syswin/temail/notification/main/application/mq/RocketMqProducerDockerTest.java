@@ -64,13 +64,15 @@ public class RocketMqProducerDockerTest {
   @ClassRule
   public static RuleChain rules = RuleChain.outerRule(rocketMqNameSrv).around(rocketMqBroker);
   private static String topic = "temail-notification";
+  private static String producerGroup = "notificationProducer";
 
   public RocketMqProducerDockerTest() {
   }
 
   @BeforeClass
   public static void setUp() throws Exception {
-    producerContainer = new RocketMqProducer(rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT, topic);
+    producerContainer = new RocketMqProducer(rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT, topic,
+        producerGroup);
     producerContainer.start();
 
     System.out.println(topic);

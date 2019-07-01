@@ -74,14 +74,14 @@ public class NotificationMqProducerConfiguration {
   @ConditionalOnProperty(name = "app.temail.notification.mq.producer", havingValue = "rocketmq", matchIfMissing = true)
   public IMqProducer notificationRocketMqProducer() {
     LOGGER.info("IMqProducer [rocketmq] started!");
-    return new RocketMqProducer(host, notifyTopic);
+    return new RocketMqProducer(host, notifyTopic, producerGroup);
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.producer", havingValue = "libraryMessage")
   public IMqProducer notificationLibraryMessagingMqProducer(Map<String, MqProducer> mqProducers) {
     LOGGER.info("IMqProducer [libraryMessage] started!");
-    return new LibraryMessagingMqProducer(mqProducers, notifyTopic);
+    return new LibraryMessagingMqProducer(mqProducers, notifyTopic, producerGroup);
   }
 
   @Bean

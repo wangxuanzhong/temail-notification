@@ -27,7 +27,6 @@ package com.syswin.temail.notification.main.application.mq;
 import com.syswin.library.messaging.MessagingException;
 import com.syswin.library.messaging.MqProducer;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
-import com.syswin.temail.notification.main.constants.Constant.ProducerGroup;
 import com.syswin.temail.notification.main.exceptions.MqException;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
@@ -37,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * rocket mq生产者
+ *
  * @author liusen@syswin.com
  */
 public class LibraryMessagingMqProducer implements IMqProducer {
@@ -45,10 +45,13 @@ public class LibraryMessagingMqProducer implements IMqProducer {
 
   private Map<String, MqProducer> rocketMqProducers;
   private String topic;
+  private String producerGroup;
 
-  public LibraryMessagingMqProducer(Map<String, MqProducer> rocketMqProducers, String topic) {
+  public LibraryMessagingMqProducer(Map<String, MqProducer> rocketMqProducers, String topic,
+      String producerGroup) {
     this.rocketMqProducers = rocketMqProducers;
     this.topic = topic;
+    this.producerGroup = producerGroup;
   }
 
   /**
@@ -56,7 +59,7 @@ public class LibraryMessagingMqProducer implements IMqProducer {
    */
   @Override
   public void sendMessage(String body, String topic, String tags, String keys) {
-    MqProducer mqProducer = rocketMqProducers.get(ProducerGroup.PRODUCER_GROUP);
+    MqProducer mqProducer = rocketMqProducers.get(producerGroup);
     if (mqProducer == null) {
       throw new MqException("mq producer is empty!");
     }

@@ -25,7 +25,6 @@
 package com.syswin.temail.notification.main.application.mq;
 
 import com.syswin.temail.notification.foundation.application.IMqProducer;
-import com.syswin.temail.notification.main.constants.Constant.ProducerGroup;
 import com.syswin.temail.notification.main.exceptions.MqException;
 import java.lang.invoke.MethodHandles;
 import java.util.UUID;
@@ -47,14 +46,15 @@ public class RocketMqProducer implements IMqProducer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final DefaultMQProducer producer = new DefaultMQProducer(ProducerGroup.PRODUCER_GROUP);
-
+  private DefaultMQProducer producer;
   private String host;
   private String topic;
+  private String producerGroup;
 
-  public RocketMqProducer(String host, String topic) {
+  public RocketMqProducer(String host, String topic, String producerGroup) {
     this.host = host;
     this.topic = topic;
+    this.producerGroup = producerGroup;
   }
 
   public DefaultMQProducer getProducer() {
@@ -67,6 +67,7 @@ public class RocketMqProducer implements IMqProducer {
   @Override
   public void start() {
     LOGGER.info("MQ: start producer.");
+    producer = new DefaultMQProducer(producerGroup);
     producer.setNamesrvAddr(host);
     producer.setInstanceName(UUID.randomUUID().toString());
     try {
