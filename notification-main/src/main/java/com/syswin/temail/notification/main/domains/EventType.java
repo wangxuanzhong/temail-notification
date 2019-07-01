@@ -46,6 +46,7 @@ public enum EventType {
   DO_NOT_DISTURB(48, "设置免打扰"),
   DO_NOT_DISTURB_CANCEL(49, "设置免打扰取消"),
   CROSS_DOMAIN(51, "跨域事件消息"),
+  CHANGE_EXT_DATA(56, "修改extData"),
 
   // 群管理部分
   GROUP_RESET(-101, "重置群聊消息未读数"),
@@ -77,6 +78,8 @@ public enum EventType {
   ADD_ADMIN(46, "添加群管理员"),
   DELETE_ADMIN(47, "移除群管理员"),
   ABANDON_ADMIN(50, "放弃群管理员"),
+  GROUP_CHANGE_EXT_DATA(57, "群聊修改extData"),
+  GROUP_MEMBER_CHANGE_EXT_DATA(58, "群聊修改成员extData"),
 
   // @部分
   RECEIVE_AT(44, "@消息发送"),
@@ -97,6 +100,8 @@ public enum EventType {
   TOPIC_ARCHIVE(29, "话题归档"),
   TOPIC_ARCHIVE_CANCEL(30, "话题归档取消"),
   TOPIC_SESSION_DELETE(39, "话题会话删除"),
+  TOPIC_CHANGE_EXT_DATA(59, "话题修改extData"),
+  TOPIC_MEMBER_CHANGE_EXT_DATA(60, "话题修改成员extData"),
 
   // 其他
   PACKET(52, "报文事件"),

@@ -79,6 +79,14 @@ public class TopicEvent {
    * 删除会话是否同时删除消息
    */
   private Boolean deleteAllMsg;
+  /**
+   * 话题ExtData
+   */
+  private String extData;
+  /**
+   * 话题成员ExtData
+   */
+  private String memberExtData;
 
   @JsonIgnore
   private String extendParam;
@@ -110,6 +118,8 @@ public class TopicEvent {
       this.cc = topicExtendParam.getCc();
       this.msgIds = topicExtendParam.getMsgIds();
       this.deleteAllMsg = topicExtendParam.getDeleteAllMsg();
+      this.extData = topicExtendParam.getExtData();
+      this.memberExtData = topicExtendParam.getMemberExtData();
     }
     return this;
   }
@@ -118,8 +128,9 @@ public class TopicEvent {
    * 自动配置扩展字段
    */
   public TopicEvent autoWriteExtendParam(IJsonService iJsonService) {
-    this.extendParam = iJsonService
-        .toJson(new TopicExtendParam(this.title, this.receivers, this.cc, this.msgIds, this.deleteAllMsg));
+    this.extendParam = iJsonService.toJson(
+        new TopicExtendParam(this.title, this.receivers, this.cc, this.msgIds, this.deleteAllMsg, this.extData,
+            this.memberExtData));
     return this;
   }
 
@@ -267,6 +278,22 @@ public class TopicEvent {
     this.extendParam = extendParam;
   }
 
+  public String getMemberExtData() {
+    return memberExtData;
+  }
+
+  public void setMemberExtData(String memberExtData) {
+    this.memberExtData = memberExtData;
+  }
+
+  public String getExtData() {
+    return extData;
+  }
+
+  public void setExtData(String extData) {
+    this.extData = extData;
+  }
+
   @Override
   public String toString() {
     return "TopicEvent{" +
@@ -287,6 +314,8 @@ public class TopicEvent {
         ", cc=" + cc +
         ", msgIds=" + msgIds +
         ", deleteAllMsg=" + deleteAllMsg +
+        ", extData='" + extData + '\'' +
+        ", memberExtData='" + memberExtData + '\'' +
         ", extendParam='" + extendParam + '\'' +
         '}';
   }

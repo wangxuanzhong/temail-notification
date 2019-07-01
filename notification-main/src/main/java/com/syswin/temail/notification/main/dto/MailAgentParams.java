@@ -65,6 +65,8 @@ public class MailAgentParams {
    * 时间戳
    */
   private Long timestamp;
+
+
   /**
    * 删除会话是否同时删除消息
    */
@@ -85,6 +87,7 @@ public class MailAgentParams {
    * 新群聊被通知人员
    */
   private List<String> filter;
+
 
   /**
    * 群邮件
@@ -111,9 +114,10 @@ public class MailAgentParams {
    */
   private Integer type;
   /**
-   * @对象
+   * at对象
    */
   private String at;
+
 
   /**
    * 话题id
@@ -137,11 +141,24 @@ public class MailAgentParams {
   private List<String> cc;
 
   /**
+   * 群ExtData
+   */
+  private String extData;
+  /**
+   * 群成员ExtData
+   */
+  private String memberExtData;
+  /**
+   * 会话ExtData
+   */
+  private String sessionExtData;
+
+
+  /**
    * CDTP报文头
    */
   private String header;
   private String xPacketId;
-
 
   public Integer getSessionMessageType() {
     return sessionMessageType;
@@ -362,6 +379,31 @@ public class MailAgentParams {
     this.xPacketId = xPacketId;
   }
 
+  public String getExtData() {
+    return extData;
+  }
+
+  public void setExtData(String extData) {
+    this.extData = extData;
+  }
+
+  public String getMemberExtData() {
+    return memberExtData;
+  }
+
+  public void setMemberExtData(String memberExtData) {
+    this.memberExtData = memberExtData;
+  }
+
+  public String getSessionExtData() {
+    return sessionExtData;
+  }
+
+  public void setSessionExtData(String sessionExtData) {
+    this.sessionExtData = sessionExtData;
+  }
+
+
   @Override
   public String toString() {
     return "MailAgentParams{" +
@@ -390,6 +432,9 @@ public class MailAgentParams {
         ", title='" + title + '\'' +
         ", receivers=" + receivers +
         ", cc=" + cc +
+        ", extData='" + extData + '\'' +
+        ", memberExtData='" + memberExtData + '\'' +
+        ", sessionExtData='" + sessionExtData + '\'' +
         ", header='" + header + '\'' +
         ", xPacketId='" + xPacketId + '\'' +
         '}';

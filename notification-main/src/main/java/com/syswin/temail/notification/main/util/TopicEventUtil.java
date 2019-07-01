@@ -26,6 +26,7 @@ package com.syswin.temail.notification.main.util;
 
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
+import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 
 /**
@@ -52,4 +53,22 @@ public class TopicEventUtil {
     topicEvent.setEventSeqId(iSequenceService.getNextSeq("topic_" + topicEvent.getTo()));
   }
 
+  /**
+   * 获取msgId，如果msgId为空则临时生成，反向业务使用对立事件类型生成
+   */
+  public static String getMsgId(EventType eventType, TopicEvent topicEvent) {
+    EventType againstEventType;
+    switch (eventType) {
+      default:
+        againstEventType = eventType;
+        break;
+    }
+
+    if (topicEvent.getMsgId() == null) {
+      return topicEvent.getTopicId() + "_" + topicEvent.getTo() + "_" + againstEventType;
+    } else {
+      return topicEvent.getMsgId();
+    }
+
+  }
 }

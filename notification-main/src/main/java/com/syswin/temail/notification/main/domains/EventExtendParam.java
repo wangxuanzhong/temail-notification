@@ -76,13 +76,26 @@ class EventExtendParam {
    * 被通知人员
    */
   private List<String> filter;
+  /**
+   * 群ExtData
+   */
+  private String extData;
+  /**
+   * 群成员ExtData
+   */
+  private String memberExtData;
+  /**
+   * 会话ExtData
+   */
+  private String sessionExtData;
 
 
   public EventExtendParam() {
   }
 
   public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds,
-      Boolean deleteAllMsg, String owner, String trashMsgInfo, String author, List<String> filter) {
+      Boolean deleteAllMsg, String owner, String trashMsgInfo, String author, List<String> filter,
+      String extData, String memberExtData, String sessionExtData) {
     this.name = name;
     this.adminName = adminName;
     this.groupName = groupName;
@@ -93,6 +106,9 @@ class EventExtendParam {
     this.trashMsgInfo = trashMsgInfo;
     this.author = author;
     this.filter = filter;
+    this.extData = extData;
+    this.memberExtData = memberExtData;
+    this.sessionExtData = sessionExtData;
   }
 
   public String getName() {
@@ -133,5 +149,17 @@ class EventExtendParam {
 
   public List<String> getFilter() {
     return filter;
+  }
+
+  public String getMemberExtData() {
+    return memberExtData;
+  }
+
+  public String getExtData() {
+    return extData;
+  }
+
+  public String getSessionExtData() {
+    return sessionExtData;
   }
 }

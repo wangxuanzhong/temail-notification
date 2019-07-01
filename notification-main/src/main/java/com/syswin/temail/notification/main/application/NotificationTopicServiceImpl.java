@@ -140,6 +140,14 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
         topicEvent.setDeleteAllMsg(params.getDeleteAllMsg());
         sendMessage(topicEvent, header, tags);
         break;
+      case TOPIC_CHANGE_EXT_DATA:
+        topicEvent.setExtData(params.getExtData());
+        sendMessage(topicEvent, header, tags);
+        break;
+      case TOPIC_MEMBER_CHANGE_EXT_DATA:
+        topicEvent.setMemberExtData(params.getMemberExtData());
+        sendMessage(topicEvent, header, tags);
+        break;
       default:
         LOGGER.warn("unsupport event type!");
     }
@@ -186,6 +194,7 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
     Long lastEventSeqId = events.isEmpty() ? maxEventSeqId : events.get(events.size() - 1).getEventSeqId();
 
     Map<String, Map<String, TopicEvent>> allTopicMap = new HashMap<>(16);
+    Map<String, Map<String, TopicEvent>> allEventMap = new HashMap<>(16);
     Map<String, Map<String, TopicEvent>> allReplyMap = new HashMap<>(16);
     List<TopicEvent> notifyEvents = new ArrayList<>();
     events.forEach(event -> {
@@ -196,6 +205,12 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
         allTopicMap.put(event.getTopicId(), new LinkedHashMap<>());
       }
       Map<String, TopicEvent> topicMap = allTopicMap.get(event.getTopicId());
+
+      // 费消息类事件
+      if (!allEventMap.containsKey(event.getTopicId())) {
+        allEventMap.put(event.getTopicId(), new LinkedHashMap<>());
+      }
+      Map<String, TopicEvent> eventMap = allEventMap.get(event.getTopicId());
 
       // 按照话题统计回复消息
       if (!allReplyMap.containsKey(event.getTopicId())) {
@@ -227,6 +242,7 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
         case TOPIC_DELETE:
           topicMap.clear();
           replyMap.clear();
+          eventMap.clear();
           topicMap.put(event.getTopicId(), event);
           break;
         case TOPIC_SESSION_DELETE:
@@ -236,12 +252,17 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
           }
           topicMap.put(event.getTopicId(), event);
           break;
+        case TOPIC_CHANGE_EXT_DATA:
+        case TOPIC_MEMBER_CHANGE_EXT_DATA:
+          eventMap.put(event.getTopicId(), event);
+          break;
         default:
           // do nothing
       }
     });
 
     allTopicMap.values().forEach(map -> notifyEvents.addAll(map.values()));
+    allEventMap.values().forEach(map -> notifyEvents.addAll(map.values()));
 
     // 每个话题只返回最新一条回复消息
     allReplyMap.values().forEach(map -> {

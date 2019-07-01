@@ -119,6 +119,18 @@ public class Event {
    * 被通知人员
    */
   private List<String> filter;
+  /**
+   * 群ExtData
+   */
+  private String extData;
+  /**
+   * 群成员ExtData
+   */
+  private String memberExtData;
+  /**
+   * 会话ExtData
+   */
+  private String sessionExtData;
 
   @JsonIgnore
   private String extendParam;
@@ -186,6 +198,8 @@ public class Event {
       this.trashMsgInfo = eventExtendParam.getTrashMsgInfo();
       this.author = eventExtendParam.getAuthor();
       this.filter = eventExtendParam.getFilter();
+      this.extData = eventExtendParam.getExtData();
+      this.memberExtData = eventExtendParam.getMemberExtData();
     }
     return this;
   }
@@ -196,7 +210,7 @@ public class Event {
   public Event autoWriteExtendParam(IJsonService iJsonService) {
     this.extendParam = iJsonService.toJson(
         new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg,
-            this.owner, this.trashMsgInfo, this.author, this.filter));
+            this.owner, this.trashMsgInfo, this.author, this.filter, this.extData, this.memberExtData, sessionExtData));
     return this;
   }
 
@@ -440,6 +454,30 @@ public class Event {
     this.zipPacket = zipPacket;
   }
 
+  public String getMemberExtData() {
+    return memberExtData;
+  }
+
+  public void setMemberExtData(String memberExtData) {
+    this.memberExtData = memberExtData;
+  }
+
+  public String getExtData() {
+    return extData;
+  }
+
+  public void setExtData(String extData) {
+    this.extData = extData;
+  }
+
+  public String getSessionExtData() {
+    return sessionExtData;
+  }
+
+  public void setSessionExtData(String sessionExtData) {
+    this.sessionExtData = sessionExtData;
+  }
+
   @Override
   public String toString() {
     return "Event{" +
@@ -457,6 +495,7 @@ public class Event {
         ", groupTemail='" + groupTemail + '\'' +
         ", temail='" + temail + '\'' +
         ", role=" + role +
+        ", packet='" + packet + '\'' +
         ", name='" + name + '\'' +
         ", adminName='" + adminName + '\'' +
         ", groupName='" + groupName + '\'' +
@@ -465,9 +504,11 @@ public class Event {
         ", deleteAllMsg=" + deleteAllMsg +
         ", owner='" + owner + '\'' +
         ", trashMsgInfo='" + trashMsgInfo + '\'' +
-        ", packet='" + packet + '\'' +
         ", author='" + author + '\'' +
-        ", filter='" + filter + '\'' +
+        ", filter=" + filter +
+        ", extData='" + extData + '\'' +
+        ", memberExtData='" + memberExtData + '\'' +
+        ", sessionExtData='" + sessionExtData + '\'' +
         ", extendParam='" + extendParam + '\'' +
         '}';
   }
