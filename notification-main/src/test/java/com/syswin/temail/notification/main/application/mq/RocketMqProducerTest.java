@@ -36,10 +36,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {
-    "library.messaging.type=redis",
-//    "app.temail.notification.mq.producer=rocketmq",
-    "app.temail.notification.mq.consumer=rocketmq",
-    "app.temail.notification.mq.producer=libraryMessage"
+    "app.temail.notification.mq.consumer=libraryMessage",
+    "app.temail.notification.mq.consumerType=ROCKET_MQ_ONS",
+    "app.temail.notification.mq.producer=libraryMessage",
+    "app.temail.notification.mq.producerType=ROCKET_MQ_ONS"
 })
 @ActiveProfiles("test")
 @Ignore
@@ -47,13 +47,13 @@ public class RocketMqProducerTest {
 
   @Autowired
   private IMqProducer iMqProducer;
-  @Value("${spring.rocketmq.topics.mailAgent.singleChat}")
-  private String singleChatTopic;
+  @Value("${spring.rocketmq.topics.sync}")
+  private String topic;
 
   @Test
   public void testSendMessage() throws Exception {
     for (int i = 0; i < 10; i++) {
-      iMqProducer.sendMessage("" + i, singleChatTopic, null, null);
+      iMqProducer.sendMessage("" + i, topic, null, null);
     }
   }
 }

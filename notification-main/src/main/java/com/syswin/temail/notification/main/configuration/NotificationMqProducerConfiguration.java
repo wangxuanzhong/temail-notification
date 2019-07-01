@@ -30,7 +30,6 @@ import com.syswin.library.messaging.all.spring.MqProducerConfig;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.LibraryMessagingMqProducer;
 import com.syswin.temail.notification.main.application.mq.RocketMqProducer;
-import com.syswin.temail.notification.main.constants.Constant.ProducerGroup;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -52,9 +51,23 @@ public class NotificationMqProducerConfiguration {
 
   @Value("${spring.rocketmq.host}")
   private String host;
+
+  /**
+   * MQ发送topic
+   */
   @Value("${spring.rocketmq.topics.notify}")
   private String notifyTopic;
-  @Value("${app.temail.notification.mq.producerType:REDIS}")
+
+  /**
+   * MQ生产组
+   */
+  @Value("${spring.rocketmq.topics.notifyProducerGroup:notificationProducer}")
+  private String producerGroup;
+
+  /**
+   * MQ生产类型
+   */
+  @Value("${app.temail.notification.mq.producerType:ROCKET_MQ_ONS}")
   private String producerType;
 
   @Bean(initMethod = "start", destroyMethod = "stop")
@@ -74,6 +87,6 @@ public class NotificationMqProducerConfiguration {
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.producer", havingValue = "libraryMessage")
   MqProducerConfig groupmailagentTopicProducerConfig() {
-    return new MqProducerConfig(ProducerGroup.PRODUCER_GROUP, MqImplementation.valueOf(producerType));
+    return new MqProducerConfig(producerGroup, MqImplementation.valueOf(producerType));
   }
 }

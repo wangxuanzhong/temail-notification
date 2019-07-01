@@ -38,30 +38,6 @@ public class Constant {
   }
 
   /**
-   * MQ消费组
-   */
-  public static class ConsumerGroup {
-
-    public static final String SINGLE_CHAT_CONSUMER_GROUP = "notificationSingleChatConsumer";
-
-    public static final String GROUP_CHAT_CONSUMER_GROUP = "notificationGroupChatConsumer";
-
-    public static final String TOPIC_CONSUMER_GROUP = "notificationTopicConsumer";
-
-    public static final String DM_CONSUMER_GROUP = "notificationGroupEventPushConsumer";
-
-    public static final String SYNC_CONSUMER_GROUP = "notificationSyncConsumer";
-  }
-
-  /**
-   * MQ生产组
-   */
-  public static class ProducerGroup {
-
-    public static final String PRODUCER_GROUP = "notificationProducer";
-  }
-
-  /**
    * 事件筛选条件
    */
   public static class EventCondition {

@@ -32,7 +32,6 @@ import com.syswin.temail.notification.main.application.NotificationSingleChatSer
 import com.syswin.temail.notification.main.application.NotificationSyncServiceImpl;
 import com.syswin.temail.notification.main.application.NotificationTopicServiceImpl;
 import com.syswin.temail.notification.main.application.mq.RocketMqConsumer;
-import com.syswin.temail.notification.main.constants.Constant.ConsumerGroup;
 import java.lang.invoke.MethodHandles;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -54,6 +53,10 @@ public class NotificationMqConsumerConfiguration {
 
   @Value("${spring.rocketmq.host}")
   private String host;
+
+  /**
+   * MQ消费topic
+   */
   @Value("${spring.rocketmq.topics.mailAgent.singleChat}")
   private String singleChatTopic;
   @Value("${spring.rocketmq.topics.mailAgent.groupChat}")
@@ -64,7 +67,25 @@ public class NotificationMqConsumerConfiguration {
   private String dmTopic;
   @Value("${spring.rocketmq.topics.sync}")
   private String syncTopic;
-  @Value("${app.temail.notification.mq.consumerType:REDIS}")
+
+  /**
+   * MQ消费组
+   */
+  @Value("${spring.rocketmq.topics.mailAgent.singleChatConsumerGroup:notificationSingleChatConsumer}")
+  private String singleChatConsumerGroup;
+  @Value("${spring.rocketmq.topics.mailAgent.groupChatConsumerGroup:notificationGroupChatConsumer}")
+  private String gropuChatConsumerGroup;
+  @Value("${spring.rocketmq.topics.mailAgent.topicChatConsumerGroup:notificationTopicConsumer}")
+  private String topicConsumerGroup;
+  @Value("${spring.rocketmq.topics.syncConsumerGroup:notificationSyncConsumer}")
+  private String syncConsumerGroup;
+  @Value("${spring.rocketmq.topics.dmConsumerGroup:notificationGroupEventPushConsumer}")
+  private String dmConsumerGroup;
+
+  /**
+   * MQ消费类型
+   */
+  @Value("${app.temail.notification.mq.consumerType:ROCKET_MQ_ONS}")
   private String consumerType;
 
   /**
@@ -74,35 +95,35 @@ public class NotificationMqConsumerConfiguration {
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
   public RocketMqConsumer notificationSingleChatRocketMqConsumer(NotificationSingleChatServiceImpl singleChatService) {
     LOGGER.info("IMqConsumer [rocketmq singleChat] started!");
-    return new RocketMqConsumer(singleChatService, host, singleChatTopic, ConsumerGroup.SINGLE_CHAT_CONSUMER_GROUP);
+    return new RocketMqConsumer(singleChatService, host, singleChatTopic, singleChatConsumerGroup);
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
   public RocketMqConsumer notificationGroupChatRocketMqConsumer(NotificationGroupChatServiceImpl groupChatService) {
     LOGGER.info("IMqConsumer [rocketmq groupChat] started!");
-    return new RocketMqConsumer(groupChatService, host, groupChatTopic, ConsumerGroup.GROUP_CHAT_CONSUMER_GROUP);
+    return new RocketMqConsumer(groupChatService, host, groupChatTopic, gropuChatConsumerGroup);
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
   public RocketMqConsumer notificationTopicRocketMqConsumer(NotificationTopicServiceImpl topicService) {
     LOGGER.info("IMqConsumer [rocketmq topic] started!");
-    return new RocketMqConsumer(topicService, host, topicTopic, ConsumerGroup.TOPIC_CONSUMER_GROUP);
+    return new RocketMqConsumer(topicService, host, topicTopic, topicConsumerGroup);
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.consumer", havingValue = "rocketmq", matchIfMissing = true)
   public RocketMqConsumer notificationSyncMqConsumer(NotificationSyncServiceImpl syncService) {
     LOGGER.info("IMqConsumer [rocketmq sync] started!");
-    return new RocketMqConsumer(syncService, host, syncTopic, ConsumerGroup.SYNC_CONSUMER_GROUP);
+    return new RocketMqConsumer(syncService, host, syncTopic, syncConsumerGroup);
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.dm.consumer", havingValue = "rocketmq")
   public RocketMqConsumer notificationDmRocketMqConsumer(NotificationDmServiceImpl dmService) {
     LOGGER.info("IMqConsumer [rocketmq dm] started!");
-    return new RocketMqConsumer(dmService, host, dmTopic, ConsumerGroup.DM_CONSUMER_GROUP);
+    return new RocketMqConsumer(dmService, host, dmTopic, dmConsumerGroup);
   }
 
   /**
@@ -114,7 +135,7 @@ public class NotificationMqConsumerConfiguration {
     LOGGER.info("IMqConsumer [libraryMessage singleChat] started!");
     Consumer<String> listener = body -> singleChatService.handleMqMessage(body, null);
     return MqConsumerConfig.create()
-        .group(ConsumerGroup.SINGLE_CHAT_CONSUMER_GROUP)
+        .group(singleChatConsumerGroup)
         .topic(singleChatTopic)
         .listener(listener)
         .implementation(MqImplementation.valueOf(consumerType))
@@ -127,7 +148,7 @@ public class NotificationMqConsumerConfiguration {
     LOGGER.info("IMqConsumer [libraryMessage groupChat] started!");
     Consumer<String> listener = body -> groupChatService.handleMqMessage(body, null);
     return MqConsumerConfig.create()
-        .group(ConsumerGroup.GROUP_CHAT_CONSUMER_GROUP)
+        .group(gropuChatConsumerGroup)
         .topic(groupChatTopic)
         .listener(listener)
         .implementation(MqImplementation.valueOf(consumerType))
@@ -140,7 +161,7 @@ public class NotificationMqConsumerConfiguration {
     LOGGER.info("IMqConsumer [libraryMessage topic] started!");
     Consumer<String> listener = body -> topicService.handleMqMessage(body, null);
     return MqConsumerConfig.create()
-        .group(ConsumerGroup.TOPIC_CONSUMER_GROUP)
+        .group(topicConsumerGroup)
         .topic(topicTopic)
         .listener(listener)
         .implementation(MqImplementation.valueOf(consumerType))
@@ -153,7 +174,7 @@ public class NotificationMqConsumerConfiguration {
     LOGGER.info("IMqConsumer [libraryMessage sync] started!");
     Consumer<String> listener = body -> syncService.handleMqMessage(body, null);
     return MqConsumerConfig.create()
-        .group(ConsumerGroup.SYNC_CONSUMER_GROUP)
+        .group(syncConsumerGroup)
         .topic(syncTopic)
         .listener(listener)
         .implementation(MqImplementation.valueOf(consumerType))
@@ -166,7 +187,7 @@ public class NotificationMqConsumerConfiguration {
     LOGGER.info("IMqConsumer [libraryMessage dm] started!");
     Consumer<String> listener = body -> dmService.handleMqMessage(body, null);
     return MqConsumerConfig.create()
-        .group(ConsumerGroup.DM_CONSUMER_GROUP)
+        .group(dmConsumerGroup)
         .topic(dmTopic)
         .listener(listener)
         .implementation(MqImplementation.valueOf(consumerType))
