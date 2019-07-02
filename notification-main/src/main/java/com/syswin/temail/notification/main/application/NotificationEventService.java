@@ -171,8 +171,6 @@ public class NotificationEventService {
         case GROUP_STICK:
         case GROUP_DO_NOT_DISTURB:
         case DO_NOT_DISTURB:
-        case GROUP_CHANGE_EXT_DATA:
-        case GROUP_MEMBER_CHANGE_EXT_DATA:
           // 只返回最后一条事件
           sessionEventMap.put(EventUtil.getMsgId(eventType, event), event);
           break;

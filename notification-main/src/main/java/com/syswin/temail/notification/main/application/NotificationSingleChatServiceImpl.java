@@ -93,6 +93,14 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
       return;
     }
 
+    /* 添加透传参数 */
+    event.setExtData(params.getExtData());
+    event.setMemberExtData(params.getMemberExtData());
+    event.setSessionExtData(params.getSessionExtData());
+    // 新群聊消息字段
+    event.setFilter(params.getFilter());
+    event.setAuthor(params.getAuthor());
+
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
       case DESTROY:
@@ -102,9 +110,6 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
       case DESTROYED:
       case REPLY_RETRACT:
       case REPLY_DESTROYED:
-        // 新群聊消息字段
-        event.setFilter(params.getFilter());
-        event.setAuthor(params.getAuthor());
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
           EventUtil.initEventSeqId(notificationRedisServiceImpl, event);

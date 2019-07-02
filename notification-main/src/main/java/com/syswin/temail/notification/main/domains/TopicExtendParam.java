@@ -56,27 +56,17 @@ class TopicExtendParam {
    * 删除会话是否同时删除消息
    */
   private Boolean deleteAllMsg;
-  /**
-   * 话题ExtData
-   */
-  private String extData;
-  /**
-   * 话题成员ExtData
-   */
-  private String memberExtData;
 
   public TopicExtendParam() {
   }
 
   public TopicExtendParam(String title, List<String> receivers, List<String> cc, List<String> msgIds,
-      Boolean deleteAllMsg, String extData, String memberExtData) {
+      Boolean deleteAllMsg) {
     this.title = title;
     this.receivers = receivers;
     this.cc = cc;
     this.msgIds = msgIds;
     this.deleteAllMsg = deleteAllMsg;
-    this.extData = extData;
-    this.memberExtData = memberExtData;
   }
 
   public String getTitle() {
@@ -97,13 +87,5 @@ class TopicExtendParam {
 
   public Boolean getDeleteAllMsg() {
     return deleteAllMsg;
-  }
-
-  public String getMemberExtData() {
-    return memberExtData;
-  }
-
-  public String getExtData() {
-    return extData;
   }
 }

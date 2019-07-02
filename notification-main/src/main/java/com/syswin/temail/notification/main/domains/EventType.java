@@ -78,8 +78,6 @@ public enum EventType {
   ADD_ADMIN(46, "添加群管理员"),
   DELETE_ADMIN(47, "移除群管理员"),
   ABANDON_ADMIN(50, "放弃群管理员"),
-  GROUP_CHANGE_EXT_DATA(57, "群聊修改extData"),
-  GROUP_MEMBER_CHANGE_EXT_DATA(58, "群聊修改成员extData"),
 
   // @部分
   RECEIVE_AT(44, "@消息发送"),
@@ -100,8 +98,6 @@ public enum EventType {
   TOPIC_ARCHIVE(29, "话题归档"),
   TOPIC_ARCHIVE_CANCEL(30, "话题归档取消"),
   TOPIC_SESSION_DELETE(39, "话题会话删除"),
-  TOPIC_CHANGE_EXT_DATA(59, "话题修改extData"),
-  TOPIC_MEMBER_CHANGE_EXT_DATA(60, "话题修改成员extData"),
 
   // 其他
   PACKET(52, "报文事件"),

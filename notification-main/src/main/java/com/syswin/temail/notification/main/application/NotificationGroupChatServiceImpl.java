@@ -98,6 +98,11 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
       return;
     }
 
+    /* 添加透传参数 */
+    event.setExtData(params.getExtData());
+    event.setMemberExtData(params.getMemberExtData());
+    event.setSessionExtData(params.getSessionExtData());
+
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RECEIVE:
         EventUtil.notifyToAll(event);
@@ -127,7 +132,6 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
         break;
       case ADD_GROUP:
         event.setRole(MemberRole.ADMIN.getValue());
-        event.setExtData(params.getExtData());
         memberMapper.insert(event);
         this.sendSingleMessage(event, header, tags);
         break;
@@ -149,8 +153,6 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
             LOGGER.warn("add member duplicate exception: ", e);
             break;
           }
-          event.setMemberExtData(params.getMemberExtData());
-          event.setSessionExtData(params.getSessionExtData());
           this.sendSingleMessage(event, header, tags);
         } else {
           LOGGER.warn("{} was group {} member, do nothing.", event.getTemail(), event.getGroupTemail());
@@ -280,16 +282,6 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
         memberMapper.updateRole(event);
         EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, header, tags);
-        break;
-      case GROUP_CHANGE_EXT_DATA:
-        event.setExtData(params.getExtData());
-        this.sendGroupMessageToAll(event, header, tags);
-        break;
-      case GROUP_MEMBER_CHANGE_EXT_DATA:
-        event.setFrom(params.getTemail());
-        event.setTo(params.getTemail());
-        event.setMemberExtData(params.getMemberExtData());
-        this.sendSingleMessageDirectly(event, header, tags);
         break;
       default:
         LOGGER.warn("unsupported event type!");

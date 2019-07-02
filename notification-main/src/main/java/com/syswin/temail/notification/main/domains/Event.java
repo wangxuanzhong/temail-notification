@@ -200,6 +200,7 @@ public class Event {
       this.filter = eventExtendParam.getFilter();
       this.extData = eventExtendParam.getExtData();
       this.memberExtData = eventExtendParam.getMemberExtData();
+      this.sessionExtData = eventExtendParam.getSessionExtData();
     }
     return this;
   }
