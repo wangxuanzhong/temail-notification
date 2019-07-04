@@ -37,7 +37,6 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 多端同步事件处理类
@@ -64,7 +63,6 @@ public class NotificationSyncServiceImpl implements IMqConsumerService {
   /**
    * 处理从MQ收到的信息
    */
-  @Transactional(rollbackFor = Exception.class)
   @Override
   public void handleMqMessage(String body, String tags) {
     LOGGER.info("sync params: {}, tags: {}", body, tags);
