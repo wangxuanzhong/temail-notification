@@ -32,6 +32,7 @@ import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import com.syswin.temail.notification.main.util.SyncEventUtil;
+import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,9 +80,9 @@ public class NotificationSyncServiceImplTest {
     SyncEventUtil.initEventSeqId(redisServiceMock, relationEvent);
     relationEvent.setHeader(ConstantMock.HEADER);
 
-    relationEvent.setMyVcardId("myVcardId");
-    relationEvent.setOppositeId("");
-    relationEvent.setRemark("");
+    relationEvent.setMyVcard("myVcard");
+    relationEvent.setOppositeVcard("oppositeVcard");
+    relationEvent.setRemark("remark");
     relationEvent.setStatus(1);
     relationEvent.setIsEmail(2);
     relationEvent.setContactType(3);
@@ -105,16 +106,15 @@ public class NotificationSyncServiceImplTest {
     SyncEventUtil.initEventSeqId(redisServiceMock, relationEvent);
     relationEvent.setHeader(ConstantMock.HEADER);
 
-    relationEvent.setMyVcardId("myVcardId");
-    relationEvent.setOppositeId("");
-    relationEvent.setRemark("");
+    relationEvent.setMyVcard("myVcard");
+    relationEvent.setOppositeVcard("oppositeVcard");
+    relationEvent.setRemark("remark");
     relationEvent.setStatus(1);
     relationEvent.setIsEmail(2);
     relationEvent.setContactType(3);
     relationEvent.setCreateTimeStp(1111L);
     relationEvent.setUpdateTimeStp(2222L);
 
-    syncService.handleMqMessage(gson.toJson(relationEvent), "");
     syncService.handleMqMessage(gson.toJson(relationEvent), "");
   }
 
@@ -126,8 +126,11 @@ public class NotificationSyncServiceImplTest {
     SyncRelationEvent relationEvent = new SyncRelationEvent();
     relationEvent.setxPacketId(UUID.randomUUID().toString());
     relationEvent.setEventType(EventType.RELATION_DELETE.getValue());
-    relationEvent.setFrom("b");
+//    relationEvent.setFrom("a");
     relationEvent.setTo("a");
+    relationEvent.setCreateTimeStp(1111L);
+    relationEvent.setUpdateTimeStp(2222L);
+    relationEvent.setDeleteList(Arrays.asList("b", "c", "d"));
     SyncEventUtil.initEventSeqId(redisServiceMock, relationEvent);
     relationEvent.setHeader(ConstantMock.HEADER);
     syncService.handleMqMessage(gson.toJson(relationEvent), "");

@@ -36,29 +36,51 @@ import java.util.List;
 @JsonInclude(Include.NON_NULL)
 public class SyncRelationEvent extends SyncEvent {
 
-  private String myVcardId;
-  private String oppositeId;
+  /**
+   * 主动方的vcard ID
+   */
+  private String myVcard;
+  /**
+   * 被动方vcard文件信息
+   */
+  private String oppositeVcard;
+  /**
+   * 主动方添加的备注(可选字段)
+   */
   private String remark;
-  private int status;
+  /**
+   * 关系状态位（0 普通 1 VIP 2 免打扰 4黑名单 8 置顶）
+   */
+  private Integer status;
+  /**
+   * 是否为email标志位（0 否 1 是）
+   */
   private Integer isEmail;
+  /**
+   * 联系人类型（1普通 2群 4应用号 默认1）
+   */
   private Integer contactType;
+
   private Long createTimeStp;
   private Long updateTimeStp;
+  /**
+   * 批量删除temail列表
+   */
   private List<String> deleteList;
 
-  public void setMyVcardId(String myVcardId) {
-    this.myVcardId = myVcardId;
+  public void setMyVcard(String myVcard) {
+    this.myVcard = myVcard;
   }
 
-  public void setOppositeId(String oppositeId) {
-    this.oppositeId = oppositeId;
+  public void setOppositeVcard(String oppositeVcard) {
+    this.oppositeVcard = oppositeVcard;
   }
 
   public void setRemark(String remark) {
     this.remark = remark;
   }
 
-  public void setStatus(int status) {
+  public void setStatus(Integer status) {
     this.status = status;
   }
 
@@ -85,8 +107,8 @@ public class SyncRelationEvent extends SyncEvent {
   @Override
   public String toString() {
     return "SyncRelationEvent{" +
-        "myVcardId='" + myVcardId + '\'' +
-        ", oppositeId='" + oppositeId + '\'' +
+        "myVcard='" + myVcard + '\'' +
+        ", oppositeVcard='" + oppositeVcard + '\'' +
         ", remark='" + remark + '\'' +
         ", status=" + status +
         ", isEmail=" + isEmail +
