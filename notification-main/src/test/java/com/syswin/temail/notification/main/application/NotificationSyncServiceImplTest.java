@@ -32,7 +32,6 @@ import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import com.syswin.temail.notification.main.util.SyncEventUtil;
-import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,13 +93,13 @@ public class NotificationSyncServiceImplTest {
   }
 
   /**
-   * EventType RELATION_DELETE 55 增加关系
+   * EventType RELATION_UPDATE 54 更新关系
    */
   @Test
-  public void testEventTypeRelationDelete() {
+  public void testEventTypeRelationUpdate() {
     SyncRelationEvent relationEvent = new SyncRelationEvent();
     relationEvent.setxPacketId(UUID.randomUUID().toString());
-    relationEvent.setEventType(EventType.RELATION_DELETE.getValue());
+    relationEvent.setEventType(EventType.RELATION_UPDATE.getValue());
     relationEvent.setFrom("b");
     relationEvent.setTo("a");
     SyncEventUtil.initEventSeqId(redisServiceMock, relationEvent);
@@ -114,8 +113,23 @@ public class NotificationSyncServiceImplTest {
     relationEvent.setContactType(3);
     relationEvent.setCreateTimeStp(1111L);
     relationEvent.setUpdateTimeStp(2222L);
-    relationEvent.setDeleteList(Arrays.asList("J", "Q", "K"));
 
+    syncService.handleMqMessage(gson.toJson(relationEvent), "");
+    syncService.handleMqMessage(gson.toJson(relationEvent), "");
+  }
+
+  /**
+   * EventType RELATION_DELETE 55 删除关系
+   */
+  @Test
+  public void testEventTypeRelationDelete() {
+    SyncRelationEvent relationEvent = new SyncRelationEvent();
+    relationEvent.setxPacketId(UUID.randomUUID().toString());
+    relationEvent.setEventType(EventType.RELATION_DELETE.getValue());
+    relationEvent.setFrom("b");
+    relationEvent.setTo("a");
+    SyncEventUtil.initEventSeqId(redisServiceMock, relationEvent);
+    relationEvent.setHeader(ConstantMock.HEADER);
     syncService.handleMqMessage(gson.toJson(relationEvent), "");
   }
 }
