@@ -57,17 +57,16 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final IMqProducer iMqProducer;
-  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
+  private final NotificationRedisServiceImpl redisService;
   private final EventMapper eventMapper;
   private final MemberMapper memberMapper;
   private final IJsonService iJsonService;
 
   @Autowired
-  public NotificationGroupChatServiceImpl(IMqProducer iMqProducer,
-      NotificationRedisServiceImpl notificationRedisServiceImpl,
+  public NotificationGroupChatServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl redisService,
       EventMapper eventMapper, MemberMapper memberMapper, IJsonService iJsonService) {
     this.iMqProducer = iMqProducer;
-    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
+    this.redisService = redisService;
     this.eventMapper = eventMapper;
     this.memberMapper = memberMapper;
     this.iJsonService = iJsonService;
@@ -93,7 +92,7 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
     // 校验收到的数据是否重复
     String redisKey =
         event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail();
-    if (!EventUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
+    if (!EventUtil.checkUnique(event, redisKey, eventMapper, redisService)) {
       return;
     }
 
@@ -291,7 +290,7 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
    * 插入数据库
    */
   private void insert(Event event) {
-    EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
+    EventUtil.initEventSeqId(redisService, event);
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
   }

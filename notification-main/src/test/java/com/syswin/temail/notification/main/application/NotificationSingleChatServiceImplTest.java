@@ -68,7 +68,7 @@ public class NotificationSingleChatServiceImplTest {
   @Autowired
   private IMqProducer iMqProducer;
   @Autowired
-  private NotificationRedisServiceImpl notificationRedisServiceImpl;
+  private NotificationRedisServiceImpl redisService;
   @Autowired
   private EventMapper eventMapper;
   @Autowired
@@ -77,16 +77,15 @@ public class NotificationSingleChatServiceImplTest {
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
 
-  private NotificationSingleChatServiceImpl notificationSingleChatServiceImpl;
+  private NotificationSingleChatServiceImpl singleChatService;
 
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      notificationSingleChatServiceImpl = new NotificationSingleChatServiceImpl(mqProducerMock, redisServiceMock,
-          eventMapper, iJsonService);
+      singleChatService = new NotificationSingleChatServiceImpl(mqProducerMock, redisServiceMock, eventMapper,
+          iJsonService);
     } else {
-      notificationSingleChatServiceImpl = new NotificationSingleChatServiceImpl(iMqProducer,
-          notificationRedisServiceImpl, eventMapper, iJsonService);
+      singleChatService = new NotificationSingleChatServiceImpl(iMqProducer, redisService, eventMapper, iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -336,6 +335,17 @@ public class NotificationSingleChatServiceImplTest {
     this.sendMessage(params, params.getFrom());
   }
 
+  /**
+   * EventType CHANGE_EXT_DATA 56 修改extData
+   */
+  @Test
+  public void testEventTypeChangeExtData() throws Exception {
+    params.setSessionMessageType(EventType.CHANGE_EXT_DATA.getValue());
+    params.setOwner(TEST_FROM);
+    params.setSessionExtData("SessionExtData");
+    this.sendMessage(params, params.getFrom());
+  }
+
 
   private void sendMessage(MailAgentParams param, String tags) throws Exception {
     sendMessage(param, false, tags);
@@ -351,7 +361,7 @@ public class NotificationSingleChatServiceImplTest {
     } else {
       System.out.println("Message Body：" + gson.toJson(param));
       System.out.println("Tag：" + tags);
-      notificationSingleChatServiceImpl.handleMqMessage(gson.toJson(param), tags);
+      singleChatService.handleMqMessage(gson.toJson(param), tags);
     }
   }
 }

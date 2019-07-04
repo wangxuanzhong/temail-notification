@@ -66,7 +66,7 @@ public class NotificationGroupChatServiceImplTest {
   @Autowired
   private IMqProducer iMqProducer;
   @Autowired
-  private NotificationRedisServiceImpl notificationRedisServiceImpl;
+  private NotificationRedisServiceImpl redisService;
   @Autowired
   private EventMapper eventMapper;
   @Autowired
@@ -77,16 +77,16 @@ public class NotificationGroupChatServiceImplTest {
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
 
-  private NotificationGroupChatServiceImpl notificationGroupChatServiceImpl;
+  private NotificationGroupChatServiceImpl groupChatService;
 
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      notificationGroupChatServiceImpl = new NotificationGroupChatServiceImpl(mqProducerMock, redisServiceMock, eventMapper, memberMapper,
-          iJsonService);
-    } else {
-      notificationGroupChatServiceImpl = new NotificationGroupChatServiceImpl(iMqProducer, notificationRedisServiceImpl, eventMapper,
+      groupChatService = new NotificationGroupChatServiceImpl(mqProducerMock, redisServiceMock, eventMapper,
           memberMapper, iJsonService);
+    } else {
+      groupChatService = new NotificationGroupChatServiceImpl(iMqProducer, redisService, eventMapper, memberMapper,
+          iJsonService);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -590,7 +590,7 @@ public class NotificationGroupChatServiceImplTest {
       iMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
       Thread.sleep(2000);
     } else {
-      notificationGroupChatServiceImpl.handleMqMessage(gson.toJson(param), tags);
+      groupChatService.handleMqMessage(gson.toJson(param), tags);
     }
   }
 }

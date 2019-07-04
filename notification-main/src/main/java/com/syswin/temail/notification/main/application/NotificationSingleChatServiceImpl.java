@@ -54,16 +54,15 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final IMqProducer iMqProducer;
-  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
+  private final NotificationRedisServiceImpl redisService;
   private final EventMapper eventMapper;
   private final IJsonService iJsonService;
 
   @Autowired
-  public NotificationSingleChatServiceImpl(IMqProducer iMqProducer,
-      NotificationRedisServiceImpl notificationRedisServiceImpl,
+  public NotificationSingleChatServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl redisService,
       EventMapper eventMapper, IJsonService iJsonService) {
     this.iMqProducer = iMqProducer;
-    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
+    this.redisService = redisService;
     this.eventMapper = eventMapper;
     this.iJsonService = iJsonService;
   }
@@ -88,13 +87,11 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
-    if (!EventUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
+    if (!EventUtil.checkUnique(event, redisKey, eventMapper, redisService)) {
       return;
     }
 
     /* 添加透传参数 */
-    event.setExtData(params.getExtData());
-    event.setMemberExtData(params.getMemberExtData());
     event.setSessionExtData(params.getSessionExtData());
     // 新群聊消息字段
     event.setFilter(params.getFilter());
@@ -109,9 +106,10 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
       case DESTROYED:
       case REPLY_RETRACT:
       case REPLY_DESTROYED:
+      case CHANGE_EXT_DATA:
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
-          EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
+          EventUtil.initEventSeqId(redisService, event);
           event.autoWriteExtendParam(iJsonService);
           sendMessageToSender(event, header, tags);
           // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
@@ -175,7 +173,7 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
    * 插入数据库
    */
   private void insert(Event event) {
-    EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
+    EventUtil.initEventSeqId(redisService, event);
     event.autoWriteExtendParam(iJsonService);
     eventMapper.insert(event);
   }
