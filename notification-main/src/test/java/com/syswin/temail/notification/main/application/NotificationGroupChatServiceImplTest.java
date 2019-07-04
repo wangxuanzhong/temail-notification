@@ -147,9 +147,10 @@ public class NotificationGroupChatServiceImplTest {
    */
   @Test
   public void testEventTypeAddMember() throws Exception {
-//    params.setxPacketId("aaaaaaaaa");
     params.setSessionMessageType(EventType.ADD_MEMBER.getValue());
     params.setType(MemberRole.NORMAL.getValue());
+    params.setSessionExtData("SessionExtData");
+    params.setMemberExtData("MemberExtData");
     params.setTemail("d");
     params.setName("dd");
     this.sendMessage(params, params.getGroupTemail());
@@ -222,12 +223,26 @@ public class NotificationGroupChatServiceImplTest {
   }
 
   /**
+   * EventType APPLY_ADOPT 6
+   */
+  @Test
+  public void testEventTypeApplyAdopt() throws Exception {
+    params.setSessionMessageType(EventType.APPLY_ADOPT.getValue());
+    params.setTemail("c");
+    params.setSessionExtData("SessionExtData");
+    params.setMemberExtData("MemberExtData");
+    this.sendMessage(params, params.getGroupTemail());
+  }
+
+  /**
    * EventType APPLY_REFUSE 7
    */
   @Test
   public void testEventTypeApplyRefuse() throws Exception {
     params.setSessionMessageType(EventType.APPLY_REFUSE.getValue());
     params.setTemail("c");
+    params.setSessionExtData("SessionExtData");
+    params.setMemberExtData("MemberExtData");
     this.sendMessage(params, params.getGroupTemail());
   }
 
@@ -242,12 +257,26 @@ public class NotificationGroupChatServiceImplTest {
   }
 
   /**
+   * EventType INVITATION_REFUSE 9
+   */
+  @Test
+  public void testEventTypeInvitationRefuse() throws Exception {
+    params.setSessionMessageType(EventType.INVITATION_REFUSE.getValue());
+    params.setTemail("c");
+    params.setSessionExtData("SessionExtData");
+    params.setMemberExtData("MemberExtData");
+    this.sendMessage(params, params.getGroupTemail());
+  }
+
+  /**
    * EventType INVITATION_ADOPT 14
    */
   @Test
   public void testEventTypeInvitationAdopt() throws Exception {
     params.setSessionMessageType(EventType.INVITATION_ADOPT.getValue());
     params.setTemail("c");
+    params.setSessionExtData("SessionExtData");
+    params.setMemberExtData("MemberExtData");
     this.sendMessage(params, params.getGroupTemail());
   }
 
@@ -261,6 +290,7 @@ public class NotificationGroupChatServiceImplTest {
     params.setGroupName("测试组名");
     params.setName("测试当事人名");
     params.setAdminName("测试触发人名");
+    params.setExtData("ExtData");
     this.sendMessage(params, params.getGroupTemail());
   }
 
