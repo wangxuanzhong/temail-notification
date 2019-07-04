@@ -36,7 +36,6 @@ import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
-import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Objects;
@@ -94,7 +93,7 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
     // 校验收到的数据是否重复
     String redisKey =
         event.getxPacketId() + "_" + event.getEventType() + "_" + event.getGroupTemail() + "_" + event.getTemail();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
+    if (!EventUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
       return;
     }
 

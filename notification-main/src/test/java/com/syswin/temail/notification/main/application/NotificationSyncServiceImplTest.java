@@ -40,10 +40,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 public class NotificationSyncServiceImplTest {
 
   private Gson gson = new Gson();
@@ -87,6 +89,7 @@ public class NotificationSyncServiceImplTest {
     relationEvent.setCreateTimeStp(1111L);
     relationEvent.setUpdateTimeStp(2222L);
 
+    syncService.handleMqMessage(gson.toJson(relationEvent), "");
     syncService.handleMqMessage(gson.toJson(relationEvent), "");
   }
 

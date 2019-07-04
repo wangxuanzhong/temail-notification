@@ -47,16 +47,6 @@ public class SyncEvent {
   @JsonIgnore
   private String header;
 
-  public SyncEvent() {
-  }
-
-  public SyncEvent(String xPacketId, Integer eventType, String from, String to) {
-    this.xPacketId = xPacketId;
-    this.eventType = eventType;
-    this.from = from;
-    this.to = to;
-  }
-
   public Long getId() {
     return id;
   }

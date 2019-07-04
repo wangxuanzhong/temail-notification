@@ -35,7 +35,6 @@ import com.syswin.temail.notification.main.dto.CdtpResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.NotificationPacketUtil;
-import com.syswin.temail.notification.main.util.NotificationUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import java.lang.invoke.MethodHandles;
@@ -111,7 +110,7 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
+    if (!EventUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
       return;
     }
 
@@ -181,7 +180,7 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
-    if (!NotificationUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
+    if (!EventUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
       return;
     }
 

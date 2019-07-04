@@ -46,90 +46,36 @@ public class SyncRelationEvent extends SyncEvent {
   private Long updateTimeStp;
   private List<String> deleteList;
 
-  public SyncRelationEvent() {
-  }
-
-  public SyncRelationEvent(String xPacketId, Integer eventType, String from, String to, String myVcardId,
-      String oppositeId, String remark, int status, Integer isEmail, Integer contactType, Long createTimeStp,
-      Long updateTimeStp, List<String> deleteList) {
-    super(xPacketId, eventType, from, to);
-    this.myVcardId = myVcardId;
-    this.oppositeId = oppositeId;
-    this.remark = remark;
-    this.status = status;
-    this.isEmail = isEmail;
-    this.contactType = contactType;
-    this.createTimeStp = createTimeStp;
-    this.updateTimeStp = updateTimeStp;
-    this.deleteList = deleteList;
-  }
-
-  public String getMyVcardId() {
-    return myVcardId;
-  }
-
   public void setMyVcardId(String myVcardId) {
     this.myVcardId = myVcardId;
-  }
-
-  public String getOppositeId() {
-    return oppositeId;
   }
 
   public void setOppositeId(String oppositeId) {
     this.oppositeId = oppositeId;
   }
 
-  public String getRemark() {
-    return remark;
-  }
-
   public void setRemark(String remark) {
     this.remark = remark;
-  }
-
-  public int getStatus() {
-    return status;
   }
 
   public void setStatus(int status) {
     this.status = status;
   }
 
-  public Integer getIsEmail() {
-    return isEmail;
-  }
-
   public void setIsEmail(Integer isEmail) {
     this.isEmail = isEmail;
-  }
-
-  public Integer getContactType() {
-    return contactType;
   }
 
   public void setContactType(Integer contactType) {
     this.contactType = contactType;
   }
 
-  public Long getCreateTimeStp() {
-    return createTimeStp;
-  }
-
   public void setCreateTimeStp(Long createTimeStp) {
     this.createTimeStp = createTimeStp;
   }
 
-  public Long getUpdateTimeStp() {
-    return updateTimeStp;
-  }
-
   public void setUpdateTimeStp(Long updateTimeStp) {
     this.updateTimeStp = updateTimeStp;
-  }
-
-  public List<String> getDeleteList() {
-    return deleteList;
   }
 
   public void setDeleteList(List<String> deleteList) {

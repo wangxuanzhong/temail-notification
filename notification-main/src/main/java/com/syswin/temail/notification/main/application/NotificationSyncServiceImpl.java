@@ -76,6 +76,12 @@ public class NotificationSyncServiceImpl implements IMqConsumerService {
 
     LOGGER.info("sync event type: {}", EventType.getByValue(event.getEventType()));
 
+    // 校验收到的数据是否重复
+    String redisKey = event.getxPacketId() + "_" + event.getEventType();
+    if (!SyncEventUtil.checkUnique(event, redisKey, redisService)) {
+      return;
+    }
+
     switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
       case RELATION_ADD:
       case RELATION_UPDATE:

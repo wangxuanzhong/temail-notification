@@ -183,6 +183,7 @@ public class NotificationGroupChatServiceImplTest {
     params.setSessionMessageType(EventType.ADD_GROUP.getValue());
     params.setGroupTemail("g2");
     params.setTemail("a");
+    params.setExtData("ExtData");
     this.sendMessage(params, params.getGroupTemail());
   }
 
@@ -215,6 +216,8 @@ public class NotificationGroupChatServiceImplTest {
   public void testEventTypeApply() throws Exception {
     params.setSessionMessageType(EventType.APPLY.getValue());
     params.setTemail("d");
+    params.setSessionExtData("SessionExtData");
+    params.setMemberExtData("MemberExtData");
     this.sendMessage(params, params.getGroupTemail());
   }
 

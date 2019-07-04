@@ -26,15 +26,40 @@ package com.syswin.temail.notification.main.util;
 
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
+import com.syswin.temail.notification.main.application.NotificationRedisServiceImpl;
 import com.syswin.temail.notification.main.domains.SyncEvent;
+import java.lang.invoke.MethodHandles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author liusen@syswin.com
  */
 public class SyncEventUtil {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   private SyncEventUtil() {
     throw new IllegalStateException("Utility class");
+  }
+
+  /**
+   * 幂等校验
+   */
+  public static boolean checkUnique(SyncEvent event, String redisKey, NotificationRedisServiceImpl redisService) {
+    // xPacketId为空则认为是无效数据
+    if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
+      LOGGER.warn("xPacketId is null!");
+      return false;
+    }
+
+    // 第一步：查询redis，是否key值未过期，解决并发问题
+    if (!redisService.checkUnique(redisKey)) {
+      LOGGER.warn("check unique from redis failed: {}", event);
+      return false;
+    }
+
+    return true;
   }
 
   /**

@@ -36,33 +36,35 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class NotificationUtilTest {
+@ActiveProfiles("test")
+public class EventUtilTest {
 
   @MockBean
   EventMapper eventMapper;
 
   @MockBean
-  NotificationRedisServiceImpl notificationRedisServiceImpl;
+  NotificationRedisServiceImpl redisService;
 
   @Test
   public void testCheckUnique() {
     Event event = new Event();
-    Assertions.assertThat(NotificationUtil.checkUnique(event, "key", eventMapper, notificationRedisServiceImpl)).isFalse();
+    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isFalse();
 
     event.setxPacketId(UUID.randomUUID().toString());
-    Mockito.when(notificationRedisServiceImpl.checkUnique(Mockito.anyString())).thenReturn(false);
-    Assertions.assertThat(NotificationUtil.checkUnique(event, "key", eventMapper, notificationRedisServiceImpl)).isFalse();
+    Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(false);
+    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isFalse();
 
-    Mockito.when(notificationRedisServiceImpl.checkUnique(Mockito.anyString())).thenReturn(true);
+    Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(true);
     Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(Collections.singletonList(event));
-    Assertions.assertThat(NotificationUtil.checkUnique(event, "key", eventMapper, notificationRedisServiceImpl)).isFalse();
+    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isFalse();
 
     Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
-    Assertions.assertThat(NotificationUtil.checkUnique(event, "key", eventMapper, notificationRedisServiceImpl)).isTrue();
+    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isTrue();
 
   }
 }
