@@ -27,6 +27,7 @@ package com.syswin.temail.notification.main.application;
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
+import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
@@ -65,25 +66,26 @@ public class NotificationTopicServiceImplTest {
   @Autowired
   private IMqProducer iMqProducer;
   @Autowired
-  private NotificationRedisServiceImpl notificationRedisServiceImpl;
+  private NotificationRedisServiceImpl redisService;
   @Autowired
   private TopicMapper topicMapper;
   @Autowired
   private IJsonService iJsonService;
+  @Autowired
+  private NotificationConfig config;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
 
-  private NotificationTopicServiceImpl notificationTopicServiceImpl;
+  private NotificationTopicServiceImpl topicService;
 
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      notificationTopicServiceImpl = new NotificationTopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper,
-          iJsonService);
+      topicService = new NotificationTopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper, iJsonService,
+          config);
     } else {
-      notificationTopicServiceImpl = new NotificationTopicServiceImpl(iMqProducer, notificationRedisServiceImpl,
-          topicMapper, iJsonService);
+      topicService = new NotificationTopicServiceImpl(iMqProducer, redisService, topicMapper, iJsonService, config);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -222,7 +224,7 @@ public class NotificationTopicServiceImplTest {
     } else {
       System.out.println("Message Body：" + gson.toJson(param));
       System.out.println("Tag：" + tags);
-      notificationTopicServiceImpl.handleMqMessage(gson.toJson(param), tags);
+      topicService.handleMqMessage(gson.toJson(param), tags);
     }
   }
 }

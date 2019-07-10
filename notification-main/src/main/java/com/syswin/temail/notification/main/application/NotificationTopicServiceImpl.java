@@ -28,6 +28,7 @@ import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
+import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.dto.CdtpResponse;
@@ -45,7 +46,6 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,20 +60,20 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final IMqProducer iMqProducer;
-  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
+  private final NotificationRedisServiceImpl redisService;
   private final TopicMapper topicMapper;
   private final IJsonService iJsonService;
 
-  @Value("${app.temail.notification.getEvents.defaultPageSize}")
-  private int defaultPageSize;
+  private final NotificationConfig config;
 
   @Autowired
-  public NotificationTopicServiceImpl(IMqProducer iMqProducer,
-      NotificationRedisServiceImpl notificationRedisServiceImpl, TopicMapper topicMapper, IJsonService iJsonService) {
+  public NotificationTopicServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl redisService,
+      TopicMapper topicMapper, IJsonService iJsonService, NotificationConfig config) {
     this.iMqProducer = iMqProducer;
-    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
+    this.redisService = redisService;
     this.topicMapper = topicMapper;
     this.iJsonService = iJsonService;
+    this.config = config;
   }
 
   /**
@@ -155,7 +155,7 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
    * 插入数据库
    */
   private void insert(TopicEvent topicEvent) {
-    TopicEventUtil.initTopicEventSeqId(notificationRedisServiceImpl, topicEvent);
+    TopicEventUtil.initTopicEventSeqId(redisService, topicEvent);
     topicEvent.autoWriteExtendParam(iJsonService);
     topicMapper.insert(topicEvent);
   }
@@ -279,7 +279,7 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
   public Map<String, Object> getTopicEventsLimited(String to, Long eventSeqId, Integer pageSize) {
     LOGGER.info("pull topic events limited called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
     // 为pageSize配置默认值和最大值
-    pageSize = pageSize == null || pageSize > defaultPageSize ? defaultPageSize : pageSize;
+    pageSize = pageSize == null || pageSize > config.defaultPageSize ? config.defaultPageSize : pageSize;
     return this.getTopicEvents(to, eventSeqId, pageSize);
   }
 }

@@ -26,6 +26,7 @@ package com.syswin.temail.notification.main.application.scheduler;
 
 import com.syswin.temail.notification.main.application.NotificationEventService;
 import com.syswin.temail.notification.main.application.NotificationRedisServiceImpl;
+import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Unread;
@@ -56,22 +57,24 @@ public class NotificationEventScheduleTest {
   private UnreadMapper unreadMapper;
 
   @Autowired
-  private NotificationEventService notificationEventService;
+  private NotificationEventService eventService;
 
   @MockBean
-  private NotificationRedisServiceImpl notificationRedisServiceImpl;
+  private NotificationRedisServiceImpl redisService;
 
   @Autowired
   private TopicMapper topicMapper;
 
-  private int deadline = -1;
+  @Autowired
+  private NotificationConfig config;
 
-  private NotificationEventSchedule notificationEventSchedule;
+  private NotificationEventSchedule eventSchedule;
 
   @Before
   public void setUp() {
-    notificationEventSchedule = new NotificationEventSchedule(eventMapper, unreadMapper, notificationEventService, notificationRedisServiceImpl,
-        topicMapper, deadline);
+    config.deadline = -1;
+    eventSchedule = new NotificationEventSchedule(eventMapper, unreadMapper, eventService, redisService, topicMapper,
+        config);
   }
 
   @Test
@@ -87,13 +90,14 @@ public class NotificationEventScheduleTest {
 
     unreadMapper.insert(new Unread("from", "to", 2));
 
-    Mockito.when(notificationRedisServiceImpl.checkLock(Mockito.anyString(), Mockito.anyLong(), Mockito.any(TimeUnit.class))).thenReturn(true);
+    Mockito.when(redisService.checkLock(Mockito.anyString(), Mockito.anyLong(), Mockito.any(TimeUnit.class)))
+        .thenReturn(true);
 
-    notificationEventSchedule.deleteOldEvent();
+    eventSchedule.deleteOldEvent();
   }
 
   @Test
   public void testDeleteOldTopic() {
-    notificationEventSchedule.deleteOldTopic();
+    eventSchedule.deleteOldTopic();
   }
 }

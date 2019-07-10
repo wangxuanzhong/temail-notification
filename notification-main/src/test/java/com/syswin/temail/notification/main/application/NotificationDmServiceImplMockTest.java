@@ -27,6 +27,7 @@ package com.syswin.temail.notification.main.application;
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
+import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.dto.CdtpResponse;
@@ -45,7 +46,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpEntity;
@@ -73,16 +73,8 @@ public class NotificationDmServiceImplMockTest {
   @MockBean
   private NotificationRedisServiceImpl redisService;
 
-  @Value("${app.temail.notification.dm.groupChat.enabled:false}")
-  private String groupChatEnabled;
-  @Value("${app.temail.notification.dm.application.enabled:false}")
-  private String applicationEnabled;
-  @Value("${spring.rocketmq.topics.notify.groupChat:notify}")
-  private String groupChatTopic;
-  @Value("${spring.rocketmq.topics.notify.application:notify}")
-  private String applicationTopic;
-  @Value("${url.temail.auth:authUrl}")
-  private String authUrl;
+  @Autowired
+  private NotificationConfig config;
 
   private RestTemplate restTemplateMock = new RestTemplate() {
     @Override
@@ -98,7 +90,7 @@ public class NotificationDmServiceImplMockTest {
   @Before
   public void setUp() {
     dmService = new NotificationDmServiceImpl(iMqProducer, redisService, eventMapper, iJsonService, restTemplateMock,
-        groupChatEnabled, applicationEnabled, groupChatTopic, applicationTopic, authUrl);
+        config);
   }
 
   @Test
@@ -133,7 +125,8 @@ public class NotificationDmServiceImplMockTest {
 
     String tag = event.getFrom() + "_" + event.getTo();
 
-    Mockito.verify(iMqProducer).sendMessage(EventUtil.toJson(iJsonService, event), groupChatTopic, tag, "");
+    Mockito.verify(iMqProducer)
+        .sendMessage(EventUtil.toJson(iJsonService, event), config.notifyGroupChatTopic, tag, "");
   }
 
   @Test

@@ -27,6 +27,7 @@ package com.syswin.temail.notification.main.application;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
+import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.constants.Constant.EventCondition;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
@@ -50,7 +51,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,20 +69,21 @@ public class NotificationEventService {
   private final MemberMapper memberMapper;
   private final IJsonService iJsonService;
   private final IMqProducer iMqProducer;
-  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
+  private final NotificationRedisServiceImpl redisService;
 
-  @Value("${app.temail.notification.getEvents.defaultPageSize}")
-  private int defaultPageSize;
+  private final NotificationConfig config;
 
   @Autowired
   public NotificationEventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
-      IJsonService iJsonService, IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl) {
+      IJsonService iJsonService, IMqProducer iMqProducer, NotificationRedisServiceImpl redisService,
+      NotificationConfig config) {
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
     this.iJsonService = iJsonService;
     this.iMqProducer = iMqProducer;
-    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
+    this.redisService = redisService;
+    this.config = config;
   }
 
   /**
@@ -398,7 +399,7 @@ public class NotificationEventService {
       cdtpEventType = EventType.GROUP_RESET.getValue();
     }
     event.setTimestamp(System.currentTimeMillis());
-    EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
+    EventUtil.initEventSeqId(redisService, event);
     eventMapper.insert(event);
 
     // 删除历史重置事件
@@ -458,7 +459,7 @@ public class NotificationEventService {
   public Map<String, Object> getEventsLimited(String to, Long eventSeqId, Integer pageSize) {
     LOGGER.info("pull events limited called, to: {}, eventSeqId: {}, pageSize: {}", to, eventSeqId, pageSize);
     // 为pageSize配置默认值和最大值
-    pageSize = pageSize == null || pageSize > defaultPageSize ? defaultPageSize : pageSize;
+    pageSize = pageSize == null || pageSize > config.defaultPageSize ? config.defaultPageSize : pageSize;
     return this.getEvents(to, eventSeqId, pageSize);
   }
 }

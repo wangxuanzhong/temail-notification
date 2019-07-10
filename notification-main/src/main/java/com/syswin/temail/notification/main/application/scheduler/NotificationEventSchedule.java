@@ -26,6 +26,7 @@ package com.syswin.temail.notification.main.application.scheduler;
 
 import com.syswin.temail.notification.main.application.NotificationEventService;
 import com.syswin.temail.notification.main.application.NotificationRedisServiceImpl;
+import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.constants.Constant.EventCondition;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Unread;
@@ -42,7 +43,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,22 +63,22 @@ public class NotificationEventSchedule {
 
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
-  private final NotificationEventService notificationEventService;
-  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
+  private final NotificationEventService eventService;
+  private final NotificationRedisServiceImpl redisService;
   private final TopicMapper topicMapper;
-  private final int deadline;
+
+  private final NotificationConfig config;
 
   @Autowired
   public NotificationEventSchedule(EventMapper eventMapper, UnreadMapper unreadMapper,
-      NotificationEventService notificationEventService,
-      NotificationRedisServiceImpl notificationRedisServiceImpl,
-      TopicMapper topicMapper, @Value("${app.temail.notification.schedule.deadline}") int deadline) {
+      NotificationEventService eventService, NotificationRedisServiceImpl redisService, TopicMapper topicMapper,
+      NotificationConfig config) {
     this.eventMapper = eventMapper;
-    this.notificationEventService = notificationEventService;
+    this.eventService = eventService;
     this.topicMapper = topicMapper;
     this.unreadMapper = unreadMapper;
-    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
-    this.deadline = deadline;
+    this.redisService = redisService;
+    this.config = config;
   }
 
   /**
@@ -89,7 +89,7 @@ public class NotificationEventSchedule {
     LocalDateTime createTime = this.getDeadline();
     LOGGER.info("delete old event before {}", createTime);
 
-    if (!notificationRedisServiceImpl.checkLock(DELETE_OLD_EVENT_KEY, TIMEOUT, TimeUnit.MINUTES)) {
+    if (!redisService.checkLock(DELETE_OLD_EVENT_KEY, TIMEOUT, TimeUnit.MINUTES)) {
       LOGGER.warn("check lock from redis failed!");
       return;
     }
@@ -107,7 +107,7 @@ public class NotificationEventSchedule {
 
       // 统计未读数
       LOGGER.info("calculate [{}]'s event, size : {}", to, events.size());
-      Map<String, List<String>> eventMap = notificationEventService.calculateUnread(events, unreadMap);
+      Map<String, List<String>> eventMap = eventService.calculateUnread(events, unreadMap);
 
       // 统计各个会话的未读数量，并插入数据库
       eventMap.forEach((key, msgIds) -> {
@@ -146,6 +146,6 @@ public class NotificationEventSchedule {
   }
 
   private LocalDateTime getDeadline() {
-    return LocalDate.now().atStartOfDay().minusDays(deadline);
+    return LocalDate.now().atStartOfDay().minusDays(config.deadline);
   }
 }

@@ -34,13 +34,13 @@ import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * 初始化rocket mq生产者
+ * 初始化mq生产者
  *
  * @author liusen@syswin.com
  */
@@ -49,44 +49,26 @@ public class NotificationMqProducerConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  @Value("${spring.rocketmq.host}")
-  private String host;
-
-  /**
-   * MQ发送topic
-   */
-  @Value("${spring.rocketmq.topics.notify}")
-  private String notifyTopic;
-
-  /**
-   * MQ生产组
-   */
-  @Value("${spring.rocketmq.topics.notifyProducerGroup:notificationProducer}")
-  private String producerGroup;
-
-  /**
-   * MQ生产类型
-   */
-  @Value("${app.temail.notification.mq.producerType:ROCKET_MQ_ONS}")
-  private String producerType;
+  @Autowired
+  private NotificationConfig config;
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.producer", havingValue = "rocketmq", matchIfMissing = true)
   public IMqProducer notificationRocketMqProducer() {
     LOGGER.info("IMqProducer [rocketmq] started!");
-    return new RocketMqProducer(host, notifyTopic, producerGroup);
+    return new RocketMqProducer(config.host, config.notifyTopic, config.producerGroup);
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   @ConditionalOnProperty(name = "app.temail.notification.mq.producer", havingValue = "libraryMessage")
   public IMqProducer notificationLibraryMessagingMqProducer(Map<String, MqProducer> mqProducers) {
     LOGGER.info("IMqProducer [libraryMessage] started!");
-    return new LibraryMessagingMqProducer(mqProducers, notifyTopic, producerGroup);
+    return new LibraryMessagingMqProducer(mqProducers, config.notifyTopic, config.producerGroup);
   }
 
   @Bean
   @ConditionalOnProperty(name = "app.temail.notification.mq.producer", havingValue = "libraryMessage")
   MqProducerConfig groupmailagentTopicProducerConfig() {
-    return new MqProducerConfig(producerGroup, MqImplementation.valueOf(producerType));
+    return new MqProducerConfig(config.producerGroup, MqImplementation.valueOf(config.producerType));
   }
 }

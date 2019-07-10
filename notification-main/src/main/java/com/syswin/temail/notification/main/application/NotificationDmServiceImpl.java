@@ -29,6 +29,7 @@ import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.foundation.exceptions.BaseException;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
+import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.dto.CdtpResponse;
@@ -42,7 +43,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -67,36 +67,24 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
   private static final String APPLICATION_TYPE_PREFIX = "B";
 
   private final IMqProducer iMqProducer;
-  private final NotificationRedisServiceImpl notificationRedisServiceImpl;
+  private final NotificationRedisServiceImpl redisService;
   private final EventMapper eventMapper;
   private final IJsonService iJsonService;
   private final RestTemplate restTemplate;
   private final NotificationPacketUtil notificationPacketUtil = new NotificationPacketUtil();
 
-  private final String groupChatEnabled;
-  private final String applicationEnabled;
-  private final String groupChatTopic;
-  private final String applicationTopic;
-  private final String authUrl;
+  private final NotificationConfig config;
 
   @Autowired
-  public NotificationDmServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl notificationRedisServiceImpl,
+  public NotificationDmServiceImpl(IMqProducer iMqProducer, NotificationRedisServiceImpl redisService,
       EventMapper eventMapper, IJsonService iJsonService, RestTemplate notificationRestTemplate,
-      @Value("${app.temail.notification.dm.groupChat.enabled:false}") String groupChatEnabled,
-      @Value("${app.temail.notification.dm.application.enabled:false}") String applicationEnabled,
-      @Value("${spring.rocketmq.topics.notify.groupChat:notify}") String groupChatTopic,
-      @Value("${spring.rocketmq.topics.notify.application:notify}") String applicationTopic,
-      @Value("${url.temail.auth:authUrl}") String authUrl) {
+      NotificationConfig config) {
     this.iMqProducer = iMqProducer;
-    this.notificationRedisServiceImpl = notificationRedisServiceImpl;
+    this.redisService = redisService;
     this.eventMapper = eventMapper;
     this.iJsonService = iJsonService;
     this.restTemplate = notificationRestTemplate;
-    this.groupChatEnabled = groupChatEnabled;
-    this.applicationEnabled = applicationEnabled;
-    this.groupChatTopic = groupChatTopic;
-    this.applicationTopic = applicationTopic;
-    this.authUrl = authUrl;
+    this.config = config;
   }
 
   /**
@@ -110,14 +98,14 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
-    if (!EventUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
+    if (!EventUtil.checkUnique(event, redisKey, eventMapper, redisService)) {
       return;
     }
 
     CDTPHeader cdtpHeader = iJsonService.fromJson(header, CDTPHeader.class);
     event.setFrom(cdtpHeader.getSender());
     event.setTo(cdtpHeader.getReceiver());
-    EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
+    EventUtil.initEventSeqId(redisService, event);
     event.autoWriteExtendParam(iJsonService);
     event.zip();
     eventMapper.insert(event);
@@ -135,14 +123,14 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
       if (type == null) {
         // 发送到dispatcher
         iMqProducer.sendMessage(iJsonService.toJson(response), tag);
-      } else if (Boolean.valueOf(groupChatEnabled) && type instanceof String && type.toString()
+      } else if (Boolean.valueOf(config.dmGroupChatEnabled) && type instanceof String && type.toString()
           .startsWith(GROUP_CHAT_TYPE_PREFIX)) {
         // 发送到新群聊topic
-        iMqProducer.sendMessage(EventUtil.toJson(iJsonService, event), groupChatTopic, tag, "");
-      } else if (Boolean.valueOf(applicationEnabled) && type instanceof String && type.toString()
+        iMqProducer.sendMessage(EventUtil.toJson(iJsonService, event), config.notifyGroupChatTopic, tag, "");
+      } else if (Boolean.valueOf(config.dmApplicationEnabled) && type instanceof String && type.toString()
           .startsWith(APPLICATION_TYPE_PREFIX)) {
         // 发送到协同应用topic
-        iMqProducer.sendMessage(EventUtil.toJson(iJsonService, event), applicationTopic, tag, "");
+        iMqProducer.sendMessage(EventUtil.toJson(iJsonService, event), config.notifyApplicationTopic, tag, "");
       } else {
         // 发送到dispatcher
         iMqProducer.sendMessage(iJsonService.toJson(response), tag);
@@ -180,11 +168,11 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
-    if (!EventUtil.checkUnique(event, redisKey, eventMapper, notificationRedisServiceImpl)) {
+    if (!EventUtil.checkUnique(event, redisKey, eventMapper, redisService)) {
       return;
     }
 
-    EventUtil.initEventSeqId(notificationRedisServiceImpl, event);
+    EventUtil.initEventSeqId(redisService, event);
     event.autoWriteExtendParam(iJsonService);
     event.zip();
     eventMapper.insert(event);
@@ -199,7 +187,7 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
 
 
   private boolean checkIsSameDomain(String temail) {
-    String url = authUrl + String.format(GET_PUBLIC_KEY_PATH, temail);
+    String url = config.authUrl + String.format(GET_PUBLIC_KEY_PATH, temail);
     try {
       // 调用auth获取公钥接口，接口返回404则表示用户不存在或是不在本域。
       LOGGER.info("check domain url: {}", url);

@@ -26,6 +26,7 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member;
@@ -76,17 +77,17 @@ public class NotificationEventServiceTest {
   private MemberMapper memberMapper;
   @Autowired
   private IJsonService iJsonService;
+  @Autowired
+  private NotificationConfig config;
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
-  private NotificationEventService notificationEventService;
+  private NotificationEventService eventService;
   private NotificationPacketUtil notificationPacketUtil = new NotificationPacketUtil();
-
-//  private INosqlMsgTemplate nosqlMsgTemplate;
 
   @Before
   public void setUp() {
-    notificationEventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService, mqProducerMock,
-        redisServiceMock);
+    eventService = new NotificationEventService(eventMapper, unreadMapper, memberMapper, iJsonService, mqProducerMock,
+        redisServiceMock, config);
   }
 
   private Event initEvent() {
@@ -103,7 +104,7 @@ public class NotificationEventServiceTest {
   public void TestGetEventsBranchEmpty() {
     List<Event> events = new ArrayList<>();
     Mockito.when(eventMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(events);
-    List<Event> result = (List<Event>) notificationEventService.getEventsLimited(to, 0L, null).get("events");
+    List<Event> result = (List<Event>) eventService.getEventsLimited(to, 0L, null).get("events");
     Assertions.assertThat(result).isEmpty();
   }
 
@@ -534,7 +535,7 @@ public class NotificationEventServiceTest {
   private List<Event> getEvents(List<Event> events) {
     Mockito.when(eventMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(events);
     Mockito.when(eventMapper.selectLastEventSeqId(Mockito.anyString())).thenReturn(events.get(events.size() - 1).getEventSeqId());
-    List<Event> result = (List<Event>) notificationEventService.getEventsLimited(to, 0L, null).get("events");
+    List<Event> result = (List<Event>) eventService.getEventsLimited(to, 0L, null).get("events");
     System.out.println(result);
     return result;
   }
@@ -551,7 +552,7 @@ public class NotificationEventServiceTest {
     Mockito.when(eventMapper.selectResetEvents(Mockito.any(Event.class))).thenReturn(Arrays.asList(1L, 2L, 3l));
     Mockito.doNothing().when(eventMapper).delete(Mockito.anyList());
 
-    notificationEventService.reset(event, header);
+    eventService.reset(event, header);
   }
 
 
@@ -574,7 +575,7 @@ public class NotificationEventServiceTest {
     Mockito.when(unreadMapper.selectCount(Mockito.anyString())).thenReturn(Collections.singletonList(new Unread(groupTemail, to, 2)));
     Mockito.when(eventMapper.selectPartEvents(Mockito.anyString(), Mockito.anyList())).thenReturn(events);
 
-    List<UnreadResponse> result = notificationEventService.getUnread(to);
+    List<UnreadResponse> result = eventService.getUnread(to);
 
     Assertions.assertThat(result).hasSize(1);
     Assertions.assertThat(result.get(0).getUnread()).isEqualTo(3);
@@ -589,15 +590,15 @@ public class NotificationEventServiceTest {
 
     Mockito.doNothing().when(memberMapper).updateUserStatus(Mockito.any(Member.class));
 
-    notificationEventService.updateGroupChatUserStatus(member, UserStatus.NORMAL, header);
-    notificationEventService.updateGroupChatUserStatus(member, UserStatus.DO_NOT_DISTURB, header);
+    eventService.updateGroupChatUserStatus(member, UserStatus.NORMAL, header);
+    eventService.updateGroupChatUserStatus(member, UserStatus.DO_NOT_DISTURB, header);
   }
 
   @Test
   public void testGetGroupChatUserStatus() {
     Mockito.when(memberMapper.selectUserStatus(Mockito.anyString(), Mockito.anyString())).thenReturn(1);
 
-    Map<String, Integer> result = notificationEventService.getGroupChatUserStatus("some one", "some group");
+    Map<String, Integer> result = eventService.getGroupChatUserStatus("some one", "some group");
     Assertions.assertThat(result.get("userStatus")).isEqualTo(1);
   }
 }
