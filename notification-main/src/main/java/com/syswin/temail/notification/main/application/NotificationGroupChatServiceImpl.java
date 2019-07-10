@@ -38,7 +38,6 @@ import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +86,13 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
     // 前端需要的头信息
     String header = params.getHeader();
     LOGGER.info("group chat params: {}, tags: {}", params, tags);
-    LOGGER.info("group chat event type: {}", EventType.getByValue(event.getEventType()));
+
+    EventType eventType = EventType.getByValue(params.getSessionMessageType());
+    if (eventType == null) {
+      LOGGER.warn("event type is illegal! xPacketId: {}", params.getxPacketId());
+      return;
+    }
+    LOGGER.info("group chat event type: {}", eventType);
 
     // 校验收到的数据是否重复
     String redisKey =
@@ -101,7 +106,7 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
     event.setMemberExtData(params.getMemberExtData());
     event.setSessionExtData(params.getSessionExtData());
 
-    switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+    switch (eventType) {
       case RECEIVE:
         EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, EventType.GROUP_RECEIVE.getValue(), header, tags);
@@ -326,14 +331,14 @@ public class NotificationGroupChatServiceImpl implements IMqConsumerService {
   }
 
   /**
-   * 向所有群成员发送群消息
+   * 发送多人消息
    */
   private void sendGroupMessageToAll(Event event, String header, String tags) {
     this.sendGroupMessage(event, memberMapper.selectMember(event), event.getEventType(), header, tags);
   }
 
   /**
-   * 向所有群成员发送群消息
+   * 发送多人消息
    */
   private void sendGroupMessageToAll(Event event, Integer cdtpEventType, String header, String tags) {
     this.sendGroupMessage(event, memberMapper.selectMember(event), cdtpEventType, header, tags);

@@ -36,7 +36,6 @@ import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +82,13 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
     String header = params.getHeader();
 
     LOGGER.info("single chat params: {}, tags: {}", params, tags);
-    LOGGER.info("single chat event type: {}", EventType.getByValue(event.getEventType()));
+
+    EventType eventType = EventType.getByValue(params.getSessionMessageType());
+    if (eventType == null) {
+      LOGGER.warn("event type is illegal! xPacketId: {}", params.getxPacketId());
+      return;
+    }
+    LOGGER.info("single chat event type: {}", eventType);
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
@@ -97,7 +102,7 @@ public class NotificationSingleChatServiceImpl implements IMqConsumerService {
     event.setFilter(params.getFilter());
     event.setAuthor(params.getAuthor());
 
-    switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+    switch (eventType) {
       case RECEIVE:
       case DESTROY:
       case REPLY:

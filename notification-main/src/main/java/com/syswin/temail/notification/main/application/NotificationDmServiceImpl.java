@@ -202,9 +202,9 @@ public class NotificationDmServiceImpl implements IMqConsumerService {
     String url = authUrl + String.format(GET_PUBLIC_KEY_PATH, temail);
     try {
       // 调用auth获取公钥接口，接口返回404则表示用户不存在或是不在本域。
-      LOGGER.debug("check domain url: {}", url);
+      LOGGER.info("check domain url: {}", url);
       ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-      LOGGER.debug("check domain result: {}", responseEntity);
+      LOGGER.info("check domain result: {}", responseEntity);
       return responseEntity.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
       throw new BaseException("check domain exception: ", e);

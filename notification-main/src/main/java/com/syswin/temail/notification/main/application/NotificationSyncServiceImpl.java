@@ -33,7 +33,6 @@ import com.syswin.temail.notification.main.domains.SyncRelationEvent;
 import com.syswin.temail.notification.main.dto.CdtpResponse;
 import com.syswin.temail.notification.main.util.SyncEventUtil;
 import java.lang.invoke.MethodHandles;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -72,7 +71,12 @@ public class NotificationSyncServiceImpl implements IMqConsumerService {
     // 前端需要的头信息
     String header = event.getHeader();
 
-    LOGGER.info("sync event type: {}", EventType.getByValue(event.getEventType()));
+    EventType eventType = EventType.getByValue(event.getEventType());
+    if (eventType == null) {
+      LOGGER.warn("event type is illegal! xPacketId: {}", event.getxPacketId());
+      return;
+    }
+    LOGGER.info("sync event type: {}", eventType);
 
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
@@ -80,7 +84,7 @@ public class NotificationSyncServiceImpl implements IMqConsumerService {
       return;
     }
 
-    switch (Objects.requireNonNull(EventType.getByValue(event.getEventType()))) {
+    switch (eventType) {
       case RELATION_ADD:
       case RELATION_UPDATE:
       case RELATION_DELETE:

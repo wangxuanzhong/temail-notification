@@ -91,9 +91,15 @@ public class NotificationTopicServiceImpl implements IMqConsumerService {
     String header = params.getHeader();
 
     LOGGER.info("topic params: {}, tags: {}", params, tags);
-    LOGGER.info("topic event type: {}", EventType.getByValue(topicEvent.getEventType()));
 
-    switch (Objects.requireNonNull(EventType.getByValue(topicEvent.getEventType()))) {
+    EventType eventType = EventType.getByValue(params.getSessionMessageType());
+    if (eventType == null) {
+      LOGGER.warn("event type is illegal! xPacketId: {}", params.getxPacketId());
+      return;
+    }
+    LOGGER.info("topic event type: {}", eventType);
+
+    switch (eventType) {
       case TOPIC:
         // from和to相同为话题发送者的消息
         topicEvent.setTitle(params.getTitle());
