@@ -26,8 +26,8 @@ package com.syswin.temail.notification.main.interfaces.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.syswin.temail.notification.foundation.domains.Response;
-import com.syswin.temail.notification.main.application.NotificationEventService;
-import com.syswin.temail.notification.main.application.NotificationTopicServiceImpl;
+import com.syswin.temail.notification.main.application.EventService;
+import com.syswin.temail.notification.main.application.TopicServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
@@ -64,17 +64,18 @@ public class NotificationControllerTest {
   private MockMvc mvc;
 
   @MockBean
-  private NotificationEventService notificationEventService;
+  private EventService eventService;
 
   @MockBean
-  private NotificationTopicServiceImpl notificationTopicServiceImpl;
+  private TopicServiceImpl topicService;
 
   private String header = "header";
 
   @Test
   public void testGetEvents() throws Exception {
     Response<Map<String, Object>> response = new Response<>(HttpStatus.OK, null, new HashMap<>());
-    Mockito.when(notificationEventService.getEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(new HashMap<>());
+    Mockito.when(eventService.getEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt()))
+        .thenReturn(new HashMap<>());
 
     MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/notification/events")
         .header("CDTP-header", header)
@@ -90,7 +91,7 @@ public class NotificationControllerTest {
   public void testGetUnread() throws Exception {
     UnreadResponse unreadResponse = new UnreadResponse("from", "to", 1);
     Response<List<UnreadResponse>> response = new Response<>(HttpStatus.OK, null, Collections.singletonList(unreadResponse));
-    Mockito.when(notificationEventService.getUnread(Mockito.anyString())).thenReturn(Collections.singletonList(unreadResponse));
+    Mockito.when(eventService.getUnread(Mockito.anyString())).thenReturn(Collections.singletonList(unreadResponse));
 
     MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/notification/unread")
         .header("CDTP-header", header)
@@ -138,7 +139,8 @@ public class NotificationControllerTest {
   @Test
   public void testGetTopicEvents() throws Exception {
     Response<Map<String, Object>> response = new Response<>(HttpStatus.OK, null, new HashMap<>());
-    Mockito.when(notificationTopicServiceImpl.getTopicEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(new HashMap<>());
+    Mockito.when(topicService.getTopicEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt()))
+        .thenReturn(new HashMap<>());
 
     MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/notification/topic/events")
         .header("CDTP-header", header)
@@ -161,7 +163,7 @@ public class NotificationControllerTest {
     ).andExpect(MockMvcResultMatchers.status().isBadRequest());
 
     member.setUserStatus(1);
-    Mockito.doNothing().when(notificationEventService)
+    Mockito.doNothing().when(eventService)
         .updateGroupChatUserStatus(Mockito.any(Member.class), Mockito.any(UserStatus.class), Mockito.anyString());
 
     mvc.perform(MockMvcRequestBuilders.put("/notification/groupchat/user/status")
@@ -174,7 +176,8 @@ public class NotificationControllerTest {
   @Test
   public void testGetUserDoNotDisturbGroups() throws Exception {
     Response<Map<String, Integer>> response = new Response<>(HttpStatus.OK, null, new HashMap<>());
-    Mockito.when(notificationEventService.getGroupChatUserStatus(Mockito.anyString(), Mockito.anyString())).thenReturn(new HashMap<>());
+    Mockito.when(eventService.getGroupChatUserStatus(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(new HashMap<>());
 
     MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/notification/groupchat/user/status")
         .header("CDTP-header", header)
@@ -189,7 +192,8 @@ public class NotificationControllerTest {
   @Test
   public void testGetEventsLimited() throws Exception {
     Response<Map<String, Object>> response = new Response<>(HttpStatus.OK, null, new HashMap<>());
-    Mockito.when(notificationEventService.getEventsLimited(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(new HashMap<>());
+    Mockito.when(eventService.getEventsLimited(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt()))
+        .thenReturn(new HashMap<>());
 
     MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/notification/limit/events")
         .header("CDTP-header", header)
@@ -204,7 +208,7 @@ public class NotificationControllerTest {
   @Test
   public void testGetTopicEventsLimited() throws Exception {
     Response<Map<String, Object>> response = new Response<>(HttpStatus.OK, null, new HashMap<>());
-    Mockito.when(notificationTopicServiceImpl.getTopicEventsLimited(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt()))
+    Mockito.when(topicService.getTopicEventsLimited(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt()))
         .thenReturn(new HashMap<>());
 
     MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/notification/limit/topic/events")

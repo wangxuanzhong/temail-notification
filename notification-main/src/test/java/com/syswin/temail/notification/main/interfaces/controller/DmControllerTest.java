@@ -22,49 +22,45 @@
  * SOFTWARE.
  */
 
-package com.syswin.temail.notification.main.util;
+package com.syswin.temail.notification.main.interfaces.controller;
 
-import com.syswin.temail.notification.main.application.RedisServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.syswin.temail.notification.main.application.DmServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.infrastructure.EventMapper;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.UUID;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
-public class EventUtilTest {
+public class DmControllerTest {
 
   @MockBean
-  EventMapper eventMapper;
+  DmServiceImpl dmService;
 
-  @MockBean
-  RedisServiceImpl redisService;
+  @Autowired
+  private MockMvc mvc;
 
   @Test
-  public void testCheckUnique() {
-    Event event = new Event();
-    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isFalse();
-
-    event.setxPacketId(UUID.randomUUID().toString());
-    Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(false);
-    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isFalse();
-
-    Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(true);
-    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(Collections.singletonList(event));
-    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isFalse();
-
-    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
-    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isTrue();
-
+  public void testSavePacketEvent() throws Exception {
+    Mockito.doNothing().when(dmService).savePacketEvent(Mockito.any(Event.class), Mockito.anyString(), Mockito.anyString());
+    mvc.perform(MockMvcRequestBuilders.post("/notification/packet")
+        .contentType(MediaType.APPLICATION_JSON_UTF8)
+        .header("CDTP-header", "header")
+        .header("X-PACKET-ID", "xPacketId")
+        .content(new ObjectMapper().writeValueAsString(new Event()))
+    ).andExpect(MockMvcResultMatchers.status().isOk());
   }
 }

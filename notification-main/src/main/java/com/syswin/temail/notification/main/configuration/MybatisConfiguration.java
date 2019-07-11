@@ -22,46 +22,18 @@
  * SOFTWARE.
  */
 
-package com.syswin.temail.notification.main.mock;
+package com.syswin.temail.notification.main.configuration;
 
-import com.syswin.temail.notification.main.application.RedisServiceImpl;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.mockito.Mockito;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.context.annotation.Configuration;
 
-public class RedisServiceImplMock extends RedisServiceImpl {
+/**
+ * mybatis配置类
+ *
+ * @author liusen@syswin.com
+ */
+@Configuration
+@MapperScan("com.syswin.temail.notification.main.infrastructure")
+public class MybatisConfiguration {
 
-  private static List<String> keys = new ArrayList<>();
-  private static Map<String, Long> seqMap = new HashMap<>();
-
-  public RedisServiceImplMock() {
-    super(Mockito.mock(StringRedisTemplate.class));
-  }
-
-
-  @Override
-  public synchronized Long getNextSeq(String key) {
-    if (seqMap.containsKey(key)) {
-      Long seq = seqMap.get(key);
-      seqMap.put(key, ++seq);
-      return seq;
-    } else {
-      Long seq = 1L;
-      seqMap.put(key, seq);
-      return seq;
-    }
-  }
-
-  @Override
-  public synchronized boolean checkUnique(String key) {
-    if (keys.contains(key)) {
-      return false;
-    } else {
-      keys.add(key);
-      return true;
-    }
-  }
 }

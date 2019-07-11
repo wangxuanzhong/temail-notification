@@ -26,7 +26,7 @@ package com.syswin.temail.notification.main.util;
 
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
-import com.syswin.temail.notification.main.application.NotificationRedisServiceImpl;
+import com.syswin.temail.notification.main.application.RedisServiceImpl;
 import com.syswin.temail.notification.main.domains.SyncEvent;
 import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ public class SyncEventUtil {
   /**
    * 幂等校验
    */
-  public static boolean checkUnique(SyncEvent event, String redisKey, NotificationRedisServiceImpl redisService) {
+  public static boolean checkUnique(SyncEvent event, String redisKey, RedisServiceImpl redisService) {
     // xPacketId为空则认为是无效数据
     if (event.getxPacketId() == null || event.getxPacketId().isEmpty()) {
       LOGGER.warn("xPacketId is null!");

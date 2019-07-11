@@ -22,18 +22,24 @@
  * SOFTWARE.
  */
 
-package com.syswin.temail.notification.main.util;
+package com.syswin.temail.notification.main.application.scheduler;
 
+import com.syswin.temail.notification.main.application.EventService;
 import com.syswin.temail.notification.main.application.RedisServiceImpl;
+import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
+import com.syswin.temail.notification.main.domains.EventType;
+import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
-import java.util.ArrayList;
-import java.util.Collections;
+import com.syswin.temail.notification.main.infrastructure.TopicMapper;
+import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import java.util.UUID;
-import org.assertj.core.api.Assertions;
+import java.util.concurrent.TimeUnit;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -41,30 +47,57 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-public class EventUtilTest {
+@ActiveProfiles("test") // mast be profile test
+public class EventScheduleTest {
+
+  @Autowired
+  private EventMapper eventMapper;
+
+  @Autowired
+  private UnreadMapper unreadMapper;
+
+  @Autowired
+  private EventService eventService;
 
   @MockBean
-  EventMapper eventMapper;
+  private RedisServiceImpl redisService;
 
-  @MockBean
-  RedisServiceImpl redisService;
+  @Autowired
+  private TopicMapper topicMapper;
+
+  @Autowired
+  private NotificationConfig config;
+
+  private EventSchedule eventSchedule;
+
+  @Before
+  public void setUp() {
+    config.deadline = -1;
+    eventSchedule = new EventSchedule(eventMapper, unreadMapper, eventService, redisService, topicMapper,
+        config);
+  }
 
   @Test
-  public void testCheckUnique() {
+  public void testDeleteOldEvent() {
     Event event = new Event();
-    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isFalse();
-
+    event.setEventType(EventType.RECEIVE.getValue());
     event.setxPacketId(UUID.randomUUID().toString());
-    Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(false);
-    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isFalse();
+    event.setMsgId(UUID.randomUUID().toString());
+    event.setFrom("from");
+    event.setTo("to");
+    event.setEventSeqId(1L);
+    eventMapper.insert(event);
 
-    Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(true);
-    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(Collections.singletonList(event));
-    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isFalse();
+    unreadMapper.insert(new Unread("from", "to", 2));
 
-    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
-    Assertions.assertThat(EventUtil.checkUnique(event, "key", eventMapper, redisService)).isTrue();
+    Mockito.when(redisService.checkLock(Mockito.anyString(), Mockito.anyLong(), Mockito.any(TimeUnit.class)))
+        .thenReturn(true);
 
+    eventSchedule.deleteOldEvent();
+  }
+
+  @Test
+  public void testDeleteOldTopic() {
+    eventSchedule.deleteOldTopic();
   }
 }

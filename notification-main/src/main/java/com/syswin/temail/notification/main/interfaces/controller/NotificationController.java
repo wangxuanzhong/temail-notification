@@ -24,9 +24,13 @@
 
 package com.syswin.temail.notification.main.interfaces.controller;
 
+import static com.syswin.temail.notification.main.constants.Constant.CdtpParams.CDTP_HEADER;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
+
 import com.syswin.temail.notification.foundation.domains.Response;
-import com.syswin.temail.notification.main.application.NotificationEventService;
-import com.syswin.temail.notification.main.application.NotificationTopicServiceImpl;
+import com.syswin.temail.notification.main.application.EventService;
+import com.syswin.temail.notification.main.application.TopicServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
@@ -39,7 +43,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -62,16 +65,13 @@ public class NotificationController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final String CDTP_HEADER = "CDTP-header";
-
-  private final NotificationEventService notificationEventService;
-  private final NotificationTopicServiceImpl notificationTopicServiceImpl;
+  private final EventService eventService;
+  private final TopicServiceImpl topicService;
 
   @Autowired
-  public NotificationController(NotificationEventService notificationEventService,
-      NotificationTopicServiceImpl notificationTopicServiceImpl) {
-    this.notificationEventService = notificationEventService;
-    this.notificationTopicServiceImpl = notificationTopicServiceImpl;
+  public NotificationController(EventService eventService, TopicServiceImpl topicService) {
+    this.eventService = eventService;
+    this.topicService = topicService;
   }
 
   @ApiOperation(value = "pull event 3 0001", consumes = "application/json")
@@ -84,18 +84,16 @@ public class NotificationController {
 
     if (to == null || "".equals(to)) {
       LOGGER.warn("pull event 3 0001 : from mast not empty!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from mast not empty!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from mast not empty!"), headers, BAD_REQUEST);
     }
 
     if (eventSeqId == null) {
       LOGGER.warn("pull event 3 0001 : eventSeqId mast not null!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "eventSeqId mast not null!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "eventSeqId mast not null!"), headers, BAD_REQUEST);
     }
 
-    Map<String, Object> result = notificationEventService.getEvents(to, eventSeqId, pageSize);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+    Map<String, Object> result = eventService.getEvents(to, eventSeqId, pageSize);
+    return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
   }
 
   @ApiOperation(value = "get unread 3 0002", consumes = "application/json")
@@ -107,12 +105,11 @@ public class NotificationController {
 
     if (to == null || "".equals(to)) {
       LOGGER.warn("get unread 3 0002 : from mast not empty!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from mast not empty!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from mast not empty!"), headers, BAD_REQUEST);
     }
 
-    List<UnreadResponse> result = notificationEventService.getUnread(to);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+    List<UnreadResponse> result = eventService.getUnread(to);
+    return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
   }
 
   @ApiOperation(value = "reset 3 0004", consumes = "application/json")
@@ -123,21 +120,19 @@ public class NotificationController {
 
     if (event.getTo() == null || "".equals(event.getTo())) {
       LOGGER.warn("reset 3 0004 : to mast not empty!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "to mast not empty!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "to mast not empty!"), headers, BAD_REQUEST);
     }
 
     boolean fromIsEmpty = event.getFrom() == null || "".equals(event.getFrom());
     boolean groupTemailIsEmpty = event.getGroupTemail() == null || "".equals(event.getGroupTemail());
     if (fromIsEmpty && groupTemailIsEmpty) {
       LOGGER.warn("reset 3 0004 : from and groupTemail mast not empty at the same time!");
-      return new ResponseEntity<>(
-          new Response<>(HttpStatus.BAD_REQUEST, "from and groupTemail mast not empty at the same time!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from and groupTemail mast not empty at the same time!"),
+          headers, BAD_REQUEST);
     }
 
-    notificationEventService.reset(event, header);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
+    eventService.reset(event, header);
+    return new ResponseEntity<>(new Response<>(OK), headers, OK);
   }
 
   /**
@@ -152,7 +147,7 @@ public class NotificationController {
       @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
+    return new ResponseEntity<>(new Response<>(OK), headers, OK);
   }
 
   @ApiOperation(value = "pull topic event 3 0006", consumes = "application/json")
@@ -165,18 +160,16 @@ public class NotificationController {
 
     if (to == null || "".equals(to)) {
       LOGGER.warn("pull topic event 3 0006 : from mast not empty!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from mast not empty!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from mast not empty!"), headers, BAD_REQUEST);
     }
 
     if (eventSeqId == null) {
       LOGGER.warn("pull topic event 3 0006 : eventSeqId mast not null!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "eventSeqId mast not null!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "eventSeqId mast not null!"), headers, BAD_REQUEST);
     }
 
-    Map<String, Object> result = notificationTopicServiceImpl.getTopicEvents(to, eventSeqId, pageSize);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+    Map<String, Object> result = topicService.getTopicEvents(to, eventSeqId, pageSize);
+    return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
   }
 
   /**
@@ -191,13 +184,12 @@ public class NotificationController {
 
     if (member.getUserStatus() == null) {
       LOGGER.warn("update group chat user status 3 0007 : status is illegal!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "status is illegal!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "status is illegal!"), headers, BAD_REQUEST);
     }
     UserStatus userStatus = UserStatus.getByValue(member.getUserStatus());
 
-    notificationEventService.updateGroupChatUserStatus(member, userStatus, header);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK), headers, HttpStatus.OK);
+    eventService.updateGroupChatUserStatus(member, userStatus, header);
+    return new ResponseEntity<>(new Response<>(OK), headers, OK);
   }
 
   /**
@@ -210,8 +202,8 @@ public class NotificationController {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
-    Map<String, Integer> result = notificationEventService.getGroupChatUserStatus(temail, groupTemail);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+    Map<String, Integer> result = eventService.getGroupChatUserStatus(temail, groupTemail);
+    return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
   }
 
   @ApiOperation(value = "pull event limited 3 0009", consumes = "application/json")
@@ -224,18 +216,16 @@ public class NotificationController {
 
     if (to == null || "".equals(to)) {
       LOGGER.warn("pull event limited 3 0009 : from mast not empty!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from mast not empty!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from mast not empty!"), headers, BAD_REQUEST);
     }
 
     if (eventSeqId == null) {
       LOGGER.warn("pull event limited 3 0009 : eventSeqId mast not null!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "eventSeqId mast not null!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "eventSeqId mast not null!"), headers, BAD_REQUEST);
     }
 
-    Map<String, Object> result = notificationEventService.getEventsLimited(to, eventSeqId, pageSize);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+    Map<String, Object> result = eventService.getEventsLimited(to, eventSeqId, pageSize);
+    return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
   }
 
   @ApiOperation(value = "pull topic event limited 3 000A", consumes = "application/json")
@@ -248,17 +238,15 @@ public class NotificationController {
 
     if (to == null || "".equals(to)) {
       LOGGER.warn("pull topic event limited 3 000A : from mast not empty!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "from mast not empty!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from mast not empty!"), headers, BAD_REQUEST);
     }
 
     if (eventSeqId == null) {
       LOGGER.warn("pull topic event limited 3 000A : eventSeqId mast not null!");
-      return new ResponseEntity<>(new Response<>(HttpStatus.BAD_REQUEST, "eventSeqId mast not null!"), headers,
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "eventSeqId mast not null!"), headers, BAD_REQUEST);
     }
 
-    Map<String, Object> result = notificationTopicServiceImpl.getTopicEventsLimited(to, eventSeqId, pageSize);
-    return new ResponseEntity<>(new Response<>(HttpStatus.OK, null, result), headers, HttpStatus.OK);
+    Map<String, Object> result = topicService.getTopicEventsLimited(to, eventSeqId, pageSize);
+    return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
   }
 }

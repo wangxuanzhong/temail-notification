@@ -22,46 +22,26 @@
  * SOFTWARE.
  */
 
-package com.syswin.temail.notification.main.mock;
+package com.syswin.temail.notification.main.application.scheduler;
 
-import com.syswin.temail.notification.main.application.RedisServiceImpl;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.mockito.Mockito;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.quartz.QuartzJobBean;
 
-public class RedisServiceImplMock extends RedisServiceImpl {
+/**
+ * 清理过期话题时间job类
+ *
+ * @author liusen@syswin.com
+ */
+@DisallowConcurrentExecution
+public class DeleteOldTopicJob extends QuartzJobBean {
 
-  private static List<String> keys = new ArrayList<>();
-  private static Map<String, Long> seqMap = new HashMap<>();
-
-  public RedisServiceImplMock() {
-    super(Mockito.mock(StringRedisTemplate.class));
-  }
-
+  @Autowired
+  private EventSchedule eventSchedule;
 
   @Override
-  public synchronized Long getNextSeq(String key) {
-    if (seqMap.containsKey(key)) {
-      Long seq = seqMap.get(key);
-      seqMap.put(key, ++seq);
-      return seq;
-    } else {
-      Long seq = 1L;
-      seqMap.put(key, seq);
-      return seq;
-    }
-  }
-
-  @Override
-  public synchronized boolean checkUnique(String key) {
-    if (keys.contains(key)) {
-      return false;
-    } else {
-      keys.add(key);
-      return true;
-    }
+  protected void executeInternal(JobExecutionContext jobExecutionContext) {
+    eventSchedule.deleteOldTopic();
   }
 }

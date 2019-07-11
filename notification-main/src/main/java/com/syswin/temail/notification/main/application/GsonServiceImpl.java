@@ -22,46 +22,37 @@
  * SOFTWARE.
  */
 
-package com.syswin.temail.notification.main.mock;
+package com.syswin.temail.notification.main.application;
 
-import com.syswin.temail.notification.main.application.RedisServiceImpl;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.mockito.Mockito;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import com.google.gson.Gson;
+import com.syswin.temail.notification.foundation.application.IJsonService;
+import java.lang.reflect.Type;
+import org.springframework.stereotype.Service;
 
-public class RedisServiceImplMock extends RedisServiceImpl {
+/**
+ * gson工具类
+ *
+ * @author liusen@syswin.com
+ */
+@Service
+public class GsonServiceImpl implements IJsonService {
 
-  private static List<String> keys = new ArrayList<>();
-  private static Map<String, Long> seqMap = new HashMap<>();
-
-  public RedisServiceImplMock() {
-    super(Mockito.mock(StringRedisTemplate.class));
-  }
-
+  private final Gson gson = new Gson();
 
   @Override
-  public synchronized Long getNextSeq(String key) {
-    if (seqMap.containsKey(key)) {
-      Long seq = seqMap.get(key);
-      seqMap.put(key, ++seq);
-      return seq;
-    } else {
-      Long seq = 1L;
-      seqMap.put(key, seq);
-      return seq;
-    }
+  public String toJson(Object src) {
+    return gson.toJson(src);
   }
 
   @Override
-  public synchronized boolean checkUnique(String key) {
-    if (keys.contains(key)) {
-      return false;
-    } else {
-      keys.add(key);
-      return true;
-    }
+  public <T> T fromJson(String json, Class<T> classOfT) {
+    return gson.fromJson(json, classOfT);
   }
+
+  @Override
+  public <T> T fromJson(String json, Type typeOfT) {
+    return gson.fromJson(json, typeOfT);
+  }
+
+
 }
