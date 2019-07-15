@@ -111,6 +111,7 @@ public class SingleChatServiceImpl implements IMqConsumerService {
       case REPLY_RETRACT:
       case REPLY_DESTROYED:
       case CROSS_DOMAIN:
+        // 修改extData事件from和owner永远相同
       case CHANGE_EXT_DATA:
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
