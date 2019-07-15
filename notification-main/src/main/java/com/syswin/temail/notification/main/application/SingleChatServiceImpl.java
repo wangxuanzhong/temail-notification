@@ -104,13 +104,13 @@ public class SingleChatServiceImpl implements IMqConsumerService {
 
     switch (eventType) {
       case RECEIVE:
-      case DESTROY:
-      case REPLY:
-      case CROSS_DOMAIN:
       case RETRACT:
+      case DESTROY:
       case DESTROYED:
+      case REPLY:
       case REPLY_RETRACT:
       case REPLY_DESTROYED:
+      case CROSS_DOMAIN:
       case CHANGE_EXT_DATA:
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {

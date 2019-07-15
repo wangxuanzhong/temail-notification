@@ -145,8 +145,9 @@ public class EventUtil {
       case DESTROYED:
       case REPLY:
       case REPLY_RETRACT:
-      case REPLY_DELETE:
       case REPLY_DESTROYED:
+      case CROSS_DOMAIN:
+      case CHANGE_EXT_DATA:
         event.setEventSeqId(iSequenceService.getNextSeq(event.getOwner() == null ? event.getTo() : event.getOwner()));
         break;
       default:
