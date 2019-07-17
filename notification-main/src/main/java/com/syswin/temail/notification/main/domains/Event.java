@@ -131,6 +131,10 @@ public class Event {
    * 会话ExtData
    */
   private String sessionExtData;
+  /**
+   * crowd群对称密钥
+   */
+  private String sharedKey;
 
   @JsonIgnore
   private String extendParam;
@@ -201,6 +205,7 @@ public class Event {
       this.extData = eventExtendParam.getExtData();
       this.memberExtData = eventExtendParam.getMemberExtData();
       this.sessionExtData = eventExtendParam.getSessionExtData();
+      this.sharedKey = eventExtendParam.getSharedKey();
     }
     return this;
   }
@@ -211,7 +216,8 @@ public class Event {
   public Event autoWriteExtendParam(IJsonService iJsonService) {
     this.extendParam = iJsonService.toJson(
         new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg,
-            this.owner, this.trashMsgInfo, this.author, this.filter, this.extData, this.memberExtData, sessionExtData));
+            this.owner, this.trashMsgInfo, this.author, this.filter, this.extData, this.memberExtData, sessionExtData,
+            this.sharedKey));
     return this;
   }
 
@@ -479,6 +485,14 @@ public class Event {
     this.sessionExtData = sessionExtData;
   }
 
+  public String getSharedKey() {
+    return sharedKey;
+  }
+
+  public void setSharedKey(String sharedKey) {
+    this.sharedKey = sharedKey;
+  }
+
   @Override
   public String toString() {
     return "Event{" +
@@ -510,6 +524,7 @@ public class Event {
         ", extData='" + extData + '\'' +
         ", memberExtData='" + memberExtData + '\'' +
         ", sessionExtData='" + sessionExtData + '\'' +
+        ", sharedKey='" + sharedKey + '\'' +
         ", extendParam='" + extendParam + '\'' +
         '}';
   }

@@ -105,6 +105,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
     event.setExtData(params.getExtData());
     event.setMemberExtData(params.getMemberExtData());
     event.setSessionExtData(params.getSessionExtData());
+    event.setSharedKey(params.getSharedKey());
 
     switch (eventType) {
       case RECEIVE:

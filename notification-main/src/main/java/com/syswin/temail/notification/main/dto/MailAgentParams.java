@@ -152,6 +152,10 @@ public class MailAgentParams {
    * 会话ExtData
    */
   private String sessionExtData;
+  /**
+   * crowd群对称密钥
+   */
+  private String sharedKey;
 
 
   /**
@@ -403,6 +407,13 @@ public class MailAgentParams {
     this.sessionExtData = sessionExtData;
   }
 
+  public String getSharedKey() {
+    return sharedKey;
+  }
+
+  public void setSharedKey(String sharedKey) {
+    this.sharedKey = sharedKey;
+  }
 
   @Override
   public String toString() {
@@ -435,6 +446,7 @@ public class MailAgentParams {
         ", extData='" + extData + '\'' +
         ", memberExtData='" + memberExtData + '\'' +
         ", sessionExtData='" + sessionExtData + '\'' +
+        ", sharedKey='" + sharedKey + '\'' +
         ", header='" + header + '\'' +
         ", xPacketId='" + xPacketId + '\'' +
         '}';

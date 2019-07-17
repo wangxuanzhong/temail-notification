@@ -88,6 +88,10 @@ class EventExtendParam {
    * 会话ExtData
    */
   private String sessionExtData;
+  /**
+   * crowd群对称密钥
+   */
+  private String sharedKey;
 
 
   public EventExtendParam() {
@@ -95,7 +99,7 @@ class EventExtendParam {
 
   public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds,
       Boolean deleteAllMsg, String owner, String trashMsgInfo, String author, List<String> filter,
-      String extData, String memberExtData, String sessionExtData) {
+      String extData, String memberExtData, String sessionExtData, String sharedKey) {
     this.name = name;
     this.adminName = adminName;
     this.groupName = groupName;
@@ -109,6 +113,7 @@ class EventExtendParam {
     this.extData = extData;
     this.memberExtData = memberExtData;
     this.sessionExtData = sessionExtData;
+    this.sharedKey = sharedKey;
   }
 
   public String getName() {
@@ -161,5 +166,9 @@ class EventExtendParam {
 
   public String getSessionExtData() {
     return sessionExtData;
+  }
+
+  public String getSharedKey() {
+    return sharedKey;
   }
 }

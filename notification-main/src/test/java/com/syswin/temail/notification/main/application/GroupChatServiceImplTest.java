@@ -185,6 +185,7 @@ public class GroupChatServiceImplTest {
     params.setGroupTemail("g2");
     params.setTemail("a");
     params.setExtData("ExtData");
+    params.setSharedKey("sharedKey");
     this.sendMessage(params, params.getGroupTemail());
   }
 
@@ -231,6 +232,7 @@ public class GroupChatServiceImplTest {
     params.setTemail("c");
     params.setSessionExtData("SessionExtData");
     params.setMemberExtData("MemberExtData");
+    params.setSharedKey("sharedKey");
     this.sendMessage(params, params.getGroupTemail());
   }
 
@@ -253,6 +255,7 @@ public class GroupChatServiceImplTest {
   public void testEventTypeInvitation() throws Exception {
     params.setSessionMessageType(EventType.INVITATION.getValue());
     params.setTemail("c");
+    params.setSharedKey("sharedKey");
     this.sendMessage(params, params.getGroupTemail());
   }
 
@@ -265,6 +268,7 @@ public class GroupChatServiceImplTest {
     params.setTemail("c");
     params.setSessionExtData("SessionExtData");
     params.setMemberExtData("MemberExtData");
+    params.setSharedKey("sharedKey");
     this.sendMessage(params, params.getGroupTemail());
   }
 
@@ -277,6 +281,7 @@ public class GroupChatServiceImplTest {
     params.setTemail("c");
     params.setSessionExtData("SessionExtData");
     params.setMemberExtData("MemberExtData");
+    params.setSharedKey("sharedKey");
     this.sendMessage(params, params.getGroupTemail());
   }
 
