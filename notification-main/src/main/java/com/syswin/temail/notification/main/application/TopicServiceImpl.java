@@ -32,7 +32,7 @@ import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.constants.Constant.EventCondition;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
-import com.syswin.temail.notification.main.dto.CdtpResponse;
+import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.util.TopicEventUtil;
@@ -168,7 +168,8 @@ public class TopicServiceImpl implements IMqConsumerService {
     LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(),
         EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent);
-    iMqProducer.sendMessage(iJsonService.toJson(new CdtpResponse(topicEvent.getTo(), topicEvent.getEventType(), header,
+    iMqProducer
+        .sendMessage(iJsonService.toJson(new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(), header,
         TopicEventUtil.toJson(iJsonService, topicEvent))), tags);
 
   }

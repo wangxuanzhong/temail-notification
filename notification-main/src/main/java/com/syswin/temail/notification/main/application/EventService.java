@@ -33,7 +33,7 @@ import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
-import com.syswin.temail.notification.main.dto.CdtpResponse;
+import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams.TrashMsgInfo;
 import com.syswin.temail.notification.main.dto.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
@@ -402,7 +402,7 @@ public class EventService {
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(iJsonService
-        .toJson(new CdtpResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))));
+        .toJson(new DispatcherResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))));
   }
 
   /**
@@ -431,7 +431,8 @@ public class EventService {
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(iJsonService
-        .toJson(new CdtpResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))));
+        .toJson(new DispatcherResponse(event.getTo(), event.getEventType(), header,
+            EventUtil.toJson(iJsonService, event))));
   }
 
   /**

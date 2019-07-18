@@ -30,7 +30,7 @@ import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.dto.CdtpResponse;
+import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
@@ -101,12 +101,13 @@ public class SingleChatServiceImplMockTest {
     event.setEventSeqId(1L);
     event.autoWriteExtendParam(iJsonService);
 
-    CdtpResponse cdtpResponse = new CdtpResponse(event.getTo(), event.getEventType(), ConstantMock.HEADER,
+    DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
+        ConstantMock.HEADER,
         EventUtil.toJson(iJsonService, event));
 
     singleChatService.handleMqMessage(gson.toJson(params), params.getFrom());
 
-    Mockito.verify(iMqProducer).sendMessage(gson.toJson(cdtpResponse), params.getFrom());
+    Mockito.verify(iMqProducer).sendMessage(gson.toJson(dispatcherResponse), params.getFrom());
   }
 
 
@@ -135,12 +136,13 @@ public class SingleChatServiceImplMockTest {
     event.setEventSeqId(1L);
     event.autoWriteExtendParam(iJsonService);
 
-    CdtpResponse cdtpResponse = new CdtpResponse(event.getTo(), event.getEventType(), ConstantMock.HEADER,
+    DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
+        ConstantMock.HEADER,
         EventUtil.toJson(iJsonService, event));
 
     singleChatService.handleMqMessage(gson.toJson(params), params.getFrom());
 
-    Mockito.verify(iMqProducer).sendMessage(gson.toJson(cdtpResponse), params.getFrom());
+    Mockito.verify(iMqProducer).sendMessage(gson.toJson(dispatcherResponse), params.getFrom());
   }
 
 
@@ -161,12 +163,13 @@ public class SingleChatServiceImplMockTest {
     event.setEventSeqId(1L);
     event.autoWriteExtendParam(iJsonService);
 
-    CdtpResponse cdtpResponse = new CdtpResponse(event.getTo(), event.getEventType(), ConstantMock.HEADER,
+    DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
+        ConstantMock.HEADER,
         EventUtil.toJson(iJsonService, event));
 
     singleChatService.handleMqMessage(gson.toJson(params), params.getFrom());
 
-    Mockito.verify(iMqProducer).sendMessage(gson.toJson(cdtpResponse), params.getFrom());
+    Mockito.verify(iMqProducer).sendMessage(gson.toJson(dispatcherResponse), params.getFrom());
   }
 
 

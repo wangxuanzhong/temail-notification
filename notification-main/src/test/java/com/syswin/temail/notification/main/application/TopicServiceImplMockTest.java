@@ -30,7 +30,7 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
-import com.syswin.temail.notification.main.dto.CdtpResponse;
+import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
@@ -303,12 +303,13 @@ public class TopicServiceImplMockTest {
     topicEvent.setEventSeqId(1L);
     topicEvent.autoWriteExtendParam(iJsonService);
 
-    CdtpResponse cdtpResponse = new CdtpResponse(topicEvent.getTo(), topicEvent.getEventType(), ConstantMock.HEADER,
+    DispatcherResponse dispatcherResponse = new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(),
+        ConstantMock.HEADER,
         TopicEventUtil.toJson(iJsonService, topicEvent));
 
     topicServiceForHandle.handleMqMessage(gson.toJson(params), params.getTopicId());
 
-    Mockito.verify(iMqProducer).sendMessage(gson.toJson(cdtpResponse), params.getTopicId());
+    Mockito.verify(iMqProducer).sendMessage(gson.toJson(dispatcherResponse), params.getTopicId());
   }
 
 
@@ -328,12 +329,13 @@ public class TopicServiceImplMockTest {
     topicEvent.setEventSeqId(1L);
     topicEvent.autoWriteExtendParam(iJsonService);
 
-    CdtpResponse cdtpResponse = new CdtpResponse(topicEvent.getTo(), topicEvent.getEventType(), ConstantMock.HEADER,
+    DispatcherResponse dispatcherResponse = new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(),
+        ConstantMock.HEADER,
         TopicEventUtil.toJson(iJsonService, topicEvent));
 
     topicServiceForHandle.handleMqMessage(gson.toJson(params), params.getTopicId());
 
-    Mockito.verify(iMqProducer).sendMessage(gson.toJson(cdtpResponse), params.getTopicId());
+    Mockito.verify(iMqProducer).sendMessage(gson.toJson(dispatcherResponse), params.getTopicId());
 
   }
 

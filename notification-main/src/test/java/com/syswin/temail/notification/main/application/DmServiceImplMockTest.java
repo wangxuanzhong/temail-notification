@@ -30,7 +30,7 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.dto.CdtpResponse;
+import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.NotificationPacketUtil;
@@ -146,11 +146,11 @@ public class DmServiceImplMockTest {
 
     CDTPPacket cdtpPacket = notificationPacketUtil.unpack(notificationPacketUtil.decodeData(event.getPacket()));
     String header = iJsonService.toJson(cdtpPacket.getHeader());
-    CdtpResponse cdtpResponse = new CdtpResponse(event.getTo(), event.getEventType(), header,
+    DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(), header,
         EventUtil.toJson(iJsonService, event));
     String tag = event.getFrom() + "_" + event.getTo();
 
     dmService.handleMqMessage(body, null);
-    Mockito.verify(iMqProducer).sendMessage(gson.toJson(cdtpResponse), tag);
+    Mockito.verify(iMqProducer).sendMessage(gson.toJson(dispatcherResponse), tag);
   }
 }

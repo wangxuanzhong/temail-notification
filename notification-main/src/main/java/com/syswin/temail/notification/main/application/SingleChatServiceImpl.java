@@ -30,7 +30,7 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.dto.CdtpResponse;
+import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
@@ -198,7 +198,8 @@ public class SingleChatServiceImpl implements IMqConsumerService {
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     this.insert(event);
     iMqProducer.sendMessage(
-        iJsonService.toJson(new CdtpResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+        iJsonService
+            .toJson(new DispatcherResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
         tags);
   }
 
@@ -209,7 +210,8 @@ public class SingleChatServiceImpl implements IMqConsumerService {
     LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(),
         EventType.getByValue(event.getEventType()));
     iMqProducer.sendMessage(iJsonService
-            .toJson(new CdtpResponse(event.getFrom(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+            .toJson(new DispatcherResponse(event.getFrom(), event.getEventType(), header,
+                EventUtil.toJson(iJsonService, event))),
         tags);
   }
 }

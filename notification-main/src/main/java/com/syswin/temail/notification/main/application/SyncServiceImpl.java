@@ -30,7 +30,7 @@ import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.SyncEvent;
 import com.syswin.temail.notification.main.domains.SyncRelationEvent;
-import com.syswin.temail.notification.main.dto.CdtpResponse;
+import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.util.SyncEventUtil;
 import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
@@ -110,6 +110,7 @@ public class SyncServiceImpl implements IMqConsumerService {
     SyncEventUtil.initEventSeqId(redisService, event);
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     iMqProducer.sendMessage(iJsonService
-        .toJson(new CdtpResponse(to, event.getEventType(), header, SyncEventUtil.toJson(iJsonService, event))), tags);
+            .toJson(new DispatcherResponse(to, event.getEventType(), header, SyncEventUtil.toJson(iJsonService, event))),
+        tags);
   }
 }

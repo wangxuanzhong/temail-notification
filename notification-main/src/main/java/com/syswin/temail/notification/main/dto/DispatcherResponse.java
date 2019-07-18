@@ -31,17 +31,17 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * @author liusen@syswin.com
  */
 @JsonInclude(Include.NON_NULL)
-public class CdtpResponse {
+public class DispatcherResponse {
 
   private String receiver;
   private Integer eventType;
   private String header;
   private String data;
 
-  public CdtpResponse() {
+  public DispatcherResponse() {
   }
 
-  public CdtpResponse(String receiver, Integer eventType, String header, String data) {
+  public DispatcherResponse(String receiver, Integer eventType, String header, String data) {
     this.receiver = receiver;
     this.eventType = eventType;
     this.header = header;
