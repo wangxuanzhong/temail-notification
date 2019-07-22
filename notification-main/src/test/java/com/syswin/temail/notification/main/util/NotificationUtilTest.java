@@ -60,12 +60,12 @@ public class NotificationUtilTest {
     Assertions.assertThat(c2.extParam2).isNull();
 
     NotificationUtil.copyField(c1, c3);
-    Assertions.assertThat(c3.typeInt).isNotEqualTo(c1.typeInt);
-    Assertions.assertThat(c3.typeLong).isNotEqualTo(c1.typeLong);
+    Assertions.assertThat(c3.typeInt).isNull();
+    Assertions.assertThat(c3.typeLong).isNull();
     Assertions.assertThat(c3.typeString).isEqualTo(c1.typeString);
-    Assertions.assertThat(c3.typeBoolean).isNotEqualTo(c1.typeBoolean);
-    Assertions.assertThat(c3.typeList).isNotEqualTo(c1.typeList);
-    Assertions.assertThat(c3.typeMap).isNotEqualTo(c1.typeMap);
+    Assertions.assertThat(c3.typeBoolean).isNull();
+    Assertions.assertThat(c3.typeList).isNull();
+    Assertions.assertThat(c3.typeMap).isNull();
 
   }
 
