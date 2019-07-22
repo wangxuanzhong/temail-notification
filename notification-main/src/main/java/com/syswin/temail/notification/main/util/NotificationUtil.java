@@ -52,7 +52,7 @@ public class NotificationUtil {
 
     for (Field f1 : fields1) {
       for (Field f2 : fields2) {
-        if (f1.getName().equals(f2.getName()) & f1.getType().getName().equals(f2.getType().getName())) {
+        if (f1.getName().equals(f2.getName()) && f1.getType().getName().equals(f2.getType().getName())) {
           try {
             f1.setAccessible(true);
             Object val = f1.get(obj1);
