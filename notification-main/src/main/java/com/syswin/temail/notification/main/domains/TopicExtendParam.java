@@ -34,26 +34,11 @@ import java.util.List;
  * @author liusen@syswin.com
  */
 @JsonInclude(Include.NON_NULL)
-public class TopicExtendParam {
+class TopicExtendParam {
 
-  /**
-   * 话题主题
-   */
   private String title;
-  /**
-   * 收件人
-   */
   private List<String> receivers;
-  /**
-   * 抄送
-   */
   private List<String> cc;
-  /**
-   * 批量msgId
-   */
   private List<String> msgIds;
-  /**
-   * 删除会话是否同时删除消息
-   */
   private Boolean deleteAllMsg;
 }

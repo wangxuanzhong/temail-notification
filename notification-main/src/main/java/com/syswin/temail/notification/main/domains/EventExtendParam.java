@@ -34,134 +34,22 @@ import java.util.List;
  * @author liusen@syswin.com
  */
 @JsonInclude(Include.NON_NULL)
-public class EventExtendParam {
+class EventExtendParam {
 
-  /**
-   * 当事人名称
-   */
   private String name;
-  /**
-   * 触发人名称
-   */
   private String adminName;
-  /**
-   * 群名称
-   */
   private String groupName;
-  /**
-   * at的temail
-   */
   private String at;
-  /**
-   * 批量msgId
-   */
   private List<String> msgIds;
-  /**
-   * 单聊删除会话是否同时删除消息
-   */
   private Boolean deleteAllMsg;
-  /**
-   * 单聊消息拥有者
-   */
   private String owner;
-  /**
-   * 废纸篓删除的消息明细
-   */
   private String trashMsgInfo;
-  /**
-   * 消息发送者
-   */
   private String author;
-  /**
-   * 被通知人员
-   */
   private List<String> filter;
-  /**
-   * 群ExtData
-   */
   private String extData;
-  /**
-   * 群成员ExtData
-   */
   private String memberExtData;
-  /**
-   * 会话ExtData
-   */
   private String sessionExtData;
-  /**
-   * crowd群对称密钥
-   */
   private String sharedKey;
-  /**
-   * 发送人名称
-   */
   private String fromNickName;
-  /**
-   * 新群聊群名称
-   */
   private String fromGroupName;
-
-  public String getName() {
-    return name;
-  }
-
-  public String getAdminName() {
-    return adminName;
-  }
-
-  public String getGroupName() {
-    return groupName;
-  }
-
-  public String getAt() {
-    return at;
-  }
-
-  public List<String> getMsgIds() {
-    return msgIds;
-  }
-
-  public Boolean getDeleteAllMsg() {
-    return deleteAllMsg;
-  }
-
-  public String getOwner() {
-    return owner;
-  }
-
-  public String getTrashMsgInfo() {
-    return trashMsgInfo;
-  }
-
-  public String getAuthor() {
-    return author;
-  }
-
-  public List<String> getFilter() {
-    return filter;
-  }
-
-  public String getExtData() {
-    return extData;
-  }
-
-  public String getMemberExtData() {
-    return memberExtData;
-  }
-
-  public String getSessionExtData() {
-    return sessionExtData;
-  }
-
-  public String getSharedKey() {
-    return sharedKey;
-  }
-
-  public String getFromNickName() {
-    return fromNickName;
-  }
-
-  public String getFromGroupName() {
-    return fromGroupName;
-  }
 }

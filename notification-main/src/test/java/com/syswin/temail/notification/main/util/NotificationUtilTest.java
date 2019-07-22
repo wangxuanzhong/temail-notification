@@ -24,59 +24,80 @@
 
 package com.syswin.temail.notification.main.util;
 
-import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.EventExtendParam;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
 public class NotificationUtilTest {
 
   @Test
   public void testCopyField() {
-    Event event = new Event();
-    event.setName("name");
-    event.setAdminName("adminName");
-    event.setGroupName("groupName");
-    event.setAt("at");
-    event.setMsgIds(Arrays.asList("id1", "id2", "id3"));
-    event.setDeleteAllMsg(true);
-    event.setOwner("owner");
-    event.setTrashMsgInfo("trashMsgInfo");
-    event.setAuthor("author");
-    event.setFilter(Arrays.asList("a", "b", "c"));
-    event.setExtData("extData");
-    event.setMemberExtData("memberExtData");
-    event.setSessionExtData("sessionExtData");
-    event.setSharedKey("sharedKey");
-    event.setFromNickName("发送方昵称");
-    event.setFromGroupName("新群聊群昵称");
+    C1 c1 = new C1();
+    c1.typeInt = 1;
+    c1.typeLong = 2L;
+    c1.typeString = "string";
+    c1.typeBoolean = false;
+    c1.typeList = Arrays.asList("a", "b", "c");
+    c1.typeMap = new HashMap<>();
+    c1.typeMap.put("a", "a");
+    c1.typeMap.put("b", "b");
+    c1.typeMap.put("c", "c");
 
-    EventExtendParam eventExtendParam = new EventExtendParam();
-    NotificationUtil.copyField(event, eventExtendParam);
+    C2 c2 = new C2();
+    C3 c3 = new C3();
 
-    Assertions.assertThat(eventExtendParam.getName()).isEqualTo(event.getName());
-    Assertions.assertThat(eventExtendParam.getAdminName()).isEqualTo(event.getAdminName());
-    Assertions.assertThat(eventExtendParam.getGroupName()).isEqualTo(event.getGroupName());
-    Assertions.assertThat(eventExtendParam.getAt()).isEqualTo(event.getAt());
-    Assertions.assertThat(eventExtendParam.getMsgIds()).isEqualTo(event.getMsgIds());
-    Assertions.assertThat(eventExtendParam.getDeleteAllMsg()).isEqualTo(event.getDeleteAllMsg());
-    Assertions.assertThat(eventExtendParam.getOwner()).isEqualTo(event.getOwner());
-    Assertions.assertThat(eventExtendParam.getTrashMsgInfo()).isEqualTo(event.getTrashMsgInfo());
-    Assertions.assertThat(eventExtendParam.getAuthor()).isEqualTo(event.getAuthor());
-    Assertions.assertThat(eventExtendParam.getFilter()).isEqualTo(event.getFilter());
-    Assertions.assertThat(eventExtendParam.getExtData()).isEqualTo(event.getExtData());
-    Assertions.assertThat(eventExtendParam.getMemberExtData()).isEqualTo(event.getMemberExtData());
-    Assertions.assertThat(eventExtendParam.getSessionExtData()).isEqualTo(event.getSessionExtData());
-    Assertions.assertThat(eventExtendParam.getSharedKey()).isEqualTo(event.getSharedKey());
-    Assertions.assertThat(eventExtendParam.getFromNickName()).isEqualTo(event.getFromNickName());
-    Assertions.assertThat(eventExtendParam.getFromGroupName()).isEqualTo(event.getFromGroupName());
+    NotificationUtil.copyField(c1, c2);
+    Assertions.assertThat(c2.typeInt).isEqualTo(c1.typeInt);
+    Assertions.assertThat(c2.typeLong).isEqualTo(c1.typeLong);
+    Assertions.assertThat(c2.typeString).isEqualTo(c1.typeString);
+    Assertions.assertThat(c2.typeBoolean).isEqualTo(c1.typeBoolean);
+    Assertions.assertThat(c2.typeList).isEqualTo(c1.typeList);
+    Assertions.assertThat(c2.typeMap).isEqualTo(c1.typeMap);
+    Assertions.assertThat(c2.extParam1).isNull();
+    Assertions.assertThat(c2.extParam2).isNull();
+
+    NotificationUtil.copyField(c1, c3);
+    Assertions.assertThat(c3.typeInt).isNotEqualTo(c1.typeInt);
+    Assertions.assertThat(c3.typeLong).isNotEqualTo(c1.typeLong);
+    Assertions.assertThat(c3.typeString).isEqualTo(c1.typeString);
+    Assertions.assertThat(c3.typeBoolean).isNotEqualTo(c1.typeBoolean);
+    Assertions.assertThat(c3.typeList).isNotEqualTo(c1.typeList);
+    Assertions.assertThat(c3.typeMap).isNotEqualTo(c1.typeMap);
+
+  }
+
+  class C1 {
+
+    public Integer typeInt;
+    public Long typeLong;
+    public String typeString;
+    public Boolean typeBoolean;
+    public List<String> typeList;
+    public Map<String, Object> typeMap;
+  }
+
+  class C2 {
+
+    public Integer typeInt;
+    public Long typeLong;
+    public String typeString;
+    public Boolean typeBoolean;
+    public List<String> typeList;
+    public Map<String, Object> typeMap;
+    public String extParam1;
+    public List<String> extParam2;
+  }
+
+  class C3 {
+
+    public String typeInt;
+    public String typeLong;
+    public String typeString;
+    public String typeBoolean;
+    public String typeList;
+    public String typeMap;
   }
 }
