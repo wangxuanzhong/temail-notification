@@ -24,31 +24,49 @@
 
 package com.syswin.temail.notification.main.util;
 
-import com.syswin.temail.notification.foundation.application.IJsonService;
-import com.syswin.temail.notification.foundation.application.ISequenceService;
-import com.syswin.temail.notification.main.domains.TopicEvent;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author liusen@syswin.com
  */
-public class TopicEventUtil {
+public class NotificationUtil {
 
-  private TopicEventUtil() {
-    throw new IllegalStateException("Utility class");
-  }
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   /**
-   * 转换成json，清空extendParam
+   * 将obj1的字段值复制到obj2的同名字段
    */
-  public static String toJson(IJsonService iJsonService, TopicEvent topicEvent) {
-    topicEvent.setExtendParam(null);
-    return iJsonService.toJson(topicEvent);
-  }
+  public static <T1, T2> T2 copyField(T1 obj1, T2 obj2) {
+    if (obj1 == null || obj2 == null) {
+      return null;
+    }
 
-  /**
-   * 生成seqId
-   */
-  public static void initTopicEventSeqId(ISequenceService iSequenceService, TopicEvent topicEvent) {
-    topicEvent.setEventSeqId(iSequenceService.getNextSeq("topic_" + topicEvent.getTo()));
+    Class clazz1 = obj1.getClass();
+    Class clazz2 = obj2.getClass();
+
+    Field[] fields1 = clazz1.getDeclaredFields();
+    Field[] fields2 = clazz2.getDeclaredFields();
+
+    for (Field f1 : fields1) {
+      for (Field f2 : fields2) {
+        if (f1.getName().equals(f2.getName()) & f1.getType().getName().equals(f2.getType().getName())) {
+          try {
+            f1.setAccessible(true);
+            Object val = f1.get(obj1);
+            f2.setAccessible(true);
+            f2.set(obj2, val);
+            f2.setAccessible(false);
+            f1.setAccessible(false);
+          } catch (IllegalAccessException e) {
+            LOGGER.error("copy field error!", e);
+          }
+        }
+      }
+    }
+
+    return obj2;
   }
 }

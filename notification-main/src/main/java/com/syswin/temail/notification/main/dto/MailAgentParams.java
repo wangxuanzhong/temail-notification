@@ -156,6 +156,14 @@ public class MailAgentParams {
    * crowd群对称密钥
    */
   private String sharedKey;
+  /**
+   * 发送人名称
+   */
+  private String fromNickName;
+  /**
+   * 新群聊群名称
+   */
+  private String fromGroupName;
 
 
   /**
@@ -415,6 +423,22 @@ public class MailAgentParams {
     this.sharedKey = sharedKey;
   }
 
+  public String getFromNickName() {
+    return fromNickName;
+  }
+
+  public void setFromNickName(String fromNickName) {
+    this.fromNickName = fromNickName;
+  }
+
+  public String getFromGroupName() {
+    return fromGroupName;
+  }
+
+  public void setFromGroupName(String fromGroupName) {
+    this.fromGroupName = fromGroupName;
+  }
+
   @Override
   public String toString() {
     return "MailAgentParams{" +
@@ -447,6 +471,8 @@ public class MailAgentParams {
         ", memberExtData='" + memberExtData + '\'' +
         ", sessionExtData='" + sessionExtData + '\'' +
         ", sharedKey='" + sharedKey + '\'' +
+        ", fromNickName='" + fromNickName + '\'' +
+        ", fromGroupName='" + fromGroupName + '\'' +
         ", header='" + header + '\'' +
         ", xPacketId='" + xPacketId + '\'' +
         '}';

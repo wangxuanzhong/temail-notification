@@ -98,6 +98,8 @@ public class SingleChatServiceImpl implements IMqConsumerService {
 
     /* 添加透传参数 */
     event.setSessionExtData(params.getSessionExtData());
+    event.setFromNickName(params.getFromNickName());
+    event.setFromGroupName(params.getFromGroupName());
     // 新群聊消息字段
     event.setFilter(params.getFilter());
     event.setAuthor(params.getAuthor());
@@ -116,7 +118,6 @@ public class SingleChatServiceImpl implements IMqConsumerService {
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(params.getOwner())) {
           EventUtil.initEventSeqId(redisService, event);
-          event.autoWriteExtendParam(iJsonService);
           sendMessageToSender(event, header, tags);
           // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
           event.setTo(params.getOwner());

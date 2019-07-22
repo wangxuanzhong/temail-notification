@@ -104,6 +104,9 @@ public class SingleChatServiceImplTest {
     params.setToMsg(Base64.getUrlEncoder().encodeToString("这是一条单聊测试消息！".getBytes()));
     params.setAuthor("a");
     params.setFilter(Arrays.asList("b", "c", "d"));
+    params.setSessionExtData("sessionExtData");
+    params.setFromNickName("发送方昵称");
+    params.setFromGroupName("新群聊群昵称");
 
     params.setOwner(TEST_TO);
     this.sendMessage(params, params.getFrom());
@@ -183,6 +186,7 @@ public class SingleChatServiceImplTest {
     params.setMsgid("5");
     params.setSeqNo(1L);
     params.setToMsg(Base64.getUrlEncoder().encodeToString("这是一条单聊阅后即焚测试消息！".getBytes()));
+    params.setFromNickName("发送方昵称");
 
     params.setOwner(TEST_TO);
     this.sendMessage(params, params.getFrom());
@@ -342,7 +346,7 @@ public class SingleChatServiceImplTest {
   public void testEventTypeChangeExtData() throws Exception {
     params.setSessionMessageType(EventType.CHANGE_EXT_DATA.getValue());
     params.setOwner(TEST_FROM);
-    params.setSessionExtData("SessionExtData");
+    params.setSessionExtData("sessionExtData");
     this.sendMessage(params, params.getFrom());
   }
 

@@ -29,6 +29,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.main.util.GzipUtil;
+import com.syswin.temail.notification.main.util.NotificationUtil;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -135,6 +137,14 @@ public class Event {
    * crowd群对称密钥
    */
   private String sharedKey;
+  /**
+   * 发送人名称
+   */
+  private String fromNickName;
+  /**
+   * 新群聊群名称
+   */
+  private String fromGroupName;
 
   @JsonIgnore
   private String extendParam;
@@ -191,21 +201,7 @@ public class Event {
    */
   public Event autoReadExtendParam(IJsonService iJsonService) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
-      EventExtendParam eventExtendParam = iJsonService.fromJson(this.extendParam, EventExtendParam.class);
-      this.name = eventExtendParam.getName();
-      this.adminName = eventExtendParam.getAdminName();
-      this.groupName = eventExtendParam.getGroupName();
-      this.at = eventExtendParam.getAt();
-      this.msgIds = eventExtendParam.getMsgIds();
-      this.deleteAllMsg = eventExtendParam.getDeleteAllMsg();
-      this.owner = eventExtendParam.getOwner();
-      this.trashMsgInfo = eventExtendParam.getTrashMsgInfo();
-      this.author = eventExtendParam.getAuthor();
-      this.filter = eventExtendParam.getFilter();
-      this.extData = eventExtendParam.getExtData();
-      this.memberExtData = eventExtendParam.getMemberExtData();
-      this.sessionExtData = eventExtendParam.getSessionExtData();
-      this.sharedKey = eventExtendParam.getSharedKey();
+      NotificationUtil.copyField(iJsonService.fromJson(this.extendParam, EventExtendParam.class), this);
     }
     return this;
   }
@@ -214,10 +210,7 @@ public class Event {
    * 自动配置扩展字段
    */
   public Event autoWriteExtendParam(IJsonService iJsonService) {
-    this.extendParam = iJsonService.toJson(
-        new EventExtendParam(this.name, this.adminName, this.groupName, this.at, this.msgIds, this.deleteAllMsg,
-            this.owner, this.trashMsgInfo, this.author, this.filter, this.extData, this.memberExtData, sessionExtData,
-            this.sharedKey));
+    this.extendParam = iJsonService.toJson(NotificationUtil.copyField(this, new EventExtendParam()));
     return this;
   }
 
@@ -493,6 +486,22 @@ public class Event {
     this.sharedKey = sharedKey;
   }
 
+  public String getFromNickName() {
+    return fromNickName;
+  }
+
+  public void setFromNickName(String fromNickName) {
+    this.fromNickName = fromNickName;
+  }
+
+  public String getFromGroupName() {
+    return fromGroupName;
+  }
+
+  public void setFromGroupName(String fromGroupName) {
+    this.fromGroupName = fromGroupName;
+  }
+
   @Override
   public String toString() {
     return "Event{" +
@@ -511,6 +520,7 @@ public class Event {
         ", temail='" + temail + '\'' +
         ", role=" + role +
         ", packet='" + packet + '\'' +
+        ", zipPacket=" + Arrays.toString(zipPacket) +
         ", name='" + name + '\'' +
         ", adminName='" + adminName + '\'' +
         ", groupName='" + groupName + '\'' +
@@ -525,6 +535,8 @@ public class Event {
         ", memberExtData='" + memberExtData + '\'' +
         ", sessionExtData='" + sessionExtData + '\'' +
         ", sharedKey='" + sharedKey + '\'' +
+        ", fromNickName='" + fromNickName + '\'' +
+        ", fromGroupName='" + fromGroupName + '\'' +
         ", extendParam='" + extendParam + '\'' +
         '}';
   }

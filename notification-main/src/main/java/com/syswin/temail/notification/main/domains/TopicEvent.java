@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.util.List;
 
 /**
@@ -104,12 +105,7 @@ public class TopicEvent {
    */
   public TopicEvent autoReadExtendParam(IJsonService iJsonService) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
-      TopicExtendParam topicExtendParam = iJsonService.fromJson(this.extendParam, TopicExtendParam.class);
-      this.title = topicExtendParam.getTitle();
-      this.receivers = topicExtendParam.getReceivers();
-      this.cc = topicExtendParam.getCc();
-      this.msgIds = topicExtendParam.getMsgIds();
-      this.deleteAllMsg = topicExtendParam.getDeleteAllMsg();
+      NotificationUtil.copyField(iJsonService.fromJson(this.extendParam, TopicExtendParam.class), this);
     }
     return this;
   }
@@ -118,8 +114,7 @@ public class TopicEvent {
    * 自动配置扩展字段
    */
   public TopicEvent autoWriteExtendParam(IJsonService iJsonService) {
-    this.extendParam = iJsonService
-        .toJson(new TopicExtendParam(this.title, this.receivers, this.cc, this.msgIds, this.deleteAllMsg));
+    this.extendParam = iJsonService.toJson(NotificationUtil.copyField(this, new TopicExtendParam()));
     return this;
   }
 

@@ -34,7 +34,7 @@ import java.util.List;
  * @author liusen@syswin.com
  */
 @JsonInclude(Include.NON_NULL)
-class EventExtendParam {
+public class EventExtendParam {
 
   /**
    * 当事人名称
@@ -92,29 +92,14 @@ class EventExtendParam {
    * crowd群对称密钥
    */
   private String sharedKey;
-
-
-  public EventExtendParam() {
-  }
-
-  public EventExtendParam(String name, String adminName, String groupName, String at, List<String> msgIds,
-      Boolean deleteAllMsg, String owner, String trashMsgInfo, String author, List<String> filter,
-      String extData, String memberExtData, String sessionExtData, String sharedKey) {
-    this.name = name;
-    this.adminName = adminName;
-    this.groupName = groupName;
-    this.at = at;
-    this.msgIds = msgIds;
-    this.deleteAllMsg = deleteAllMsg;
-    this.owner = owner;
-    this.trashMsgInfo = trashMsgInfo;
-    this.author = author;
-    this.filter = filter;
-    this.extData = extData;
-    this.memberExtData = memberExtData;
-    this.sessionExtData = sessionExtData;
-    this.sharedKey = sharedKey;
-  }
+  /**
+   * 发送人名称
+   */
+  private String fromNickName;
+  /**
+   * 新群聊群名称
+   */
+  private String fromGroupName;
 
   public String getName() {
     return name;
@@ -156,12 +141,12 @@ class EventExtendParam {
     return filter;
   }
 
-  public String getMemberExtData() {
-    return memberExtData;
-  }
-
   public String getExtData() {
     return extData;
+  }
+
+  public String getMemberExtData() {
+    return memberExtData;
   }
 
   public String getSessionExtData() {
@@ -170,5 +155,13 @@ class EventExtendParam {
 
   public String getSharedKey() {
     return sharedKey;
+  }
+
+  public String getFromNickName() {
+    return fromNickName;
+  }
+
+  public String getFromGroupName() {
+    return fromGroupName;
   }
 }

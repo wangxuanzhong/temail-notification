@@ -94,11 +94,17 @@ public class SingleChatServiceImplMockTest {
     params.setAuthor("a");
     params.setFilter(Arrays.asList("b", "c", "d"));
     params.setOwner(TEST_TO);
+    params.setSessionExtData("SessionExtData");
+    params.setFromNickName("发送方昵称");
+    params.setFromGroupName("新群聊群昵称");
 
     Event event = this.mock();
     event.setFilter(params.getFilter());
     event.setAuthor(params.getAuthor());
     event.setEventSeqId(1L);
+    event.setSessionExtData(params.getSessionExtData());
+    event.setFromNickName(params.getFromNickName());
+    event.setFromGroupName(params.getFromGroupName());
     event.autoWriteExtendParam(iJsonService);
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
