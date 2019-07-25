@@ -49,6 +49,7 @@ class EventExtendParam {
   private String extData;
   private String memberExtData;
   private String sessionExtData;
+  private String inviteExtData;
   private String sharedKey;
   private String fromNickName;
   private String fromGroupName;

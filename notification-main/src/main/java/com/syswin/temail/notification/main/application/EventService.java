@@ -164,6 +164,7 @@ public class EventService {
         case GROUP_DO_NOT_DISTURB:
         case DO_NOT_DISTURB:
         case CHANGE_EXT_DATA:
+        case CHANGE_MEMBER_EXT_DATA:
           // 只返回最后一条事件
           sessionEventMap.put(EventUtil.getMsgId(eventType, event), event);
           break;

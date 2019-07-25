@@ -134,6 +134,10 @@ public class Event {
    */
   private String sessionExtData;
   /**
+   * 邀请人ExtData
+   */
+  private String inviteExtData;
+  /**
    * crowd群对称密钥
    */
   private String sharedKey;
@@ -478,6 +482,14 @@ public class Event {
     this.sessionExtData = sessionExtData;
   }
 
+  public String getInviteExtData() {
+    return inviteExtData;
+  }
+
+  public void setInviteExtData(String inviteExtData) {
+    this.inviteExtData = inviteExtData;
+  }
+
   public String getSharedKey() {
     return sharedKey;
   }
@@ -534,6 +546,7 @@ public class Event {
         ", extData='" + extData + '\'' +
         ", memberExtData='" + memberExtData + '\'' +
         ", sessionExtData='" + sessionExtData + '\'' +
+        ", inviteExtData='" + inviteExtData + '\'' +
         ", sharedKey='" + sharedKey + '\'' +
         ", fromNickName='" + fromNickName + '\'' +
         ", fromGroupName='" + fromGroupName + '\'' +

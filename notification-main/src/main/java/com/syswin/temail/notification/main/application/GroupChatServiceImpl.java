@@ -105,6 +105,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
     event.setExtData(params.getExtData());
     event.setMemberExtData(params.getMemberExtData());
     event.setSessionExtData(params.getSessionExtData());
+    event.setInviteExtData(params.getInviteExtData());
     event.setSharedKey(params.getSharedKey());
 
     switch (eventType) {
@@ -145,7 +146,6 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         event.setTemail(null);
         memberMapper.deleteGroupMember(event);
         break;
-      // 只通知被添加的人
       case ADD_MEMBER:
         // 校验群成员是否已存在，不存在时添加到数据库
         List<String> members = memberMapper.selectMember(event);
@@ -157,7 +157,8 @@ public class GroupChatServiceImpl implements IMqConsumerService {
             LOGGER.warn("add member duplicate exception: ", e);
             break;
           }
-          this.sendSingleMessage(event, header, tags);
+          EventUtil.notifyToAll(event);
+          this.sendGroupMessageToAll(event, header, tags);
         } else {
           LOGGER.warn("{} was group {} member, do nothing.", event.getTemail(), event.getGroupTemail());
         }
@@ -168,9 +169,13 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         }.getType());
         List<String> names = iJsonService.fromJson(event.getName(), new TypeToken<List<String>>() {
         }.getType());
+        List<String> memberExtDatas = iJsonService.fromJson(event.getMemberExtData(), new TypeToken<List<String>>() {
+        }.getType());
 
-        if (temails.size() != names.size()) {
-          LOGGER.error("delete member temail and name mismatching, temails: {}, names: {}", temails, names);
+        if (temails.size() != names.size() || temails.size() != memberExtDatas.size()) {
+          LOGGER.error(
+              "delete member temail, name, memberExtData mismatching, temails: {}, names: {}, memberExtDatas: {}",
+              temails, names, memberExtDatas);
           break;
         }
 
@@ -180,17 +185,28 @@ public class GroupChatServiceImpl implements IMqConsumerService {
           memberMapper.deleteGroupMember(event);
         }
 
-        // 通知当事人被移除群聊
         for (int i = 0; i < temails.size(); i++) {
-          event.setName(names.get(i));
           event.setTemail(temails.get(i));
+          event.setName(names.get(i));
+          event.setMemberExtData(memberExtDatas.get(i));
+          // 通知所有人
+          EventUtil.notifyToAll(event);
+          this.sendGroupMessageToAll(event, header, tags);
+          // 通知当事人被移除群聊
+          event.setFrom(event.getGroupTemail());
+          event.setTo(temails.get(i));
           this.sendSingleMessage(event, header, tags);
         }
+
         break;
-      // 只通知当事人
       case LEAVE_GROUP:
         memberMapper.deleteGroupMember(event);
+        // 通知所有人
+        EventUtil.notifyToAll(event);
+        this.sendGroupMessageToAll(event, header, tags);
         // 通知当事人
+        event.setFrom(event.getGroupTemail());
+        event.setTo(event.getTemail());
         this.sendSingleMessage(event, header, tags);
         break;
       case APPLY:
@@ -236,6 +252,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         break;
       case GROUP_STICK:
       case GROUP_STICK_CANCEL:
+      case CHANGE_MEMBER_EXT_DATA:
         EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, header, tags);
         break;

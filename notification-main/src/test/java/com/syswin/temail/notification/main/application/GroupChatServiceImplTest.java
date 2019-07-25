@@ -143,24 +143,25 @@ public class GroupChatServiceImplTest {
   }
 
   /**
-   * EventType ADD_MEMBER 10
+   * EventType ADD_MEMBER 10 新成员入群
    */
   @Test
   public void testEventTypeAddMember() throws Exception {
     params.setSessionMessageType(EventType.ADD_MEMBER.getValue());
     params.setType(MemberRole.NORMAL.getValue());
-    params.setSessionExtData("SessionExtData");
-    params.setMemberExtData("MemberExtData");
-    params.setTemail("d");
-    params.setName("dd");
+    params.setSessionExtData("sessionExtData");
+    params.setMemberExtData("memberExtData");
+
+    params.setTemail("h");
+    params.setName("hh");
     this.sendMessage(params, params.getGroupTemail());
-    params.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
+
+    params.setTemail("i");
+    params.setName("ii");
     this.sendMessage(params, params.getGroupTemail());
-    params.setTemail("e");
-    params.setName("ee");
-    this.sendMessage(params, params.getGroupTemail());
-    params.setTemail("f");
-    params.setName("ff");
+
+    params.setTemail("j");
+    params.setName("jj");
     this.sendMessage(params, params.getGroupTemail());
   }
 
@@ -190,19 +191,20 @@ public class GroupChatServiceImplTest {
   }
 
   /**
-   * EventType DELETE_MEMBER 11
+   * EventType DELETE_MEMBER 11 群成员被移除
    */
   @Test
   public void testEventTypeDeleteMember() throws Exception {
+    params.setSessionMessageType(EventType.DELETE_MEMBER.getValue());
     params.setAdminName("测试触发人名");
     params.setTemail(gson.toJson(Arrays.asList("d", "e", "f")));
     params.setName(gson.toJson(Arrays.asList("dd", "ee", "ff")));
-    params.setSessionMessageType(EventType.DELETE_MEMBER.getValue());
+    params.setMemberExtData(gson.toJson(Arrays.asList("d ext data", "e ext data", "f ext data")));
     this.sendMessage(params, params.getGroupTemail());
   }
 
   /**
-   * EventType LEAVE_GROUP 15
+   * EventType LEAVE_GROUP 15 已退出群聊
    */
   @Test
   public void testEventTypeLeaveGroup() throws Exception {
@@ -249,13 +251,14 @@ public class GroupChatServiceImplTest {
   }
 
   /**
-   * EventType INVITATION 8
+   * EventType INVITATION 8 入群邀请
    */
   @Test
   public void testEventTypeInvitation() throws Exception {
     params.setSessionMessageType(EventType.INVITATION.getValue());
     params.setTemail("c");
     params.setSharedKey("sharedKey");
+    params.setInviteExtData("inviteExtData");
     this.sendMessage(params, params.getGroupTemail());
   }
 
@@ -447,6 +450,18 @@ public class GroupChatServiceImplTest {
     params.setTemail("b");
     this.sendMessage(params, params.getGroupTemail());
   }
+
+  /**
+   * EventType CHANGE_MEMBER_EXT_DATA 57 修改memberExtData
+   */
+  @Test
+  public void testEventTypeChangeMemberExtData() throws Exception {
+    params.setSessionMessageType(EventType.CHANGE_MEMBER_EXT_DATA.getValue());
+    params.setTemail("b");
+    params.setMemberExtData("memberExtData");
+    this.sendMessage(params, params.getGroupTemail());
+  }
+
 
 
   /**
