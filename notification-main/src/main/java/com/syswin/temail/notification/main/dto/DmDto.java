@@ -22,35 +22,30 @@
  * SOFTWARE.
  */
 
-package com.syswin.temail.notification.main.domains;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import java.util.List;
+package com.syswin.temail.notification.main.dto;
 
 /**
- * 事件扩展参数
- *
  * @author liusen@syswin.com
  */
-@JsonInclude(Include.NON_NULL)
-class EventExtendParam {
+public class DmDto {
 
-  private String name;
-  private String adminName;
-  private String groupName;
-  private String at;
-  private List<String> msgIds;
-  private Boolean deleteAllMsg;
-  private String owner;
-  private String trashMsgInfo;
-  private String author;
-  private List<String> filter;
-  private String extData;
-  private String memberExtData;
-  private String sessionExtData;
-  private String inviteExtData;
-  private String sharedKey;
-  private String fromNickName;
-  private String fromGroupName;
+  /**
+   * 时间戳
+   */
+  private String packet;
+
+  public String getPacket() {
+    return packet;
+  }
+
+  public void setPacket(String packet) {
+    this.packet = packet;
+  }
+
+  @Override
+  public String toString() {
+    return "DmDto{" +
+        "packet=" + packet +
+        '}';
+  }
 }

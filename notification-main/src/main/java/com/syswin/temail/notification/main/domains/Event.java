@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.GzipUtil;
 import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.util.Arrays;
@@ -80,19 +81,11 @@ public class Event {
   @JsonIgnore
   private byte[] zipPacket;
 
-  // 以下参数均存入扩展参数字段
+  // 以下参数均存入扩展参数字段extendParam
   /**
    * 当事人名称
    */
   private String name;
-  /**
-   * 管理员名称
-   */
-  private String adminName;
-  /**
-   * 群名称
-   */
-  private String groupName;
   /**
    * at的temail
    */
@@ -114,41 +107,9 @@ public class Event {
    */
   private String trashMsgInfo;
   /**
-   * 消息发送者
-   */
-  private String author;
-  /**
-   * 被通知人员
-   */
-  private List<String> filter;
-  /**
-   * 群ExtData
-   */
-  private String extData;
-  /**
    * 群成员ExtData
    */
   private String memberExtData;
-  /**
-   * 会话ExtData
-   */
-  private String sessionExtData;
-  /**
-   * 邀请人ExtData
-   */
-  private String inviteExtData;
-  /**
-   * crowd群对称密钥
-   */
-  private String sharedKey;
-  /**
-   * 发送人名称
-   */
-  private String fromNickName;
-  /**
-   * 新群聊群名称
-   */
-  private String fromGroupName;
 
   @JsonIgnore
   private String extendParam;
@@ -157,47 +118,13 @@ public class Event {
   }
 
   /**
-   * 单聊
+   * 只需要初始化与mq消息字段名称不符的参数
    */
-  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to,
-      Long timestamp, String groupTemail, String temail, String xPacketId, String owner, Boolean deleteAllMsg) {
+  public Event(Integer eventType, String msgId, Long seqId, String message) {
     this.eventType = eventType;
     this.msgId = msgId;
-    this.parentMsgId = parentMsgId;
     this.seqId = seqId;
     this.message = message;
-    this.from = from;
-    this.to = to;
-    this.timestamp = timestamp;
-    this.groupTemail = groupTemail;
-    this.temail = temail;
-    this.xPacketId = xPacketId;
-    this.owner = owner;
-    this.deleteAllMsg = deleteAllMsg;
-  }
-
-  /**
-   * 群聊
-   */
-  public Event(Integer eventType, String msgId, String parentMsgId, Long seqId, String message, String from, String to,
-      Long timestamp, String groupTemail, String temail, Integer role, String name, String adminName, String groupName,
-      String at, String xPacketId) {
-    this.eventType = eventType;
-    this.msgId = msgId;
-    this.parentMsgId = parentMsgId;
-    this.seqId = seqId;
-    this.message = message;
-    this.from = from;
-    this.to = to;
-    this.timestamp = timestamp;
-    this.groupTemail = groupTemail;
-    this.temail = temail;
-    this.role = role;
-    this.name = name;
-    this.adminName = adminName;
-    this.groupName = groupName;
-    this.at = at;
-    this.xPacketId = xPacketId;
   }
 
   /**
@@ -205,7 +132,7 @@ public class Event {
    */
   public Event autoReadExtendParam(IJsonService iJsonService) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
-      NotificationUtil.copyField(iJsonService.fromJson(this.extendParam, EventExtendParam.class), this);
+      NotificationUtil.copyField(iJsonService.fromJson(this.extendParam, Event.class), this);
     }
     return this;
   }
@@ -213,8 +140,8 @@ public class Event {
   /**
    * 自动配置扩展字段
    */
-  public Event autoWriteExtendParam(IJsonService iJsonService) {
-    this.extendParam = iJsonService.toJson(NotificationUtil.copyField(this, new EventExtendParam()));
+  public Event autoWriteExtendParam(String params) {
+    this.extendParam = EventUtil.initExtendParam(params, this);
     return this;
   }
 
@@ -245,6 +172,14 @@ public class Event {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getxPacketId() {
+    return xPacketId;
+  }
+
+  public void setxPacketId(String xPacketId) {
+    this.xPacketId = xPacketId;
   }
 
   public Long getEventSeqId() {
@@ -311,14 +246,6 @@ public class Event {
     this.to = to;
   }
 
-  public String getOwner() {
-    return owner;
-  }
-
-  public void setOwner(String owner) {
-    this.owner = owner;
-  }
-
   public Long getTimestamp() {
     if (this.timestamp == null) {
       this.timestamp = System.currentTimeMillis();
@@ -354,6 +281,22 @@ public class Event {
     this.role = role;
   }
 
+  public String getPacket() {
+    return packet;
+  }
+
+  public void setPacket(String packet) {
+    this.packet = packet;
+  }
+
+  public byte[] getZipPacket() {
+    return zipPacket;
+  }
+
+  public void setZipPacket(byte[] zipPacket) {
+    this.zipPacket = zipPacket;
+  }
+
   public String getName() {
     return name;
   }
@@ -362,44 +305,12 @@ public class Event {
     this.name = name;
   }
 
-  public String getAdminName() {
-    return adminName;
-  }
-
-  public void setAdminName(String adminName) {
-    this.adminName = adminName;
-  }
-
-  public String getGroupName() {
-    return groupName;
-  }
-
-  public void setGroupName(String groupName) {
-    this.groupName = groupName;
-  }
-
   public String getAt() {
     return at;
   }
 
   public void setAt(String at) {
     this.at = at;
-  }
-
-  public String getExtendParam() {
-    return extendParam;
-  }
-
-  public void setExtendParam(String extendParam) {
-    this.extendParam = extendParam;
-  }
-
-  public String getxPacketId() {
-    return xPacketId;
-  }
-
-  public void setxPacketId(String xPacketId) {
-    this.xPacketId = xPacketId;
   }
 
   public List<String> getMsgIds() {
@@ -418,6 +329,14 @@ public class Event {
     this.deleteAllMsg = deleteAllMsg;
   }
 
+  public String getOwner() {
+    return owner;
+  }
+
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
   public String getTrashMsgInfo() {
     return trashMsgInfo;
   }
@@ -426,92 +345,12 @@ public class Event {
     this.trashMsgInfo = trashMsgInfo;
   }
 
-  public String getPacket() {
-    return packet;
+  public String getExtendParam() {
+    return extendParam;
   }
 
-  public void setPacket(String packet) {
-    this.packet = packet;
-  }
-
-  public String getAuthor() {
-    return author;
-  }
-
-  public void setAuthor(String author) {
-    this.author = author;
-  }
-
-  public List<String> getFilter() {
-    return filter;
-  }
-
-  public void setFilter(List<String> filter) {
-    this.filter = filter;
-  }
-
-  public byte[] getZipPacket() {
-    return zipPacket;
-  }
-
-  public void setZipPacket(byte[] zipPacket) {
-    this.zipPacket = zipPacket;
-  }
-
-  public String getMemberExtData() {
-    return memberExtData;
-  }
-
-  public void setMemberExtData(String memberExtData) {
-    this.memberExtData = memberExtData;
-  }
-
-  public String getExtData() {
-    return extData;
-  }
-
-  public void setExtData(String extData) {
-    this.extData = extData;
-  }
-
-  public String getSessionExtData() {
-    return sessionExtData;
-  }
-
-  public void setSessionExtData(String sessionExtData) {
-    this.sessionExtData = sessionExtData;
-  }
-
-  public String getInviteExtData() {
-    return inviteExtData;
-  }
-
-  public void setInviteExtData(String inviteExtData) {
-    this.inviteExtData = inviteExtData;
-  }
-
-  public String getSharedKey() {
-    return sharedKey;
-  }
-
-  public void setSharedKey(String sharedKey) {
-    this.sharedKey = sharedKey;
-  }
-
-  public String getFromNickName() {
-    return fromNickName;
-  }
-
-  public void setFromNickName(String fromNickName) {
-    this.fromNickName = fromNickName;
-  }
-
-  public String getFromGroupName() {
-    return fromGroupName;
-  }
-
-  public void setFromGroupName(String fromGroupName) {
-    this.fromGroupName = fromGroupName;
+  public void setExtendParam(String extendParam) {
+    this.extendParam = extendParam;
   }
 
   @Override
@@ -534,22 +373,11 @@ public class Event {
         ", packet='" + packet + '\'' +
         ", zipPacket=" + Arrays.toString(zipPacket) +
         ", name='" + name + '\'' +
-        ", adminName='" + adminName + '\'' +
-        ", groupName='" + groupName + '\'' +
         ", at='" + at + '\'' +
         ", msgIds=" + msgIds +
         ", deleteAllMsg=" + deleteAllMsg +
         ", owner='" + owner + '\'' +
         ", trashMsgInfo='" + trashMsgInfo + '\'' +
-        ", author='" + author + '\'' +
-        ", filter=" + filter +
-        ", extData='" + extData + '\'' +
-        ", memberExtData='" + memberExtData + '\'' +
-        ", sessionExtData='" + sessionExtData + '\'' +
-        ", inviteExtData='" + inviteExtData + '\'' +
-        ", sharedKey='" + sharedKey + '\'' +
-        ", fromNickName='" + fromNickName + '\'' +
-        ", fromGroupName='" + fromGroupName + '\'' +
         ", extendParam='" + extendParam + '\'' +
         '}';
   }

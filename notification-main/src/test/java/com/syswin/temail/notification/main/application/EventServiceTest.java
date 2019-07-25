@@ -32,7 +32,7 @@ import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
 import com.syswin.temail.notification.main.domains.Unread;
-import com.syswin.temail.notification.main.dto.MailAgentParams.TrashMsgInfo;
+import com.syswin.temail.notification.main.dto.MailAgentParamsFull.TrashMsgInfo;
 import com.syswin.temail.notification.main.dto.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
@@ -123,7 +123,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     event = initEvent();
@@ -134,7 +134,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setOwner(from);
     event.setEventSeqId(2L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isEmpty();
@@ -156,7 +156,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -176,7 +176,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -198,7 +198,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -213,7 +213,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     event.setEventType(EventType.REPLY_RETRACT.getValue());
@@ -223,7 +223,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setOwner(event.getTo());
     event.setEventSeqId(2L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isEmpty();
@@ -243,7 +243,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(from);
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -262,7 +262,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setEventSeqId(1L);
     event.setMsgIds(Arrays.asList("1", "2", "3"));
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isEmpty();
@@ -281,7 +281,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setEventSeqId(1L);
     event.setMsgIds(Arrays.asList("1", "2", "3"));
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     event = initEvent();
@@ -295,7 +295,7 @@ public class EventServiceTest {
       infos.add(new TrashMsgInfo(from, to, String.valueOf(i)));
     }
     event.setTrashMsgInfo(gson.toJson(infos));
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -315,7 +315,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(to);
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -335,7 +335,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(to);
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -355,7 +355,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(from);
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -369,7 +369,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(to);
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     event = initEvent();
@@ -379,7 +379,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(to);
     event.setEventSeqId(2L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isEmpty();
@@ -401,7 +401,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setOwner(event.getTo());
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     event = initEvent();
@@ -410,7 +410,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setMsgIds(Arrays.asList("1", "2", "3"));
     event.setEventSeqId(2L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     event = initEvent();
@@ -419,7 +419,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setDeleteAllMsg(true);
     event.setEventSeqId(3L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -438,7 +438,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setMsgIds(Arrays.asList("1", "2", "3"));
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isEmpty();
@@ -458,7 +458,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(to);
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -478,7 +478,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(to);
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     event = initEvent();
@@ -488,7 +488,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(to);
     event.setEventSeqId(2L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isEmpty();
@@ -500,7 +500,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(to);
     event.setEventSeqId(3L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -519,7 +519,7 @@ public class EventServiceTest {
     event.setTo(to);
     event.setEventSeqId(1L);
     event.setZipPacket(GzipUtil.zipWithDecode(notificationPacketUtil.encodeData("test packet".getBytes())));
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Assertions.assertThat(this.getEvents(events)).isNotEmpty();
@@ -569,7 +569,7 @@ public class EventServiceTest {
     event.setGroupTemail(groupTemail);
     event.setTemail(from);
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(null);
     events.add(event);
 
     Mockito.when(unreadMapper.selectCount(Mockito.anyString())).thenReturn(Collections.singletonList(new Unread(groupTemail, to, 2)));

@@ -27,6 +27,7 @@ package com.syswin.temail.notification.main.interfaces.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.syswin.temail.notification.main.application.DmServiceImpl;
 import com.syswin.temail.notification.main.domains.Event;
+import com.syswin.temail.notification.main.dto.DmDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -55,7 +56,8 @@ public class DmControllerTest {
 
   @Test
   public void testSavePacketEvent() throws Exception {
-    Mockito.doNothing().when(dmService).savePacketEvent(Mockito.any(Event.class), Mockito.anyString(), Mockito.anyString());
+    Mockito.doNothing().when(dmService)
+        .savePacketEvent(Mockito.any(DmDto.class), Mockito.anyString(), Mockito.anyString());
     mvc.perform(MockMvcRequestBuilders.post("/notification/packet")
         .contentType(MediaType.APPLICATION_JSON_UTF8)
         .header("CDTP-header", "header")

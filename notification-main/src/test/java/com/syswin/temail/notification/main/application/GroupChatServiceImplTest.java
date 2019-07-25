@@ -29,7 +29,7 @@ import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
-import com.syswin.temail.notification.main.dto.MailAgentParams;
+import com.syswin.temail.notification.main.dto.MailAgentParamsFull;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
@@ -57,7 +57,7 @@ public class GroupChatServiceImplTest {
   private final boolean useMQ = false;
   private final boolean isMock = true;
 
-  private MailAgentParams params = new MailAgentParams();
+  private MailAgentParamsFull params = new MailAgentParamsFull();
   private Gson gson = new Gson();
 
   @Value("${spring.rocketmq.topics.mailAgent.groupChat}")
@@ -462,11 +462,11 @@ public class GroupChatServiceImplTest {
     this.sendMessage(params, params.getGroupTemail());
   }
 
-  private void sendMessage(MailAgentParams param, String tags) throws Exception {
+  private void sendMessage(MailAgentParamsFull param, String tags) throws Exception {
     sendMessage(param, false, tags);
   }
 
-  private void sendMessage(MailAgentParams param, boolean isSamePacket, String tags) throws Exception {
+  private void sendMessage(MailAgentParamsFull param, boolean isSamePacket, String tags) throws Exception {
     if (!isSamePacket) {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
     }

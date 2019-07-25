@@ -24,14 +24,18 @@
 
 package com.syswin.temail.notification.main.util;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
 import com.syswin.temail.notification.main.application.RedisServiceImpl;
+import com.syswin.temail.notification.main.constants.Constant.EventParams;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,9 +81,11 @@ public class EventUtil {
    * 转换成json，清空后端使用参数
    */
   public static String toJson(IJsonService iJsonService, Event event) {
+    String extendParam = event.getExtendParam();
+    event.setId(null);
     event.setExtendParam(null);
     event.setZipPacket(null);
-    return iJsonService.toJson(event);
+    return NotificationUtil.combineTwoJson(iJsonService.toJson(event), extendParam);
   }
 
   /**
@@ -153,6 +159,41 @@ public class EventUtil {
       default:
         event.setEventSeqId(iSequenceService.getNextSeq(event.getTo()));
         break;
+    }
+  }
+
+  /**
+   * 初始化extendParam的json
+   */
+  public static String initExtendParam(String params, Event event) {
+    JsonObject jsonObject = NotificationUtil.removeUsedField(params);
+
+    if (event == null) {
+      event = new Event();
+    }
+
+    // 添加单聊owner
+    if (event.getOwner() != null) {
+      jsonObject.addProperty(EventParams.OWNER, event.getOwner());
+    }
+
+    // 添加批量删除操作msgIds
+    List<String> msgIds = event.getMsgIds();
+    if (msgIds != null && !msgIds.isEmpty()) {
+      JsonArray msgIdsArray = new JsonArray();
+      msgIds.forEach(msgIdsArray::add);
+      jsonObject.add(EventParams.MSG_IDS, msgIdsArray);
+    }
+
+    // 添加群聊批量移除群成员事件，群成员名称字段name
+    if (event.getName() != null) {
+      jsonObject.addProperty(EventParams.NAME, event.getName());
+    }
+
+    if (jsonObject.size() == 0) {
+      return null;
+    } else {
+      return jsonObject.toString();
     }
   }
 }

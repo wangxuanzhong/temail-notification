@@ -34,6 +34,7 @@ import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
+import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import org.slf4j.Logger;
@@ -73,15 +74,14 @@ public class SingleChatServiceImpl implements IMqConsumerService {
   @Override
   public void handleMqMessage(String body, String tags) {
     MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
-    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(),
-        params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp(),
-        params.getGroupTemail(), params.getTemail(), params.getxPacketId(), params.getOwner(),
-        params.getDeleteAllMsg());
+    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getSeqNo(), params.getToMsg());
+    // 复制相同名称的字段的值
+    NotificationUtil.copyField(params, event);
 
     // 前端需要的头信息
     String header = params.getHeader();
 
-    LOGGER.info("single chat params: {}, tags: {}", params, tags);
+    LOGGER.info("single chat params: {}, tags: {}", body, tags);
 
     EventType eventType = EventType.getByValue(params.getSessionMessageType());
     if (eventType == null) {
@@ -95,14 +95,6 @@ public class SingleChatServiceImpl implements IMqConsumerService {
     if (!EventUtil.checkUnique(event, redisKey, eventMapper, redisService)) {
       return;
     }
-
-    /* 添加透传参数 */
-    event.setSessionExtData(params.getSessionExtData());
-    event.setFromNickName(params.getFromNickName());
-    event.setFromGroupName(params.getFromGroupName());
-    // 新群聊消息字段
-    event.setFilter(params.getFilter());
-    event.setAuthor(params.getAuthor());
 
     switch (eventType) {
       case RECEIVE:
@@ -122,10 +114,10 @@ public class SingleChatServiceImpl implements IMqConsumerService {
           // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
           event.setTo(params.getOwner());
           event.setOwner(params.getTo());
-          event.autoWriteExtendParam(iJsonService);
+          event.autoWriteExtendParam(body);
           eventMapper.insert(event);
         } else {
-          sendMessage(event, header, tags);
+          sendMessage(event, header, tags, body);
         }
         break;
       case PULLED:
@@ -135,7 +127,7 @@ public class SingleChatServiceImpl implements IMqConsumerService {
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
           if (eventMapper.selectEventsByMsgId(event).isEmpty()) {
-            sendMessage(event, header, tags);
+            sendMessage(event, header, tags, body);
           } else {
             LOGGER.info("message {} is pulled, do nothing!", msgId);
           }
@@ -151,7 +143,7 @@ public class SingleChatServiceImpl implements IMqConsumerService {
         // from是操作人，to是会话另一方
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
-        sendMessage(event, header, tags);
+        sendMessage(event, header, tags, body);
         break;
       // 只提供多端同步
       case ARCHIVE:
@@ -161,15 +153,14 @@ public class SingleChatServiceImpl implements IMqConsumerService {
         // from是操作人，to是会话的另一方
         event.setFrom(params.getTo());
         event.setTo(params.getFrom());
-        sendMessage(event, header, tags);
+        sendMessage(event, header, tags, body);
         break;
       case TRASH_CANCEL:
       case TRASH_DELETE:
         // owner是操作人，from和to都为空，msgId为空
-        event.setTrashMsgInfo(params.getTrashMsgInfo());
         event.setFrom(params.getOwner());
         event.setTo(params.getOwner());
-        sendMessage(event, header, tags);
+        sendMessage(event, header, tags, body);
         break;
       default:
         LOGGER.warn("not support event type!");
@@ -179,25 +170,25 @@ public class SingleChatServiceImpl implements IMqConsumerService {
   /**
    * 插入数据库
    */
-  private void insert(Event event) {
+  private void insert(Event event, String body) {
     EventUtil.initEventSeqId(redisService, event);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(body);
     eventMapper.insert(event);
   }
 
   /**
    * 发送消息
    */
-  private void sendMessage(Event event, String header, String tags) {
-    this.sendMessage(event, event.getTo(), header, tags);
+  private void sendMessage(Event event, String header, String tags, String body) {
+    this.sendMessage(event, event.getTo(), header, tags, body);
   }
 
   /**
    * 发送消息
    */
-  private void sendMessage(Event event, String to, String header, String tags) {
+  private void sendMessage(Event event, String to, String header, String tags, String body) {
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
-    this.insert(event);
+    this.insert(event, body);
     iMqProducer.sendMessage(
         iJsonService
             .toJson(new DispatcherResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))),

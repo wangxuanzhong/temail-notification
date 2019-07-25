@@ -24,6 +24,8 @@
 
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
@@ -270,18 +272,24 @@ public class EventService {
     List<Event> notifyEvents = new ArrayList<>();
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
 
+    //给事件按照eventSeqId重新排序
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
+
+    //返回事件超过1000条，只返回最后一千条
+    if (notifyEvents.size() > EventCondition.MAX_EVENT_RETURN_COUNT) {
+      notifyEvents.subList(0, notifyEvents.size() - EventCondition.MAX_EVENT_RETURN_COUNT).clear();
+    }
+
+    //将每个返回结果的extendParam合并到event中
+    List<JsonElement> eventList = new ArrayList<>();
+    notifyEvents
+        .forEach(event -> eventList.add(new JsonParser().parse(EventUtil.toJson(iJsonService, event))));
+
     Map<String, Object> result = new HashMap<>(5);
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
+    result.put("events", notifyEvents);
 
-    // 返回结果最多1000条
-    if (notifyEvents.size() > EventCondition.MAX_EVENT_RETURN_COUNT) {
-      result.put("events",
-          notifyEvents.subList(notifyEvents.size() - EventCondition.MAX_EVENT_RETURN_COUNT, notifyEvents.size()));
-    } else {
-      result.put("events", notifyEvents);
-    }
     return result;
   }
 
@@ -412,9 +420,12 @@ public class EventService {
   @Transactional(rollbackFor = Exception.class)
   public void updateGroupChatUserStatus(Member member, UserStatus userStatus, String header) {
     LOGGER.info("update user status, param: {}", member);
-    Event event = new Event(null, null, null, null, null,
-        member.getGroupTemail(), member.getTemail(), System.currentTimeMillis(), member.getGroupTemail(),
-        member.getTemail(), null, null, null, null, null, null);
+    Event event = new Event();
+    event.setFrom(member.getGroupTemail());
+    event.setTo(member.getTemail());
+    event.setGroupTemail(member.getGroupTemail());
+    event.setTemail(member.getTemail());
+    event.setTimestamp(System.currentTimeMillis());
 
     switch (userStatus) {
       case NORMAL:

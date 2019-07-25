@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.main.util.NotificationUtil;
+import com.syswin.temail.notification.main.util.TopicEventUtil;
 import java.util.List;
 
 /**
@@ -42,7 +43,6 @@ public class TopicEvent {
    */
   @JsonIgnore
   private Long id;
-  @JsonIgnore
   private String xPacketId;
   private Long eventSeqId;
   private Integer eventType;
@@ -51,7 +51,6 @@ public class TopicEvent {
    * 话题参数
    */
   private String topicId;
-  private Long topicSeqId;
   private String msgId;
   private Long seqId;
   private String message;
@@ -60,18 +59,6 @@ public class TopicEvent {
   private Long timestamp;
 
   // 以下参数均存入扩展参数字段
-  /**
-   * 话题主题
-   */
-  private String title;
-  /**
-   * 收件人
-   */
-  private List<String> receivers;
-  /**
-   * 抄送
-   */
-  private List<String> cc;
   /**
    * 批量msgId
    */
@@ -87,17 +74,14 @@ public class TopicEvent {
   public TopicEvent() {
   }
 
-  public TopicEvent(String xPacketId, Integer eventType, String topicId, String msgId, Long seqId, String message,
-      String from, String to, Long timestamp) {
-    this.xPacketId = xPacketId;
+  /**
+   * 只需要初始化与mq消息字段名称不符的参数
+   */
+  public TopicEvent(Integer eventType, String msgId, Long seqId, String message) {
     this.eventType = eventType;
-    this.topicId = topicId;
     this.msgId = msgId;
     this.seqId = seqId;
     this.message = message;
-    this.from = from;
-    this.to = to;
-    this.timestamp = timestamp;
   }
 
   /**
@@ -105,7 +89,7 @@ public class TopicEvent {
    */
   public TopicEvent autoReadExtendParam(IJsonService iJsonService) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
-      NotificationUtil.copyField(iJsonService.fromJson(this.extendParam, TopicExtendParam.class), this);
+      NotificationUtil.copyField(iJsonService.fromJson(this.extendParam, TopicEvent.class), this);
     }
     return this;
   }
@@ -113,8 +97,8 @@ public class TopicEvent {
   /**
    * 自动配置扩展字段
    */
-  public TopicEvent autoWriteExtendParam(IJsonService iJsonService) {
-    this.extendParam = iJsonService.toJson(NotificationUtil.copyField(this, new TopicExtendParam()));
+  public TopicEvent autoWriteExtendParam(String params) {
+    this.extendParam = TopicEventUtil.initExtendParam(params, this);
     return this;
   }
 
@@ -158,28 +142,12 @@ public class TopicEvent {
     this.topicId = topicId;
   }
 
-  public Long getTopicSeqId() {
-    return topicSeqId;
-  }
-
-  public void setTopicSeqId(Long topicSeqId) {
-    this.topicSeqId = topicSeqId;
-  }
-
   public String getMsgId() {
     return msgId;
   }
 
   public void setMsgId(String msgId) {
     this.msgId = msgId;
-  }
-
-  public Long getSeqId() {
-    return seqId;
-  }
-
-  public void setSeqId(Long seqId) {
-    this.seqId = seqId;
   }
 
   public String getMessage() {
@@ -207,35 +175,14 @@ public class TopicEvent {
   }
 
   public Long getTimestamp() {
+    if (this.timestamp == null) {
+      this.timestamp = System.currentTimeMillis();
+    }
     return timestamp;
   }
 
   public void setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public List<String> getReceivers() {
-    return receivers;
-  }
-
-  public void setReceivers(List<String> receivers) {
-    this.receivers = receivers;
-  }
-
-  public List<String> getCc() {
-    return cc;
-  }
-
-  public void setCc(List<String> cc) {
-    this.cc = cc;
   }
 
   public List<String> getMsgIds() {
@@ -270,16 +217,12 @@ public class TopicEvent {
         ", eventSeqId=" + eventSeqId +
         ", eventType=" + eventType +
         ", topicId='" + topicId + '\'' +
-        ", topicSeqId=" + topicSeqId +
         ", msgId='" + msgId + '\'' +
         ", seqId=" + seqId +
         ", message length='" + (message == null ? 0 : message.length()) + '\'' +
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", timestamp=" + timestamp +
-        ", title='" + title + '\'' +
-        ", receivers=" + receivers +
-        ", cc=" + cc +
         ", msgIds=" + msgIds +
         ", deleteAllMsg=" + deleteAllMsg +
         ", extendParam='" + extendParam + '\'' +

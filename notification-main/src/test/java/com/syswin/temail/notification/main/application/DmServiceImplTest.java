@@ -29,6 +29,7 @@ import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
+import com.syswin.temail.notification.main.dto.DmDto;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
@@ -102,8 +103,8 @@ public class DmServiceImplTest {
 
   @Test
   public void testSavePacketEvent() {
-    Event event = new Event();
-    event.setPacket(notificationPacketUtil.encodeData("test packet".getBytes()));
+    DmDto dmDto = new DmDto();
+    dmDto.setPacket(notificationPacketUtil.encodeData("test packet".getBytes()));
 
     Map<String, Object> extraData = new HashMap<>();
     extraData.put("type", "A000");
@@ -113,7 +114,7 @@ public class DmServiceImplTest {
     cdtpHeader.setReceiver("b@test.com");
     cdtpHeader.setExtraData(gson.toJson(extraData));
 
-    dmService.savePacketEvent(event, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
+    dmService.savePacketEvent(dmDto, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
   }
 
   @Test
@@ -161,29 +162,29 @@ public class DmServiceImplTest {
 
   @Test
   public void testSavePacketEventAll() {
-    Event event = new Event();
-    event.setPacket(notificationPacketUtil.encodeData("".getBytes()));
+    DmDto dmDto = new DmDto();
+    dmDto.setPacket(notificationPacketUtil.encodeData("test packet".getBytes()));
 
     CDTPHeader cdtpHeader = new CDTPHeader();
     cdtpHeader.setSender("a@test.com");
     cdtpHeader.setReceiver("b@test.com");
     String xPacketId = UUID.randomUUID().toString();
-    dmService.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
-    dmService.savePacketEvent(event, gson.toJson(cdtpHeader), xPacketId);
+    dmService.savePacketEvent(dmDto, gson.toJson(cdtpHeader), xPacketId);
+    dmService.savePacketEvent(dmDto, gson.toJson(cdtpHeader), xPacketId);
 
     Map<String, Object> extraData = new HashMap<>();
-    dmService.savePacketEvent(event, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
+    dmService.savePacketEvent(dmDto, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
 
     extraData.put("type", "A000");
     cdtpHeader.setExtraData(gson.toJson(extraData));
-    dmService.savePacketEvent(event, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
+    dmService.savePacketEvent(dmDto, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
 
     extraData.put("type", "B000");
     cdtpHeader.setExtraData(gson.toJson(extraData));
-    dmService.savePacketEvent(event, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
+    dmService.savePacketEvent(dmDto, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
 
     extraData.put("type", "C000");
     cdtpHeader.setExtraData(gson.toJson(extraData));
-    dmService.savePacketEvent(event, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
+    dmService.savePacketEvent(dmDto, gson.toJson(cdtpHeader), UUID.randomUUID().toString());
   }
 }

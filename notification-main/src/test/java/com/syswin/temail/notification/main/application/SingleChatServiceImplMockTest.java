@@ -31,10 +31,11 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.dto.DispatcherResponse;
-import com.syswin.temail.notification.main.dto.MailAgentParams;
+import com.syswin.temail.notification.main.dto.MailAgentParamsFull;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.util.EventUtil;
+import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,7 +58,7 @@ public class SingleChatServiceImplMockTest {
   private final String TEST_FROM = "a";
   private final String TEST_TO = "b";
 
-  private MailAgentParams params = new MailAgentParams();
+  private MailAgentParamsFull params = new MailAgentParamsFull();
   private Gson gson = new Gson();
 
   @MockBean
@@ -99,13 +100,8 @@ public class SingleChatServiceImplMockTest {
     params.setFromGroupName("新群聊群昵称");
 
     Event event = this.mock();
-    event.setFilter(params.getFilter());
-    event.setAuthor(params.getAuthor());
     event.setEventSeqId(1L);
-    event.setSessionExtData(params.getSessionExtData());
-    event.setFromNickName(params.getFromNickName());
-    event.setFromGroupName(params.getFromGroupName());
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(gson.toJson(params));
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
         ConstantMock.HEADER,
@@ -140,7 +136,7 @@ public class SingleChatServiceImplMockTest {
     event.setFrom(params.getTo());
     event.setTo(params.getFrom());
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(gson.toJson(params));
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
         ConstantMock.HEADER,
@@ -167,7 +163,7 @@ public class SingleChatServiceImplMockTest {
     event.setFrom(params.getTo());
     event.setTo(params.getFrom());
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(gson.toJson(params));
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
         ConstantMock.HEADER,
@@ -181,12 +177,12 @@ public class SingleChatServiceImplMockTest {
 
   private Event mock() {
     Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(true);
-    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
+    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class)))
+        .thenReturn(new ArrayList<>());
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
-    return new Event(params.getSessionMessageType(), params.getMsgid(), params.getParentMsgId(),
-        params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(), params.getTimestamp(),
-        params.getGroupTemail(), params.getTemail(), params.getxPacketId(), params.getOwner(),
-        params.getDeleteAllMsg());
+    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getSeqNo(), params.getToMsg());
+    NotificationUtil.copyField(params, event);
+    return event;
   }
 }

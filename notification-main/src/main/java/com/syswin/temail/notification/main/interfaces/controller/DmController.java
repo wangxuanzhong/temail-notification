@@ -30,7 +30,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.main.application.DmServiceImpl;
-import com.syswin.temail.notification.main.domains.Event;
+import com.syswin.temail.notification.main.dto.DmDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,11 +60,11 @@ public class DmController {
 
   @ApiOperation(value = "save packet event 1 3000", consumes = "application/json")
   @PostMapping("/packet")
-  public ResponseEntity<Response> savePacketEvent(@RequestBody Event event,
+  public ResponseEntity<Response> savePacketEvent(@RequestBody DmDto dmDto,
       @RequestHeader(name = CDTP_HEADER) String header, @RequestHeader(name = X_PACKET_ID) String xPacketId) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
-    dmService.savePacketEvent(event, header, xPacketId);
+    dmService.savePacketEvent(dmDto, header, xPacketId);
     return new ResponseEntity<>(new Response<>(OK), headers, OK);
   }
 }

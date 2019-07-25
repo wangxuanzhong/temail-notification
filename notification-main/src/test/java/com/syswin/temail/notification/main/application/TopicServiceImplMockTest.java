@@ -31,11 +31,12 @@ import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.dto.DispatcherResponse;
-import com.syswin.temail.notification.main.dto.MailAgentParams;
+import com.syswin.temail.notification.main.dto.MailAgentParamsFull;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
+import com.syswin.temail.notification.main.util.NotificationUtil;
 import com.syswin.temail.notification.main.util.TopicEventUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,7 +63,7 @@ public class TopicServiceImplMockTest {
   private static final String from = "a";
   private static final String to = "b";
 
-  private MailAgentParams params = new MailAgentParams();
+  private MailAgentParamsFull params = new MailAgentParamsFull();
   private Gson gson = new Gson();
 
   @MockBean
@@ -130,10 +131,7 @@ public class TopicServiceImplMockTest {
     topicEvent.setMsgId("msgId");
     topicEvent.setMessage(message);
     topicEvent.setEventSeqId(1L);
-    topicEvent.setTitle("话题标题");
-    topicEvent.setReceivers(Arrays.asList("b", "c", "d"));
-    topicEvent.setCc(Arrays.asList("J", "Q", "K"));
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
     topicEvents.add(topicEvent);
 
     topicEvent = initEvent();
@@ -144,7 +142,7 @@ public class TopicServiceImplMockTest {
     topicEvent.setMsgId("msgId2");
     topicEvent.setMessage(message);
     topicEvent.setEventSeqId(2L);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
     topicEvents.add(topicEvent);
 
     Assertions.assertThat(this.getEvents(topicEvents)).hasSize(2);
@@ -165,7 +163,7 @@ public class TopicServiceImplMockTest {
     topicEvent.setTopicId("topicId");
     topicEvent.setMsgId("msgId");
     topicEvent.setEventSeqId(1L);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
     topicEvents.add(topicEvent);
 
     Assertions.assertThat(this.getEvents(topicEvents)).hasSize(1);
@@ -181,7 +179,7 @@ public class TopicServiceImplMockTest {
     topicEvent.setMsgId("msgId2");
     topicEvent.setMessage(message);
     topicEvent.setEventSeqId(2L);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
     topicEvents.add(topicEvent);
 
     topicEvent = initEvent();
@@ -191,7 +189,7 @@ public class TopicServiceImplMockTest {
     topicEvent.setTopicId("topicId");
     topicEvent.setMsgId("msgId2");
     topicEvent.setEventSeqId(3L);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
     topicEvents.add(topicEvent);
 
     Assertions.assertThat(this.getEvents(topicEvents)).isEmpty();
@@ -212,10 +210,7 @@ public class TopicServiceImplMockTest {
     topicEvent.setMsgId("msgId");
     topicEvent.setMessage(message);
     topicEvent.setEventSeqId(1L);
-    topicEvent.setTitle("话题标题");
-    topicEvent.setReceivers(Arrays.asList("b", "c", "d"));
-    topicEvent.setCc(Arrays.asList("J", "Q", "K"));
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
     topicEvents.add(topicEvent);
 
     topicEvent = initEvent();
@@ -226,7 +221,7 @@ public class TopicServiceImplMockTest {
     topicEvent.setMsgId("msgId2");
     topicEvent.setMessage(message);
     topicEvent.setEventSeqId(2L);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
     topicEvents.add(topicEvent);
 
     topicEvent = initEvent();
@@ -236,7 +231,7 @@ public class TopicServiceImplMockTest {
     topicEvent.setTopicId("topicId");
     topicEvent.setMsgIds(Collections.singletonList("msgId2"));
     topicEvent.setEventSeqId(3L);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
     topicEvents.add(topicEvent);
 
     topicEvent = initEvent();
@@ -245,7 +240,7 @@ public class TopicServiceImplMockTest {
     topicEvent.setTo(to);
     topicEvent.setTopicId("topicId");
     topicEvent.setEventSeqId(4L);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
     topicEvents.add(topicEvent);
 
     topicEvent = initEvent();
@@ -255,7 +250,7 @@ public class TopicServiceImplMockTest {
     topicEvent.setTopicId("topicId");
     topicEvent.setEventSeqId(5L);
     topicEvent.setDeleteAllMsg(true);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
     topicEvents.add(topicEvent);
 
     Assertions.assertThat(this.getEvents(topicEvents)).hasSize(1);
@@ -296,12 +291,8 @@ public class TopicServiceImplMockTest {
     params.setTo("b");
 
     TopicEvent topicEvent = this.mock();
-    topicEvent.setTitle(params.getTitle());
-    topicEvent.setReceivers(params.getReceivers());
-    topicEvent.setCc(params.getCc());
-    topicEvent.setTopicSeqId(params.getTopicSeqId());
     topicEvent.setEventSeqId(1L);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(),
         ConstantMock.HEADER,
@@ -327,7 +318,7 @@ public class TopicServiceImplMockTest {
 
     TopicEvent topicEvent = this.mock();
     topicEvent.setEventSeqId(1L);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(null);
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(),
         ConstantMock.HEADER,
@@ -342,8 +333,9 @@ public class TopicServiceImplMockTest {
   private TopicEvent mock() {
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
-    return new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(),
-        params.getMsgid(), params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
-        params.getTimestamp());
+    TopicEvent topicEvent = new TopicEvent(params.getSessionMessageType(), params.getMsgid(), params.getSeqNo(),
+        params.getToMsg());
+    NotificationUtil.copyField(params, topicEvent);
+    return topicEvent;
   }
 }

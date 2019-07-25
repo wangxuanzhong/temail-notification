@@ -24,10 +24,12 @@
 
 package com.syswin.temail.notification.main.dto;
 
+import java.util.List;
+
 /**
  * @author liusen@syswin.com
  */
-public class MailAgentParams {
+public class MailAgentParamsFull {
 
   public static final String MSG_ID_SPLIT = ",";
 
@@ -77,6 +79,14 @@ public class MailAgentParams {
    * 废纸篓删除的消息明细
    */
   private String trashMsgInfo;
+  /**
+   * 新群聊发起方
+   */
+  private String author;
+  /**
+   * 新群聊被通知人员
+   */
+  private List<String> filter;
 
 
   /**
@@ -84,19 +94,77 @@ public class MailAgentParams {
    */
   private String groupTemail;
   /**
+   * 群名称
+   */
+  private String groupName;
+  /**
    * 当事人
    */
   private String temail;
   /**
+   * 当事人名称
+   */
+  private String name;
+  /**
+   * 管理员名称
+   */
+  private String adminName;
+  /**
    * 成员类型
    */
   private Integer type;
+  /**
+   * at对象
+   */
+  private String at;
 
 
   /**
    * 话题id
    */
   private String topicId;
+  /**
+   * 话题序列号
+   */
+  private Long topicSeqId;
+  /**
+   * 话题主题
+   */
+  private String title;
+  /**
+   * 收件人
+   */
+  private List<String> receivers;
+  /**
+   * 抄送
+   */
+  private List<String> cc;
+
+  /**
+   * 群ExtData
+   */
+  private String extData;
+  /**
+   * 群成员ExtData
+   */
+  private String memberExtData;
+  /**
+   * 会话ExtData
+   */
+  private String sessionExtData;
+  /**
+   * crowd群对称密钥
+   */
+  private String sharedKey;
+  /**
+   * 发送人名称
+   */
+  private String fromNickName;
+  /**
+   * 新群聊群名称
+   */
+  private String fromGroupName;
+
 
   /**
    * CDTP报文头
@@ -195,12 +263,36 @@ public class MailAgentParams {
     this.trashMsgInfo = trashMsgInfo;
   }
 
+  public String getAuthor() {
+    return author;
+  }
+
+  public void setAuthor(String author) {
+    this.author = author;
+  }
+
+  public List<String> getFilter() {
+    return filter;
+  }
+
+  public void setFilter(List<String> filter) {
+    this.filter = filter;
+  }
+
   public String getGroupTemail() {
     return groupTemail;
   }
 
   public void setGroupTemail(String groupTemail) {
     this.groupTemail = groupTemail;
+  }
+
+  public String getGroupName() {
+    return groupName;
+  }
+
+  public void setGroupName(String groupName) {
+    this.groupName = groupName;
   }
 
   public String getTemail() {
@@ -211,6 +303,22 @@ public class MailAgentParams {
     this.temail = temail;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getAdminName() {
+    return adminName;
+  }
+
+  public void setAdminName(String adminName) {
+    this.adminName = adminName;
+  }
+
   public Integer getType() {
     return type;
   }
@@ -219,12 +327,52 @@ public class MailAgentParams {
     this.type = type;
   }
 
+  public String getAt() {
+    return at;
+  }
+
+  public void setAt(String at) {
+    this.at = at;
+  }
+
   public String getTopicId() {
     return topicId;
   }
 
   public void setTopicId(String topicId) {
     this.topicId = topicId;
+  }
+
+  public Long getTopicSeqId() {
+    return topicSeqId;
+  }
+
+  public void setTopicSeqId(Long topicSeqId) {
+    this.topicSeqId = topicSeqId;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public List<String> getReceivers() {
+    return receivers;
+  }
+
+  public void setReceivers(List<String> receivers) {
+    this.receivers = receivers;
+  }
+
+  public List<String> getCc() {
+    return cc;
+  }
+
+  public void setCc(List<String> cc) {
+    this.cc = cc;
   }
 
   public String getHeader() {
@@ -243,9 +391,57 @@ public class MailAgentParams {
     this.xPacketId = xPacketId;
   }
 
+  public String getExtData() {
+    return extData;
+  }
+
+  public void setExtData(String extData) {
+    this.extData = extData;
+  }
+
+  public String getMemberExtData() {
+    return memberExtData;
+  }
+
+  public void setMemberExtData(String memberExtData) {
+    this.memberExtData = memberExtData;
+  }
+
+  public String getSessionExtData() {
+    return sessionExtData;
+  }
+
+  public void setSessionExtData(String sessionExtData) {
+    this.sessionExtData = sessionExtData;
+  }
+
+  public String getSharedKey() {
+    return sharedKey;
+  }
+
+  public void setSharedKey(String sharedKey) {
+    this.sharedKey = sharedKey;
+  }
+
+  public String getFromNickName() {
+    return fromNickName;
+  }
+
+  public void setFromNickName(String fromNickName) {
+    this.fromNickName = fromNickName;
+  }
+
+  public String getFromGroupName() {
+    return fromGroupName;
+  }
+
+  public void setFromGroupName(String fromGroupName) {
+    this.fromGroupName = fromGroupName;
+  }
+
   @Override
   public String toString() {
-    return "MailAgentParams{" +
+    return "MailAgentParamsFull{" +
         "sessionMessageType=" + sessionMessageType +
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
@@ -257,10 +453,26 @@ public class MailAgentParams {
         ", deleteAllMsg=" + deleteAllMsg +
         ", owner='" + owner + '\'' +
         ", trashMsgInfo='" + trashMsgInfo + '\'' +
+        ", author='" + author + '\'' +
+        ", filter=" + filter +
         ", groupTemail='" + groupTemail + '\'' +
+        ", groupName='" + groupName + '\'' +
         ", temail='" + temail + '\'' +
+        ", name='" + name + '\'' +
+        ", adminName='" + adminName + '\'' +
         ", type=" + type +
+        ", at='" + at + '\'' +
         ", topicId='" + topicId + '\'' +
+        ", topicSeqId=" + topicSeqId +
+        ", title='" + title + '\'' +
+        ", receivers=" + receivers +
+        ", cc=" + cc +
+        ", extData='" + extData + '\'' +
+        ", memberExtData='" + memberExtData + '\'' +
+        ", sessionExtData='" + sessionExtData + '\'' +
+        ", sharedKey='" + sharedKey + '\'' +
+        ", fromNickName='" + fromNickName + '\'' +
+        ", fromGroupName='" + fromGroupName + '\'' +
         ", header='" + header + '\'' +
         ", xPacketId='" + xPacketId + '\'' +
         '}';

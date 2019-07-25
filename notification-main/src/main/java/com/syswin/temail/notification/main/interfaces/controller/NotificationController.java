@@ -28,6 +28,7 @@ import static com.syswin.temail.notification.main.constants.Constant.CdtpParams.
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
+import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.main.application.EventService;
 import com.syswin.temail.notification.main.application.TopicServiceImpl;
@@ -67,33 +68,36 @@ public class NotificationController {
 
   private final EventService eventService;
   private final TopicServiceImpl topicService;
+  private final Gson gson;
 
   @Autowired
   public NotificationController(EventService eventService, TopicServiceImpl topicService) {
     this.eventService = eventService;
     this.topicService = topicService;
+    gson = new Gson();
   }
 
   @ApiOperation(value = "pull event 3 0001", consumes = "application/json")
-  @GetMapping("/events")
-  public ResponseEntity<Response<Map<String, Object>>> getEvents(@RequestParam(name = "from") String to,
-      @RequestParam Long eventSeqId, Integer pageSize,
-      @RequestHeader(name = CDTP_HEADER, required = false) String header) {
+  @GetMapping(value = "/events", produces = "application/json")
+  public ResponseEntity<String> getEvents(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
+      Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
     if (to == null || "".equals(to)) {
-      LOGGER.warn("pull event 3 0001 : from mast not empty!");
-      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from mast not empty!"), headers, BAD_REQUEST);
+      LOGGER.warn("pull topic event 3 0001 : from mast not empty!");
+      return new ResponseEntity<>(gson.toJson(new Response<>(BAD_REQUEST, "from mast not empty!")), headers,
+          BAD_REQUEST);
     }
 
     if (eventSeqId == null) {
-      LOGGER.warn("pull event 3 0001 : eventSeqId mast not null!");
-      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "eventSeqId mast not null!"), headers, BAD_REQUEST);
+      LOGGER.warn("pull topic event 3 0001 : eventSeqId mast not null!");
+      return new ResponseEntity<>(gson.toJson(new Response<>(BAD_REQUEST, "eventSeqId mast not null!")), headers,
+          BAD_REQUEST);
     }
 
     Map<String, Object> result = eventService.getEvents(to, eventSeqId, pageSize);
-    return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
+    return new ResponseEntity<>(gson.toJson(new Response<>(OK, null, result)), headers, OK);
   }
 
   @ApiOperation(value = "get unread 3 0002", consumes = "application/json")
@@ -151,25 +155,26 @@ public class NotificationController {
   }
 
   @ApiOperation(value = "pull topic event 3 0006", consumes = "application/json")
-  @GetMapping("/topic/events")
-  public ResponseEntity<Response<Map<String, Object>>> getTopicEvents(@RequestParam(name = "from") String to,
-      @RequestParam Long eventSeqId, Integer pageSize,
-      @RequestHeader(name = CDTP_HEADER, required = false) String header) {
+  @GetMapping(value = "/topic/events", produces = "application/json")
+  public ResponseEntity<String> getTopicEvents(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
+      Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
     if (to == null || "".equals(to)) {
       LOGGER.warn("pull topic event 3 0006 : from mast not empty!");
-      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from mast not empty!"), headers, BAD_REQUEST);
+      return new ResponseEntity<>(gson.toJson(new Response<>(BAD_REQUEST, "from mast not empty!")), headers,
+          BAD_REQUEST);
     }
 
     if (eventSeqId == null) {
       LOGGER.warn("pull topic event 3 0006 : eventSeqId mast not null!");
-      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "eventSeqId mast not null!"), headers, BAD_REQUEST);
+      return new ResponseEntity<>(gson.toJson(new Response<>(BAD_REQUEST, "eventSeqId mast not null!")), headers,
+          BAD_REQUEST);
     }
 
     Map<String, Object> result = topicService.getTopicEvents(to, eventSeqId, pageSize);
-    return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
+    return new ResponseEntity<>(gson.toJson(new Response<>(OK, null, result)), headers, OK);
   }
 
   /**
@@ -207,46 +212,49 @@ public class NotificationController {
   }
 
   @ApiOperation(value = "pull event limited 3 0009", consumes = "application/json")
-  @GetMapping("/limit/events")
-  public ResponseEntity<Response<Map<String, Object>>> getEventsLimited(@RequestParam(name = "from") String to,
-      @RequestParam Long eventSeqId, Integer pageSize,
-      @RequestHeader(name = CDTP_HEADER, required = false) String header) {
+  @GetMapping(value = "/limit/events", produces = "application/json")
+  public ResponseEntity<String> getEventsLimited(@RequestParam(name = "from") String to, @RequestParam Long eventSeqId,
+      Integer pageSize, @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
     if (to == null || "".equals(to)) {
-      LOGGER.warn("pull event limited 3 0009 : from mast not empty!");
-      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from mast not empty!"), headers, BAD_REQUEST);
+      LOGGER.warn("pull topic event 3 0009 : from mast not empty!");
+      return new ResponseEntity<>(gson.toJson(new Response<>(BAD_REQUEST, "from mast not empty!")), headers,
+          BAD_REQUEST);
     }
 
     if (eventSeqId == null) {
-      LOGGER.warn("pull event limited 3 0009 : eventSeqId mast not null!");
-      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "eventSeqId mast not null!"), headers, BAD_REQUEST);
+      LOGGER.warn("pull topic event 3 0009 : eventSeqId mast not null!");
+      return new ResponseEntity<>(gson.toJson(new Response<>(BAD_REQUEST, "eventSeqId mast not null!")), headers,
+          BAD_REQUEST);
     }
 
     Map<String, Object> result = eventService.getEventsLimited(to, eventSeqId, pageSize);
-    return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
+    return new ResponseEntity<>(gson.toJson(new Response<>(OK, null, result)), headers, OK);
   }
 
   @ApiOperation(value = "pull topic event limited 3 000A", consumes = "application/json")
-  @GetMapping("/limit/topic/events")
-  public ResponseEntity<Response<Map<String, Object>>> getTopicEventsLimited(@RequestParam(name = "from") String to,
+  @GetMapping(value = "/limit/topic/events", produces = "application/json")
+  public ResponseEntity<String> getTopicEventsLimited(@RequestParam(name = "from") String to,
       @RequestParam Long eventSeqId, Integer pageSize,
       @RequestHeader(name = CDTP_HEADER, required = false) String header) {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headers.add(CDTP_HEADER, header);
 
     if (to == null || "".equals(to)) {
-      LOGGER.warn("pull topic event limited 3 000A : from mast not empty!");
-      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from mast not empty!"), headers, BAD_REQUEST);
+      LOGGER.warn("pull topic event 3 000A : from mast not empty!");
+      return new ResponseEntity<>(gson.toJson(new Response<>(BAD_REQUEST, "from mast not empty!")), headers,
+          BAD_REQUEST);
     }
 
     if (eventSeqId == null) {
-      LOGGER.warn("pull topic event limited 3 000A : eventSeqId mast not null!");
-      return new ResponseEntity<>(new Response<>(BAD_REQUEST, "eventSeqId mast not null!"), headers, BAD_REQUEST);
+      LOGGER.warn("pull topic event 3 000A : eventSeqId mast not null!");
+      return new ResponseEntity<>(gson.toJson(new Response<>(BAD_REQUEST, "eventSeqId mast not null!")), headers,
+          BAD_REQUEST);
     }
 
     Map<String, Object> result = topicService.getTopicEventsLimited(to, eventSeqId, pageSize);
-    return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
+    return new ResponseEntity<>(gson.toJson(new Response<>(OK, null, result)), headers, OK);
   }
 }

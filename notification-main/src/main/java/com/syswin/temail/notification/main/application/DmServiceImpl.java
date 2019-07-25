@@ -33,6 +33,7 @@ import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.dto.DispatcherResponse;
+import com.syswin.temail.notification.main.dto.DmDto;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.NotificationPacketUtil;
@@ -90,8 +91,10 @@ public class DmServiceImpl implements IMqConsumerService {
    * 保存报文事件
    */
   @Transactional(rollbackFor = Exception.class)
-  public void savePacketEvent(Event event, String header, String xPacketId) {
-    LOGGER.info("save packet event: event={}, header={}, xPacketId={}", event, header, xPacketId);
+  public void savePacketEvent(DmDto dmDto, String header, String xPacketId) {
+    LOGGER.info("save packet event: packet={}, header={}, xPacketId={}", dmDto.getPacket(), header, xPacketId);
+    Event event = new Event();
+    event.setPacket(dmDto.getPacket());
     event.setEventType(EventType.PACKET.getValue());
     event.setxPacketId(xPacketId);
 
@@ -105,7 +108,6 @@ public class DmServiceImpl implements IMqConsumerService {
     event.setFrom(cdtpHeader.getSender());
     event.setTo(cdtpHeader.getReceiver());
     EventUtil.initEventSeqId(redisService, event);
-    event.autoWriteExtendParam(iJsonService);
     event.zip();
     eventMapper.insert(event);
 
@@ -147,7 +149,7 @@ public class DmServiceImpl implements IMqConsumerService {
   @Override
   public void handleMqMessage(String body, String tags) {
     Event event = iJsonService.fromJson(body, Event.class);
-    LOGGER.info("dm params: event={}, tags={}", event, tags);
+    LOGGER.info("dm params: body={}, tags={}", body, tags);
     event.setEventType(EventType.PACKET.getValue());
 
     // 校验收到的消息通道是否是1x3000
@@ -159,20 +161,20 @@ public class DmServiceImpl implements IMqConsumerService {
       return;
     }
 
-    // 如果接收人不是本域的账号，则不需要发送通知
-    if (!checkIsSameDomain(event.getTo())) {
-      LOGGER.info("[{}] belong to another domain, packetId={}", event.getTo(), event.getxPacketId());
-      return;
-    }
-
     // 校验收到的数据是否重复
     String redisKey = event.getxPacketId() + "_" + event.getEventType();
     if (!EventUtil.checkUnique(event, redisKey, eventMapper, redisService)) {
       return;
     }
 
+    // 如果接收人不是本域的账号，则不需要发送通知
+    if (!checkIsSameDomain(event.getTo())) {
+      LOGGER.info("[{}] belong to another domain, packetId={}", event.getTo(), event.getxPacketId());
+      return;
+    }
+
     EventUtil.initEventSeqId(redisService, event);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(body);
     event.zip();
     eventMapper.insert(event);
 

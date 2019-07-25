@@ -69,6 +69,17 @@ public class NotificationUtilTest {
 
   }
 
+  @Test
+  public void testInitExtendParam() {
+    String params = null;
+    String extendParam = NotificationUtil.removeUsedField(params).toString();
+    Assertions.assertThat(extendParam).isEqualTo(params);
+
+    params = "";
+    extendParam = NotificationUtil.removeUsedField("").toString();
+    System.out.println(extendParam);
+  }
+
   class C1 {
 
     public Integer typeInt;

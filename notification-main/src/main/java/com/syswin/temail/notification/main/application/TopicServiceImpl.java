@@ -24,6 +24,8 @@
 
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
@@ -35,6 +37,7 @@ import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
+import com.syswin.temail.notification.main.util.NotificationUtil;
 import com.syswin.temail.notification.main.util.TopicEventUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -84,14 +87,15 @@ public class TopicServiceImpl implements IMqConsumerService {
   @Override
   public void handleMqMessage(String body, String tags) {
     MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
-    TopicEvent topicEvent = new TopicEvent(params.getxPacketId(), params.getSessionMessageType(), params.getTopicId(),
-        params.getMsgid(), params.getSeqNo(), params.getToMsg(), params.getFrom(), params.getTo(),
-        params.getTimestamp());
+    TopicEvent topicEvent = new TopicEvent(params.getSessionMessageType(), params.getMsgid(), params.getSeqNo(),
+        params.getToMsg());
+    // 复制相同名称的字段的值
+    NotificationUtil.copyField(params, topicEvent);
 
     // 前端需要的头信息
     String header = params.getHeader();
 
-    LOGGER.info("topic params: {}, tags: {}", params, tags);
+    LOGGER.info("topic params: {}, tags: {}", body, tags);
 
     EventType eventType = EventType.getByValue(params.getSessionMessageType());
     if (eventType == null) {
@@ -102,22 +106,15 @@ public class TopicServiceImpl implements IMqConsumerService {
 
     switch (eventType) {
       case TOPIC:
-        // from和to相同为话题发送者的消息
-        topicEvent.setTitle(params.getTitle());
-        topicEvent.setReceivers(params.getReceivers());
-        topicEvent.setCc(params.getCc());
-        // 话题单独的序列号
-        topicEvent.setTopicSeqId(params.getTopicSeqId());
-        sendMessage(topicEvent, header, tags);
-        break;
       case TOPIC_REPLY:
-        sendMessage(topicEvent, header, tags);
+        // from和to相同为话题发送者的消息
+        sendMessage(topicEvent, header, tags, body);
         break;
       case TOPIC_REPLY_RETRACT:
         // 向撤回的消息的所有收件人发送通知
         for (TopicEvent event : topicMapper.selectEventsByMsgId(topicEvent.getMsgId())) {
           topicEvent.setTo(event.getTo());
-          sendMessage(topicEvent, header, tags);
+          sendMessage(topicEvent, header, tags, body);
         }
         break;
       case TOPIC_REPLY_DELETE:
@@ -126,26 +123,25 @@ public class TopicServiceImpl implements IMqConsumerService {
         }.getType()));
         topicEvent.setMsgId(null);
         topicEvent.setTo(topicEvent.getFrom());
-        sendMessage(topicEvent, header, tags);
+        sendMessage(topicEvent, header, tags, body);
         break;
       case TOPIC_DELETE:
         // 向话题接收的所有人发送通知
         for (TopicEvent event : topicMapper.selectEventsByTopicId(topicEvent.getTopicId())) {
           topicEvent.setTo(event.getTo());
-          sendMessage(topicEvent, header, tags);
+          sendMessage(topicEvent, header, tags, body);
         }
         break;
       case TOPIC_ARCHIVE:
       case TOPIC_ARCHIVE_CANCEL:
         // from是操作人，to为空
         topicEvent.setTo(params.getFrom());
-        sendMessage(topicEvent, header, tags);
+        sendMessage(topicEvent, header, tags, body);
         break;
       case TOPIC_SESSION_DELETE:
         // from是操作人，to为空
         topicEvent.setTo(params.getFrom());
-        topicEvent.setDeleteAllMsg(params.getDeleteAllMsg());
-        sendMessage(topicEvent, header, tags);
+        sendMessage(topicEvent, header, tags, body);
         break;
       default:
         LOGGER.warn("unsupport event type!");
@@ -155,22 +151,22 @@ public class TopicServiceImpl implements IMqConsumerService {
   /**
    * 插入数据库
    */
-  private void insert(TopicEvent topicEvent) {
+  private void insert(TopicEvent topicEvent, String body) {
     TopicEventUtil.initTopicEventSeqId(redisService, topicEvent);
-    topicEvent.autoWriteExtendParam(iJsonService);
+    topicEvent.autoWriteExtendParam(body);
     topicMapper.insert(topicEvent);
   }
 
   /**
    * 发送消息
    */
-  private void sendMessage(TopicEvent topicEvent, String header, String tags) {
+  private void sendMessage(TopicEvent topicEvent, String header, String tags, String body) {
     LOGGER.info("send message to --->> {}, event type: {}", topicEvent.getTo(),
         EventType.getByValue(topicEvent.getEventType()));
-    this.insert(topicEvent);
+    this.insert(topicEvent, body);
     iMqProducer
         .sendMessage(iJsonService.toJson(new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(), header,
-        TopicEventUtil.toJson(iJsonService, topicEvent))), tags);
+            TopicEventUtil.toJson(iJsonService, topicEvent))), tags);
 
   }
 
@@ -267,10 +263,15 @@ public class TopicServiceImpl implements IMqConsumerService {
       notifyEvents.subList(0, notifyEvents.size() - EventCondition.MAX_EVENT_RETURN_COUNT).clear();
     }
 
+    //将每个返回结果的extendParam合并到event中
+    List<JsonElement> eventList = new ArrayList<>();
+    notifyEvents
+        .forEach(topicEvent -> eventList.add(new JsonParser().parse(TopicEventUtil.toJson(iJsonService, topicEvent))));
+
     Map<String, Object> result = new HashMap<>(5);
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
-    result.put("events", notifyEvents);
+    result.put("events", eventList);
     return result;
   }
 

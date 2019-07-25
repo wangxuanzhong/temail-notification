@@ -68,4 +68,47 @@ public class Constant {
     public static final String CDTP_HEADER = "CDTP-header";
     public static final String X_PACKET_ID = "X-PACKET-ID";
   }
+
+  /**
+   * 事件参数中需要做处理的字段
+   */
+  public static class EventParams {
+
+    /**
+     * 通用参数
+     */
+    public static final String SESSION_MESSAGE_TYPE = "sessionMessageType";
+    public static final String FROM = "from";
+    public static final String TO = "to";
+    public static final String MSG_ID = "msgid";
+    public static final String PARENT_MSG_ID = "parentMsgId";
+    public static final String SEQ_NO = "seqNo";
+    public static final String TO_MSG = "toMsg";
+    public static final String TIMESTAMP = "timestamp";
+    public static final String HEADER = "header";
+    public static final String X_PACKET_ID = "xPacketId";
+    /**
+     * 单聊参数
+     */
+    public static final String OWNER = "owner";
+    /**
+     * 群聊参数
+     */
+    public static final String GROUP_TEMAIL = "groupTemail";
+    public static final String TEMAIL = "temail";
+    public static final String TYPE = "type";
+    public static final String NAME = "name";
+    /**
+     * 话题参数
+     */
+    public static final String TOPIC_ID = "topicId";
+    /**
+     * dm参数
+     */
+    public static final String PACKET = "packet";
+    /**
+     * 事件参数
+     */
+    public static final String MSG_IDS = "msgIds";
+  }
 }

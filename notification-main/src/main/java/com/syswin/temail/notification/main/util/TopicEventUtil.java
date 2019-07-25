@@ -24,9 +24,13 @@
 
 package com.syswin.temail.notification.main.util;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
+import com.syswin.temail.notification.main.constants.Constant.EventParams;
 import com.syswin.temail.notification.main.domains.TopicEvent;
+import java.util.List;
 
 /**
  * @author liusen@syswin.com
@@ -38,11 +42,13 @@ public class TopicEventUtil {
   }
 
   /**
-   * 转换成json，清空extendParam
+   * 转换成json，将extendParam中字段合并并清空extendParam
    */
   public static String toJson(IJsonService iJsonService, TopicEvent topicEvent) {
+    String extendParam = topicEvent.getExtendParam();
+    topicEvent.setId(null);
     topicEvent.setExtendParam(null);
-    return iJsonService.toJson(topicEvent);
+    return NotificationUtil.combineTwoJson(iJsonService.toJson(topicEvent), extendParam);
   }
 
   /**
@@ -50,5 +56,30 @@ public class TopicEventUtil {
    */
   public static void initTopicEventSeqId(ISequenceService iSequenceService, TopicEvent topicEvent) {
     topicEvent.setEventSeqId(iSequenceService.getNextSeq("topic_" + topicEvent.getTo()));
+  }
+
+  /**
+   * 初始化extendParam的json
+   */
+  public static String initExtendParam(String params, TopicEvent topicEvent) {
+    JsonObject jsonObject = NotificationUtil.removeUsedField(params);
+
+    if (topicEvent == null) {
+      topicEvent = new TopicEvent();
+    }
+
+    // 添加批量删除操作msgIds
+    List<String> msgIds = topicEvent.getMsgIds();
+    if (msgIds != null && !msgIds.isEmpty()) {
+      JsonArray msgIdsArray = new JsonArray();
+      msgIds.forEach(msgIdsArray::add);
+      jsonObject.add(EventParams.MSG_IDS, msgIdsArray);
+    }
+
+    if (jsonObject.size() == 0) {
+      return null;
+    } else {
+      return jsonObject.toString();
+    }
   }
 }

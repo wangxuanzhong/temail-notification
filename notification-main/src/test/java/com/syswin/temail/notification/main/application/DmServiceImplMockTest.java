@@ -31,6 +31,7 @@ import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.dto.DispatcherResponse;
+import com.syswin.temail.notification.main.dto.DmDto;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.NotificationPacketUtil;
@@ -95,8 +96,8 @@ public class DmServiceImplMockTest {
 
   @Test
   public void testSavePacketEvent() {
-    Event in = new Event();
-    in.setPacket(notificationPacketUtil.encodeData("test packet".getBytes()));
+    DmDto dmDto = new DmDto();
+    dmDto.setPacket(notificationPacketUtil.encodeData("test packet".getBytes()));
 
     Event event = new Event();
     event.setPacket(notificationPacketUtil.encodeData("test packet".getBytes()));
@@ -114,7 +115,7 @@ public class DmServiceImplMockTest {
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
     String xPacketId = UUID.randomUUID().toString();
-    dmService.savePacketEvent(in, gson.toJson(cdtpHeader), xPacketId);
+    dmService.savePacketEvent(dmDto, gson.toJson(cdtpHeader), xPacketId);
 
     event.setEventType(EventType.PACKET.getValue());
     event.setxPacketId(xPacketId);
@@ -141,7 +142,7 @@ public class DmServiceImplMockTest {
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
     event.setEventSeqId(1L);
-    event.autoWriteExtendParam(iJsonService);
+    event.autoWriteExtendParam(body);
     event.zip();
 
     CDTPPacket cdtpPacket = notificationPacketUtil.unpack(notificationPacketUtil.decodeData(event.getPacket()));
