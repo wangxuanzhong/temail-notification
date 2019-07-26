@@ -24,10 +24,10 @@
 
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
@@ -37,7 +37,6 @@ import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
-import com.syswin.temail.notification.main.util.NotificationUtil;
 import com.syswin.temail.notification.main.util.TopicEventUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -66,17 +65,17 @@ public class TopicServiceImpl implements IMqConsumerService {
   private final IMqProducer iMqProducer;
   private final RedisServiceImpl redisService;
   private final TopicMapper topicMapper;
-  private final IJsonService iJsonService;
+  private final Gson gson;
 
   private final NotificationConfig config;
 
   @Autowired
-  public TopicServiceImpl(IMqProducer iMqProducer, RedisServiceImpl redisService,
-      TopicMapper topicMapper, IJsonService iJsonService, NotificationConfig config) {
+  public TopicServiceImpl(IMqProducer iMqProducer, RedisServiceImpl redisService, TopicMapper topicMapper,
+      NotificationConfig config) {
     this.iMqProducer = iMqProducer;
     this.redisService = redisService;
     this.topicMapper = topicMapper;
-    this.iJsonService = iJsonService;
+    this.gson = new Gson();
     this.config = config;
   }
 
@@ -86,11 +85,9 @@ public class TopicServiceImpl implements IMqConsumerService {
   @Transactional(rollbackFor = Exception.class)
   @Override
   public void handleMqMessage(String body, String tags) {
-    MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
-    TopicEvent topicEvent = new TopicEvent(params.getSessionMessageType(), params.getMsgid(), params.getSeqNo(),
-        params.getToMsg());
-    // 复制相同名称的字段的值
-    NotificationUtil.copyField(params, topicEvent);
+    MailAgentParams params = gson.fromJson(body, MailAgentParams.class);
+    TopicEvent topicEvent = gson.fromJson(body, TopicEvent.class);
+    TopicEventUtil.copyMailAgentFieldToEvent(params, topicEvent);
 
     // 前端需要的头信息
     String header = params.getHeader();
@@ -99,7 +96,7 @@ public class TopicServiceImpl implements IMqConsumerService {
 
     EventType eventType = EventType.getByValue(params.getSessionMessageType());
     if (eventType == null) {
-      LOGGER.warn("event type is illegal! xPacketId: {}", params.getxPacketId());
+      LOGGER.warn("event type is illegal! xPacketId: {}", topicEvent.getxPacketId());
       return;
     }
     LOGGER.info("topic event type: {}", eventType);
@@ -119,7 +116,7 @@ public class TopicServiceImpl implements IMqConsumerService {
         break;
       case TOPIC_REPLY_DELETE:
         // 删除操作msgId是多条，存入msgIds字段，from为操作人
-        topicEvent.setMsgIds(iJsonService.fromJson(topicEvent.getMsgId(), new TypeToken<List<String>>() {
+        topicEvent.setMsgIds(gson.fromJson(topicEvent.getMsgId(), new TypeToken<List<String>>() {
         }.getType()));
         topicEvent.setMsgId(null);
         topicEvent.setTo(topicEvent.getFrom());
@@ -135,12 +132,12 @@ public class TopicServiceImpl implements IMqConsumerService {
       case TOPIC_ARCHIVE:
       case TOPIC_ARCHIVE_CANCEL:
         // from是操作人，to为空
-        topicEvent.setTo(params.getFrom());
+        topicEvent.setTo(topicEvent.getFrom());
         sendMessage(topicEvent, header, tags, body);
         break;
       case TOPIC_SESSION_DELETE:
         // from是操作人，to为空
-        topicEvent.setTo(params.getFrom());
+        topicEvent.setTo(topicEvent.getFrom());
         sendMessage(topicEvent, header, tags, body);
         break;
       default:
@@ -165,8 +162,8 @@ public class TopicServiceImpl implements IMqConsumerService {
         EventType.getByValue(topicEvent.getEventType()));
     this.insert(topicEvent, body);
     iMqProducer
-        .sendMessage(iJsonService.toJson(new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(), header,
-            TopicEventUtil.toJson(iJsonService, topicEvent))), tags);
+        .sendMessage(gson.toJson(new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(), header,
+            TopicEventUtil.toJson(gson, topicEvent))), tags);
 
   }
 
@@ -193,7 +190,7 @@ public class TopicServiceImpl implements IMqConsumerService {
     Map<String, Map<String, TopicEvent>> allReplyMap = new HashMap<>(16);
     List<TopicEvent> notifyEvents = new ArrayList<>();
     events.forEach(event -> {
-      event.autoReadExtendParam(iJsonService);
+      event.autoReadExtendParam(gson);
 
       // 按照话题统计事件
       if (!allTopicMap.containsKey(event.getTopicId())) {
@@ -266,7 +263,7 @@ public class TopicServiceImpl implements IMqConsumerService {
     //将每个返回结果的extendParam合并到event中
     List<JsonElement> eventList = new ArrayList<>();
     notifyEvents
-        .forEach(topicEvent -> eventList.add(new JsonParser().parse(TopicEventUtil.toJson(iJsonService, topicEvent))));
+        .forEach(topicEvent -> eventList.add(new JsonParser().parse(TopicEventUtil.toJson(gson, topicEvent))));
 
     Map<String, Object> result = new HashMap<>(5);
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);

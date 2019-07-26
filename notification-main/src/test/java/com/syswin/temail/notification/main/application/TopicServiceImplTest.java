@@ -25,7 +25,6 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.EventType;
@@ -70,8 +69,6 @@ public class TopicServiceImplTest {
   @Autowired
   private TopicMapper topicMapper;
   @Autowired
-  private IJsonService iJsonService;
-  @Autowired
   private NotificationConfig config;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
@@ -82,10 +79,9 @@ public class TopicServiceImplTest {
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      topicService = new TopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper, iJsonService,
-          config);
+      topicService = new TopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper, config);
     } else {
-      topicService = new TopicServiceImpl(iMqProducer, redisService, topicMapper, iJsonService, config);
+      topicService = new TopicServiceImpl(iMqProducer, redisService, topicMapper, config);
     }
 
     params.setHeader(ConstantMock.HEADER);

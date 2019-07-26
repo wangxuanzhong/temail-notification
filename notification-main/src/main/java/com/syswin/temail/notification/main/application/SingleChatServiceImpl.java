@@ -24,8 +24,8 @@
 
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
@@ -34,7 +34,6 @@ import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
-import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import org.slf4j.Logger;
@@ -56,15 +55,15 @@ public class SingleChatServiceImpl implements IMqConsumerService {
   private final IMqProducer iMqProducer;
   private final RedisServiceImpl redisService;
   private final EventMapper eventMapper;
-  private final IJsonService iJsonService;
+  private final Gson gson;
 
   @Autowired
   public SingleChatServiceImpl(IMqProducer iMqProducer, RedisServiceImpl redisService,
-      EventMapper eventMapper, IJsonService iJsonService) {
+      EventMapper eventMapper) {
     this.iMqProducer = iMqProducer;
     this.redisService = redisService;
     this.eventMapper = eventMapper;
-    this.iJsonService = iJsonService;
+    this.gson = new Gson();
   }
 
   /**
@@ -73,10 +72,9 @@ public class SingleChatServiceImpl implements IMqConsumerService {
   @Transactional(rollbackFor = Exception.class)
   @Override
   public void handleMqMessage(String body, String tags) {
-    MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
-    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getSeqNo(), params.getToMsg());
-    // 复制相同名称的字段的值
-    NotificationUtil.copyField(params, event);
+    MailAgentParams params = gson.fromJson(body, MailAgentParams.class);
+    Event event = gson.fromJson(body, Event.class);
+    EventUtil.copyMailAgentFieldToEvent(params, event);
 
     // 前端需要的头信息
     String header = params.getHeader();
@@ -85,7 +83,7 @@ public class SingleChatServiceImpl implements IMqConsumerService {
 
     EventType eventType = EventType.getByValue(params.getSessionMessageType());
     if (eventType == null) {
-      LOGGER.warn("event type is illegal! xPacketId: {}", params.getxPacketId());
+      LOGGER.warn("event type is illegal! xPacketId: {}", event.getxPacketId());
       return;
     }
     LOGGER.info("single chat event type: {}", eventType);
@@ -108,12 +106,14 @@ public class SingleChatServiceImpl implements IMqConsumerService {
         // 修改extData事件from和owner永远相同
       case CHANGE_EXT_DATA:
         // 发送时会分别发送到发件人收件箱和收件人收件箱
-        if (event.getFrom().equals(params.getOwner())) {
+        if (event.getFrom().equals(event.getOwner())) {
           EventUtil.initEventSeqId(redisService, event);
+          event.autoWriteExtendParam(body);
           sendMessageToSender(event, header, tags);
           // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
-          event.setTo(params.getOwner());
-          event.setOwner(params.getTo());
+          String tmp = event.getTo();
+          event.setTo(event.getOwner());
+          event.setOwner(tmp);
           event.autoWriteExtendParam(body);
           eventMapper.insert(event);
         } else {
@@ -122,8 +122,7 @@ public class SingleChatServiceImpl implements IMqConsumerService {
         break;
       case PULLED:
         // from是消息拉取人
-        event.setFrom(params.getTo());
-        event.setTo(params.getFrom());
+        exchangeFromAndTo(event);
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
           event.setMsgId(msgId);
           if (eventMapper.selectEventsByMsgId(event).isEmpty()) {
@@ -137,12 +136,11 @@ public class SingleChatServiceImpl implements IMqConsumerService {
       case REPLY_DELETE:
       case TRASH:
         // 删除操作msgId是多条，存入msgIds字段
-        event.setMsgIds(iJsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
+        event.setMsgIds(gson.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
         }.getType()));
         event.setMsgId(null);
         // from是操作人，to是会话另一方
-        event.setFrom(params.getTo());
-        event.setTo(params.getFrom());
+        exchangeFromAndTo(event);
         sendMessage(event, header, tags, body);
         break;
       // 只提供多端同步
@@ -151,15 +149,14 @@ public class SingleChatServiceImpl implements IMqConsumerService {
       case DO_NOT_DISTURB:
       case DO_NOT_DISTURB_CANCEL:
         // from是操作人，to是会话的另一方
-        event.setFrom(params.getTo());
-        event.setTo(params.getFrom());
+        exchangeFromAndTo(event);
         sendMessage(event, header, tags, body);
         break;
       case TRASH_CANCEL:
       case TRASH_DELETE:
         // owner是操作人，from和to都为空，msgId为空
-        event.setFrom(params.getOwner());
-        event.setTo(params.getOwner());
+        event.setFrom(event.getOwner());
+        event.setTo(event.getOwner());
         sendMessage(event, header, tags, body);
         break;
       default:
@@ -190,9 +187,7 @@ public class SingleChatServiceImpl implements IMqConsumerService {
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
     this.insert(event, body);
     iMqProducer.sendMessage(
-        iJsonService
-            .toJson(new DispatcherResponse(to, event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
-        tags);
+        gson.toJson(new DispatcherResponse(to, event.getEventType(), header, EventUtil.toJson(gson, event))), tags);
   }
 
   /**
@@ -201,9 +196,16 @@ public class SingleChatServiceImpl implements IMqConsumerService {
   private void sendMessageToSender(Event event, String header, String tags) {
     LOGGER.info("send message to sender --->> {}, event type: {}", event.getFrom(),
         EventType.getByValue(event.getEventType()));
-    iMqProducer.sendMessage(iJsonService
-            .toJson(new DispatcherResponse(event.getFrom(), event.getEventType(), header,
-                EventUtil.toJson(iJsonService, event))),
-        tags);
+    iMqProducer.sendMessage(gson.toJson(
+        new DispatcherResponse(event.getFrom(), event.getEventType(), header, EventUtil.toJson(gson, event))), tags);
+  }
+
+  /**
+   * 交换from和to
+   */
+  private void exchangeFromAndTo(Event event) {
+    String tmp = event.getFrom();
+    event.setFrom(event.getTo());
+    event.setTo(tmp);
   }
 }

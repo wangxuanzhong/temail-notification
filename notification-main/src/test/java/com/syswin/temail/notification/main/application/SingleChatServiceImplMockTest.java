@@ -26,7 +26,6 @@ package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
@@ -44,7 +43,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -67,14 +65,12 @@ public class SingleChatServiceImplMockTest {
   private RedisServiceImpl redisService;
   @MockBean
   private EventMapper eventMapper;
-  @Autowired
-  private IJsonService iJsonService;
 
   private SingleChatServiceImpl singleChatService;
 
   @Before
   public void setUp() {
-    singleChatService = new SingleChatServiceImpl(iMqProducer, redisService, eventMapper, iJsonService);
+    singleChatService = new SingleChatServiceImpl(iMqProducer, redisService, eventMapper);
 
     params.setHeader(ConstantMock.HEADER);
     params.setFrom(TEST_FROM);
@@ -105,7 +101,7 @@ public class SingleChatServiceImplMockTest {
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
         ConstantMock.HEADER,
-        EventUtil.toJson(iJsonService, event));
+        EventUtil.toJson(gson, event));
 
     singleChatService.handleMqMessage(gson.toJson(params), params.getFrom());
 
@@ -129,7 +125,7 @@ public class SingleChatServiceImplMockTest {
     params.setDeleteAllMsg(true);
 
     Event event = this.mock();
-    event.setMsgIds(iJsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
+    event.setMsgIds(gson.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
     }.getType()));
     event.setMsgId(null);
     // from是操作人，to是会话另一方
@@ -140,7 +136,7 @@ public class SingleChatServiceImplMockTest {
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
         ConstantMock.HEADER,
-        EventUtil.toJson(iJsonService, event));
+        EventUtil.toJson(gson, event));
 
     singleChatService.handleMqMessage(gson.toJson(params), params.getFrom());
 
@@ -167,7 +163,7 @@ public class SingleChatServiceImplMockTest {
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
         ConstantMock.HEADER,
-        EventUtil.toJson(iJsonService, event));
+        EventUtil.toJson(gson, event));
 
     singleChatService.handleMqMessage(gson.toJson(params), params.getFrom());
 

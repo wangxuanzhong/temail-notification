@@ -27,7 +27,7 @@ package com.syswin.temail.notification.main.domains;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.google.gson.Gson;
 import com.syswin.temail.notification.main.util.NotificationUtil;
 import com.syswin.temail.notification.main.util.TopicEventUtil;
 import java.util.List;
@@ -87,9 +87,9 @@ public class TopicEvent {
   /**
    * 自动解析扩展字段
    */
-  public TopicEvent autoReadExtendParam(IJsonService iJsonService) {
+  public TopicEvent autoReadExtendParam(Gson gson) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
-      NotificationUtil.copyField(iJsonService.fromJson(this.extendParam, TopicEvent.class), this);
+      NotificationUtil.copyField(gson.fromJson(this.extendParam, TopicEvent.class), this);
     }
     return this;
   }
@@ -148,6 +148,14 @@ public class TopicEvent {
 
   public void setMsgId(String msgId) {
     this.msgId = msgId;
+  }
+
+  public Long getSeqId() {
+    return seqId;
+  }
+
+  public void setSeqId(Long seqId) {
+    this.seqId = seqId;
   }
 
   public String getMessage() {

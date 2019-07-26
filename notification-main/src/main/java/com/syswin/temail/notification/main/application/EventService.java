@@ -24,10 +24,10 @@
 
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.constants.Constant.EventCondition;
@@ -69,7 +69,7 @@ public class EventService {
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
   private final MemberMapper memberMapper;
-  private final IJsonService iJsonService;
+  private final Gson gson;
   private final IMqProducer iMqProducer;
   private final RedisServiceImpl redisService;
 
@@ -77,11 +77,11 @@ public class EventService {
 
   @Autowired
   public EventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
-      IJsonService iJsonService, IMqProducer iMqProducer, RedisServiceImpl redisService, NotificationConfig config) {
+      IMqProducer iMqProducer, RedisServiceImpl redisService, NotificationConfig config) {
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
-    this.iJsonService = iJsonService;
+    this.gson = new Gson();
     this.iMqProducer = iMqProducer;
     this.redisService = redisService;
     this.config = config;
@@ -112,7 +112,7 @@ public class EventService {
     // 存放废纸篓消息，以便还原操作处理
     List<String> trashMsgIds = new ArrayList<>();
     events.forEach(event -> {
-      event.autoReadExtendParam(iJsonService);
+      event.autoReadExtendParam(gson);
 
       // 按照会话统计事件，方便对单个会话多事件进行处理
       String key = event.getFrom();
@@ -176,7 +176,7 @@ public class EventService {
           break;
         case TRASH_CANCEL:
           List<TrashMsgInfo> newInfos = new ArrayList<>();
-          List<TrashMsgInfo> infos = iJsonService
+          List<TrashMsgInfo> infos = gson
               .fromJson(event.getTrashMsgInfo(), new TypeToken<List<TrashMsgInfo>>() {
               }.getType());
           // 如果查询到的事件中，有移入移出的操作，则对应msgId不需要返回给前端
@@ -186,7 +186,7 @@ public class EventService {
             }
           });
           if (!newInfos.isEmpty()) {
-            event.setTrashMsgInfo(iJsonService.toJson(newInfos));
+            event.setTrashMsgInfo(gson.toJson(newInfos));
             sessionEventMap.put(UUID.randomUUID().toString(), event);
           }
           break;
@@ -283,7 +283,7 @@ public class EventService {
     //将每个返回结果的extendParam合并到event中
     List<JsonElement> eventList = new ArrayList<>();
     notifyEvents
-        .forEach(event -> eventList.add(new JsonParser().parse(EventUtil.toJson(iJsonService, event))));
+        .forEach(event -> eventList.add(new JsonParser().parse(EventUtil.toJson(gson, event))));
 
     Map<String, Object> result = new HashMap<>(5);
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
@@ -340,7 +340,7 @@ public class EventService {
   public Map<String, List<String>> calculateUnread(List<Event> events, Map<String, Integer> unreadMap) {
     Map<String, List<String>> eventMap = new HashMap<>(16);
     events.forEach(event -> {
-      event.autoReadExtendParam(iJsonService);
+      event.autoReadExtendParam(gson);
       // 为了区分单聊和群聊，给群聊添加后缀
       String key = event.getFrom();
       if (event.getGroupTemail() != null && !"".equals(event.getGroupTemail())) {
@@ -410,8 +410,8 @@ public class EventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    iMqProducer.sendMessage(iJsonService
-        .toJson(new DispatcherResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))));
+    iMqProducer.sendMessage(gson
+        .toJson(new DispatcherResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(gson, event))));
   }
 
   /**
@@ -442,9 +442,9 @@ public class EventService {
 
     // 发送到MQ以便多端同步
     LOGGER.info("send reset event to {}", event.getTo());
-    iMqProducer.sendMessage(iJsonService
+    iMqProducer.sendMessage(gson
         .toJson(new DispatcherResponse(event.getTo(), event.getEventType(), header,
-            EventUtil.toJson(iJsonService, event))));
+            EventUtil.toJson(gson, event))));
   }
 
   /**

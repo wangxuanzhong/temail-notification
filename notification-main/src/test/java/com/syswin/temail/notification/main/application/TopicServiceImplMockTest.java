@@ -25,7 +25,6 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.EventType;
@@ -73,8 +72,6 @@ public class TopicServiceImplMockTest {
   @MockBean
   private RedisServiceImpl redisService;
   @Autowired
-  private IJsonService iJsonService;
-  @Autowired
   private NotificationConfig config;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
@@ -85,10 +82,8 @@ public class TopicServiceImplMockTest {
 
   @Before
   public void setUp() {
-    topicServiceForGet = new TopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper, iJsonService,
-        config);
-    topicServiceForHandle = new TopicServiceImpl(iMqProducer, redisService, topicMapper, iJsonService,
-        config);
+    topicServiceForGet = new TopicServiceImpl(mqProducerMock, redisServiceMock, topicMapper, config);
+    topicServiceForHandle = new TopicServiceImpl(iMqProducer, redisService, topicMapper, config);
 
     params.setHeader(ConstantMock.HEADER);
     params.setFrom(from);
@@ -296,7 +291,7 @@ public class TopicServiceImplMockTest {
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(),
         ConstantMock.HEADER,
-        TopicEventUtil.toJson(iJsonService, topicEvent));
+        TopicEventUtil.toJson(gson, topicEvent));
 
     topicServiceForHandle.handleMqMessage(gson.toJson(params), params.getTopicId());
 
@@ -322,7 +317,7 @@ public class TopicServiceImplMockTest {
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(),
         ConstantMock.HEADER,
-        TopicEventUtil.toJson(iJsonService, topicEvent));
+        TopicEventUtil.toJson(gson, topicEvent));
 
     topicServiceForHandle.handleMqMessage(gson.toJson(params), params.getTopicId());
 

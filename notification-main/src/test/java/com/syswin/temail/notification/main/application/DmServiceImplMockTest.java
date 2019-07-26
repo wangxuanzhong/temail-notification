@@ -25,7 +25,6 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
@@ -67,8 +66,6 @@ public class DmServiceImplMockTest {
 
   @MockBean
   private EventMapper eventMapper;
-  @Autowired
-  private IJsonService iJsonService;
   @MockBean
   private IMqProducer iMqProducer;
   @MockBean
@@ -90,8 +87,7 @@ public class DmServiceImplMockTest {
 
   @Before
   public void setUp() {
-    dmService = new DmServiceImpl(iMqProducer, redisService, eventMapper, iJsonService, restTemplateMock,
-        config);
+    dmService = new DmServiceImpl(iMqProducer, redisService, eventMapper, restTemplateMock, config);
   }
 
   @Test
@@ -111,7 +107,8 @@ public class DmServiceImplMockTest {
     cdtpHeader.setExtraData(gson.toJson(extraData));
 
     Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(true);
-    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
+    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class)))
+        .thenReturn(new ArrayList<>());
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
     String xPacketId = UUID.randomUUID().toString();
@@ -127,18 +124,19 @@ public class DmServiceImplMockTest {
     String tag = event.getFrom() + "_" + event.getTo();
 
     Mockito.verify(iMqProducer)
-        .sendMessage(EventUtil.toJson(iJsonService, event), config.notifyGroupChatTopic, tag, "");
+        .sendMessage(EventUtil.toJson(gson, event), config.notifyGroupChatTopic, tag, "");
   }
 
   @Test
   public void testHandleMqMessage() {
     String body = "{\"from\":\"a.group@systoontest.com\",\"to\":\"kingskaaay@systoontest.com\",\"xPacketId\":\"98db4c73-da07-4935-8858-ac7d98bb3b0e:R\",\"packet\":\"AAAElwABMAAAAAM1CiRlM2FiZjQ5MC0yNjUwLTQ0YjUtOWNmNi1lNDVhMjY0OGExMTIQAhq6AU1JR0lBa0lCMDNhYWY4cmhxRXl4VHFwcXAzR0ZhYUtnaVhsUWxEODVRLW5kWlN4REl4bmV0YW5ORnQtVjJxUjNSYzA0bVVELTBFVHdJeXlvWHlsZVlzZnlOWnFqUG9vQ1FnQy1pVkEyUm45UVZVbVpoS2NSMFpodU1majBXOFdBNEI5aEM4cFFMMUVudVllaVRPZF9FamZtX1ZybFlpV19Qd21WeVFPaTVtbVhkeEZ6NXJYUEVKRjcyQSAEKSJeCy5qAQAAMiY5OGRiNGM3My1kYTA3LTQ5MzUtODg1OC1hYzdkOThiYjNiMGU6UjoXYS5ncm91cEBzeXN0b29udGVzdC5jb21C0wFNSUdiTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFqQTRHR0FBUUFjRVJqbmdubDFKMGhFVTZ2T2Z2MVdDQTh6cW9oZGpKWWVpVWN6Nk1RbUx3dEhqbjZZZVNBYWZheFdjOF9QOEJYZWt2aDRna3hZeFZSeG1ZcHdqdi1SRU1CbFR1bDkwWWhkdF9OUU1JREg1UGo0Smg4TkhCaUVSYkNZZU1zN1B1VVdpUGRKYXl1UkZHM1hvaERSVUlvOHE1dVJIYjJFZlg0aGFEcmFxNm9Bc0M2SGtzShdraW5nc2t5QHN5c3Rvb250ZXN0LmNvbVLTAU1JR2JNQkFHQnlxR1NNNDlBZ0VHQlN1QkJBQWpBNEdHQUFRQVlrZWpaMGxwMmdRVUpaS1lSaGNER042MDJiSFNnRHBTTHE0Y1JGanZGbUVhYmxWWVR6VndPVGZmTFB0R0V4QjVQNzdKbVA4azlHVVV0Y2RmWUVSTDlQY0FmdkxRdUNqM2o1U291ZXBuUk9Sdk5zd2pUN1ZZZ3I5T3lxNmdHMi02MDJINWktYmRvUW9qdDJJOVFwbWNhQXhLT2FEQmRvTlJPVV9NQzdNbzI5UGpFTHNqHyJ7XG5cdFwidHlwZVwiIDogXCJCMDAwXCJcbn1cbiJyHG1zZ3NlYWwuc3lzdG9vbnRlc3QuY29tOjgwOTlBQUFBUXdBQUFFQUFBQUJ3QUFBQVlRTUFKTjFTS0Z6LUV6RlVoaThnbkowanhVVDdycENTejZON2xNeHlRaEg4dm9LejhtTmdEY1lyNFExQVZDc1VZbEpFVWt4RjV0LXpJQzZ3TVdYZHVCTnMtcEZ1LVJqOGlMR1VkX3hTNjR0WlBNdEpIc0F1X2NTWkp4Sm14Z0hzT3hEdnZwSjFqbE1DMHFqMjFOZm9IZWVzZlNGN01sem13N2Z6eGViMVJOTG9nVERIODcxcU4zaGR1T051aVBlajZJY0ZnYmhJLUN1QnpINmtNMTYyTGpMeUttVjRVZ0hxX2JOWlV0Q2VmNlloc3VFdUd0eUtmckdvLXZoMFRSUGNhZUpDeVkwSTNFb1B0RXAwUy1uVHl3WlNUWUtDaVVxUWFVZHJNQjZheWh0SGlsanl0bDRZd2ZlRDFsOF95bUZnLUhKcXdB\"}";
 
-    Event event = iJsonService.fromJson(body, Event.class);
+    Event event = gson.fromJson(body, Event.class);
     event.setEventType(EventType.PACKET.getValue());
 
     Mockito.when(redisService.checkUnique(Mockito.anyString())).thenReturn(true);
-    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class))).thenReturn(new ArrayList<>());
+    Mockito.when(eventMapper.selectEventsByPacketIdAndEventType(Mockito.any(Event.class)))
+        .thenReturn(new ArrayList<>());
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
     event.setEventSeqId(1L);
@@ -146,9 +144,9 @@ public class DmServiceImplMockTest {
     event.zip();
 
     CDTPPacket cdtpPacket = notificationPacketUtil.unpack(notificationPacketUtil.decodeData(event.getPacket()));
-    String header = iJsonService.toJson(cdtpPacket.getHeader());
+    String header = gson.toJson(cdtpPacket.getHeader());
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(), header,
-        EventUtil.toJson(iJsonService, event));
+        EventUtil.toJson(gson, event));
     String tag = event.getFrom() + "_" + event.getTo();
 
     dmService.handleMqMessage(body, null);

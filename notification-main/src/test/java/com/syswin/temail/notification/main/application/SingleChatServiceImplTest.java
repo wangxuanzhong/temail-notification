@@ -25,7 +25,6 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.dto.MailAgentParamsFull;
@@ -71,8 +70,6 @@ public class SingleChatServiceImplTest {
   private RedisServiceImpl redisService;
   @Autowired
   private EventMapper eventMapper;
-  @Autowired
-  private IJsonService iJsonService;
 
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
@@ -82,10 +79,9 @@ public class SingleChatServiceImplTest {
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      singleChatService = new SingleChatServiceImpl(mqProducerMock, redisServiceMock, eventMapper,
-          iJsonService);
+      singleChatService = new SingleChatServiceImpl(mqProducerMock, redisServiceMock, eventMapper);
     } else {
-      singleChatService = new SingleChatServiceImpl(iMqProducer, redisService, eventMapper, iJsonService);
+      singleChatService = new SingleChatServiceImpl(iMqProducer, redisService, eventMapper);
     }
 
     params.setHeader(ConstantMock.HEADER);

@@ -25,7 +25,6 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
@@ -76,8 +75,6 @@ public class EventServiceTest {
   @MockBean
   private MemberMapper memberMapper;
   @Autowired
-  private IJsonService iJsonService;
-  @Autowired
   private NotificationConfig config;
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
@@ -86,8 +83,7 @@ public class EventServiceTest {
 
   @Before
   public void setUp() {
-    eventService = new EventService(eventMapper, unreadMapper, memberMapper, iJsonService, mqProducerMock,
-        redisServiceMock, config);
+    eventService = new EventService(eventMapper, unreadMapper, memberMapper, mqProducerMock, redisServiceMock, config);
   }
 
   private Event initEvent() {
@@ -534,7 +530,8 @@ public class EventServiceTest {
    */
   private List<Event> getEvents(List<Event> events) {
     Mockito.when(eventMapper.selectEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyInt())).thenReturn(events);
-    Mockito.when(eventMapper.selectLastEventSeqId(Mockito.anyString())).thenReturn(events.get(events.size() - 1).getEventSeqId());
+    Mockito.when(eventMapper.selectLastEventSeqId(Mockito.anyString()))
+        .thenReturn(events.get(events.size() - 1).getEventSeqId());
     List<Event> result = (List<Event>) eventService.getEventsLimited(to, 0L, null).get("events");
     System.out.println(result);
     return result;
@@ -572,7 +569,8 @@ public class EventServiceTest {
     event.autoWriteExtendParam(null);
     events.add(event);
 
-    Mockito.when(unreadMapper.selectCount(Mockito.anyString())).thenReturn(Collections.singletonList(new Unread(groupTemail, to, 2)));
+    Mockito.when(unreadMapper.selectCount(Mockito.anyString()))
+        .thenReturn(Collections.singletonList(new Unread(groupTemail, to, 2)));
     Mockito.when(eventMapper.selectPartEvents(Mockito.anyString(), Mockito.anyList())).thenReturn(events);
 
     List<UnreadResponse> result = eventService.getUnread(to);

@@ -24,12 +24,13 @@
 
 package com.syswin.temail.notification.main.util;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
 import com.syswin.temail.notification.main.constants.Constant.EventParams;
 import com.syswin.temail.notification.main.domains.TopicEvent;
+import com.syswin.temail.notification.main.dto.MailAgentParams;
 import java.util.List;
 
 /**
@@ -44,11 +45,11 @@ public class TopicEventUtil {
   /**
    * 转换成json，将extendParam中字段合并并清空extendParam
    */
-  public static String toJson(IJsonService iJsonService, TopicEvent topicEvent) {
+  public static String toJson(Gson gson, TopicEvent topicEvent) {
     String extendParam = topicEvent.getExtendParam();
     topicEvent.setId(null);
     topicEvent.setExtendParam(null);
-    return NotificationUtil.combineTwoJson(iJsonService.toJson(topicEvent), extendParam);
+    return NotificationUtil.combineTwoJson(gson.toJson(topicEvent), extendParam);
   }
 
   /**
@@ -81,5 +82,16 @@ public class TopicEventUtil {
     } else {
       return jsonObject.toString();
     }
+  }
+
+  /**
+   * 初始化event对象
+   */
+  public static TopicEvent copyMailAgentFieldToEvent(MailAgentParams params, TopicEvent topicEvent) {
+    topicEvent.setEventType(params.getSessionMessageType());
+    topicEvent.setMsgId(params.getMsgid());
+    topicEvent.setSeqId(params.getSeqNo());
+    topicEvent.setMessage(params.getToMsg());
+    return topicEvent;
   }
 }

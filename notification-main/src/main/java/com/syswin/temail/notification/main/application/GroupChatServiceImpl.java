@@ -24,8 +24,8 @@
 
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.Event;
@@ -36,7 +36,6 @@ import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
-import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import org.slf4j.Logger;
@@ -60,16 +59,16 @@ public class GroupChatServiceImpl implements IMqConsumerService {
   private final RedisServiceImpl redisService;
   private final EventMapper eventMapper;
   private final MemberMapper memberMapper;
-  private final IJsonService iJsonService;
+  private final Gson gson;
 
   @Autowired
-  public GroupChatServiceImpl(IMqProducer iMqProducer, RedisServiceImpl redisService,
-      EventMapper eventMapper, MemberMapper memberMapper, IJsonService iJsonService) {
+  public GroupChatServiceImpl(IMqProducer iMqProducer, RedisServiceImpl redisService, EventMapper eventMapper,
+      MemberMapper memberMapper) {
     this.iMqProducer = iMqProducer;
     this.redisService = redisService;
     this.eventMapper = eventMapper;
     this.memberMapper = memberMapper;
-    this.iJsonService = iJsonService;
+    this.gson = new Gson();
   }
 
   /**
@@ -78,10 +77,9 @@ public class GroupChatServiceImpl implements IMqConsumerService {
   @Transactional(rollbackFor = Exception.class)
   @Override
   public void handleMqMessage(String body, String tags) {
-    MailAgentParams params = iJsonService.fromJson(body, MailAgentParams.class);
-    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getSeqNo(), params.getToMsg());
-    // 复制相同名称的字段的值
-    NotificationUtil.copyField(params, event);
+    MailAgentParams params = gson.fromJson(body, MailAgentParams.class);
+    Event event = gson.fromJson(body, Event.class);
+    EventUtil.copyMailAgentFieldToEvent(params, event);
 
     // 前端需要的头信息
     String header = params.getHeader();
@@ -89,7 +87,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
 
     EventType eventType = EventType.getByValue(params.getSessionMessageType());
     if (eventType == null) {
-      LOGGER.warn("event type is illegal! xPacketId: {}", params.getxPacketId());
+      LOGGER.warn("event type is illegal! xPacketId: {}", event.getxPacketId());
       return;
     }
     LOGGER.info("group chat event type: {}", eventType);
@@ -122,7 +120,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         break;
       case DELETE:
         // 删除操作msgId是多条，存入msgIds字段
-        event.setMsgIds(iJsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
+        event.setMsgIds(gson.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
         }.getType()));
         event.setMsgId(null);
         EventUtil.notifyToAll(event);
@@ -158,11 +156,11 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         break;
       // 只通知被删除的人
       case DELETE_MEMBER:
-        List<String> temails = iJsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
+        List<String> temails = gson.fromJson(event.getTemail(), new TypeToken<List<String>>() {
         }.getType());
-        List<String> names = iJsonService.fromJson(event.getName(), new TypeToken<List<String>>() {
+        List<String> names = gson.fromJson(event.getName(), new TypeToken<List<String>>() {
         }.getType());
-        List<String> memberExtDatas = iJsonService.fromJson(event.getMemberExtData(), new TypeToken<List<String>>() {
+        List<String> memberExtDatas = gson.fromJson(event.getMemberExtData(), new TypeToken<List<String>>() {
         }.getType());
 
         if (temails.size() != names.size() || temails.size() != memberExtDatas.size()) {
@@ -229,7 +227,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         break;
       case REPLY_DELETE:
         // 删除操作msgId是多条，存入msgIds字段
-        event.setMsgIds(iJsonService.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
+        event.setMsgIds(gson.fromJson(event.getMsgId(), new TypeToken<List<String>>() {
         }.getType()));
         event.setMsgId(null);
         EventUtil.notifyToAll(event);
@@ -251,7 +249,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
       case BLACKLIST:
       case BLACKLIST_CANCEL:
         EventUtil.notifyToAdmin(event);
-        temails = iJsonService.fromJson(event.getTemail(), new TypeToken<List<String>>() {
+        temails = gson.fromJson(event.getTemail(), new TypeToken<List<String>>() {
         }.getType());
         for (String temail : temails) {
           event.setTemail(temail);
@@ -260,7 +258,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         break;
       case RECEIVE_AT:
         // @消息下发时为多条，from为发送者，to和temail为接收者
-        event.setTemail(params.getFrom());
+        event.setTemail(event.getFrom());
         // 当事人为发件人
         this.sendSingleMessageDirectly(event, header, tags, body);
         break;
@@ -275,8 +273,8 @@ public class GroupChatServiceImpl implements IMqConsumerService {
           LOGGER.warn("do not found source message!");
           break;
         } else {
-          Event parentEvent = events.get(0).autoReadExtendParam(iJsonService);
-          List<String> tos = iJsonService.fromJson(parentEvent.getAt(), new TypeToken<List<String>>() {
+          Event parentEvent = events.get(0).autoReadExtendParam(gson);
+          List<String> tos = gson.fromJson(parentEvent.getAt(), new TypeToken<List<String>>() {
           }.getType());
           // 添加原消息发送者
           tos.add(parentEvent.getTemail());
@@ -325,9 +323,8 @@ public class GroupChatServiceImpl implements IMqConsumerService {
     event.setTo(event.getTemail());
     this.insert(event, body);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    iMqProducer.sendMessage(iJsonService
-            .toJson(new DispatcherResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(iJsonService, event))),
-        tags);
+    iMqProducer.sendMessage(
+        gson.toJson(new DispatcherResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(gson, event))), tags);
   }
 
   /**
@@ -336,8 +333,8 @@ public class GroupChatServiceImpl implements IMqConsumerService {
   private void sendSingleMessageDirectly(Event event, String header, String tags, String body) {
     this.insert(event, body);
     LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
-    iMqProducer.sendMessage(iJsonService.toJson(
-        new DispatcherResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(iJsonService, event))),
+    iMqProducer.sendMessage(
+        gson.toJson(new DispatcherResponse(event.getTo(), event.getEventType(), header, EventUtil.toJson(gson, event))),
         tags);
   }
 
@@ -367,9 +364,9 @@ public class GroupChatServiceImpl implements IMqConsumerService {
     for (String to : tos) {
       event.setTo(to);
       this.insert(event, body);
-      iMqProducer.sendMessage(
-          iJsonService.toJson(new DispatcherResponse(to, cdtpEventType, header, EventUtil.toJson(iJsonService, event))),
-          tags);
+      iMqProducer
+          .sendMessage(gson.toJson(new DispatcherResponse(to, cdtpEventType, header, EventUtil.toJson(gson, event))),
+              tags);
     }
   }
 
@@ -387,8 +384,8 @@ public class GroupChatServiceImpl implements IMqConsumerService {
     if (events.isEmpty()) {
       tos = memberMapper.selectMember(event);
     } else {
-      Event parentEvent = events.get(0).autoReadExtendParam(iJsonService);
-      tos = iJsonService.fromJson(parentEvent.getAt(), new TypeToken<List<String>>() {
+      Event parentEvent = events.get(0).autoReadExtendParam(gson);
+      tos = gson.fromJson(parentEvent.getAt(), new TypeToken<List<String>>() {
       }.getType());
       // 添加原消息发送者
       tos.add(parentEvent.getTemail());

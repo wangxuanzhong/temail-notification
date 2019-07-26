@@ -24,7 +24,7 @@
 
 package com.syswin.temail.notification.main.application;
 
-import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.EventType;
@@ -49,13 +49,12 @@ public class SyncServiceImpl implements IMqConsumerService {
 
   private final IMqProducer iMqProducer;
   private final RedisServiceImpl redisService;
-  private final IJsonService iJsonService;
+  private final Gson gson;
 
-  public SyncServiceImpl(IMqProducer iMqProducer, RedisServiceImpl redisService,
-      IJsonService iJsonService) {
+  public SyncServiceImpl(IMqProducer iMqProducer, RedisServiceImpl redisService) {
     this.iMqProducer = iMqProducer;
     this.redisService = redisService;
-    this.iJsonService = iJsonService;
+    this.gson = new Gson();
   }
 
 
@@ -66,7 +65,7 @@ public class SyncServiceImpl implements IMqConsumerService {
   public void handleMqMessage(String body, String tags) {
     LOGGER.info("sync params: {}, tags: {}", body, tags);
 
-    SyncEvent event = iJsonService.fromJson(body, SyncEvent.class);
+    SyncEvent event = gson.fromJson(body, SyncEvent.class);
 
     // 前端需要的头信息
     String header = event.getHeader();
@@ -88,7 +87,7 @@ public class SyncServiceImpl implements IMqConsumerService {
       case RELATION_ADD:
       case RELATION_UPDATE:
       case RELATION_DELETE:
-        SyncRelationEvent relationEvent = iJsonService.fromJson(body, SyncRelationEvent.class);
+        SyncRelationEvent relationEvent = gson.fromJson(body, SyncRelationEvent.class);
         this.sendMessage(relationEvent, header, tags);
         break;
       default:
@@ -109,8 +108,8 @@ public class SyncServiceImpl implements IMqConsumerService {
   private void sendMessage(SyncEvent event, String to, String header, String tags) {
     SyncEventUtil.initEventSeqId(redisService, event);
     LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
-    iMqProducer.sendMessage(iJsonService
-            .toJson(new DispatcherResponse(to, event.getEventType(), header, SyncEventUtil.toJson(iJsonService, event))),
+    iMqProducer.sendMessage(gson
+            .toJson(new DispatcherResponse(to, event.getEventType(), header, SyncEventUtil.toJson(gson, event))),
         tags);
   }
 }

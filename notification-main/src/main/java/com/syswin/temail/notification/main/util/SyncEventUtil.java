@@ -24,7 +24,7 @@
 
 package com.syswin.temail.notification.main.util;
 
-import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
 import com.syswin.temail.notification.main.application.RedisServiceImpl;
 import com.syswin.temail.notification.main.domains.SyncEvent;
@@ -65,9 +65,9 @@ public class SyncEventUtil {
   /**
    * 转换成json，清空后端使用参数
    */
-  public static String toJson(IJsonService iJsonService, SyncEvent event) {
+  public static String toJson(Gson gson, SyncEvent event) {
     event.setHeader(null);
-    return iJsonService.toJson(event);
+    return gson.toJson(event);
   }
 
   /**

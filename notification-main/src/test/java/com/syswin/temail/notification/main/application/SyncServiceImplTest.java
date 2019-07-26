@@ -25,7 +25,6 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.SyncRelationEvent;
 import com.syswin.temail.notification.main.mock.ConstantMock;
@@ -37,7 +36,6 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -53,9 +51,6 @@ public class SyncServiceImplTest {
   @Value("${spring.rocketmq.topics.sync}")
   private String topic;
 
-  @Autowired
-  private IJsonService iJsonService;
-
   private MqProducerMock mqProducerMock = new MqProducerMock();
   private RedisServiceImplMock redisServiceMock = new RedisServiceImplMock();
 
@@ -63,7 +58,7 @@ public class SyncServiceImplTest {
 
   @Before
   public void setUp() {
-    syncService = new SyncServiceImpl(mqProducerMock, redisServiceMock, iJsonService);
+    syncService = new SyncServiceImpl(mqProducerMock, redisServiceMock);
   }
 
 

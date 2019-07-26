@@ -27,7 +27,7 @@ package com.syswin.temail.notification.main.domains;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.syswin.temail.notification.foundation.application.IJsonService;
+import com.google.gson.Gson;
 import com.syswin.temail.notification.main.util.EventUtil;
 import com.syswin.temail.notification.main.util.GzipUtil;
 import com.syswin.temail.notification.main.util.NotificationUtil;
@@ -130,9 +130,9 @@ public class Event {
   /**
    * 自动解析扩展字段
    */
-  public Event autoReadExtendParam(IJsonService iJsonService) {
+  public Event autoReadExtendParam(Gson gson) {
     if (this.extendParam != null && !this.extendParam.isEmpty()) {
-      NotificationUtil.copyField(iJsonService.fromJson(this.extendParam, Event.class), this);
+      NotificationUtil.copyField(gson.fromJson(this.extendParam, Event.class), this);
     }
     return this;
   }

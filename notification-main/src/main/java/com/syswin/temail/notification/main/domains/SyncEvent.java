@@ -36,7 +36,6 @@ public class SyncEvent {
 
   @JsonIgnore
   private Long id;
-  @JsonIgnore
   private String xPacketId;
   private Long eventSeqId;
   private Integer eventType;

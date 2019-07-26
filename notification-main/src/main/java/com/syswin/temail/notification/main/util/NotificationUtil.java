@@ -26,9 +26,11 @@ package com.syswin.temail.notification.main.util;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.syswin.temail.notification.foundation.exceptions.BaseException;
 import com.syswin.temail.notification.main.constants.Constant.EventParams;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +56,9 @@ public class NotificationUtil {
     Field[] fields2 = clazz2.getDeclaredFields();
 
     for (Field f1 : fields1) {
+      if (Modifier.isFinal(f1.getModifiers())) {
+        continue;
+      }
       for (Field f2 : fields2) {
         if (f1.getName().equals(f2.getName()) && f1.getType().getName().equals(f2.getType().getName())) {
           try {
@@ -66,7 +71,7 @@ public class NotificationUtil {
             }
             f1.setAccessible(false);
           } catch (IllegalAccessException e) {
-            LOGGER.error("copy field error!", e);
+            throw new BaseException("copy field error!", e);
           }
         }
       }

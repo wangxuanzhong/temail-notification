@@ -24,8 +24,8 @@
 
 package com.syswin.temail.notification.main.application;
 
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.syswin.temail.notification.foundation.application.IJsonService;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.foundation.exceptions.BaseException;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
@@ -70,7 +70,7 @@ public class DmServiceImpl implements IMqConsumerService {
   private final IMqProducer iMqProducer;
   private final RedisServiceImpl redisService;
   private final EventMapper eventMapper;
-  private final IJsonService iJsonService;
+  private final Gson gson;
   private final RestTemplate restTemplate;
   private final NotificationPacketUtil notificationPacketUtil = new NotificationPacketUtil();
 
@@ -78,11 +78,11 @@ public class DmServiceImpl implements IMqConsumerService {
 
   @Autowired
   public DmServiceImpl(IMqProducer iMqProducer, RedisServiceImpl redisService, EventMapper eventMapper,
-      IJsonService iJsonService, RestTemplate notificationRestTemplate, NotificationConfig config) {
+      RestTemplate notificationRestTemplate, NotificationConfig config) {
     this.iMqProducer = iMqProducer;
     this.redisService = redisService;
     this.eventMapper = eventMapper;
-    this.iJsonService = iJsonService;
+    this.gson = new Gson();
     this.restTemplate = notificationRestTemplate;
     this.config = config;
   }
@@ -104,7 +104,7 @@ public class DmServiceImpl implements IMqConsumerService {
       return;
     }
 
-    CDTPHeader cdtpHeader = iJsonService.fromJson(header, CDTPHeader.class);
+    CDTPHeader cdtpHeader = gson.fromJson(header, CDTPHeader.class);
     event.setFrom(cdtpHeader.getSender());
     event.setTo(cdtpHeader.getReceiver());
     EventUtil.initEventSeqId(redisService, event);
@@ -114,8 +114,8 @@ public class DmServiceImpl implements IMqConsumerService {
     LOGGER.info("send packet event to {}", event.getTo());
     String tag = event.getFrom() + "_" + event.getTo();
     DispatcherResponse response = new DispatcherResponse(event.getTo(), event.getEventType(), header,
-        EventUtil.toJson(iJsonService, event));
-    Map<String, Object> extraDataMap = iJsonService
+        EventUtil.toJson(gson, event));
+    Map<String, Object> extraDataMap = gson
         .fromJson(cdtpHeader.getExtraData(), new TypeToken<Map<String, Object>>() {
         }.getType());
 
@@ -123,22 +123,22 @@ public class DmServiceImpl implements IMqConsumerService {
       Object type = extraDataMap.get("type");
       if (type == null) {
         // 发送到dispatcher
-        iMqProducer.sendMessage(iJsonService.toJson(response), tag);
+        iMqProducer.sendMessage(gson.toJson(response), tag);
       } else if (Boolean.valueOf(config.dmGroupChatEnabled) && type instanceof String && type.toString()
           .startsWith(GROUP_CHAT_TYPE_PREFIX)) {
         // 发送到新群聊topic
-        iMqProducer.sendMessage(EventUtil.toJson(iJsonService, event), config.notifyGroupChatTopic, tag, "");
+        iMqProducer.sendMessage(EventUtil.toJson(gson, event), config.notifyGroupChatTopic, tag, "");
       } else if (Boolean.valueOf(config.dmApplicationEnabled) && type instanceof String && type.toString()
           .startsWith(APPLICATION_TYPE_PREFIX)) {
         // 发送到协同应用topic
-        iMqProducer.sendMessage(EventUtil.toJson(iJsonService, event), config.notifyApplicationTopic, tag, "");
+        iMqProducer.sendMessage(EventUtil.toJson(gson, event), config.notifyApplicationTopic, tag, "");
       } else {
         // 发送到dispatcher
-        iMqProducer.sendMessage(iJsonService.toJson(response), tag);
+        iMqProducer.sendMessage(gson.toJson(response), tag);
       }
     } else {
       // 发送到dispatcher
-      iMqProducer.sendMessage(iJsonService.toJson(response), tag);
+      iMqProducer.sendMessage(gson.toJson(response), tag);
     }
   }
 
@@ -148,7 +148,7 @@ public class DmServiceImpl implements IMqConsumerService {
   @Transactional(rollbackFor = Exception.class)
   @Override
   public void handleMqMessage(String body, String tags) {
-    Event event = iJsonService.fromJson(body, Event.class);
+    Event event = gson.fromJson(body, Event.class);
     LOGGER.info("dm params: body={}, tags={}", body, tags);
     event.setEventType(EventType.PACKET.getValue());
 
@@ -179,11 +179,11 @@ public class DmServiceImpl implements IMqConsumerService {
     eventMapper.insert(event);
 
     // 解析packet取出CDTPHeader推送给dispatcher
-    String header = iJsonService.toJson(cdtpPacket.getHeader());
+    String header = gson.toJson(cdtpPacket.getHeader());
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(), header,
-        EventUtil.toJson(iJsonService, event));
+        EventUtil.toJson(gson, event));
     String tag = event.getFrom() + "_" + event.getTo();
-    iMqProducer.sendMessage(iJsonService.toJson(dispatcherResponse), tag);
+    iMqProducer.sendMessage(gson.toJson(dispatcherResponse), tag);
   }
 
 
