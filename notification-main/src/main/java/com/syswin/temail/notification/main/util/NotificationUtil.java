@@ -102,6 +102,7 @@ public class NotificationUtil {
     jsonObject.remove(EventParams.TEMAIL);
     jsonObject.remove(EventParams.TYPE);
     jsonObject.remove(EventParams.NAME);
+    jsonObject.remove(EventParams.MEMBER_EXT_DATA);
     jsonObject.remove(EventParams.TOPIC_ID);
     jsonObject.remove(EventParams.PACKET);
     return jsonObject;

@@ -153,6 +153,10 @@ public class MailAgentParamsFull {
    */
   private String sessionExtData;
   /**
+   * 邀请人ExtData
+   */
+  private String inviteExtData;
+  /**
    * crowd群对称密钥
    */
   private String sharedKey;
@@ -229,9 +233,6 @@ public class MailAgentParamsFull {
   }
 
   public Long getTimestamp() {
-    if (this.timestamp == null) {
-      this.timestamp = System.currentTimeMillis();
-    }
     return timestamp;
   }
 
@@ -375,22 +376,6 @@ public class MailAgentParamsFull {
     this.cc = cc;
   }
 
-  public String getHeader() {
-    return header;
-  }
-
-  public void setHeader(String header) {
-    this.header = header;
-  }
-
-  public String getxPacketId() {
-    return xPacketId;
-  }
-
-  public void setxPacketId(String xPacketId) {
-    this.xPacketId = xPacketId;
-  }
-
   public String getExtData() {
     return extData;
   }
@@ -413,6 +398,14 @@ public class MailAgentParamsFull {
 
   public void setSessionExtData(String sessionExtData) {
     this.sessionExtData = sessionExtData;
+  }
+
+  public String getInviteExtData() {
+    return inviteExtData;
+  }
+
+  public void setInviteExtData(String inviteExtData) {
+    this.inviteExtData = inviteExtData;
   }
 
   public String getSharedKey() {
@@ -439,6 +432,22 @@ public class MailAgentParamsFull {
     this.fromGroupName = fromGroupName;
   }
 
+  public String getHeader() {
+    return header;
+  }
+
+  public void setHeader(String header) {
+    this.header = header;
+  }
+
+  public String getxPacketId() {
+    return xPacketId;
+  }
+
+  public void setxPacketId(String xPacketId) {
+    this.xPacketId = xPacketId;
+  }
+
   @Override
   public String toString() {
     return "MailAgentParamsFull{" +
@@ -448,7 +457,7 @@ public class MailAgentParamsFull {
         ", msgid='" + msgid + '\'' +
         ", parentMsgId='" + parentMsgId + '\'' +
         ", seqNo=" + seqNo +
-        ", toMsg length='" + (toMsg == null ? 0 : toMsg.length()) + '\'' +
+        ", toMsg='" + toMsg + '\'' +
         ", timestamp=" + timestamp +
         ", deleteAllMsg=" + deleteAllMsg +
         ", owner='" + owner + '\'' +
@@ -470,6 +479,7 @@ public class MailAgentParamsFull {
         ", extData='" + extData + '\'' +
         ", memberExtData='" + memberExtData + '\'' +
         ", sessionExtData='" + sessionExtData + '\'' +
+        ", inviteExtData='" + inviteExtData + '\'' +
         ", sharedKey='" + sharedKey + '\'' +
         ", fromNickName='" + fromNickName + '\'' +
         ", fromGroupName='" + fromGroupName + '\'' +

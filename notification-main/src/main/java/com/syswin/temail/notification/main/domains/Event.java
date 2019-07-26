@@ -345,6 +345,14 @@ public class Event {
     this.trashMsgInfo = trashMsgInfo;
   }
 
+  public String getMemberExtData() {
+    return memberExtData;
+  }
+
+  public void setMemberExtData(String memberExtData) {
+    this.memberExtData = memberExtData;
+  }
+
   public String getExtendParam() {
     return extendParam;
   }
@@ -378,6 +386,7 @@ public class Event {
         ", deleteAllMsg=" + deleteAllMsg +
         ", owner='" + owner + '\'' +
         ", trashMsgInfo='" + trashMsgInfo + '\'' +
+        ", memberExtData='" + memberExtData + '\'' +
         ", extendParam='" + extendParam + '\'' +
         '}';
   }

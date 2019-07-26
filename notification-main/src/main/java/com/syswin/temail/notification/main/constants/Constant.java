@@ -98,6 +98,7 @@ public class Constant {
     public static final String TEMAIL = "temail";
     public static final String TYPE = "type";
     public static final String NAME = "name";
+    public static final String MEMBER_EXT_DATA = "memberExtData";
     /**
      * 话题参数
      */

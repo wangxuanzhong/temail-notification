@@ -190,6 +190,11 @@ public class EventUtil {
       jsonObject.addProperty(EventParams.NAME, event.getName());
     }
 
+    // 添加群聊批量移除群成员事件，群成员扩展字段
+    if (event.getMemberExtData() != null) {
+      jsonObject.addProperty(EventParams.MEMBER_EXT_DATA, event.getMemberExtData());
+    }
+
     if (jsonObject.size() == 0) {
       return null;
     } else {
