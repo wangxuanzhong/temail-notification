@@ -231,6 +231,7 @@ public class EventUtil {
     event.setMsgId(params.getMsgid());
     event.setSeqId(params.getSeqNo());
     event.setMessage(params.getToMsg());
+    event.setRole(params.getType());
     return event;
   }
 }

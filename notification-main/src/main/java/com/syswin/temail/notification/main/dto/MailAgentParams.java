@@ -48,6 +48,10 @@ public class MailAgentParams {
    */
   private String toMsg;
   /**
+   * 成员类型
+   */
+  private Integer type;
+  /**
    * CDTP报文头
    */
   private String header;
@@ -68,6 +72,10 @@ public class MailAgentParams {
     return toMsg;
   }
 
+  public Integer getType() {
+    return type;
+  }
+
   public String getHeader() {
     return header;
   }
@@ -79,6 +87,7 @@ public class MailAgentParams {
         ", msgid='" + msgid + '\'' +
         ", seqNo=" + seqNo +
         ", toMsg='" + toMsg + '\'' +
+        ", type=" + type +
         ", header='" + header + '\'' +
         '}';
   }
