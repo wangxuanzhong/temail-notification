@@ -248,11 +248,11 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         break;
       case BLACKLIST:
       case BLACKLIST_CANCEL:
-        EventUtil.notifyToAdmin(event);
         temails = gson.fromJson(event.getTemail(), new TypeToken<List<String>>() {
         }.getType());
         for (String temail : temails) {
           event.setTemail(temail);
+          EventUtil.notifyToAdmin(event);
           this.sendGroupMessageToAll(event, header, tags, body);
         }
         break;
