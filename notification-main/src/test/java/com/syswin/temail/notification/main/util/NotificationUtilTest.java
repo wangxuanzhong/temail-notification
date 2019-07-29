@@ -24,7 +24,6 @@
 
 package com.syswin.temail.notification.main.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -68,17 +67,6 @@ public class NotificationUtilTest {
     Assertions.assertThat(c3.typeList).isNull();
     Assertions.assertThat(c3.typeMap).isNull();
 
-  }
-
-  @Test
-  public void testInitExtendParam() {
-    String params = null;
-    String extendParam = NotificationUtil.removeUsedField(params, null).toString();
-    Assertions.assertThat(extendParam).isEqualTo(params);
-
-    params = "";
-    extendParam = NotificationUtil.removeUsedField("", new ArrayList<>()).toString();
-    System.out.println(extendParam);
   }
 
   class C1 {

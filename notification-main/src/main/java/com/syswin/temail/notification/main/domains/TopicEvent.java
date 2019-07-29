@@ -71,19 +71,6 @@ public class TopicEvent {
   @JsonIgnore
   private String extendParam;
 
-  public TopicEvent() {
-  }
-
-  /**
-   * 只需要初始化与mq消息字段名称不符的参数
-   */
-  public TopicEvent(Integer eventType, String msgId, Long seqId, String message) {
-    this.eventType = eventType;
-    this.msgId = msgId;
-    this.seqId = seqId;
-    this.message = message;
-  }
-
   /**
    * 自动解析扩展字段
    */

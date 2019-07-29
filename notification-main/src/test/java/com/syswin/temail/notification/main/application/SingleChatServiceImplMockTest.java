@@ -30,11 +30,11 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.dto.DispatcherResponse;
+import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.dto.MailAgentParamsFull;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.util.EventUtil;
-import com.syswin.temail.notification.main.util.NotificationUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -100,8 +100,7 @@ public class SingleChatServiceImplMockTest {
     event.autoWriteExtendParam(gson.toJson(params));
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
-        ConstantMock.HEADER,
-        EventUtil.toJson(gson, event));
+        ConstantMock.HEADER, EventUtil.toJson(gson, event));
 
     singleChatService.handleMqMessage(gson.toJson(params), params.getFrom());
 
@@ -135,8 +134,7 @@ public class SingleChatServiceImplMockTest {
     event.autoWriteExtendParam(gson.toJson(params));
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
-        ConstantMock.HEADER,
-        EventUtil.toJson(gson, event));
+        ConstantMock.HEADER, EventUtil.toJson(gson, event));
 
     singleChatService.handleMqMessage(gson.toJson(params), params.getFrom());
 
@@ -162,8 +160,7 @@ public class SingleChatServiceImplMockTest {
     event.autoWriteExtendParam(gson.toJson(params));
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
-        ConstantMock.HEADER,
-        EventUtil.toJson(gson, event));
+        ConstantMock.HEADER, EventUtil.toJson(gson, event));
 
     singleChatService.handleMqMessage(gson.toJson(params), params.getFrom());
 
@@ -177,8 +174,9 @@ public class SingleChatServiceImplMockTest {
         .thenReturn(new ArrayList<>());
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
-    Event event = new Event(params.getSessionMessageType(), params.getMsgid(), params.getSeqNo(), params.getToMsg());
-    NotificationUtil.copyField(params, event);
+    MailAgentParams params = gson.fromJson(gson.toJson(this.params), MailAgentParams.class);
+    Event event = gson.fromJson(gson.toJson(this.params), Event.class);
+    EventUtil.copyMailAgentFieldToEvent(params, event);
     return event;
   }
 }

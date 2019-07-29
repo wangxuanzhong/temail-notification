@@ -30,12 +30,12 @@ import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.dto.DispatcherResponse;
+import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.dto.MailAgentParamsFull;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
-import com.syswin.temail.notification.main.util.NotificationUtil;
 import com.syswin.temail.notification.main.util.TopicEventUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -287,11 +287,10 @@ public class TopicServiceImplMockTest {
 
     TopicEvent topicEvent = this.mock();
     topicEvent.setEventSeqId(1L);
-    topicEvent.autoWriteExtendParam(null);
+    topicEvent.autoWriteExtendParam(gson.toJson(params));
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(),
-        ConstantMock.HEADER,
-        TopicEventUtil.toJson(gson, topicEvent));
+        ConstantMock.HEADER, TopicEventUtil.toJson(gson, topicEvent));
 
     topicServiceForHandle.handleMqMessage(gson.toJson(params), params.getTopicId());
 
@@ -313,11 +312,10 @@ public class TopicServiceImplMockTest {
 
     TopicEvent topicEvent = this.mock();
     topicEvent.setEventSeqId(1L);
-    topicEvent.autoWriteExtendParam(null);
+    topicEvent.autoWriteExtendParam(gson.toJson(params));
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(topicEvent.getTo(), topicEvent.getEventType(),
-        ConstantMock.HEADER,
-        TopicEventUtil.toJson(gson, topicEvent));
+        ConstantMock.HEADER, TopicEventUtil.toJson(gson, topicEvent));
 
     topicServiceForHandle.handleMqMessage(gson.toJson(params), params.getTopicId());
 
@@ -328,9 +326,9 @@ public class TopicServiceImplMockTest {
   private TopicEvent mock() {
     Mockito.when(redisService.getNextSeq(Mockito.anyString())).thenReturn(1L);
 
-    TopicEvent topicEvent = new TopicEvent(params.getSessionMessageType(), params.getMsgid(), params.getSeqNo(),
-        params.getToMsg());
-    NotificationUtil.copyField(params, topicEvent);
+    MailAgentParams params = gson.fromJson(gson.toJson(this.params), MailAgentParams.class);
+    TopicEvent topicEvent = gson.fromJson(gson.toJson(this.params), TopicEvent.class);
+    TopicEventUtil.copyMailAgentFieldToEvent(params, topicEvent);
     return topicEvent;
   }
 }
