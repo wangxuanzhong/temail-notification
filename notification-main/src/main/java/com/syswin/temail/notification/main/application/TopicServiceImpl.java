@@ -46,6 +46,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,14 +229,14 @@ public class TopicServiceImpl implements IMqConsumerService {
         case TOPIC_DELETE:
           topicMap.clear();
           replyMap.clear();
-          topicMap.put(event.getTopicId(), event);
+          topicMap.put(UUID.randomUUID().toString(), event);
           break;
         case TOPIC_SESSION_DELETE:
           if (event.getDeleteAllMsg()) {
             topicMap.clear();
             replyMap.clear();
           }
-          topicMap.put(event.getTopicId(), event);
+          topicMap.put(UUID.randomUUID().toString(), event);
           break;
         default:
           // do nothing
