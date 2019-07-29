@@ -29,7 +29,6 @@ import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.SyncEvent;
-import com.syswin.temail.notification.main.domains.SyncRelationEvent;
 import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.util.SyncEventUtil;
 import java.lang.invoke.MethodHandles;
@@ -87,8 +86,7 @@ public class SyncServiceImpl implements IMqConsumerService {
       case RELATION_ADD:
       case RELATION_UPDATE:
       case RELATION_DELETE:
-        SyncRelationEvent relationEvent = gson.fromJson(body, SyncRelationEvent.class);
-        this.sendMessage(relationEvent, header, tags);
+        this.sendMessage(event, header, tags, body);
         break;
       default:
         LOGGER.warn("not support event type!");
@@ -98,18 +96,11 @@ public class SyncServiceImpl implements IMqConsumerService {
   /**
    * 发送消息
    */
-  private void sendMessage(SyncEvent event, String header, String tags) {
-    this.sendMessage(event, event.getTo(), header, tags);
-  }
-
-  /**
-   * 发送消息
-   */
-  private void sendMessage(SyncEvent event, String to, String header, String tags) {
+  private void sendMessage(SyncEvent event, String header, String tags, String body) {
     SyncEventUtil.initEventSeqId(redisService, event);
-    LOGGER.info("send message to --->> {}, event type: {}", to, EventType.getByValue(event.getEventType()));
-    iMqProducer.sendMessage(gson
-            .toJson(new DispatcherResponse(to, event.getEventType(), header, SyncEventUtil.toJson(gson, event))),
+    LOGGER.info("send message to --->> {}, event type: {}", event.getTo(), EventType.getByValue(event.getEventType()));
+    iMqProducer.sendMessage(gson.toJson(
+        new DispatcherResponse(event.getTo(), event.getEventType(), header, SyncEventUtil.toJson(gson, event, body))),
         tags);
   }
 }

@@ -78,6 +78,7 @@ public class Constant {
      * 通用参数
      */
     public static final String SESSION_MESSAGE_TYPE = "sessionMessageType";
+    public static final String EVENT_TYPE = "eventType";
     public static final String FROM = "from";
     public static final String TO = "to";
     public static final String MSG_ID = "msgid";

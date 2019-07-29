@@ -25,10 +25,14 @@
 package com.syswin.temail.notification.main.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.syswin.temail.notification.foundation.application.ISequenceService;
 import com.syswin.temail.notification.main.application.RedisServiceImpl;
+import com.syswin.temail.notification.main.constants.Constant.EventParams;
 import com.syswin.temail.notification.main.domains.SyncEvent;
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,9 +69,17 @@ public class SyncEventUtil {
   /**
    * 转换成json，清空后端使用参数
    */
-  public static String toJson(Gson gson, SyncEvent event) {
+  public static String toJson(Gson gson, SyncEvent event, String params) {
+    List<String> removeKeys = new ArrayList<>();
+    removeKeys.add(EventParams.EVENT_TYPE);
+    removeKeys.add(EventParams.FROM);
+    removeKeys.add(EventParams.TO);
+    removeKeys.add(EventParams.HEADER);
+    removeKeys.add(EventParams.X_PACKET_ID);
+    JsonObject jsonObject = NotificationUtil.removeUsedField(params, removeKeys);
+
     event.setHeader(null);
-    return gson.toJson(event);
+    return NotificationUtil.combineTwoJson(gson.toJson(event), jsonObject.toString());
   }
 
   /**
@@ -76,4 +88,6 @@ public class SyncEventUtil {
   public static void initEventSeqId(ISequenceService iSequenceService, SyncEvent event) {
     event.setEventSeqId(iSequenceService.getNextSeq(event.getTo()));
   }
+
+
 }

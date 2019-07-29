@@ -36,6 +36,7 @@ import com.syswin.temail.notification.main.domains.Member.MemberRole;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -168,7 +169,25 @@ public class EventUtil {
    * 初始化extendParam的json
    */
   public static String initExtendParam(String params, Event event) {
-    JsonObject jsonObject = NotificationUtil.removeUsedField(params);
+    List<String> removeKeys = new ArrayList<>();
+    removeKeys.add(EventParams.SESSION_MESSAGE_TYPE);
+    removeKeys.add(EventParams.FROM);
+    removeKeys.add(EventParams.TO);
+    removeKeys.add(EventParams.MSG_ID);
+    removeKeys.add(EventParams.PARENT_MSG_ID);
+    removeKeys.add(EventParams.SEQ_NO);
+    removeKeys.add(EventParams.TO_MSG);
+    removeKeys.add(EventParams.TIMESTAMP);
+    removeKeys.add(EventParams.HEADER);
+    removeKeys.add(EventParams.X_PACKET_ID);
+    removeKeys.add(EventParams.OWNER);
+    removeKeys.add(EventParams.GROUP_TEMAIL);
+    removeKeys.add(EventParams.TEMAIL);
+    removeKeys.add(EventParams.TYPE);
+    removeKeys.add(EventParams.NAME);
+    removeKeys.add(EventParams.MEMBER_EXT_DATA);
+    removeKeys.add(EventParams.PACKET);
+    JsonObject jsonObject = NotificationUtil.removeUsedField(params, removeKeys);
 
     if (event == null) {
       event = new Event();

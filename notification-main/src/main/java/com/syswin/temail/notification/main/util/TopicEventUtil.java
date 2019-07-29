@@ -31,6 +31,7 @@ import com.syswin.temail.notification.foundation.application.ISequenceService;
 import com.syswin.temail.notification.main.constants.Constant.EventParams;
 import com.syswin.temail.notification.main.domains.TopicEvent;
 import com.syswin.temail.notification.main.dto.MailAgentParams;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,7 +64,19 @@ public class TopicEventUtil {
    * 初始化extendParam的json
    */
   public static String initExtendParam(String params, TopicEvent topicEvent) {
-    JsonObject jsonObject = NotificationUtil.removeUsedField(params);
+    List<String> removeKeys = new ArrayList<>();
+    removeKeys.add(EventParams.SESSION_MESSAGE_TYPE);
+    removeKeys.add(EventParams.FROM);
+    removeKeys.add(EventParams.TO);
+    removeKeys.add(EventParams.MSG_ID);
+    removeKeys.add(EventParams.PARENT_MSG_ID);
+    removeKeys.add(EventParams.SEQ_NO);
+    removeKeys.add(EventParams.TO_MSG);
+    removeKeys.add(EventParams.TIMESTAMP);
+    removeKeys.add(EventParams.HEADER);
+    removeKeys.add(EventParams.X_PACKET_ID);
+    removeKeys.add(EventParams.TOPIC_ID);
+    JsonObject jsonObject = NotificationUtil.removeUsedField(params, removeKeys);
 
     if (topicEvent == null) {
       topicEvent = new TopicEvent();

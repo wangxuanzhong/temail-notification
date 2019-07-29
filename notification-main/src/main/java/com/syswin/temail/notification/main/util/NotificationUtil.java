@@ -27,10 +27,10 @@ package com.syswin.temail.notification.main.util;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.syswin.temail.notification.foundation.exceptions.BaseException;
-import com.syswin.temail.notification.main.constants.Constant.EventParams;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,34 +83,17 @@ public class NotificationUtil {
   /**
    * 删除入参json中非透传的参数
    */
-  public static JsonObject removeUsedField(String params) {
-    JsonObject jsonObject;
+  public static JsonObject removeUsedField(String params, List<String> removeKeys) {
     // 如果传入的
     if (params != null && !params.isEmpty()) {
-      JsonParser parser = new JsonParser();
-      jsonObject = parser.parse(params).getAsJsonObject();
+      JsonObject jsonObject = new JsonParser().parse(params).getAsJsonObject();
+      if (removeKeys != null) {
+        removeKeys.forEach(jsonObject::remove);
+      }
+      return jsonObject;
     } else {
-      jsonObject = new JsonObject();
+      return new JsonObject();
     }
-    jsonObject.remove(EventParams.SESSION_MESSAGE_TYPE);
-    jsonObject.remove(EventParams.FROM);
-    jsonObject.remove(EventParams.TO);
-    jsonObject.remove(EventParams.MSG_ID);
-    jsonObject.remove(EventParams.PARENT_MSG_ID);
-    jsonObject.remove(EventParams.SEQ_NO);
-    jsonObject.remove(EventParams.TO_MSG);
-    jsonObject.remove(EventParams.TIMESTAMP);
-    jsonObject.remove(EventParams.HEADER);
-    jsonObject.remove(EventParams.X_PACKET_ID);
-    jsonObject.remove(EventParams.OWNER);
-    jsonObject.remove(EventParams.GROUP_TEMAIL);
-    jsonObject.remove(EventParams.TEMAIL);
-    jsonObject.remove(EventParams.TYPE);
-    jsonObject.remove(EventParams.NAME);
-    jsonObject.remove(EventParams.MEMBER_EXT_DATA);
-    jsonObject.remove(EventParams.TOPIC_ID);
-    jsonObject.remove(EventParams.PACKET);
-    return jsonObject;
   }
 
   /**
