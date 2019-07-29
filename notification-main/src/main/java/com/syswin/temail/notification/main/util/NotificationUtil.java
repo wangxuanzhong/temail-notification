@@ -46,7 +46,7 @@ public class NotificationUtil {
    */
   public static <T1, T2> T2 copyField(T1 obj1, T2 obj2) {
     if (obj1 == null || obj2 == null) {
-      return null;
+      return obj2;
     }
 
     Class clazz1 = obj1.getClass();
