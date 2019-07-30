@@ -224,7 +224,7 @@ public class EventUtil {
   }
 
   /**
-   * 初始化event对象
+   * 将单群聊mq参数中名称不同的字段手动赋值
    */
   public static Event copyMailAgentFieldToEvent(MailAgentParams params, Event event) {
     event.setEventType(params.getSessionMessageType());

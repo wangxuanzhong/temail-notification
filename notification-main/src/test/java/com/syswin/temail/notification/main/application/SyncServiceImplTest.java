@@ -30,7 +30,6 @@ import com.syswin.temail.notification.main.domains.SyncRelationEvent;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
-import com.syswin.temail.notification.main.util.SyncEventUtil;
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Before;
@@ -72,7 +71,6 @@ public class SyncServiceImplTest {
     relationEvent.setEventType(EventType.RELATION_ADD.getValue());
     relationEvent.setFrom("b");
     relationEvent.setTo("a");
-    SyncEventUtil.initEventSeqId(redisServiceMock, relationEvent);
     relationEvent.setHeader(ConstantMock.HEADER);
 
     relationEvent.setMyVcard("myVcard");
@@ -98,7 +96,6 @@ public class SyncServiceImplTest {
     relationEvent.setEventType(EventType.RELATION_UPDATE.getValue());
     relationEvent.setFrom("b");
     relationEvent.setTo("a");
-    SyncEventUtil.initEventSeqId(redisServiceMock, relationEvent);
     relationEvent.setHeader(ConstantMock.HEADER);
 
     relationEvent.setMyVcard("myVcard");
@@ -126,7 +123,6 @@ public class SyncServiceImplTest {
     relationEvent.setCreateTimeStp(1111L);
     relationEvent.setUpdateTimeStp(2222L);
     relationEvent.setDeleteList(Arrays.asList("b", "c", "d"));
-    SyncEventUtil.initEventSeqId(redisServiceMock, relationEvent);
     relationEvent.setHeader(ConstantMock.HEADER);
     syncService.handleMqMessage(gson.toJson(relationEvent), "");
   }

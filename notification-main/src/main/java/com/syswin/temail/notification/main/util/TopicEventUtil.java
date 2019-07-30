@@ -98,7 +98,7 @@ public class TopicEventUtil {
   }
 
   /**
-   * 初始化event对象
+   * 将话题mq参数中名称不同的字段手动赋值
    */
   public static TopicEvent copyMailAgentFieldToEvent(MailAgentParams params, TopicEvent topicEvent) {
     topicEvent.setEventType(params.getSessionMessageType());
