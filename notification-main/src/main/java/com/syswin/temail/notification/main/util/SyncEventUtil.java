@@ -79,7 +79,7 @@ public class SyncEventUtil {
     JsonObject jsonObject = NotificationUtil.removeUsedField(params, removeKeys);
 
     event.setHeader(null);
-    return NotificationUtil.combineTwoJson(gson.toJson(event), jsonObject.toString());
+    return NotificationUtil.combineTwoJson(jsonObject.toString(), gson.toJson(event));
   }
 
   /**

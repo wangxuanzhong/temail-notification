@@ -88,7 +88,7 @@ public class EventUtil {
     event.setRole(null);
     event.setZipPacket(null);
     event.setExtendParam(null);
-    return NotificationUtil.combineTwoJson(gson.toJson(event), extendParam);
+    return NotificationUtil.combineTwoJson(extendParam, gson.toJson(event));
   }
 
   /**

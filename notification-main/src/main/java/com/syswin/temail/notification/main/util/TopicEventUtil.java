@@ -50,7 +50,7 @@ public class TopicEventUtil {
     String extendParam = topicEvent.getExtendParam();
     topicEvent.setId(null);
     topicEvent.setExtendParam(null);
-    return NotificationUtil.combineTwoJson(gson.toJson(topicEvent), extendParam);
+    return NotificationUtil.combineTwoJson(extendParam, gson.toJson(topicEvent));
   }
 
   /**

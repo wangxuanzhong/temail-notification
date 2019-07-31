@@ -97,7 +97,7 @@ public class NotificationUtil {
   }
 
   /**
-   * 合并两个json
+   * 合并两个json，json2的参数会覆盖json1的同名参数
    */
   public static String combineTwoJson(String json1, String json2) {
     if (json1 == null || json1.isEmpty()) {
