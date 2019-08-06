@@ -272,15 +272,15 @@ public class EventService {
     List<Event> notifyEvents = new ArrayList<>();
     eventMap.values().forEach(sessionEventMap -> notifyEvents.addAll(sessionEventMap.values()));
 
-    //给事件按照eventSeqId重新排序
+    // 给事件按照eventSeqId重新排序
     notifyEvents.sort(Comparator.comparing(Event::getEventSeqId));
 
-    //返回事件超过1000条，只返回最后一千条
+    // 返回事件超过1000条，只返回最后一千条
     if (notifyEvents.size() > EventCondition.MAX_EVENT_RETURN_COUNT) {
       notifyEvents.subList(0, notifyEvents.size() - EventCondition.MAX_EVENT_RETURN_COUNT).clear();
     }
 
-    //将每个返回结果的extendParam合并到event中
+    // 将每个返回结果的extendParam合并到event中
     List<JsonElement> eventList = new ArrayList<>();
     notifyEvents
         .forEach(event -> eventList.add(new JsonParser().parse(EventUtil.toJson(gson, event))));
@@ -288,7 +288,7 @@ public class EventService {
     Map<String, Object> result = new HashMap<>(5);
     result.put("lastEventSeqId", lastEventSeqId == null ? 0 : lastEventSeqId);
     result.put("maxEventSeqId", maxEventSeqId == null ? 0 : maxEventSeqId);
-    result.put("events", notifyEvents);
+    result.put("events", eventList);
 
     return result;
   }

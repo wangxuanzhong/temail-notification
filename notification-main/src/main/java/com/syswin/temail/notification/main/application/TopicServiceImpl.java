@@ -253,15 +253,15 @@ public class TopicServiceImpl implements IMqConsumerService {
       }
     });
 
-    //给事件按照eventSeqId重新排序
+    // 给事件按照eventSeqId重新排序
     notifyEvents.sort(Comparator.comparing(TopicEvent::getEventSeqId));
 
-    //返回事件超过1000条，只返回最后一千条
+    // 返回事件超过1000条，只返回最后一千条
     if (notifyEvents.size() > EventCondition.MAX_EVENT_RETURN_COUNT) {
       notifyEvents.subList(0, notifyEvents.size() - EventCondition.MAX_EVENT_RETURN_COUNT).clear();
     }
 
-    //将每个返回结果的extendParam合并到event中
+    // 将每个返回结果的extendParam合并到event中
     List<JsonElement> eventList = new ArrayList<>();
     notifyEvents
         .forEach(topicEvent -> eventList.add(new JsonParser().parse(TopicEventUtil.toJson(gson, topicEvent))));
