@@ -37,6 +37,7 @@ import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,6 +163,14 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         }.getType());
         List<String> memberExtDatas = gson.fromJson(event.getMemberExtData(), new TypeToken<List<String>>() {
         }.getType());
+
+        // 兼容旧群聊，没有memberExtDatas字段
+        if (memberExtDatas == null) {
+          memberExtDatas = new ArrayList<>(temails.size());
+          for (int i = 0; i < temails.size(); i++) {
+            memberExtDatas.add("");
+          }
+        }
 
         if (temails.size() != names.size() || temails.size() != memberExtDatas.size()) {
           LOGGER.error(
