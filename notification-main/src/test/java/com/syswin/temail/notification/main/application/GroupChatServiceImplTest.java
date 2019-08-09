@@ -457,6 +457,18 @@ public class GroupChatServiceImplTest {
     this.sendMessage(params, params.getGroupTemail());
   }
 
+  /**
+   * EventType CROWD_ADD_GROUP 58 C群新建群
+   */
+  @Test
+  public void testEventTypeCrowdAddGroup() throws Exception {
+    params.setSessionMessageType(EventType.CROWD_ADD_GROUP.getValue());
+    params.setGroupTemail("C");
+    params.setTemail("a");
+    params.setTo(gson.toJson(Arrays.asList("b", "c", "d", "e")));
+    this.sendMessage(params, params.getGroupTemail());
+  }
+
   private void sendMessage(MailAgentParamsFull param, String tags) throws Exception {
     sendMessage(param, false, tags);
   }

@@ -80,6 +80,9 @@ public enum EventType {
   ABANDON_ADMIN(50, "放弃群管理员"),
   CHANGE_MEMBER_EXT_DATA(57, "修改memberExtData"),
 
+  // C群部分
+  CROWD_ADD_GROUP(58, "C群新建群"),
+
   // @部分
   RECEIVE_AT(44, "@消息发送"),
   DELETE_AT(45, "@消息删除"),
