@@ -30,6 +30,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
+import com.syswin.temail.notification.main.constants.Constant;
 import com.syswin.temail.notification.main.constants.Constant.EventCondition;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
@@ -66,6 +67,7 @@ public class EventService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private final UnreadService unreadService;
   private final EventMapper eventMapper;
   private final UnreadMapper unreadMapper;
   private final MemberMapper memberMapper;
@@ -76,8 +78,9 @@ public class EventService {
   private final NotificationConfig config;
 
   @Autowired
-  public EventService(EventMapper eventMapper, UnreadMapper unreadMapper, MemberMapper memberMapper,
-      IMqProducer iMqProducer, RedisServiceImpl redisService, NotificationConfig config) {
+  public EventService(UnreadService unreadService, EventMapper eventMapper, UnreadMapper unreadMapper,
+      MemberMapper memberMapper, IMqProducer iMqProducer, RedisServiceImpl redisService, NotificationConfig config) {
+    this.unreadService = unreadService;
     this.eventMapper = eventMapper;
     this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
@@ -317,13 +320,13 @@ public class EventService {
       if (!msgIds.isEmpty()) {
         // 计算未读数表中的数据
         int unread = 0;
-        if (unreadMap.containsKey(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0])) {
-          unread = unreadMap.get(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0]);
+        if (unreadMap.containsKey(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0])) {
+          unread = unreadMap.get(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
         }
 
-        UnreadResponse unreadResponse = new UnreadResponse(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to,
+        UnreadResponse unreadResponse = new UnreadResponse(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to,
             msgIds.size() + unread);
-        if (key.endsWith(Event.GROUP_CHAT_KEY_POSTFIX)) {
+        if (key.endsWith(Constant.GROUP_CHAT_KEY_POSTFIX)) {
           unreadResponse.setGroupTemail(unreadResponse.getFrom());
         }
         unreadResponses.add(unreadResponse);
@@ -344,7 +347,7 @@ public class EventService {
       // 为了区分单聊和群聊，给群聊添加后缀
       String key = event.getFrom();
       if (event.getGroupTemail() != null && !"".equals(event.getGroupTemail())) {
-        key += Event.GROUP_CHAT_KEY_POSTFIX;
+        key += Constant.GROUP_CHAT_KEY_POSTFIX;
       }
 
       if (!eventMap.containsKey(key)) {
@@ -412,6 +415,13 @@ public class EventService {
     LOGGER.info("send reset event to {}", event.getTo());
     iMqProducer.sendMessage(gson
         .toJson(new DispatcherResponse(event.getTo(), cdtpEventType, header, EventUtil.toJson(gson, event))));
+
+    // 重置未读数
+    if (event.getGroupTemail() != null && !event.getGroupTemail().isEmpty()) {
+      unreadService.reset(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo());
+    } else {
+      unreadService.reset(event.getFrom(), event.getTo());
+    }
   }
 
   /**

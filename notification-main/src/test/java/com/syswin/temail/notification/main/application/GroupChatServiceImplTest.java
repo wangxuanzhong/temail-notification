@@ -42,6 +42,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -62,6 +63,8 @@ public class GroupChatServiceImplTest {
   @Value("${spring.rocketmq.topics.mailAgent.groupChat}")
   private String topic;
 
+  @MockBean
+  private UnreadService unreadService;
   @Autowired
   private IMqProducer iMqProducer;
   @Autowired
@@ -79,9 +82,10 @@ public class GroupChatServiceImplTest {
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      groupChatService = new GroupChatServiceImpl(mqProducerMock, redisServiceMock, eventMapper, memberMapper);
+      groupChatService = new GroupChatServiceImpl(unreadService, mqProducerMock, redisServiceMock, eventMapper,
+          memberMapper);
     } else {
-      groupChatService = new GroupChatServiceImpl(iMqProducer, redisService, eventMapper, memberMapper);
+      groupChatService = new GroupChatServiceImpl(unreadService, iMqProducer, redisService, eventMapper, memberMapper);
     }
 
     params.setHeader(ConstantMock.HEADER);

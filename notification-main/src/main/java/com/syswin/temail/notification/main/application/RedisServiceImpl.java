@@ -25,6 +25,7 @@
 package com.syswin.temail.notification.main.application;
 
 import com.syswin.temail.notification.foundation.application.ISequenceService;
+import com.syswin.temail.notification.main.constants.Constant;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -44,7 +45,7 @@ public class RedisServiceImpl implements ISequenceService {
   }
 
   private String getKey(String body) {
-    return KEY_PREFIX + body;
+    return Constant.REDIS_KEY_PREFIX + body;
   }
 
   /**

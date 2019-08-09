@@ -37,6 +37,10 @@ public class Constant {
     throw new IllegalStateException("Utility class");
   }
 
+  public static final String REDIS_KEY_PREFIX = "temail_notification_";
+
+  public static final String GROUP_CHAT_KEY_POSTFIX = "::event_group_chat";
+
   /**
    * 事件筛选条件
    */

@@ -40,8 +40,6 @@ import java.util.List;
 @JsonInclude(Include.NON_NULL)
 public class Event {
 
-  public static final String GROUP_CHAT_KEY_POSTFIX = "::event_group_chat";
-
   /**
    * 事件参数
    */
@@ -113,6 +111,8 @@ public class Event {
 
   @JsonIgnore
   private String extendParam;
+  @JsonIgnore
+  private Integer unread;
 
   /**
    * 自动解析扩展字段
@@ -348,6 +348,14 @@ public class Event {
     this.extendParam = extendParam;
   }
 
+  public Integer getUnread() {
+    return unread;
+  }
+
+  public void setUnread(Integer unread) {
+    this.unread = unread;
+  }
+
   @Override
   public String toString() {
     return "Event{" +
@@ -375,6 +383,7 @@ public class Event {
         ", trashMsgInfo='" + trashMsgInfo + '\'' +
         ", memberExtData='" + memberExtData + '\'' +
         ", extendParam='" + extendParam + '\'' +
+        ", unread='" + unread + '\'' +
         '}';
   }
 }

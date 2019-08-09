@@ -41,9 +41,11 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -66,6 +68,8 @@ public class SingleChatServiceImplTest {
 
   @Autowired
   private IMqProducer iMqProducer;
+  @MockBean
+  private UnreadService unreadService;
   @Autowired
   private RedisServiceImpl redisService;
   @Autowired
@@ -79,9 +83,9 @@ public class SingleChatServiceImplTest {
   @Before
   public void setUp() {
     if (!useMQ && isMock) {
-      singleChatService = new SingleChatServiceImpl(mqProducerMock, redisServiceMock, eventMapper);
+      singleChatService = new SingleChatServiceImpl(unreadService, mqProducerMock, redisServiceMock, eventMapper);
     } else {
-      singleChatService = new SingleChatServiceImpl(iMqProducer, redisService, eventMapper);
+      singleChatService = new SingleChatServiceImpl(unreadService, iMqProducer, redisService, eventMapper);
     }
 
     params.setHeader(ConstantMock.HEADER);
@@ -103,6 +107,8 @@ public class SingleChatServiceImplTest {
     params.setSessionExtData("sessionExtData");
     params.setFromNickName("发送方昵称");
     params.setFromGroupName("新群聊群昵称");
+
+    Mockito.when(unreadService.getUnreadSum(TEST_TO)).thenReturn(2);
 
     params.setOwner(TEST_TO);
     this.sendMessage(params, params.getFrom());

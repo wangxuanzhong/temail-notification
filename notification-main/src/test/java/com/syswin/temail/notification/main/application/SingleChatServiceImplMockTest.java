@@ -60,6 +60,8 @@ public class SingleChatServiceImplMockTest {
   private Gson gson = new Gson();
 
   @MockBean
+  private UnreadService unreadService;
+  @MockBean
   private IMqProducer iMqProducer;
   @MockBean
   private RedisServiceImpl redisService;
@@ -70,7 +72,7 @@ public class SingleChatServiceImplMockTest {
 
   @Before
   public void setUp() {
-    singleChatService = new SingleChatServiceImpl(iMqProducer, redisService, eventMapper);
+    singleChatService = new SingleChatServiceImpl(unreadService, iMqProducer, redisService, eventMapper);
 
     params.setHeader(ConstantMock.HEADER);
     params.setFrom(TEST_FROM);
@@ -98,6 +100,7 @@ public class SingleChatServiceImplMockTest {
     Event event = this.mock();
     event.setEventSeqId(1L);
     event.autoWriteExtendParam(gson.toJson(params));
+    event.setUnread(unreadService.getUnreadSum(event.getTo()));
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
         ConstantMock.HEADER, EventUtil.toJson(gson, event));

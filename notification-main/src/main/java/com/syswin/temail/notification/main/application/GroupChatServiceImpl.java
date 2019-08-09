@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.application.mq.IMqConsumerService;
+import com.syswin.temail.notification.main.constants.Constant;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
@@ -38,6 +39,7 @@ import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private final UnreadService unreadService;
   private final IMqProducer iMqProducer;
   private final RedisServiceImpl redisService;
   private final EventMapper eventMapper;
@@ -63,8 +66,9 @@ public class GroupChatServiceImpl implements IMqConsumerService {
   private final Gson gson;
 
   @Autowired
-  public GroupChatServiceImpl(IMqProducer iMqProducer, RedisServiceImpl redisService, EventMapper eventMapper,
-      MemberMapper memberMapper) {
+  public GroupChatServiceImpl(UnreadService unreadService, IMqProducer iMqProducer, RedisServiceImpl redisService,
+      EventMapper eventMapper, MemberMapper memberMapper) {
+    this.unreadService = unreadService;
     this.iMqProducer = iMqProducer;
     this.redisService = redisService;
     this.eventMapper = eventMapper;
@@ -108,6 +112,12 @@ public class GroupChatServiceImpl implements IMqConsumerService {
       case RETRACT:
         EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, EventType.GROUP_RETRACT.getValue(), header, tags, body);
+
+        // 删除未读数
+        memberMapper.selectMember(event).forEach(to -> {
+          unreadService.remove(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(),
+              Collections.singletonList(event.getMsgId()));
+        });
         break;
       case PULLED:
         for (String msgId : event.getMsgId().split(MailAgentParams.MSG_ID_SPLIT)) {
@@ -126,6 +136,12 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         event.setMsgId(null);
         EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, EventType.GROUP_DELETE.getValue(), header, tags, body);
+
+        // 删除未读数
+        memberMapper.selectMember(event).forEach(to -> {
+          unreadService
+              .remove(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgIds());
+        });
         break;
       case ADD_GROUP:
         event.setRole(MemberRole.ADMIN.getValue());
@@ -393,6 +409,13 @@ public class GroupChatServiceImpl implements IMqConsumerService {
     for (String to : tos) {
       event.setTo(to);
       this.insert(event, body);
+
+      // 普通消息添加未读数
+      if (cdtpEventType == EventType.GROUP_RECEIVE.getValue() && !event.getTo().equals(event.getTemail())) {
+        unreadService.add(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgId());
+        event.setUnread(unreadService.getUnreadSum(event.getTo()));
+      }
+
       iMqProducer
           .sendMessage(gson.toJson(new DispatcherResponse(to, cdtpEventType, header, EventUtil.toJson(gson, event))),
               tags);

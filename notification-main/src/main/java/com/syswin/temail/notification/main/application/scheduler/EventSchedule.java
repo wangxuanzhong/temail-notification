@@ -27,6 +27,7 @@ package com.syswin.temail.notification.main.application.scheduler;
 import com.syswin.temail.notification.main.application.EventService;
 import com.syswin.temail.notification.main.application.RedisServiceImpl;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
+import com.syswin.temail.notification.main.constants.Constant;
 import com.syswin.temail.notification.main.constants.Constant.EventCondition;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Unread;
@@ -112,10 +113,10 @@ public class EventSchedule {
       eventMap.forEach((key, msgIds) -> {
         // 计算未读数表中的数据
         int count = 0;
-        if (unreadMap.containsKey(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0])) {
-          count = unreadMap.get(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0]);
+        if (unreadMap.containsKey(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0])) {
+          count = unreadMap.get(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
         }
-        unreadMapper.insert(new Unread(key.split(Event.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds.size() + count));
+        unreadMapper.insert(new Unread(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds.size() + count));
       });
     });
 

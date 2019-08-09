@@ -69,6 +69,8 @@ public class EventServiceTest {
   private Gson gson = new Gson();
 
   @MockBean
+  private UnreadService unreadService;
+  @MockBean
   private EventMapper eventMapper;
   @MockBean
   private UnreadMapper unreadMapper;
@@ -83,7 +85,8 @@ public class EventServiceTest {
 
   @Before
   public void setUp() {
-    eventService = new EventService(eventMapper, unreadMapper, memberMapper, mqProducerMock, redisServiceMock, config);
+    eventService = new EventService(unreadService, eventMapper, unreadMapper, memberMapper, mqProducerMock,
+        redisServiceMock, config);
   }
 
   private Event initEvent() {

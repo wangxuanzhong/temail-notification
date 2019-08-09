@@ -31,8 +31,6 @@ public interface ISequenceService {
 
   long STEP = 1L;
 
-  String KEY_PREFIX = "temail_notification_";
-
   /**
    * 获取下个序号
    *

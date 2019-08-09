@@ -32,6 +32,7 @@ import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.main.application.EventService;
 import com.syswin.temail.notification.main.application.TopicServiceImpl;
+import com.syswin.temail.notification.main.application.UnreadService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
@@ -66,12 +67,14 @@ public class NotificationController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private final UnreadService unreadService;
   private final EventService eventService;
   private final TopicServiceImpl topicService;
   private final Gson gson;
 
   @Autowired
-  public NotificationController(EventService eventService, TopicServiceImpl topicService) {
+  public NotificationController(UnreadService unreadService, EventService eventService, TopicServiceImpl topicService) {
+    this.unreadService = unreadService;
     this.eventService = eventService;
     this.topicService = topicService;
     gson = new Gson();
@@ -112,7 +115,7 @@ public class NotificationController {
       return new ResponseEntity<>(new Response<>(BAD_REQUEST, "from mast not empty!"), headers, BAD_REQUEST);
     }
 
-    List<UnreadResponse> result = eventService.getUnread(to);
+    List<UnreadResponse> result = unreadService.getUnread(to);
     return new ResponseEntity<>(new Response<>(OK, null, result), headers, OK);
   }
 

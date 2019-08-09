@@ -35,6 +35,7 @@ import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import java.lang.invoke.MethodHandles;
+import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,15 +53,17 @@ public class SingleChatServiceImpl implements IMqConsumerService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private final UnreadService unreadService;
   private final IMqProducer iMqProducer;
   private final RedisServiceImpl redisService;
   private final EventMapper eventMapper;
   private final Gson gson;
 
   @Autowired
-  public SingleChatServiceImpl(IMqProducer iMqProducer, RedisServiceImpl redisService,
+  public SingleChatServiceImpl(UnreadService unreadService, IMqProducer iMqProducer, RedisServiceImpl redisService,
       EventMapper eventMapper) {
     this.iMqProducer = iMqProducer;
+    this.unreadService = unreadService;
     this.redisService = redisService;
     this.eventMapper = eventMapper;
     this.gson = new Gson();
@@ -96,8 +99,26 @@ public class SingleChatServiceImpl implements IMqConsumerService {
 
     switch (eventType) {
       case RECEIVE:
-      case RETRACT:
       case DESTROY:
+        // 发送时会分别发送到发件人收件箱和收件人收件箱
+        if (event.getFrom().equals(event.getOwner())) {
+          handleSenderMessage(body, tags, event, header);
+        } else {
+          // 发送给对方的消息记录未读数
+          unreadService.add(event.getFrom(), event.getTo(), event.getMsgId());
+          event.setUnread(unreadService.getUnreadSum(event.getTo()));
+          sendMessage(event, header, tags, body);
+        }
+        break;
+      case RETRACT:
+        // 发送时会分别发送到发件人收件箱和收件人收件箱
+        if (event.getFrom().equals(event.getOwner())) {
+          handleSenderMessage(body, tags, event, header);
+        } else {
+          sendMessage(event, header, tags, body);
+          unreadService.remove(event.getFrom(), event.getTo(), Collections.singletonList(event.getMsgId()));
+        }
+        break;
       case DESTROYED:
       case REPLY:
       case REPLY_RETRACT:
@@ -107,15 +128,7 @@ public class SingleChatServiceImpl implements IMqConsumerService {
       case CHANGE_EXT_DATA:
         // 发送时会分别发送到发件人收件箱和收件人收件箱
         if (event.getFrom().equals(event.getOwner())) {
-          EventUtil.initEventSeqId(redisService, event);
-          event.autoWriteExtendParam(body);
-          sendMessageToSender(event, header, tags);
-          // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
-          String tmp = event.getTo();
-          event.setTo(event.getOwner());
-          event.setOwner(tmp);
-          event.autoWriteExtendParam(body);
-          eventMapper.insert(event);
+          handleSenderMessage(body, tags, event, header);
         } else {
           sendMessage(event, header, tags, body);
         }
@@ -162,6 +175,21 @@ public class SingleChatServiceImpl implements IMqConsumerService {
       default:
         LOGGER.warn("not support event type!");
     }
+  }
+
+  /**
+   * 处理owner为发送者的消息
+   */
+  private void handleSenderMessage(String body, String tags, Event event, String header) {
+    EventUtil.initEventSeqId(redisService, event);
+    event.autoWriteExtendParam(body);
+    sendMessageToSender(event, header, tags);
+    // 发送到发件人收件箱的消息，事件中对换to和owner字段来保存
+    String tmp = event.getTo();
+    event.setTo(event.getOwner());
+    event.setOwner(tmp);
+    event.autoWriteExtendParam(body);
+    eventMapper.insert(event);
   }
 
   /**
