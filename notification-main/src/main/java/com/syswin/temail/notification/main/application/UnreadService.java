@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -71,8 +72,9 @@ public class UnreadService {
   /**
    * 删除msgId
    */
-  public void remove(String from, String to, List<String> msgIds) {
-    redisTemplate.opsForSet().remove(getUnreadKey(to + SESSION_SPLIT + from), msgIds.toArray());
+  @Nullable
+  public Long remove(String from, String to, List<String> msgIds) {
+    return redisTemplate.opsForSet().remove(getUnreadKey(to + SESSION_SPLIT + from), msgIds.toArray());
   }
 
   /**
@@ -83,6 +85,8 @@ public class UnreadService {
     redisTemplate.opsForSet().remove(getUnreadKey(to), from);
     // 删除会话的所有msgId
     redisTemplate.delete(getUnreadKey(to + SESSION_SPLIT + from));
+    // 删除过期未读数
+    redisTemplate.delete(getClearedUnreadKey(to + SESSION_SPLIT + from));
   }
 
   /**

@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.syswin.temail.notification.foundation.domains.Response;
 import com.syswin.temail.notification.main.application.EventService;
 import com.syswin.temail.notification.main.application.TopicServiceImpl;
+import com.syswin.temail.notification.main.application.UnreadService;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
@@ -67,6 +68,9 @@ public class NotificationControllerTest {
   private EventService eventService;
 
   @MockBean
+  private UnreadService unreadService;
+
+  @MockBean
   private TopicServiceImpl topicService;
 
   private String header = "header";
@@ -91,7 +95,7 @@ public class NotificationControllerTest {
   public void testGetUnread() throws Exception {
     UnreadResponse unreadResponse = new UnreadResponse("from", "to", 1);
     Response<List<UnreadResponse>> response = new Response<>(HttpStatus.OK, null, Collections.singletonList(unreadResponse));
-    Mockito.when(eventService.getUnread(Mockito.anyString())).thenReturn(Collections.singletonList(unreadResponse));
+    Mockito.when(unreadService.getUnread(Mockito.anyString())).thenReturn(Collections.singletonList(unreadResponse));
 
     MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/notification/unread")
         .header("CDTP-header", header)
