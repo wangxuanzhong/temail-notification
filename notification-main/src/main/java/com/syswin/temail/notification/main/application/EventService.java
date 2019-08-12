@@ -38,10 +38,8 @@ import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
 import com.syswin.temail.notification.main.dto.DispatcherResponse;
 import com.syswin.temail.notification.main.dto.MailAgentParams.TrashMsgInfo;
-import com.syswin.temail.notification.main.dto.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
-import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.util.EventUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -69,7 +67,6 @@ public class EventService {
 
   private final UnreadService unreadService;
   private final EventMapper eventMapper;
-  private final UnreadMapper unreadMapper;
   private final MemberMapper memberMapper;
   private final Gson gson;
   private final IMqProducer iMqProducer;
@@ -78,11 +75,10 @@ public class EventService {
   private final NotificationConfig config;
 
   @Autowired
-  public EventService(UnreadService unreadService, EventMapper eventMapper, UnreadMapper unreadMapper,
-      MemberMapper memberMapper, IMqProducer iMqProducer, RedisServiceImpl redisService, NotificationConfig config) {
+  public EventService(UnreadService unreadService, EventMapper eventMapper, MemberMapper memberMapper,
+      IMqProducer iMqProducer, RedisServiceImpl redisService, NotificationConfig config) {
     this.unreadService = unreadService;
     this.eventMapper = eventMapper;
-    this.unreadMapper = unreadMapper;
     this.memberMapper = memberMapper;
     this.gson = new Gson();
     this.iMqProducer = iMqProducer;
@@ -296,46 +292,6 @@ public class EventService {
     return result;
   }
 
-  /**
-   * 获取消息未读数
-   *
-   * @param to 发起人
-   */
-  public List<UnreadResponse> getUnread(String to) {
-    LOGGER.info("get unread, to: {}", to);
-
-    // 获取已经删除的事件的未读数
-    Map<String, Integer> unreadMap = new HashMap<>(16);
-    unreadMapper.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
-
-    // 查询所有事件
-    List<Event> events = eventMapper.selectPartEvents(to, EventCondition.UNREAD_EVENT_TYPES);
-
-    // 统计未读数
-    Map<String, List<String>> eventMap = this.calculateUnread(events, unreadMap);
-
-    // 统计各个会话的未读数量
-    List<UnreadResponse> unreadResponses = new ArrayList<>();
-    eventMap.forEach((key, msgIds) -> {
-      if (!msgIds.isEmpty()) {
-        // 计算未读数表中的数据
-        int unread = 0;
-        if (unreadMap.containsKey(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0])) {
-          unread = unreadMap.get(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
-        }
-
-        UnreadResponse unreadResponse = new UnreadResponse(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to,
-            msgIds.size() + unread);
-        if (key.endsWith(Constant.GROUP_CHAT_KEY_POSTFIX)) {
-          unreadResponse.setGroupTemail(unreadResponse.getFrom());
-        }
-        unreadResponses.add(unreadResponse);
-      }
-    });
-
-    LOGGER.debug("get unread result: {}", unreadResponses);
-    return unreadResponses;
-  }
 
   /**
    * 统计消息未读数

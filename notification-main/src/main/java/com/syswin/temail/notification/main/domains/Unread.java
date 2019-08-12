@@ -26,6 +26,8 @@ package com.syswin.temail.notification.main.domains;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author liusen@syswin.com
@@ -33,59 +35,25 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class Unread {
 
-  private Long id;
-  private String from;
   private String to;
-  private Integer count;
+  private Map<String, Integer> cleardUnreadMap;
+  private Map<String, List<String>> unreadMap;
 
-  public Unread() {
-  }
-
-  public Unread(String from, String to, Integer count) {
-    this.from = from;
+  public Unread(String to, Map<String, Integer> cleardUnreadMap, Map<String, List<String>> unreadMap) {
     this.to = to;
-    this.count = count;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getFrom() {
-    return from;
-  }
-
-  public void setFrom(String from) {
-    this.from = from;
+    this.cleardUnreadMap = cleardUnreadMap;
+    this.unreadMap = unreadMap;
   }
 
   public String getTo() {
     return to;
   }
 
-  public void setTo(String to) {
-    this.to = to;
+  public Map<String, Integer> getCleardUnreadMap() {
+    return cleardUnreadMap;
   }
 
-  public Integer getCount() {
-    return count;
-  }
-
-  public void setCount(Integer count) {
-    this.count = count;
-  }
-
-  @Override
-  public String toString() {
-    return "Unread{" +
-        "id=" + id +
-        ", from='" + from + '\'' +
-        ", to='" + to + '\'' +
-        ", count=" + count +
-        '}';
+  public Map<String, List<String>> getUnreadMap() {
+    return unreadMap;
   }
 }

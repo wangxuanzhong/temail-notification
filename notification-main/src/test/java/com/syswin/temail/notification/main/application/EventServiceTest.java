@@ -30,19 +30,15 @@ import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member;
 import com.syswin.temail.notification.main.domains.Member.UserStatus;
-import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.dto.MailAgentParamsFull.TrashMsgInfo;
-import com.syswin.temail.notification.main.dto.UnreadResponse;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
-import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import com.syswin.temail.notification.main.util.GzipUtil;
 import com.syswin.temail.notification.main.util.NotificationPacketUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -73,8 +69,6 @@ public class EventServiceTest {
   @MockBean
   private EventMapper eventMapper;
   @MockBean
-  private UnreadMapper unreadMapper;
-  @MockBean
   private MemberMapper memberMapper;
   @Autowired
   private NotificationConfig config;
@@ -85,8 +79,7 @@ public class EventServiceTest {
 
   @Before
   public void setUp() {
-    eventService = new EventService(unreadService, eventMapper, unreadMapper, memberMapper, mqProducerMock,
-        redisServiceMock, config);
+    eventService = new EventService(unreadService, eventMapper, memberMapper, mqProducerMock, redisServiceMock, config);
   }
 
   private Event initEvent() {
@@ -553,33 +546,6 @@ public class EventServiceTest {
     Mockito.doNothing().when(eventMapper).delete(Mockito.anyList());
 
     eventService.reset(event, header);
-  }
-
-
-  @Test
-  public void testGetUnread() {
-    List<Event> events = new ArrayList<>();
-
-    Event event = initEvent();
-    event.setEventType(EventType.RECEIVE.getValue());
-    event.setMsgId("1");
-    event.setMessage(message);
-    event.setFrom(groupTemail);
-    event.setTo(to);
-    event.setGroupTemail(groupTemail);
-    event.setTemail(from);
-    event.setEventSeqId(1L);
-    event.autoWriteExtendParam(null);
-    events.add(event);
-
-    Mockito.when(unreadMapper.selectCount(Mockito.anyString()))
-        .thenReturn(Collections.singletonList(new Unread(groupTemail, to, 2)));
-    Mockito.when(eventMapper.selectPartEvents(Mockito.anyString(), Mockito.anyList())).thenReturn(events);
-
-    List<UnreadResponse> result = eventService.getUnread(to);
-
-    Assertions.assertThat(result).hasSize(1);
-    Assertions.assertThat(result.get(0).getUnread()).isEqualTo(3);
   }
 
   @Test

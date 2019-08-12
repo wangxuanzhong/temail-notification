@@ -50,30 +50,25 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class EventScheduleTest {
 
   @Autowired
-  private EventMapper eventMapper;
-
+  private UnreadService unreadService;
   @Autowired
   private EventService eventService;
-
   @MockBean
   private RedisServiceImpl redisService;
-
+  @Autowired
+  private EventMapper eventMapper;
   @Autowired
   private TopicMapper topicMapper;
-
   @Autowired
   private NotificationConfig config;
 
-  @Autowired
-  private UnreadService unreadService;
 
   private EventSchedule eventSchedule;
 
   @Before
   public void setUp() {
     config.deadline = -1;
-    eventSchedule = new EventSchedule(eventMapper, eventService, redisService, topicMapper,
-        config, unreadService);
+    eventSchedule = new EventSchedule(unreadService, eventService, redisService, eventMapper, topicMapper, config);
   }
 
   @Test
