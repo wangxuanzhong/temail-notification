@@ -33,7 +33,6 @@ import com.syswin.temail.notification.main.constants.Constant.EventCondition;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
-import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -128,7 +127,7 @@ public class EventSchedule {
         // 删除msgId
         Long removeCount = unreadService.remove(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds);
         // 更新未读数
-        unreadService.updateUnreadCount(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to, removeCount + count);
+        unreadService.updateUnreadCount(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to, removeCount == null ? count : removeCount + count);
       });
     });
   }
