@@ -26,13 +26,12 @@ package com.syswin.temail.notification.main.application.scheduler;
 
 import com.syswin.temail.notification.main.application.EventService;
 import com.syswin.temail.notification.main.application.RedisServiceImpl;
+import com.syswin.temail.notification.main.application.UnreadService;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.domains.Event;
 import com.syswin.temail.notification.main.domains.EventType;
-import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
-import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
@@ -54,9 +53,6 @@ public class EventScheduleTest {
   private EventMapper eventMapper;
 
   @Autowired
-  private UnreadMapper unreadMapper;
-
-  @Autowired
   private EventService eventService;
 
   @MockBean
@@ -68,13 +64,16 @@ public class EventScheduleTest {
   @Autowired
   private NotificationConfig config;
 
+  @Autowired
+  private UnreadService unreadService;
+
   private EventSchedule eventSchedule;
 
   @Before
   public void setUp() {
     config.deadline = -1;
-    eventSchedule = new EventSchedule(eventMapper, unreadMapper, eventService, redisService, topicMapper,
-        config);
+    eventSchedule = new EventSchedule(eventMapper, eventService, redisService, topicMapper,
+        config, unreadService);
   }
 
   @Test
@@ -88,7 +87,7 @@ public class EventScheduleTest {
     event.setEventSeqId(1L);
     eventMapper.insert(event);
 
-    unreadMapper.insert(new Unread("from", "to", 2));
+    unreadService.add("from", "to", "msgId");
 
     Mockito.when(redisService.checkLock(Mockito.anyString(), Mockito.anyLong(), Mockito.any(TimeUnit.class)))
         .thenReturn(true);

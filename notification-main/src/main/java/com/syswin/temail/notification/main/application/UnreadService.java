@@ -98,6 +98,13 @@ public class UnreadService {
   }
 
   /**
+   * 更新未读数
+   */
+  public void updateUnreadCount(String from, String to, Long count) {
+    redisTemplate.opsForValue().set(getClearedUnreadKey(to + SESSION_SPLIT + from), String.valueOf(count));
+  }
+
+  /**
    * 获取未读数
    */
   public List<UnreadResponse> getUnread(String to) {

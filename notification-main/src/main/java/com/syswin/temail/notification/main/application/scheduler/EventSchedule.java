@@ -26,11 +26,11 @@ package com.syswin.temail.notification.main.application.scheduler;
 
 import com.syswin.temail.notification.main.application.EventService;
 import com.syswin.temail.notification.main.application.RedisServiceImpl;
+import com.syswin.temail.notification.main.application.UnreadService;
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.constants.Constant;
 import com.syswin.temail.notification.main.constants.Constant.EventCondition;
 import com.syswin.temail.notification.main.domains.Event;
-import com.syswin.temail.notification.main.domains.Unread;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import com.syswin.temail.notification.main.infrastructure.UnreadMapper;
@@ -63,22 +63,22 @@ public class EventSchedule {
   private static final int TIMEOUT = 10;
 
   private final EventMapper eventMapper;
-  private final UnreadMapper unreadMapper;
   private final EventService eventService;
   private final RedisServiceImpl redisService;
   private final TopicMapper topicMapper;
 
   private final NotificationConfig config;
+  private final UnreadService unreadService;
 
   @Autowired
-  public EventSchedule(EventMapper eventMapper, UnreadMapper unreadMapper, EventService eventService,
-      RedisServiceImpl redisService, TopicMapper topicMapper, NotificationConfig config) {
+  public EventSchedule(EventMapper eventMapper, EventService eventService,
+      RedisServiceImpl redisService, TopicMapper topicMapper, NotificationConfig config, UnreadService unreadService) {
     this.eventMapper = eventMapper;
     this.eventService = eventService;
     this.topicMapper = topicMapper;
-    this.unreadMapper = unreadMapper;
     this.redisService = redisService;
     this.config = config;
+    this.unreadService = unreadService;
   }
 
   /**
@@ -94,32 +94,6 @@ public class EventSchedule {
       return;
     }
 
-    // 查询出所有的to
-    List<String> tos = eventMapper.selectOldTo(createTime);
-
-    // 循环计算出所有to的未读数并插入数据库
-    tos.forEach(to -> {
-      // 获取已经删除的事件的未读数
-      Map<String, Integer> unreadMap = new HashMap<>(16);
-      unreadMapper.selectCount(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getCount()));
-
-      List<Event> events = eventMapper.selectOldEvent(to, createTime, EventCondition.UNREAD_EVENT_TYPES);
-
-      // 统计未读数
-      LOGGER.info("calculate [{}]'s event, size : {}", to, events.size());
-      Map<String, List<String>> eventMap = eventService.calculateUnread(events, unreadMap);
-
-      // 统计各个会话的未读数量，并插入数据库
-      eventMap.forEach((key, msgIds) -> {
-        // 计算未读数表中的数据
-        int count = 0;
-        if (unreadMap.containsKey(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0])) {
-          count = unreadMap.get(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
-        }
-        unreadMapper.insert(new Unread(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds.size() + count));
-      });
-    });
-
     // 分页删除旧数据
     LOGGER.info("delete old events!");
     while (true) {
@@ -131,9 +105,35 @@ public class EventSchedule {
       eventMapper.delete(ids);
     }
 
-    // 删除未读数为0的数据
-    LOGGER.info("delete zero count!");
-    unreadMapper.deleteZeroCount();
+    // 查询出所有的to
+    List<String> tos = eventMapper.selectOldTo(createTime);
+    // 保存eventMap
+    Map<String, Map<String, List<String>>> map = new HashMap<>();
+    // 循环计算出所有to的未读数并插入数据库
+    tos.forEach(to -> {
+      // 获取已经删除的事件的未读数
+      Map<String, Integer> unreadMap = new HashMap<>(16);
+      unreadService.getUnread(to).forEach(unread -> unreadMap.put(unread.getFrom(), unread.getUnread()));
+
+      List<Event> events = eventMapper.selectOldEvent(to, createTime, EventCondition.UNREAD_EVENT_TYPES);
+
+      // 统计未读数
+      LOGGER.info("calculate [{}]'s event, size : {}", to, events.size());
+      Map<String, List<String>> eventMap = eventService.calculateUnread(events, unreadMap);
+      map.put(to, eventMap);
+      // 统计各个会话的未读数量，并插入数据库
+      eventMap.forEach((key, msgIds) -> {
+        // 计算未读数表中的数据
+        int count = 0;
+        if (unreadMap.containsKey(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0])) {
+          count = unreadMap.get(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
+        }
+        // 删除msgId
+        Long removeCount = unreadService.remove(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds);
+        // 更新未读数
+        unreadService.updateUnreadCount(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to, removeCount + count);
+      });
+    });
   }
 
   /**
