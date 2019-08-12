@@ -49,7 +49,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("test") // mast be profile test
 public class EventScheduleTest {
 
-  @Autowired
+  @MockBean
   private UnreadService unreadService;
   @Autowired
   private EventService eventService;
@@ -81,8 +81,6 @@ public class EventScheduleTest {
     event.setTo("to");
     event.setEventSeqId(1L);
     eventMapper.insert(event);
-
-    unreadService.add("from", "to", "msgId");
 
     Mockito.when(redisService.checkLock(Mockito.anyString(), Mockito.anyLong(), Mockito.any(TimeUnit.class)))
         .thenReturn(true);
