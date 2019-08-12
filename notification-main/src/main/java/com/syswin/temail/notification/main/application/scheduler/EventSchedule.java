@@ -107,8 +107,6 @@ public class EventSchedule {
 
     // 查询出所有的to
     List<String> tos = eventMapper.selectOldTo(createTime);
-    // 保存eventMap
-    Map<String, Map<String, List<String>>> map = new HashMap<>();
     // 循环计算出所有to的未读数并插入数据库
     tos.forEach(to -> {
       // 获取已经删除的事件的未读数
@@ -120,7 +118,6 @@ public class EventSchedule {
       // 统计未读数
       LOGGER.info("calculate [{}]'s event, size : {}", to, events.size());
       Map<String, List<String>> eventMap = eventService.calculateUnread(events, unreadMap);
-      map.put(to, eventMap);
       // 统计各个会话的未读数量，并插入数据库
       eventMap.forEach((key, msgIds) -> {
         // 计算未读数表中的数据
