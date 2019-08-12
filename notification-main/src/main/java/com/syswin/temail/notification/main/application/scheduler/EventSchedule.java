@@ -31,14 +31,17 @@ import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.constants.Constant;
 import com.syswin.temail.notification.main.constants.Constant.EventCondition;
 import com.syswin.temail.notification.main.domains.Event;
+import com.syswin.temail.notification.main.domains.UnreadEvent;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.TopicMapper;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,19 +96,10 @@ public class EventSchedule {
       return;
     }
 
-    // 分页删除旧数据
-    LOGGER.info("delete old events!");
-    while (true) {
-      List<Long> ids = eventMapper.selectOldEventId(createTime, 0, PAGE_SIZE);
-      if (ids.isEmpty()) {
-        break;
-      }
-      LOGGER.info("delete {} events", ids.size());
-      eventMapper.delete(ids);
-    }
-
     // 查询出所有的to
     List<String> tos = eventMapper.selectOldTo(createTime);
+
+    List<UnreadEvent> list = new ArrayList<>();
     // 循环计算出所有to的未读数并插入数据库
     tos.forEach(to -> {
       // 获取已经删除的事件的未读数
@@ -117,9 +111,33 @@ public class EventSchedule {
       // 统计未读数
       LOGGER.info("calculate [{}]'s event, size : {}", to, events.size());
       Map<String, List<String>> eventMap = eventService.calculateUnread(events, unreadMap);
-      // 统计各个会话的未读数量，并插入数据库
-      eventMap.forEach((key, msgIds) -> {
-        // 计算未读数表中的数据
+      // 先删mysql，再更新redis
+      list.add(new UnreadEvent(to, eventMap, unreadMap));
+    });
+
+    // 分页删除旧数据
+    LOGGER.info("delete old events!");
+    while (true) {
+      List<Long> ids = eventMapper.selectOldEventId(createTime, 0, PAGE_SIZE);
+      if (ids.isEmpty()) {
+        break;
+      }
+      LOGGER.info("delete {} events", ids.size());
+      eventMapper.delete(ids);
+    }
+
+    // 更新redis数据
+    Map<String, List<String>> eventMap;
+    Map<String, Integer> unreadMap;
+    String to = "";
+    for (UnreadEvent event : list) {
+      eventMap = event.getMap();
+      unreadMap = event.getUnreadMap();
+      to = event.getTo();
+      // 统计各个会话的未读数量，并更新redis
+      for (Entry<String, List<String>> entry : eventMap.entrySet()) {
+        String key = entry.getKey();
+        List<String> msgIds = entry.getValue();
         int count = 0;
         if (unreadMap.containsKey(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0])) {
           count = unreadMap.get(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
@@ -128,8 +146,8 @@ public class EventSchedule {
         Long removeCount = unreadService.remove(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to, msgIds);
         // 更新未读数
         unreadService.updateUnreadCount(key.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to, removeCount == null ? count : removeCount + count);
-      });
-    });
+      }
+    }
   }
 
   /**
