@@ -164,7 +164,7 @@ public class UnreadService {
 
       // 获取过期数据中的未读数
       String cleared = redisTemplate.opsForValue().get(getClearedUnreadKey(to + SESSION_SPLIT + from));
-      LOGGER.info("get [{}]'s unread: from: {}, cleared: {}", to, from, cleared);
+      LOGGER.info("get [{}]'s cleard unread: from: {}, cleared: {}", to, from, cleared);
       if (cleared != null && !cleared.isEmpty()) {
         unread += Integer.valueOf(cleared);
       }
@@ -178,7 +178,7 @@ public class UnreadService {
       }
     });
 
-    LOGGER.info("get [{}]'s unread responses: {}", unreadResponses);
+    LOGGER.info("get [{}]'s unread responses: {}", to, unreadResponses);
     return unreadResponses;
   }
 

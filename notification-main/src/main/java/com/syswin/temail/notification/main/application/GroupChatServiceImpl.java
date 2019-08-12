@@ -150,6 +150,11 @@ public class GroupChatServiceImpl implements IMqConsumerService {
       case DELETE_GROUP:
         EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, header, tags, body);
+
+        memberMapper.selectMember(event).forEach(to -> {
+          this.addResetEvent(event.getGroupTemail(), to, event.getxPacketId());
+        });
+
         event.setTemail(null);
         memberMapper.deleteGroupMember(event);
         break;
@@ -204,6 +209,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
           event.setTemail(temails.get(i));
           event.setName(names.get(i));
           event.setMemberExtData(memberExtDatas.get(i));
+          this.addResetEvent(event.getGroupTemail(), event.getTemail(), event.getxPacketId());
           // 通知所有人
           EventUtil.notifyToAll(event);
           this.sendGroupMessageToAll(event, header, tags, body);
@@ -215,6 +221,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         break;
       case LEAVE_GROUP:
         memberMapper.deleteGroupMember(event);
+        this.addResetEvent(event.getGroupTemail(), event.getTemail(), event.getxPacketId());
         // 通知所有人
         EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, header, tags, body);
@@ -443,5 +450,23 @@ public class GroupChatServiceImpl implements IMqConsumerService {
     }
 
     this.sendGroupMessage(event, tos, event.getEventType(), header, tags, body);
+  }
+
+  /**
+   * 退群、被移除、解散群时添加重置未读数事件
+   */
+  private void addResetEvent(String groupTemail, String to, String xPacketId) {
+    LOGGER.info("add reset event: xPacketId: {}, groupTemail: {}, temail: {}", xPacketId, groupTemail, to);
+    Event event = new Event();
+    event.setxPacketId(xPacketId);
+    event.setEventType(EventType.RESET.getValue());
+    event.setTimestamp(System.currentTimeMillis());
+    event.setFrom(groupTemail);
+    event.setTo(to);
+    event.setGroupTemail(groupTemail);
+    EventUtil.initEventSeqId(redisService, event);
+    eventMapper.insert(event);
+    // 重置未读数
+    unreadService.reset(groupTemail + Constant.GROUP_CHAT_KEY_POSTFIX, to);
   }
 }
