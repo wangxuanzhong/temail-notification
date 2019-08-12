@@ -115,7 +115,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
 
         // 删除未读数
         memberMapper.selectMember(event).forEach(to -> {
-          unreadService.remove(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(),
+          unreadService.remove(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, to,
               Collections.singletonList(event.getMsgId()));
         });
         break;
@@ -139,8 +139,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
 
         // 删除未读数
         memberMapper.selectMember(event).forEach(to -> {
-          unreadService
-              .remove(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgIds());
+          unreadService.remove(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, to, event.getMsgIds());
         });
         break;
       case ADD_GROUP:
@@ -410,7 +409,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
       event.setTo(to);
       this.insert(event, body);
 
-      // 普通消息添加未读数
+      // 普通消息添加未读数，忽略发送方
       if (cdtpEventType == EventType.GROUP_RECEIVE.getValue() && !event.getTo().equals(event.getTemail())) {
         unreadService.add(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgId());
         event.setUnread(unreadService.getUnreadSum(event.getTo()));
