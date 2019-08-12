@@ -28,7 +28,9 @@ import com.syswin.temail.notification.main.constants.Constant;
 import com.syswin.temail.notification.main.dto.UnreadResponse;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +83,9 @@ public class UnreadService {
   @Nullable
   public Long remove(String from, String to, List<String> msgIds) {
     LOGGER.info("remove: msgIds: {} to: {} from: {}", msgIds, to, from);
-    return redisTemplate.opsForSet().remove(getUnreadKey(to + SESSION_SPLIT + from), msgIds.toArray());
+    Long count = redisTemplate.opsForSet().remove(getUnreadKey(to + SESSION_SPLIT + from), msgIds.toArray());
+    LOGGER.info("remove: msgIds: {} to: {} from: {} count: {}", msgIds, to, from, count);
+    return count;
   }
 
   /**
@@ -105,15 +109,41 @@ public class UnreadService {
   }
 
   /**
+   * 获取过期未读数
+   */
+  public Map<String, Integer> getCleardUnread(String to) {
+    LOGGER.info("get [{}]'s cleard unread", to);
+    Map<String, Integer> unreadMap = new HashMap<>(16);
+
+    // 查询出所有会话
+    Set<String> froms = redisTemplate.opsForSet().members(getClearedUnreadKey(to));
+    LOGGER.info("get [{}]'s cleard unread, froms: {}", to, froms);
+    if (froms == null) {
+      return unreadMap;
+    }
+
+    froms.forEach(from -> {
+      // 获取过期数据中的未读数
+      String cleared = redisTemplate.opsForValue().get(getClearedUnreadKey(to + SESSION_SPLIT + from));
+      LOGGER.info("get [{}]'s unread, cleared: {}", to, cleared);
+      if (cleared != null && !cleared.isEmpty()) {
+        unreadMap.put(from, Integer.valueOf(cleared));
+      }
+    });
+
+    return unreadMap;
+  }
+
+  /**
    * 获取未读数
    */
   public List<UnreadResponse> getUnread(String to) {
-    LOGGER.info("get unread, to: {}", to);
+    LOGGER.info("get [{}]'s unread", to);
     List<UnreadResponse> unreadResponses = new ArrayList<>();
 
     // 查询出所有会话
     Set<String> froms = redisTemplate.opsForSet().members(getUnreadKey(to));
-    LOGGER.info("get unread, froms: {}", froms);
+    LOGGER.info("get [{}]'s unread, froms: {}", to, froms);
     if (froms == null) {
       return unreadResponses;
     }
@@ -122,14 +152,14 @@ public class UnreadService {
       int unread = 0;
       // 获取会话中未读数
       Set<String> msgIds = redisTemplate.opsForSet().members(getUnreadKey(to + SESSION_SPLIT + from));
-      LOGGER.info("get unread, from: {}, msgIds: {}", from, msgIds);
+      LOGGER.info("get [{}]'s unread, from: {}, msgIds: {}", to, from, msgIds);
       if (msgIds != null) {
         unread += msgIds.size();
       }
 
       // 获取过期数据中的未读数
       String cleared = redisTemplate.opsForValue().get(getClearedUnreadKey(to + SESSION_SPLIT + from));
-      LOGGER.info("get unread, cleared: {}", cleared);
+      LOGGER.info("get [{}]'s unread, cleared: {}", to, cleared);
       if (cleared != null && !cleared.isEmpty()) {
         unread += Integer.valueOf(cleared);
       }
