@@ -141,7 +141,9 @@ public class EventSchedule {
           count += unread.getCleardUnreadMap().get(from.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
         }
 
-        unreadService.addCleardUnread(from, unread.getTo(), count);
+        if (count != 0) {
+          unreadService.addCleardUnread(from, unread.getTo(), count);
+        }
       });
     });
   }

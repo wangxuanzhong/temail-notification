@@ -83,7 +83,12 @@ public class UnreadService {
   @Nullable
   public Long remove(String from, String to, List<String> msgIds) {
     LOGGER.info("remove: msgIds: {} to: {} from: {}", msgIds, to, from);
-    Long count = redisTemplate.opsForSet().remove(getUnreadKey(to + SESSION_SPLIT + from), msgIds.toArray());
+    Long count;
+    if (msgIds == null || msgIds.isEmpty()) {
+      count = 0L;
+    } else {
+      count = redisTemplate.opsForSet().remove(getUnreadKey(to + SESSION_SPLIT + from), msgIds.toArray());
+    }
     LOGGER.info("remove: msgIds: {} to: {} from: {} count: {}", msgIds, to, from, count);
     return count;
   }
