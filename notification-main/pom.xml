@@ -29,7 +29,7 @@
   <parent>
     <artifactId>temail-notification</artifactId>
     <groupId>com.syswin.temail</groupId>
-    <version>0.1.78-SNAPSHOT</version>
+    <version>0.1.79-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
