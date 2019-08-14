@@ -25,3 +25,4 @@ disconf
 
 
 *.versionsBackup
+.DS_Store
