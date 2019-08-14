@@ -108,7 +108,7 @@ public class SingleChatServiceImplTest {
     params.setFromNickName("发送方昵称");
     params.setFromGroupName("新群聊群昵称");
 
-    Mockito.when(unreadService.getUnreadSum(TEST_TO)).thenReturn(2);
+    Mockito.when(unreadService.getPushUnread(TEST_TO)).thenReturn(2);
 
     params.setOwner(TEST_TO);
     this.sendMessage(params, params.getFrom());

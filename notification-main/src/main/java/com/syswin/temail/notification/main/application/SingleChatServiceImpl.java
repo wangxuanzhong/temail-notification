@@ -106,7 +106,7 @@ public class SingleChatServiceImpl implements IMqConsumerService {
         } else {
           // 发送给对方的消息记录未读数
           unreadService.add(event.getFrom(), event.getTo(), event.getMsgId());
-          event.setUnread(unreadService.getUnreadSum(event.getTo()));
+          event.setUnread(unreadService.getPushUnread(event.getTo()));
           sendMessage(event, header, tags, body);
         }
         break;

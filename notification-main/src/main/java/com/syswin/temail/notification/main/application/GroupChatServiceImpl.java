@@ -399,7 +399,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
       // 普通消息添加未读数，忽略发送方
       if (cdtpEventType == EventType.GROUP_RECEIVE.getValue() && !event.getTo().equals(event.getTemail())) {
         unreadService.add(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgId());
-        event.setUnread(unreadService.getUnreadSum(event.getTo()));
+        event.setUnread(unreadService.getPushUnread(event.getTo()));
       }
 
       iMqProducer

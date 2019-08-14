@@ -24,6 +24,7 @@
 
 package com.syswin.temail.notification.main.application;
 
+import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.constants.Constant;
 import com.syswin.temail.notification.main.dto.UnreadResponse;
 import java.lang.invoke.MethodHandles;
@@ -52,10 +53,12 @@ public class UnreadService {
   private static final String SESSION_SPLIT = ":::";
 
   private final StringRedisTemplate redisTemplate;
+  private final NotificationConfig notificationConfig;
 
   @Autowired
-  public UnreadService(StringRedisTemplate stringRedisTemplate) {
+  public UnreadService(StringRedisTemplate stringRedisTemplate, NotificationConfig notificationConfig) {
     this.redisTemplate = stringRedisTemplate;
+    this.notificationConfig = notificationConfig;
   }
 
   private String getUnreadKey(String body) {
@@ -190,7 +193,10 @@ public class UnreadService {
   /**
    * 获取未读数总数
    */
-  public int getUnreadSum(String to) {
-    return getUnread(to).stream().mapToInt(UnreadResponse::getUnread).sum();
+  public int getPushUnread(String to) {
+    // 当部署的不是C群时，不统计群聊未读数
+    boolean crowdEnabled = Boolean.valueOf(notificationConfig.crowdEnabled);
+    return getUnread(to).stream().filter(unreadResponse -> !crowdEnabled && unreadResponse.getGroupTemail() == null)
+        .mapToInt(UnreadResponse::getUnread).sum();
   }
 }

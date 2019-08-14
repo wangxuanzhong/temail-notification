@@ -110,5 +110,7 @@ public class NotificationConfig {
   public int deadline;
   @Value("${app.temail.notification.getEvents.defaultPageSize}")
   public int defaultPageSize;
+  @Value("${app.temail.notification.crowd.enabled:false}")
+  public String crowdEnabled;
 
 }

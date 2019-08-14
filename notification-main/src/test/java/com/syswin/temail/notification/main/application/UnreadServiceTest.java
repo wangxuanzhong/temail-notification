@@ -48,6 +48,6 @@ public class UnreadServiceTest {
       }
     }
     Assertions.assertThat(unread).isEqualTo(2);
-    Assertions.assertThat(unreadService.getUnreadSum(to)).isEqualTo(4);
+    Assertions.assertThat(unreadService.getPushUnread(to)).isEqualTo(4);
   }
 }
