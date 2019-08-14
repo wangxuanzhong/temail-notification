@@ -108,7 +108,7 @@ public class UnreadService {
   }
 
   /**
-   * 更新未读数
+   * 更新过期未读数
    */
   public void addCleardUnread(String from, String to, int count) {
     LOGGER.info("add cleard unread: from: {} to: {} count: {}", from, to, count);

@@ -325,26 +325,6 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         EventUtil.notifyToAll(event);
         this.sendGroupMessageToAll(event, header, tags, body);
         break;
-      case CROWD_ADD_GROUP:
-        // 添加管理员
-        event.setRole(MemberRole.ADMIN.getValue());
-        memberMapper.insert(event);
-
-        // 添加成员
-        Event e = new Event();
-        e.setGroupTemail(event.getGroupTemail());
-        e.setRole(MemberRole.NORMAL.getValue());
-        List<String> tos = gson.fromJson(event.getTo(), new TypeToken<List<String>>() {
-        }.getType());
-        tos.forEach(member -> {
-          e.setTemail(member);
-          memberMapper.insert(e);
-        });
-
-        // 通知所有人
-        tos.add(event.getTemail());
-        this.sendGroupMessage(event, tos, event.getEventType(), header, tags, body);
-        break;
       default:
         LOGGER.warn("unsupported event type!");
     }
