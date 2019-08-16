@@ -196,7 +196,12 @@ public class UnreadService {
   public int getPushUnread(String to) {
     // 当部署的不是C群时，不统计群聊未读数
     boolean crowdEnabled = Boolean.valueOf(notificationConfig.crowdEnabled);
-    return getUnread(to).stream().filter(unreadResponse -> !crowdEnabled && unreadResponse.getGroupTemail() == null)
-        .mapToInt(UnreadResponse::getUnread).sum();
+    if (crowdEnabled) {
+      return getUnread(to).stream().mapToInt(UnreadResponse::getUnread).sum();
+    } else {
+      return getUnread(to).stream().filter(unreadResponse -> unreadResponse.getGroupTemail() == null)
+          .mapToInt(UnreadResponse::getUnread).sum();
+    }
+
   }
 }
