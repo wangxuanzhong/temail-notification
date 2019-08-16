@@ -296,7 +296,7 @@ public class EventService {
   /**
    * 统计消息未读数
    */
-  public Map<String, List<String>> calculateUnread(List<Event> events, Map<String, Integer> unreadMap) {
+  public Map<String, List<String>> calculateUnread(List<Event> events, Map<String, Integer> unreadMap, Map<String, Integer> unreadAtMap) {
     Map<String, List<String>> eventMap = new HashMap<>(16);
     events.forEach(event -> {
       event.autoReadExtendParam(gson);
@@ -315,6 +315,7 @@ public class EventService {
           // 清空未读数
           msgIds.clear();
           unreadMap.remove(event.getFrom());
+          unreadAtMap.remove(event.getFrom());
           break;
         case RECEIVE:
         case DESTROY:
@@ -335,6 +336,7 @@ public class EventService {
             if (event.getDeleteAllMsg() != null && event.getDeleteAllMsg()) {
               msgIds.clear();
               unreadMap.remove(event.getFrom());
+              unreadAtMap.remove(event.getFrom());
             }
           }
           break;

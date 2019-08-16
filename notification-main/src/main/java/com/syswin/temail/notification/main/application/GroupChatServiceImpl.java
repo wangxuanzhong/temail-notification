@@ -24,6 +24,13 @@
 
 package com.syswin.temail.notification.main.application;
 
+import static com.syswin.temail.notification.main.constants.Constant.EventParams.AT;
+import static com.syswin.temail.notification.main.constants.Constant.EventParams.ATALL;
+import static com.syswin.temail.notification.main.constants.Constant.EventParams.MEMBERS;
+import static com.syswin.temail.notification.main.constants.Constant.EventParams.TEMAIL;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.ATALL_NO_0;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.ATALL_YES_1;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
@@ -40,7 +47,10 @@ import com.syswin.temail.notification.main.util.EventUtil;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +127,8 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         memberMapper.selectMember(event).forEach(to -> {
           unreadService.remove(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, to,
               Collections.singletonList(event.getMsgId()));
+          unreadService.removeAt(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, to,
+              Collections.singletonList(event.getMsgId()));
         });
         break;
       case PULLED:
@@ -140,6 +152,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
         // 删除未读数
         memberMapper.selectMember(event).forEach(to -> {
           unreadService.remove(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, to, event.getMsgIds());
+          unreadService.removeAt(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, to, event.getMsgIds());
         });
         break;
       case ADD_GROUP:
@@ -392,6 +405,28 @@ public class GroupChatServiceImpl implements IMqConsumerService {
     if (event.getFrom() == null) {
       event.setFrom(event.getGroupTemail());
     }
+    // 从header解析群at信息
+    HashMap headerMap = gson.fromJson(header, new TypeToken<HashMap<String, String>>() {
+    }.getType());
+    if (headerMap.containsKey(AT)) {
+      event.setAt((String) headerMap.get(AT));
+    } else {
+      event.setAt(null);
+    }
+    List<String> atTemails = new ArrayList<>();
+    Integer atAll = null;
+    if (StringUtils.isNotEmpty(event.getAt())) {
+      Map<String, String> atMap = gson
+          .fromJson(event.getAt(), new TypeToken<Map<String, String>>() {
+          }.getType());
+      List<Map<String, String>> atMembers = gson
+          .fromJson(atMap.get(MEMBERS), new TypeToken<List<Map<String, String>>>() {
+          }.getType());
+      atAll = atMap.get(ATALL) == null ? null : Integer.parseInt(atMap.get(ATALL));
+      atMembers.forEach(map -> {
+        atTemails.add(map.get(TEMAIL));
+      });
+    }
     for (String to : tos) {
       event.setTo(to);
       this.insert(event, body);
@@ -400,6 +435,13 @@ public class GroupChatServiceImpl implements IMqConsumerService {
       if (cdtpEventType == EventType.GROUP_RECEIVE.getValue() && !event.getTo().equals(event.getTemail())) {
         unreadService.add(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgId());
         event.setUnread(unreadService.getPushUnread(event.getTo()));
+        // 判断at成员并添加对应会话at消息数量
+        if ((atAll != null && ATALL_YES_1 == atAll)
+            || (atAll != null && ATALL_NO_0 == atAll && atTemails.contains(to))) {
+          unreadService
+              .addAt(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgId());
+        }
+        event.setUnreadAt(unreadService.getPushUnreadAt(event.getTo()));
       }
 
       iMqProducer
@@ -448,5 +490,7 @@ public class GroupChatServiceImpl implements IMqConsumerService {
     eventMapper.insert(event);
     // 重置未读数
     unreadService.reset(groupTemail + Constant.GROUP_CHAT_KEY_POSTFIX, to);
+    // 重置at 未读数
+    unreadService.resetAt(groupTemail + Constant.GROUP_CHAT_KEY_POSTFIX, to);
   }
 }

@@ -104,6 +104,9 @@ public class Constant {
     public static final String TYPE = "type";
     public static final String NAME = "name";
     public static final String MEMBER_EXT_DATA = "memberExtData";
+    public static final String AT = "at";
+    public static final String MEMBERS = "members";
+    public static final String ATALL = "atAll";
     /**
      * 话题参数
      */
@@ -116,5 +119,11 @@ public class Constant {
      * 事件参数
      */
     public static final String MSG_IDS = "msgIds";
+  }
+
+  public static class GroupChatAtParams {
+    public static final Integer ATALL_NO_0 = 0;
+
+    public static final Integer ATALL_YES_1 = 1;
   }
 }

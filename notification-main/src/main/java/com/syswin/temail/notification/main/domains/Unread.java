@@ -38,11 +38,20 @@ public class Unread {
   private String to;
   private Map<String, Integer> cleardUnreadMap;
   private Map<String, List<String>> unreadMap;
+  private Map<String, Integer> cleardUnreadAtMap;
 
-  public Unread(String to, Map<String, Integer> cleardUnreadMap, Map<String, List<String>> unreadMap) {
+//  public Unread(String to, Map<String, Integer> cleardUnreadMap, Map<String, List<String>> unreadMap) {
+//    this.to = to;
+//    this.cleardUnreadMap = cleardUnreadMap;
+//    this.unreadMap = unreadMap;
+//  }
+
+  public Unread(String to, Map<String, Integer> cleardUnreadMap,
+      Map<String, List<String>> unreadMap, Map<String, Integer> cleardUnreadAtMap) {
     this.to = to;
     this.cleardUnreadMap = cleardUnreadMap;
     this.unreadMap = unreadMap;
+    this.cleardUnreadAtMap = cleardUnreadAtMap;
   }
 
   public String getTo() {
@@ -55,5 +64,9 @@ public class Unread {
 
   public Map<String, List<String>> getUnreadMap() {
     return unreadMap;
+  }
+
+  public Map<String, Integer> getCleardUnreadAtMap() {
+    return cleardUnreadAtMap;
   }
 }

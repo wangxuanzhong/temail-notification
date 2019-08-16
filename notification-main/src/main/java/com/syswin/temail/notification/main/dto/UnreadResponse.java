@@ -35,16 +35,17 @@ public class UnreadResponse {
 
   private Integer unread;
 
+  private Integer unreadAt;
+
   private String from;
 
   private String to;
 
   private String groupTemail;
 
-  public UnreadResponse(String from, String to, Integer unread) {
+  public UnreadResponse(String from, String to) {
     this.from = from;
     this.to = to;
-    this.unread = unread;
   }
 
   public UnreadResponse(Integer unread) {
@@ -57,6 +58,14 @@ public class UnreadResponse {
 
   public void setUnread(Integer unread) {
     this.unread = unread;
+  }
+
+  public Integer getUnreadAt() {
+    return unreadAt;
+  }
+
+  public void setUnreadAt(Integer unreadAt) {
+    this.unreadAt = unreadAt;
   }
 
   public String getFrom() {
@@ -87,6 +96,7 @@ public class UnreadResponse {
   public String toString() {
     return "UnreadResponse{" +
         "unread=" + unread +
+        ", unreadAt=" + unreadAt +
         ", from='" + from + '\'' +
         ", to='" + to + '\'' +
         ", groupTemail='" + groupTemail + '\'' +

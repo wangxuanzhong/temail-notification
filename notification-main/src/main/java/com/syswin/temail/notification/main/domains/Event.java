@@ -113,6 +113,8 @@ public class Event {
   private String extendParam;
   @JsonIgnore
   private Integer unread;
+  @JsonIgnore
+  private Integer unreadAt;
 
   /**
    * 自动解析扩展字段
@@ -356,6 +358,14 @@ public class Event {
     this.unread = unread;
   }
 
+  public Integer getUnreadAt() {
+    return unreadAt;
+  }
+
+  public void setUnreadAt(Integer unreadAt) {
+    this.unreadAt = unreadAt;
+  }
+
   @Override
   public String toString() {
     return "Event{" +
@@ -384,6 +394,7 @@ public class Event {
         ", memberExtData='" + memberExtData + '\'' +
         ", extendParam='" + extendParam + '\'' +
         ", unread='" + unread + '\'' +
+        ", unreadAt='" + unreadAt + '\'' +
         '}';
   }
 }

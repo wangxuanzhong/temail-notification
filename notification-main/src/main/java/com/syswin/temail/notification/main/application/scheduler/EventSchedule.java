@@ -104,14 +104,15 @@ public class EventSchedule {
     tos.forEach(to -> {
       // 获取已经删除的事件的未读数
       Map<String, Integer> cleardUnreadMap = unreadService.getCleardUnread(to);
+      // 获取已经删除的带at消息事件的未读数
+      Map<String, Integer> cleardUnreadAtMap = unreadService.getCleardUnreadAt(to);
 
       List<Event> events = eventMapper.selectOldEvent(to, createTime, EventCondition.UNREAD_EVENT_TYPES);
 
       // 统计未读数
       LOGGER.info("calculate [{}]'s event, size : {}", to, events.size());
-      Map<String, List<String>> unreadMap = eventService.calculateUnread(events, cleardUnreadMap);
-
-      unreads.add(new Unread(to, cleardUnreadMap, unreadMap));
+      Map<String, List<String>> unreadMap = eventService.calculateUnread(events, cleardUnreadMap, cleardUnreadAtMap);
+      unreads.add(new Unread(to, cleardUnreadMap, unreadMap, cleardUnreadAtMap));
     });
 
     // 分页删除旧数据
@@ -129,11 +130,23 @@ public class EventSchedule {
     unreads.forEach(unread -> {
       unread.getUnreadMap().forEach((from, msgIds) -> {
         int count = 0;
+        int atCount = 0;
 
         // 删除redis中的未读数，获取实际删除的条数，即为未读数
         Long removedCount = unreadService.remove(from, unread.getTo(), msgIds);
+
+        List<String> atMsgIds = new ArrayList<>();
+        msgIds.forEach(msgId -> {
+          if (unreadService.isAtMsgId(from, unread.getTo(), msgId)) {
+            atMsgIds.add(msgId);
+          }
+        });
+        Long removedAtCount = unreadService.removeAt(from, unread.getTo(), atMsgIds);
         if (removedCount != null) {
           count += removedCount;
+        }
+        if (removedAtCount != null) {
+          atCount += removedAtCount;
         }
 
         // 添加已经过期事件的未读数
@@ -141,8 +154,15 @@ public class EventSchedule {
           count += unread.getCleardUnreadMap().get(from.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
         }
 
+        // 添加已经过期at事件的未读数
+        if (unread.getCleardUnreadAtMap().containsKey(from.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0])) {
+          count += unread.getCleardUnreadAtMap().get(from.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
+        }
         if (count != 0) {
           unreadService.addCleardUnread(from, unread.getTo(), count);
+        }
+        if (atCount != 0) {
+          unreadService.addCleardUnreadAt(from, unread.getTo(), count);
         }
       });
     });
