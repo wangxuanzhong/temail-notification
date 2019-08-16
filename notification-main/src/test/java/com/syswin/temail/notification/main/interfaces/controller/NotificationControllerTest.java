@@ -93,7 +93,8 @@ public class NotificationControllerTest {
 
   @Test
   public void testGetUnread() throws Exception {
-    UnreadResponse unreadResponse = new UnreadResponse("from", "to", 1);
+    UnreadResponse unreadResponse = new UnreadResponse("from", "to");
+    unreadResponse.setUnread(1);
     Response<List<UnreadResponse>> response = new Response<>(HttpStatus.OK, null, Collections.singletonList(unreadResponse));
     Mockito.when(unreadService.getUnread(Mockito.anyString())).thenReturn(Collections.singletonList(unreadResponse));
 

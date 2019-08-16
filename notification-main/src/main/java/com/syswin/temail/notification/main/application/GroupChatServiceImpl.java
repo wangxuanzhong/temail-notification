@@ -441,7 +441,8 @@ public class GroupChatServiceImpl implements IMqConsumerService {
           unreadService
               .addAt(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgId());
         }
-        event.setUnreadAt(unreadService.getPushUnreadAt(event.getTo()));
+        // TODO
+//        event.setUnreadAt(unreadService.getPushUnreadAt(event.getTo()));
       }
 
       iMqProducer

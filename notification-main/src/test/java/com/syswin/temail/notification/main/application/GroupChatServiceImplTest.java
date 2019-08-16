@@ -35,6 +35,7 @@ import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -469,6 +470,9 @@ public class GroupChatServiceImplTest {
   private void sendMessage(MailAgentParamsFull param, boolean isSamePacket, String tags) throws Exception {
     if (!isSamePacket) {
       param.setxPacketId(ConstantMock.PREFIX + UUID.randomUUID().toString());
+      HashMap header = new HashMap<>();
+      header.put("sender","sender");
+      param.setHeader(gson.toJson(header));
     }
     if (useMQ) {
       iMqProducer.sendMessage(gson.toJson(param), topic, tags, "");
