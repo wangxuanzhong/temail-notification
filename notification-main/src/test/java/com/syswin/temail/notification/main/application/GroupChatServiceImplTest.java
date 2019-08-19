@@ -108,7 +108,6 @@ public class GroupChatServiceImplTest {
     params.setTemail("a");
     params.setSeqNo(1L);
     params.setToMsg("这是一条群聊测试消息！");
-    params.setAt("b,c,d");
     this.sendMessage(params, params.getGroupTemail());
   }
 
