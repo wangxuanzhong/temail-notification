@@ -24,6 +24,9 @@
 
 package com.syswin.temail.notification.main.application;
 
+import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREAD;
+import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREADAT;
+
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.constants.Constant;
 import com.syswin.temail.notification.main.dto.UnreadResponse;
@@ -314,15 +317,24 @@ public class UnreadService {
   /**
    * 获取未读数总数
    */
-  public int getPushUnread(String to) {
+  public Map<String, Integer> getPushUnread(String to) {
     // 当部署的不是C群时，不统计群聊未读数
     boolean crowdEnabled = Boolean.valueOf(notificationConfig.crowdEnabled);
+    List<UnreadResponse> unreadResponses = getUnread(to);
+    Map<String,Integer> unreadMap = new HashMap<>(4);
+    Integer unreadCount = null;
+    Integer unreadAtCount = null;
     if (crowdEnabled) {
-      return getUnread(to).stream().mapToInt(UnreadResponse::getUnread).sum();
+      unreadCount = unreadResponses.stream().mapToInt(UnreadResponse::getUnread).sum();
+      unreadAtCount = unreadResponses.stream().mapToInt(UnreadResponse::getUnreadAt).sum();
     } else {
-      return getUnread(to).stream().filter(unreadResponse -> unreadResponse.getGroupTemail() == null)
+      unreadCount = unreadResponses.stream().filter(unreadResponse -> unreadResponse.getGroupTemail() == null)
           .mapToInt(UnreadResponse::getUnread).sum();
+      unreadAtCount = unreadResponses.stream().filter(unreadResponse -> unreadResponse.getGroupTemail() == null)
+          .mapToInt(UnreadResponse::getUnreadAt).sum();
     }
-
+    unreadMap.put(UNREAD, unreadCount);
+    unreadMap.put(UNREADAT, unreadAtCount);
+    return unreadMap;
   }
 }
