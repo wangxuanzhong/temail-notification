@@ -24,8 +24,8 @@
 
 package com.syswin.temail.notification.main.application;
 
-import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREAD;
-import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREADAT;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.UNREAD;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.UNREADAT;
 
 import com.syswin.temail.notification.main.configuration.NotificationConfig;
 import com.syswin.temail.notification.main.constants.Constant;
@@ -96,8 +96,6 @@ public class UnreadService {
    * 添加at msgId
    */
   public void addAt(String from, String to, String msgId) {
-//    // 添加at 会话
-//    redisTemplate.opsForSet().add(getUnreadAtKey(to), msgId);
     // 添加at msgId
     redisTemplate.opsForSet().add(getUnreadAtKey(to + SESSION_SPLIT + from), msgId);
   }
@@ -277,7 +275,7 @@ public class UnreadService {
       }
       // 获取会话中at消息未读数
       Set<String> atMsgIds = redisTemplate.opsForSet().members(getUnreadAtKey(to + SESSION_SPLIT + from));
-      LOGGER.info("get [{}]'s unread: from: {}, msgIds: {}", to, from, atMsgIds);
+      LOGGER.info("get [{}]'s unread at: from: {}, msgIds: {}", to, from, atMsgIds);
       if (atMsgIds != null) {
         unreadAt += atMsgIds.size();
       }
@@ -295,20 +293,14 @@ public class UnreadService {
       if (atCleared != null && !atCleared.isEmpty()) {
         unreadAt += Integer.valueOf(atCleared);
       }
-      if (unread == 0 && unreadAt == 0) {
-        continue;
+
+      if(unread != 0) {
+        UnreadResponse unreadResponse = new UnreadResponse(from.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to, unread, unreadAt);
+        if (from.endsWith(Constant.GROUP_CHAT_KEY_POSTFIX)) {
+          unreadResponse.setGroupTemail(unreadResponse.getFrom());
+        }
+        unreadResponses.add(unreadResponse);
       }
-      UnreadResponse unreadResponse = new UnreadResponse(from.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0], to);
-      if (from.endsWith(Constant.GROUP_CHAT_KEY_POSTFIX)) {
-        unreadResponse.setGroupTemail(unreadResponse.getFrom());
-      }
-      if (unread != 0) {
-        unreadResponse.setUnread(unread);
-      }
-      if (unreadAt != 0) {
-        unreadResponse.setUnreadAt(unreadAt);
-      }
-      unreadResponses.add(unreadResponse);
     }
     LOGGER.info("get [{}]'s unread responses: {}", to, unreadResponses);
     return unreadResponses;

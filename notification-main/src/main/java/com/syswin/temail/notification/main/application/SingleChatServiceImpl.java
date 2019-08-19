@@ -25,13 +25,13 @@
 package com.syswin.temail.notification.main.application;
 
 import static com.syswin.temail.notification.main.constants.Constant.EventParams.AT;
-import static com.syswin.temail.notification.main.constants.Constant.EventParams.ATALL;
 import static com.syswin.temail.notification.main.constants.Constant.EventParams.MEMBERS;
 import static com.syswin.temail.notification.main.constants.Constant.EventParams.TEMAIL;
-import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREAD;
-import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREADAT;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.ATALL;
 import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.ATALL_NO_0;
 import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.ATALL_YES_1;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.UNREAD;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.UNREADAT;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -121,38 +121,32 @@ public class SingleChatServiceImpl implements IMqConsumerService {
           // 从header解析群at信息
           HashMap headerMap = gson.fromJson(header, new TypeToken<HashMap<String, String>>() {
           }.getType());
-          if (headerMap.containsKey(AT)) {
-            event.setAt((String) headerMap.get(AT));
-          } else {
-            event.setAt(null);
-          }
           List<String> atTemails = new ArrayList<>();
           Integer atAll = null;
-          if (StringUtils.isNotEmpty(event.getAt())) {
-            Map<String, String> atMap = gson
-                .fromJson(event.getAt(), new TypeToken<Map<String, String>>() {
+          if (headerMap.containsKey(AT) && headerMap.get(AT) != null) {
+            event.setAt((String)headerMap.get(AT));
+            Map<String, Object> atMap = gson
+                .fromJson(event.getAt(), new TypeToken<Map<String, Object>>() {
                 }.getType());
-            List<Map<String, String>> atMembers = gson
-                .fromJson(atMap.get(MEMBERS), new TypeToken<List<Map<String, String>>>() {
-                }.getType());
-            atAll = atMap.get(ATALL) == null ? null : Integer.parseInt(atMap.get(ATALL));
-            atMembers.forEach(map -> {
-              atTemails.add(map.get(TEMAIL));
-            });
+            atAll = atMap.get(ATALL) == null ? null : Integer.parseInt((String)atMap.get(ATALL));
+            List<Map<String, String>> atMembers = new ArrayList<>();
+            if (atMap.containsKey(MEMBERS) && atMap.get(MEMBERS) != null) {
+              atMembers = (List)atMap.get(MEMBERS);
+              atMembers.forEach(map -> {
+                atTemails.add(map.get(TEMAIL));
+              });
+            }
           }
           unreadService.add(event.getFrom(), event.getTo(), event.getMsgId());
           Map<String, Integer> unreadMap = new HashMap<>();
+          // 兼容新群聊消息
           if ((atAll != null && ATALL_YES_1 == atAll)
               || (atAll != null && ATALL_NO_0 == atAll && atTemails.contains(event.getTo()))) {
             unreadService.addAt(event.getFrom(), event.getTo(), event.getMsgId());
-            unreadMap = unreadService.getPushUnread(event.getTo());
-            // 兼容新群聊消息
-            event.setUnread(unreadMap.get(UNREAD));
-            event.setUnreadAt(unreadMap.get(UNREADAT));
-          } else {
-            unreadMap = unreadService.getPushUnread(event.getTo());
-            event.setUnread(unreadMap.get(UNREAD));
           }
+          unreadMap = unreadService.getPushUnread(event.getTo());
+          event.setUnread(unreadMap.get(UNREAD));
+          event.setUnreadAt(unreadMap.get(UNREADAT));
           sendMessage(event, header, tags, body);
         }
         break;

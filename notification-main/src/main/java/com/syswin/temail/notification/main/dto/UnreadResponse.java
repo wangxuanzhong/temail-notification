@@ -48,6 +48,13 @@ public class UnreadResponse {
     this.to = to;
   }
 
+  public UnreadResponse(String from, String to, Integer unread, Integer unreadAt) {
+    this.unread = unread;
+    this.unreadAt = unreadAt;
+    this.from = from;
+    this.to = to;
+  }
+
   public UnreadResponse(Integer unread) {
     this.unread = unread;
   }

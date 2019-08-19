@@ -162,7 +162,7 @@ public class EventSchedule {
           unreadService.addCleardUnread(from, unread.getTo(), count);
         }
         if (atCount != 0) {
-          unreadService.addCleardUnreadAt(from, unread.getTo(), count);
+          unreadService.addCleardUnreadAt(from, unread.getTo(), atCount);
         }
       });
     });

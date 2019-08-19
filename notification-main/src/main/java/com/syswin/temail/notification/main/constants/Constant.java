@@ -106,9 +106,6 @@ public class Constant {
     public static final String MEMBER_EXT_DATA = "memberExtData";
     public static final String AT = "at";
     public static final String MEMBERS = "members";
-    public static final String ATALL = "atAll";
-    public static final String UNREAD = "unread";
-    public static final String UNREADAT = "unreadAt";
     /**
      * 话题参数
      */
@@ -127,5 +124,8 @@ public class Constant {
     public static final Integer ATALL_NO_0 = 0;
 
     public static final Integer ATALL_YES_1 = 1;
+    public static final String ATALL = "atAll";
+    public static final String UNREAD = "unread";
+    public static final String UNREADAT = "unreadAt";
   }
 }

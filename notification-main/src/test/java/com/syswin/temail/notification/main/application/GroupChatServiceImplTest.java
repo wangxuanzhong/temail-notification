@@ -25,17 +25,21 @@
 package com.syswin.temail.notification.main.application;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
 import com.syswin.temail.notification.main.domains.Member.MemberRole;
+import com.syswin.temail.notification.main.dto.MailAgentParams;
 import com.syswin.temail.notification.main.dto.MailAgentParamsFull;
 import com.syswin.temail.notification.main.infrastructure.EventMapper;
 import com.syswin.temail.notification.main.infrastructure.MemberMapper;
 import com.syswin.temail.notification.main.mock.ConstantMock;
 import com.syswin.temail.notification.main.mock.MqProducerMock;
 import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
+import com.syswin.temail.ps.common.entity.CDTPHeader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -480,5 +484,25 @@ public class GroupChatServiceImplTest {
     } else {
       groupChatService.handleMqMessage(gson.toJson(param), tags);
     }
+  }
+
+  public static void main(String[] args) {
+    Gson gson2 = new Gson();
+    Map<String,String> member = new HashMap<>();
+    member.put("temail","invitee2@alicloud.com");
+    member.put("name","gjx");
+    Map<String, Object> atmap = new HashMap<>();
+    atmap.put("atAll",0);
+    atmap.put("members",Arrays.asList(member));
+    CDTPHeader cdtpHeader = new CDTPHeader();
+    cdtpHeader.setAt(gson2.toJson(atmap));
+    Map param= new HashMap();
+    String a = gson2.toJson(cdtpHeader);
+    param.put("header", a);
+    System.out.println("a="+gson2.toJson(param));
+    HashMap headerMap = gson2.fromJson(a, new TypeToken<HashMap<String, String>>() {
+    }.getType());
+
+    System.out.println(headerMap);
   }
 }
