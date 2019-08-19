@@ -107,6 +107,8 @@ public class Constant {
     public static final String AT = "at";
     public static final String MEMBERS = "members";
     public static final String ATALL = "atAll";
+    public static final String UNREAD = "unread";
+    public static final String UNREADAT = "unreadAt";
     /**
      * 话题参数
      */

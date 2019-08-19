@@ -377,8 +377,10 @@ public class EventService {
     // 重置未读数
     if (event.getGroupTemail() != null && !event.getGroupTemail().isEmpty()) {
       unreadService.reset(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo());
+      unreadService.resetAt(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo());
     } else {
       unreadService.reset(event.getFrom(), event.getTo());
+      unreadService.resetAt(event.getFrom(), event.getTo());
     }
   }
 

@@ -434,15 +434,15 @@ public class GroupChatServiceImpl implements IMqConsumerService {
       // 普通消息添加未读数，忽略发送方
       if (cdtpEventType == EventType.GROUP_RECEIVE.getValue() && !event.getTo().equals(event.getTemail())) {
         unreadService.add(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgId());
-        event.setUnread(unreadService.getPushUnread(event.getTo()));
         // 判断at成员并添加对应会话at消息数量
         if ((atAll != null && ATALL_YES_1 == atAll)
             || (atAll != null && ATALL_NO_0 == atAll && atTemails.contains(to))) {
           unreadService
               .addAt(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgId());
         }
-        // TODO
-//        event.setUnreadAt(unreadService.getPushUnreadAt(event.getTo()));
+        Map<String, Integer> unreadMap = unreadService.getPushUnread(event.getTo());
+        event.setUnread(unreadMap.get("unread"));
+        event.setUnreadAt(unreadMap.get("unreadAt"));
       }
 
       iMqProducer

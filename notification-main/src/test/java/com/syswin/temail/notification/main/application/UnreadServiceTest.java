@@ -1,5 +1,7 @@
 package com.syswin.temail.notification.main.application;
 
+import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREAD;
+
 import com.syswin.temail.notification.main.constants.Constant;
 import com.syswin.temail.notification.main.dto.UnreadResponse;
 import java.util.Collections;
@@ -48,6 +50,6 @@ public class UnreadServiceTest {
       }
     }
     Assertions.assertThat(unread).isEqualTo(2);
-    Assertions.assertThat(unreadService.getPushUnread(to)).isEqualTo(4);
+    Assertions.assertThat(unreadService.getPushUnread(to).get(UNREAD)).isEqualTo(4);
   }
 }

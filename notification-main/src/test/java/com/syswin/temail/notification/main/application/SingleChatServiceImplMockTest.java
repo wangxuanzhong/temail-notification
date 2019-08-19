@@ -24,6 +24,8 @@
 
 package com.syswin.temail.notification.main.application;
 
+import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREAD;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
@@ -100,7 +102,7 @@ public class SingleChatServiceImplMockTest {
     Event event = this.mock();
     event.setEventSeqId(1L);
     event.autoWriteExtendParam(gson.toJson(params));
-    event.setUnread(unreadService.getPushUnread(event.getTo()));
+    event.setUnread(unreadService.getPushUnread(event.getTo()).get(UNREAD));
 
     DispatcherResponse dispatcherResponse = new DispatcherResponse(event.getTo(), event.getEventType(),
         ConstantMock.HEADER, EventUtil.toJson(gson, event));

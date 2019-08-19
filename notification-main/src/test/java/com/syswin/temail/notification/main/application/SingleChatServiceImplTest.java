@@ -24,6 +24,8 @@
 
 package com.syswin.temail.notification.main.application;
 
+import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREAD;
+
 import com.google.gson.Gson;
 import com.syswin.temail.notification.foundation.application.IMqProducer;
 import com.syswin.temail.notification.main.domains.EventType;
@@ -36,7 +38,9 @@ import com.syswin.temail.notification.main.mock.RedisServiceImplMock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -107,8 +111,9 @@ public class SingleChatServiceImplTest {
     params.setSessionExtData("sessionExtData");
     params.setFromNickName("发送方昵称");
     params.setFromGroupName("新群聊群昵称");
-
-    Mockito.when(unreadService.getPushUnread(TEST_TO)).thenReturn(2);
+    Map<String, Integer> unreadMap = new HashMap<>();
+    unreadMap.put(UNREAD, 2);
+    Mockito.when(unreadService.getPushUnread(TEST_TO)).thenReturn(unreadMap);
 
     params.setOwner(TEST_TO);
     this.sendMessage(params, params.getFrom());
