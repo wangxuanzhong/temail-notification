@@ -30,6 +30,8 @@ import static com.syswin.temail.notification.main.constants.Constant.EventParams
 import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.ATALL;
 import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.ATALL_NO_0;
 import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.ATALL_YES_1;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.UNREAD;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.UNREADAT;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -435,8 +437,8 @@ public class GroupChatServiceImpl implements IMqConsumerService {
               .addAt(event.getGroupTemail() + Constant.GROUP_CHAT_KEY_POSTFIX, event.getTo(), event.getMsgId());
         }
         Map<String, Integer> unreadMap = unreadService.getPushUnread(event.getTo());
-        event.setUnread(unreadMap.get("unread"));
-        event.setUnreadAt(unreadMap.get("unreadAt"));
+        event.setUnread(unreadMap.get(UNREAD));
+        event.setUnreadAt(unreadMap.get(UNREADAT));
       }
 
       iMqProducer
