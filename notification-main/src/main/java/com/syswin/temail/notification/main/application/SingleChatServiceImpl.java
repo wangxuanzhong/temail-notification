@@ -118,13 +118,10 @@ public class SingleChatServiceImpl implements IMqConsumerService {
           handleSenderMessage(body, tags, event, header);
         } else {
           // 发送给对方的消息记录未读数
-          // 从header解析群at信息
-          HashMap headerMap = gson.fromJson(header, new TypeToken<HashMap<String, String>>() {
-          }.getType());
+          // 解析群at信息
           List<String> atTemails = new ArrayList<>();
           Integer atAll = null;
-          if (headerMap.containsKey(AT) && headerMap.get(AT) != null) {
-            event.setAt((String)headerMap.get(AT));
+          if (StringUtils.isNotEmpty(event.getAt())) {
             Map<String, Object> atMap = gson
                 .fromJson(event.getAt(), new TypeToken<Map<String, Object>>() {
                 }.getType());

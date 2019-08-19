@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -404,13 +405,10 @@ public class GroupChatServiceImpl implements IMqConsumerService {
     if (event.getFrom() == null) {
       event.setFrom(event.getGroupTemail());
     }
-    // 从header解析群at信息
-    HashMap<String, Object> headerMap = gson.fromJson(header, new TypeToken<HashMap<String, Object>>() {
-    }.getType());
+    // 解析群at信息
     List<String> atTemails = new ArrayList<>();
     Integer atAll = null;
-    if (headerMap.containsKey(AT) && headerMap.get(AT) != null) {
-      event.setAt((String)headerMap.get(AT));
+    if (StringUtils.isNotEmpty(event.getAt())) {
       Map<String, Object> atMap = gson
           .fromJson(event.getAt(), new TypeToken<Map<String, Object>>() {
           }.getType());
