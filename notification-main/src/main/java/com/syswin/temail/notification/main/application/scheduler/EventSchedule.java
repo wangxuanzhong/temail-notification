@@ -156,7 +156,7 @@ public class EventSchedule {
 
         // 添加已经过期at事件的未读数
         if (unread.getCleardUnreadAtMap().containsKey(from.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0])) {
-          count += unread.getCleardUnreadAtMap().get(from.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
+          atCount += unread.getCleardUnreadAtMap().get(from.split(Constant.GROUP_CHAT_KEY_POSTFIX)[0]);
         }
         if (count != 0) {
           unreadService.addCleardUnread(from, unread.getTo(), count);

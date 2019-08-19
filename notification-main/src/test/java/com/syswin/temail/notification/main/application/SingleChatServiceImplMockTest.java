@@ -24,7 +24,7 @@
 
 package com.syswin.temail.notification.main.application;
 
-import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREAD;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.UNREAD;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

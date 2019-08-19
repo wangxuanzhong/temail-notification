@@ -1,6 +1,6 @@
 package com.syswin.temail.notification.main.application;
 
-import static com.syswin.temail.notification.main.constants.Constant.EventParams.UNREAD;
+import static com.syswin.temail.notification.main.constants.Constant.GroupChatAtParams.UNREAD;
 
 import com.syswin.temail.notification.main.constants.Constant;
 import com.syswin.temail.notification.main.dto.UnreadResponse;
